@@ -396,7 +396,7 @@
                                             class="{{ request()->routeIs('manajemen-user*') || request()->routeIs('user*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
                                             Roles & Permissions
                                             <span class="text-[8px] text-base-content opacity-50">
-                                                Manajemen Roles & Permissions
+                                                Manajemen Role & Permission
                                             </span>
                                         </a>
                                     </li>
