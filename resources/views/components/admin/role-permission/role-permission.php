@@ -1,8 +1,10 @@
 <?php
 
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new class extends Component
+new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends Component
 {
     //
 };

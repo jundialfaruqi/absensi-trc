@@ -17,4 +17,7 @@ Route::group([
 ], function () {
     Route::livewire('/dashboard', 'admin::dashboard')
         ->name('dashboard');
+
+    Route::livewire('/role-permission', 'admin::role-permission')
+        ->name('role-permission');
 });
