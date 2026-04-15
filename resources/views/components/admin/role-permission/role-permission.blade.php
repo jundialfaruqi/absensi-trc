@@ -367,6 +367,7 @@
 
     {{-- ─── Modal: Permission ───────────────────────────────────────────────── --}}
     <dialog id="permission-modal" class="modal backdrop-blur-xs"
+        wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'permission-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'permission-modal' && $el.close()">
         <div class="modal-box shadow">
@@ -427,6 +428,7 @@
 
     {{-- ─── Modal: Role ─────────────────────────────────────────────────────── --}}
     <dialog id="role-modal" class="modal backdrop-blur-xs"
+        wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'role-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'role-modal' && $el.close()">
         <div class="modal-box shadow">
