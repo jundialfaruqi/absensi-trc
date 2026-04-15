@@ -427,10 +427,10 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-bold truncate">
-                                {{ data_get(Session::get('user_data'), 'name', 'Super Admin') }}
+                                {{ auth()->user()->name ?? 'Nama User' }}
                             </p>
                             <p class="text-xs text-base-content/60 truncate">
-                                {{ data_get(Session::get('user_data'), 'email', 'superadmin@mail.com') }}
+                                {{ auth()->user()->email ?? 'emailuser@mail.com' }}
                             </p>
                         </div>
                         <div class="dropdown dropdown-end dropdown-top">

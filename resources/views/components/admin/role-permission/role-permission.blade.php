@@ -235,7 +235,8 @@
                                 <td class="text-sm font-mono text-base-content/60">
                                     {{ $r->created_at->format('d-m-Y H:i:s') }}
                                 </td>
-                                <td class="text-sm whitespace-nowrap"><b>{{ $r->permissions_count }}</b> permission</td>
+                                <td class="text-sm whitespace-nowrap"><b>{{ $r->permissions_count }}</b> permission
+                                </td>
                                 <td class="text-sm whitespace-nowrap"><b>{{ $r->users_count }}</b> pengguna</td>
                                 <td class="text-center">
                                     <div class="dropdown dropdown-left dropdown-end">
@@ -267,7 +268,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-sm text-base-content/60">Tidak ada role</td>
+                                <td colspan="7" class="text-center text-sm text-base-content/60">Tidak ada role
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -374,9 +376,7 @@
                                 <div class="join">
                                     <button
                                         class="join-item btn btn-xs {{ $grp['currentPage'] <= 1 ? 'btn-disabled' : '' }}"
-                                        @if ($grp['currentPage'] > 1)
-                                            wire:click="setGroupPage('{{ $grp['name'] }}', {{ $grp['currentPage'] - 1 }})"
-                                        @endif>
+                                        @if ($grp['currentPage'] > 1) wire:click="setGroupPage('{{ $grp['name'] }}', {{ $grp['currentPage'] - 1 }})" @endif>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -385,9 +385,7 @@
                                     </button>
                                     <button
                                         class="join-item btn btn-xs {{ $grp['currentPage'] >= $grp['lastPage'] ? 'btn-disabled' : '' }}"
-                                        @if ($grp['currentPage'] < $grp['lastPage'])
-                                            wire:click="setGroupPage('{{ $grp['name'] }}', {{ $grp['currentPage'] + 1 }})"
-                                        @endif>
+                                        @if ($grp['currentPage'] < $grp['lastPage']) wire:click="setGroupPage('{{ $grp['name'] }}', {{ $grp['currentPage'] + 1 }})" @endif>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="w-3 h-3">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -409,8 +407,7 @@
     </div>
 
     {{-- ─── Modal: Permission ───────────────────────────────────────────────── --}}
-    <dialog id="permission-modal" class="modal backdrop-blur-xs"
-        wire:ignore.self
+    <dialog id="permission-modal" class="modal backdrop-blur-xs" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'permission-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'permission-modal' && $el.close()">
         <div class="modal-box shadow">
@@ -470,8 +467,7 @@
     </dialog>
 
     {{-- ─── Modal: Role ─────────────────────────────────────────────────────── --}}
-    <dialog id="role-modal" class="modal backdrop-blur-xs"
-        wire:ignore.self
+    <dialog id="role-modal" class="modal backdrop-blur-xs" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'role-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'role-modal' && $el.close()">
         <div class="modal-box shadow">
