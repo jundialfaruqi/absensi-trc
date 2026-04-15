@@ -235,8 +235,7 @@
                                 <td class="text-sm font-mono text-base-content/60">
                                     {{ $r->created_at->format('d-m-Y H:i:s') }}
                                 </td>
-                                <td class="text-sm whitespace-nowrap"><b>{{ $r->permissions_count }}</b> permission
-                                </td>
+                                <td class="text-sm whitespace-nowrap"><b>{{ $r->permissions_count }}</b> permission</td>
                                 <td class="text-sm whitespace-nowrap"><b>{{ $r->users_count }}</b> pengguna</td>
                                 <td class="text-center">
                                     <div class="dropdown dropdown-left dropdown-end">
@@ -268,8 +267,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-sm text-base-content/60">Tidak ada role
-                                </td>
+                                <td colspan="7" class="text-center text-sm text-base-content/60">Tidak ada role</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -286,27 +284,33 @@
         <div class="pb-4 px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="text-sm text-base-content/60 font-medium">Permissions</div>
             <div class="join">
-                <span
-                    class="btn btn-disabled btn-sm join-item text-base-content pointer-events-none rounded-left-md">Show
-                    Permissions</span>
+                <span class="btn btn-disabled btn-sm join-item text-base-content pointer-events-none rounded-left-md">
+                    Per Group
+                </span>
                 <select wire:model.live="perPagePerm" class="select select-sm join-item w-16 rounded-end-md">
                     <option value="4">4</option>
                     <option value="8">8</option>
                     <option value="12">12</option>
+                    <option value="20">20</option>
                 </select>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach ($this->permissionGroups as $grp)
-                <div class="card bg-base-100 shadow-sm">
-                    <div class="card-body p-0">
-                        <div class="p-4">
-                            <div class="text-xs font-semibold uppercase text-base-content/60">
-                                {{ $grp['name'] ?? 'Ungrouped' }}
+                <div class="card bg-base-100 shadow-sm flex flex-col">
+                    <div class="card-body p-0 flex flex-col flex-1">
+
+                        {{-- ── Group Header ── --}}
+                        <div class="px-4 pt-4 pb-3 border-b border-base-200 flex items-center justify-between">
+                            <div class="text-xs font-semibold uppercase tracking-wider text-base-content/60">
+                                {{ $grp['name'] }}
                             </div>
+                            <span class="badge badge-ghost badge-sm">{{ $grp['total'] }}</span>
                         </div>
-                        <div class="overflow-x-auto">
+
+                        {{-- ── Table ── --}}
+                        <div class="overflow-x-auto flex-1">
                             <table class="table w-full">
                                 <thead>
                                     <tr class="bg-base-200/50">
@@ -351,7 +355,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="text-center text-sm text-base-content/60">
+                                            <td colspan="3" class="text-center text-sm text-base-content/60 py-4">
                                                 Tidak ada permission
                                             </td>
                                         </tr>
@@ -359,6 +363,45 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {{-- ── Per-group Pagination Footer ── --}}
+                        @if ($grp['lastPage'] > 1)
+                            <div class="px-4 py-2 border-t border-base-200 flex items-center justify-between gap-2">
+                                <span class="text-xs text-base-content/50">
+                                    {{ $grp['currentPage'] }} / {{ $grp['lastPage'] }}
+                                    <span class="hidden sm:inline">({{ $grp['total'] }} total)</span>
+                                </span>
+                                <div class="join">
+                                    <button
+                                        class="join-item btn btn-xs {{ $grp['currentPage'] <= 1 ? 'btn-disabled' : '' }}"
+                                        @if ($grp['currentPage'] > 1)
+                                            wire:click="setGroupPage('{{ $grp['name'] }}', {{ $grp['currentPage'] - 1 }})"
+                                        @endif>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        class="join-item btn btn-xs {{ $grp['currentPage'] >= $grp['lastPage'] ? 'btn-disabled' : '' }}"
+                                        @if ($grp['currentPage'] < $grp['lastPage'])
+                                            wire:click="setGroupPage('{{ $grp['name'] }}', {{ $grp['currentPage'] + 1 }})"
+                                        @endif>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        @else
+                            <div class="px-4 py-2 border-t border-base-200">
+                                <span class="text-xs text-base-content/40">{{ $grp['total'] }} permission</span>
+                            </div>
+                        @endif
+
                     </div>
                 </div>
             @endforeach

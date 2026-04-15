@@ -17,6 +17,9 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
     public int $perPageRole   = 10;
     public int $perPagePerm   = 4;
 
+    // Per-group page tracker: ['User' => 1, 'Role Permission' => 2, ...]
+    public array $groupPages   = [];
+
     // Search
     public string $search = '';
 
@@ -84,25 +87,44 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
             ->paginate($this->perPageRole, pageName: 'page_role');
     }
 
-    // ─── Computed: Permission groups (paginated per group) ──────────────────────
+    // ─── Computed: Permission groups (paginated per-group independently) ──────────
 
     #[Computed]
     public function permissionGroups(): array
     {
-        $groups = Permission::when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+        // Load semua permission sekaligus, lalu group di PHP
+        $all = Permission::when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
             ->orderBy('group')
             ->orderBy('name')
-            ->paginate($this->perPagePerm, pageName: 'page_perm');
+            ->get()
+            ->groupBy('group');
 
+        $perPage = max(1, $this->perPagePerm);
         $grouped = [];
-        foreach ($groups->groupBy('group') as $groupName => $items) {
+
+        foreach ($all as $groupName => $items) {
+            $key         = $groupName ?: 'Ungrouped';
+            $total       = $items->count();
+            $lastPage    = (int) ceil($total / $perPage);
+            $currentPage = max(1, min($this->groupPages[$key] ?? 1, $lastPage));
+            $sliced      = $items->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
             $grouped[] = [
-                'name'  => $groupName ?: 'Ungrouped',
-                'items' => $items,
+                'name'        => $key,
+                'items'       => $sliced,
+                'total'       => $total,
+                'currentPage' => $currentPage,
+                'lastPage'    => $lastPage,
             ];
         }
 
         return $grouped;
+    }
+
+    // Pindah halaman untuk group tertentu
+    public function setGroupPage(string $group, int $page): void
+    {
+        $this->groupPages[$group] = max(1, $page);
     }
 
     // ─── Computed: All permissions (for role modal checkbox) ────────────────────
@@ -165,7 +187,8 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
             ]);
         }
 
-        $role->syncPermissions($this->selectedPermissions);
+        $permissions = Permission::whereIn('id', array_map('intval', $this->selectedPermissions))->get();
+        $role->syncPermissions($permissions);
 
         $this->resetRoleForm();
         $this->dispatch('close-modal', id: 'role-modal');
@@ -288,7 +311,7 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
     public function updatedSearch(): void
     {
         $this->resetPage('page_role');
-        $this->resetPage('page_perm');
+        $this->groupPages = [];  // reset semua halaman group saat search berubah
     }
 
     public function updatedPerPageRole(): void
@@ -298,6 +321,6 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
 
     public function updatedPerPagePerm(): void
     {
-        $this->resetPage('page_perm');
+        $this->groupPages = [];  // reset ke halaman 1 saat per-page berubah
     }
 };
