@@ -392,8 +392,8 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a wire:navigate href="#"
-                                            class="{{ request()->routeIs('manajemen-user*') || request()->routeIs('user*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                        <a wire:navigate href="{{ route('role-permission') }}"
+                                            class="{{ request()->routeIs('role-permission*') || request()->routeIs('role-permission*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
                                             Roles & Permissions
                                             <span class="text-[8px] text-base-content opacity-50">
                                                 Manajemen Role & Permission
@@ -477,7 +477,7 @@
     </div>
     @livewireScripts
 
-    <div id="global-toast" class="toast toast-top toast-center" wire:ignore></div>
+    <div id="global-toast" class="toast toast-top toast-end" wire:ignore></div>
 
     <livewire:logout />
 </body>
