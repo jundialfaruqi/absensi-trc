@@ -37,12 +37,18 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public string $lng = '';
     public string $imageData = ''; // Base64 selfie
 
+    public function mount()
+    {
+        $this->resetErrorBag();
+    }
+
     public function selectPersonnel(int $id)
     {
         $this->selectedPersonnelId = $id;
         $this->selectedPersonnel = Personnel::find($id);
         $this->step = 2;
         $this->pin = '';
+        $this->resetErrorBag();
     }
 
     public function appendPin($num)
@@ -259,6 +265,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public function resetForm()
     {
         $this->reset(['step', 'selectedPersonnelId', 'selectedPersonnel', 'pin', 'isSuccess', 'message', 'lastAbsensi', 'search', 'activeJadwal', 'activeAbsensi', 'activeDate', 'lat', 'lng', 'imageData']);
+        $this->resetErrorBag();
     }
 
     public function personnels()
