@@ -11,6 +11,9 @@ Route::get('/', function () {
 Route::livewire('/login', 'login')
     ->name('login');
 
+Route::livewire('/absensi-web', 'absensi')
+    ->name('absensi-web');
+
 // Admin Route
 Route::group([
     'middleware' => ['auth'],
@@ -41,6 +44,9 @@ Route::group([
         ->name('jadwal');
     Route::livewire('/jadwal/import', 'admin::jadwal-import')
         ->name('jadwal.import');
+    
+    Route::livewire('/absensi', 'admin::absensi')
+        ->name('absensi');
     Route::get('/jadwal/download-template', function () {
         $month = request('month', date('m'));
         $year = request('year', date('Y'));

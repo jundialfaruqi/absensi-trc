@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Sanctum\HasApiTokens;
 
 class Personnel extends Model
 {
+    use HasApiTokens;
+
     protected $fillable = [
         'name', 'opd_id', 'penugasan_id', 'nomor_hp', 'foto', 'email', 'password', 'pin'
     ];
@@ -29,5 +32,10 @@ class Personnel extends Model
     public function jadwals()
     {
         return $this->hasMany(Jadwal::class);
+    }
+
+    public function absensis()
+    {
+        return $this->hasMany(Absensi::class);
     }
 }
