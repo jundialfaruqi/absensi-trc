@@ -25,4 +25,9 @@ class Personnel extends Model
     {
         return $this->belongsTo(Penugasan::class);
     }
+
+    public function jadwals()
+    {
+        return $this->hasMany(Jadwal::class);
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,4 +36,16 @@ Route::group([
 
     Route::livewire('/shift', 'admin::shift')
         ->name('shift');
+
+    Route::livewire('/jadwal', 'admin::jadwal')
+        ->name('jadwal');
+    Route::livewire('/jadwal/import', 'admin::jadwal-import')
+        ->name('jadwal.import');
+    Route::get('/jadwal/download-template', function () {
+        $month = request('month', date('m'));
+        $year = request('year', date('Y'));
+        $opdId = Auth::user()->hasRole('super-admin') ? null : Auth::user()->opd()?->id;
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\JadwalTemplateExport($month, $year, $opdId), "template_jadwal_{$year}_{$month}.xlsx");
+    })->name('jadwal.download-template');
 });
