@@ -20,4 +20,19 @@ Route::group([
 
     Route::livewire('/role-permission', 'admin::role-permission')
         ->name('role-permission');
+
+    Route::livewire('/opd', 'admin::opd')
+        ->name('opd');
+
+    Route::livewire('/penugasan', 'admin::penugasan')
+        ->name('penugasan');
+
+    Route::livewire('/user', 'admin::user')
+        ->name('user');
+
+    Route::livewire('/personnel', 'admin::personnel')
+        ->name('personnel');
+
+    Route::livewire('/shift', 'admin::shift')
+        ->name('shift');
 });
