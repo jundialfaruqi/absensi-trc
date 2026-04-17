@@ -154,7 +154,7 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
 
     public function executeDelete(): void
     {
-        if ($this->deleteId === auth()->id()) {
+        if ($this->deleteId === \Illuminate\Support\Facades\Auth::id()) {
             $this->dispatch('toast', type: 'error', title: 'Gagal', message: 'Tidak dapat menghapus akun Anda sendiri.');
             $this->dispatch('close-modal', id: 'user-delete-modal');
             return;

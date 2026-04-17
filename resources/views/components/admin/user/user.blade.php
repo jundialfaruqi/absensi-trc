@@ -136,7 +136,8 @@
                                     @endif
 
                                     @if ($r->roles->isNotEmpty())
-                                        <div class="badge badge-sm border-none text-white px-2 py-3 whitespace-nowrap" style="background-color: {{ $r->roles->first()->color ?? '#64748b' }}">
+                                        <div class="badge badge-sm border-none text-white px-2 py-3 whitespace-nowrap"
+                                            style="background-color: {{ $r->roles->first()->color ?? '#64748b' }}">
                                             {{ $r->roles->first()->name }}</div>
                                     @else
                                         <div class="text-xs italic text-base-content/50">Belum ada role</div>
@@ -338,14 +339,14 @@
                                 {{-- Preview section --}}
                                 @if ($foto)
                                     <div
-                                        class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-100 flex-shrink-0">
+                                        class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-100 shrink-0">
                                         <div class="w-16 h-16 rounded">
                                             <img src="{{ $foto->temporaryUrl() }}" class="object-cover bg-white">
                                         </div>
                                     </div>
                                 @elseif ($oldFoto)
                                     <div
-                                        class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-200/50 flex-shrink-0">
+                                        class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-200/50 shrink-0">
                                         <div class="w-16 h-16 rounded">
                                             <img src="{{ asset('storage/' . $oldFoto) }}" class="object-cover">
                                         </div>
