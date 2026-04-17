@@ -96,7 +96,12 @@
                         @forelse ($this->shifts as $r)
                             <tr class="hover:bg-base-200/50">
                                 <td class="text-center font-bold">{{ $this->shifts->firstItem() + $loop->index }}</td>
-                                <td class="font-bold">{{ $r->name }}</td>
+                                <td class="font-bold">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-3 h-3 rounded-full shadow-xs" style="background-color: {{ $r->color ?? '#64748b' }}"></div>
+                                        {{ $r->name }}
+                                    </div>
+                                </td>
                                 <td><div class="badge badge-lg badge-outline">{{ \Carbon\Carbon::parse($r->start_time)->format('H:i') }}</div></td>
                                 <td><div class="badge badge-lg badge-outline">{{ \Carbon\Carbon::parse($r->end_time)->format('H:i') }}</div></td>
                                 <td class="text-center">
@@ -171,6 +176,51 @@
                                 class="input input-bordered focus:input-primary w-full transition-all @error('end_time') input-error @enderror">
                             @error('end_time') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
+                    </div>
+
+                    <div class="form-control w-full" x-data="{
+                        color: $wire.entangle('color'),
+                        open: false,
+                        swatches: [
+                            '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+                            '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
+                            '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+                            '#ec4899', '#f43f5e', '#64748b', '#475569', '#334155',
+                            '#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d',
+                            '#16a34a', '#059669', '#0d9488', '#0891b2', '#0284c7',
+                            '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3',
+                            '#db2777', '#e11d48', '#0f172a', '#1e293b', '#ffffff',
+                        ],
+                        selectColor(c) {
+                            this.color = c;
+                            this.open = false;
+                        }
+                    }" x-on:click.outside="open = false">
+                        <label class="label mb-1 px-1">
+                            <span class="label-text font-medium">Warna Identitas <span class="text-error">*</span></span>
+                        </label>
+                        <div class="flex gap-2 items-center">
+                            <button type="button" x-on:click="open = !open"
+                                class="w-12 h-12 rounded-xl border-2 border-base-content/20 shrink-0 shadow-sm transition-all hover:scale-105 active:scale-95"
+                                :style="`background-color: ${color}`">
+                            </button>
+                            <input type="text" x-model="color" x-on:focus="open = false"
+                                class="input input-bordered flex-1 font-mono text-sm focus:input-primary"
+                                placeholder="#64748b" maxlength="7">
+                        </div>
+
+                        <div x-show="open" x-transition.opacity class="mt-3 p-3 bg-base-100 border border-base-200 rounded-xl shadow-xl z-50">
+                            <div class="grid grid-cols-10 gap-1.5">
+                                <template x-for="swatch in swatches" :key="swatch">
+                                    <button type="button" x-on:click="selectColor(swatch)"
+                                        class="w-6 h-6 rounded-md border-2 transition-all hover:scale-110"
+                                        :class="color === swatch ? 'border-primary' : 'border-transparent'"
+                                        :style="`background-color: ${swatch}`">
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                        @error('color') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                 </div>
 

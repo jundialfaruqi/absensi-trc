@@ -156,15 +156,19 @@
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         
                                         $cellClass = match($j->status ?? '') {
-                                            'SHIFT' => 'bg-primary text-primary-content',
                                             'LIBUR' => 'bg-neutral text-neutral-content',
                                             'SAKIT' => 'bg-error text-error-content',
                                             'IZIN'  => 'bg-warning text-warning-content',
                                             'CUTI'  => 'bg-info text-info-content',
                                             default => ''
                                         };
+
+                                        $style = ($j && $j->status === 'SHIFT') 
+                                            ? 'background-color: ' . ($j->shift->color ?? '#64748b') . '; color: white;' 
+                                            : '';
                                     @endphp
                                     <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }}"
+                                        style="{{ $style }}"
                                         wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
                                         @if ($j)
                                             <div class="flex flex-col items-center justify-center w-full h-full relative font-bold">

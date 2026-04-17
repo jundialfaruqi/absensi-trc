@@ -19,6 +19,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     public string $name = '';
     public string $start_time = '';
     public string $end_time = '';
+    public string $color = '#64748b';
 
     // Delete attributes
     public ?int $deleteId = null;
@@ -55,6 +56,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
         $this->name = $item->name;
         $this->start_time = \Carbon\Carbon::parse($item->start_time)->format('H:i');
         $this->end_time = \Carbon\Carbon::parse($item->end_time)->format('H:i');
+        $this->color = $item->color ?? '#64748b';
         
         $this->dispatch('open-modal', id: 'shift-modal');
     }
@@ -65,6 +67,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             'name' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
+            'color' => 'required|string|max:7',
         ];
 
         $this->validate($rules);
@@ -73,6 +76,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             'name' => $this->name,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
+            'color' => $this->color,
         ];
 
         if ($this->shiftId) {
@@ -111,6 +115,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
         $this->name = '';
         $this->start_time = '';
         $this->end_time = '';
+        $this->color = '#64748b';
         $this->resetErrorBag();
     }
 
