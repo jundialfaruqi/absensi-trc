@@ -38,20 +38,6 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
     }
 
     #[Computed]
-    public function stats(): array
-    {
-        $opds = Opd::withCount('users')->get();
-        $topOpd = $opds->sortByDesc('users_count')->first();
-
-        return [
-            'total' => $opds->count(),
-            'total_users' => $opds->sum('users_count'),
-            'top_opd_name' => $topOpd?->name ?? '-',
-            'top_opd_users' => $topOpd?->users_count ?? 0,
-        ];
-    }
-
-    #[Computed]
     public function opds()
     {
         return Opd::withCount('users')
@@ -79,14 +65,14 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
     {
         $this->resetForm();
         $opd = Opd::with('users')->findOrFail($id);
-        
+
         $this->opdId = $opd->id;
         $this->name = $opd->name;
         $this->singkatan = $opd->singkatan ?? '';
         $this->alamat = $opd->alamat ?? '';
         $this->oldLogo = $opd->logo;
         $this->selectedUsers = $opd->users->pluck('id')->map(fn($id) => (string)$id)->toArray();
-        
+
         $this->dispatch('open-modal', id: 'opd-modal');
     }
 
@@ -133,7 +119,7 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
                 ->where('opd_id', '!=', $opd->id)
                 ->delete();
         }
-        
+
         $opd->users()->sync($userIds);
 
         $this->resetForm();
@@ -151,11 +137,11 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
     public function executeDelete(): void
     {
         $opd = Opd::findOrFail($this->deleteId);
-        
+
         if ($opd->logo) {
             Storage::disk('public')->delete($opd->logo);
         }
-        
+
         $opd->delete();
 
         $this->deleteId = null;
@@ -181,7 +167,7 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
     {
         $this->resetPage();
     }
-    
+
     public function updatedPerPage(): void
     {
         $this->resetPage();

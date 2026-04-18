@@ -100,76 +100,134 @@
             </div>
         @endif
 
-        {{-- ─── Step 3: Action Selection ──────────────────────────────────── --}}
+        {{-- ─── Step 3: Biometric & Location Verification ──────────────────────── --}}
         @if ($step === 3)
-            <div class="card bg-base-100 shadow-xl border border-base-300 animate-in zoom-in-95">
-                <div class="card-body">
-                    <div class="text-center mb-6">
-                        <h2 class="text-xl font-bold uppercase">{{ $selectedPersonnel->name }}</h2>
-                        @if ($activeJadwal->shift)
-                            <p class="text-xs opacity-50">{{ $activeJadwal->shift->name }} ({{ $activeJadwal->shift->start_time }} - {{ $activeJadwal->shift->end_time }})</p>
-                        @else
-                            <p class="text-xs font-black uppercase text-error tracking-widest bg-error/10 py-1 px-3 rounded-full inline-block mt-1">{{ $activeJadwal->status }}</p>
-                        @endif
-                        <div class="badge badge-outline badge-xs mt-2 opacity-40 uppercase tracking-tighter">Jadwal: {{ \Carbon\Carbon::parse($activeDate)->format('d M Y') }}</div>
+            <div wire:key="step-3-verification-{{ $selectedPersonnel->id }}"
+                 x-data="absensiVerification()" 
+                 x-init="initVerification('{{ $selectedPersonnel->foto ? asset('storage/' . $selectedPersonnel->foto) : '' }}')"
+                 class="card bg-base-100 shadow-xl border border-base-300 animate-in zoom-in-95">
+                <div class="card-body p-4 sm:p-6">
+                    <div class="text-center mb-4">
+                        <h2 class="text-lg font-bold uppercase">{{ $selectedPersonnel->name }}</h2>
+                        <div class="flex items-center justify-center gap-2 mt-1">
+                            @if ($activeJadwal->shift)
+                                <div class="badge badge-primary badge-sm tracking-wider">{{ $activeJadwal->shift->name }}</div>
+                            @else
+                                <div class="badge badge-error badge-sm uppercase tracking-widest">{{ $activeJadwal->status }}</div>
+                            @endif
+                            <div class="text-[10px] opacity-40 uppercase tracking-tighter">{{ \Carbon\Carbon::parse($activeDate)->format('d M Y') }}</div>
+                        </div>
                     </div>
 
-                    @if ($activeJadwal->shift)
-                        <div class="space-y-4">
-                            {{-- Masuk Section --}}
-                            <div class="p-4 rounded-2xl bg-base-200 border border-base-300 flex items-center justify-between">
-                                <div>
-                                    <div class="text-[10px] font-black uppercase opacity-50">Status Masuk</div>
-                                    <div class="font-bold {{ $activeAbsensi?->jam_masuk ? 'text-success' : 'text-base-content/30' }}">
-                                        {{ $activeAbsensi?->jam_masuk ? 'Sudah Absen (' . $activeAbsensi->jam_masuk . ')' : 'Belum Absen' }}
-                                    </div>
-                                </div>
-                                @if (!$activeAbsensi)
-                                    <button wire:click="submitAttendance('in')" class="btn btn-primary btn-md shadow-md">Absen Masuk</button>
-                                @else
-                                    <div class="badge badge-success badge-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mr-1">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                        </svg>
-                                        OK
-                                    </div>
-                                @endif
+                    {{-- Camera & Detection View --}}
+                    <div class="relative aspect-square w-full max-w-[280px] mx-auto rounded-3xl overflow-hidden bg-black shadow-2xl border-4 border-base-200 group">
+                        <video x-ref="video" autoplay muted playsinline class="w-full h-full object-cover"></video>
+                        <canvas x-ref="overlay" class="absolute inset-0 w-full h-full"></canvas>
+                        
+                        {{-- Scanning Animation --}}
+                        <template x-if="isScanning && !isMatched">
+                            <div class="absolute inset-0 pointer-events-none">
+                                <div class="w-full h-1 bg-primary/50 absolute top-0 shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-scan-line"></div>
+                                <div class="absolute inset-x-8 inset-y-8 border-2 border-white/20 rounded-full animate-pulse"></div>
                             </div>
+                        </template>
 
-                            {{-- Pulang Section --}}
-                            <div class="p-4 rounded-2xl bg-base-200 border border-base-300 flex items-center justify-between">
-                                <div>
-                                    <div class="text-[10px] font-black uppercase opacity-50">Status Pulang</div>
-                                    <div class="font-bold {{ $activeAbsensi?->jam_pulang ? 'text-success' : 'text-base-content/30' }}">
-                                        {{ $activeAbsensi?->jam_pulang ? 'Sudah Absen (' . $activeAbsensi->jam_pulang . ')' : 'Belum Absen' }}
-                                    </div>
+                        {{-- Loading Models Overlay --}}
+                        <template x-if="isLoadingModels">
+                            <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-6 text-center">
+                                <span class="loading loading-spinner text-primary mb-3"></span>
+                                <div class="text-[10px] font-black uppercase tracking-[0.2em]">Memuat AI...</div>
+                            </div>
+                        </template>
+
+                        {{-- Matched Overlay --}}
+                        <template x-if="isMatched">
+                            <div class="absolute inset-0 bg-success/20 flex flex-col items-center justify-center text-white border-4 border-success animate-in fade-in duration-300">
+                                <div class="bg-success text-white rounded-full p-2 mb-2 shadow-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
                                 </div>
-                                @if ($activeAbsensi && !$activeAbsensi->jam_pulang)
-                                    <button wire:click="submitAttendance('out')" class="btn btn-secondary btn-md shadow-md">Absen Pulang</button>
-                                @elseif ($activeAbsensi?->jam_pulang)
-                                    <div class="badge badge-success badge-lg">OK</div>
-                                @else
-                                    <button class="btn btn-disabled btn-md">Absen Pulang</button>
-                                @endif
+                                <div class="text-[10px] font-black uppercase tracking-widest">Wajah Terverifikasi</div>
+                            </div>
+                        </template>
+                    </div>
+
+                    {{-- Status Indicators --}}
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <div :class="gpsStatus === 'OK' ? 'bg-success/5 border-success/20' : 'bg-base-200 border-base-300'" 
+                             class="p-2 rounded-xl border flex items-center gap-2 transition-all">
+                            <div :class="gpsStatus === 'OK' ? 'text-success' : 'text-base-content/30'">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Lokasi</div>
+                                <div class="text-[10px] font-bold" x-text="gpsMessage">Mencari...</div>
                             </div>
                         </div>
+
+                        <div :class="isMatched ? 'bg-success/5 border-success/20' : 'bg-base-200 border-base-300'" 
+                             class="p-2 rounded-xl border flex items-center gap-2 transition-all">
+                            <div :class="isMatched ? 'text-success' : 'text-base-content/30'">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.191 6.062h.008v.008h-.008V6.062ZM18 8.812h.008v.008H18V8.812ZM15.191 11.562h.008v.008h-.008v-.008ZM18 14.312h.008v.008H18v-.008ZM21 17.062h.008v.008H21v-.008ZM12.181 8.68c.341-1.107 1.467-1.875 2.65-1.875 1.157 0 2.1 1.607 1.969 2.45-.12.772-.646 1.393-1.307 1.816-.656.422-1.202.911-1.377 1.513l-.111.452m-1.146-5.303-.01.013m2.706 3.103c.19.116.446.126.646.017a1.322 1.322 0 0 0 .512-.575 1.31 1.31 0 0 0 .08-.611c-.027-.317-.184-.504-.39-.554a.705.705 0 0 0-.662.131.6.6 0 0 0-.186.418.604.604 0 0 0 0 .15l.019.014c.032.022.03.024.03.024a.5.5 0 0 1-.038-.027ZM11.182 18H9.122a2 2 0 0 1-1.928-1.464l-1.071-3.75a2 2 0 0 1 .728-2.22l3.07-2.1c.176-.121.377-.183.583-.183h.004c.158 0 .313.036.452.106l1.652.825" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Biometrik</div>
+                                <div class="text-[10px] font-bold" x-text="faceMessage">Memindai...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Actions --}}
+                    @if ($activeJadwal->shift)
+                        <div class="space-y-3 mt-6">
+                            @if (!$activeAbsensi)
+                                <button type="button" 
+                                        x-on:click="submit('in')"
+                                        :disabled="!isMatched || gpsStatus !== 'OK'"
+                                        class="btn btn-primary btn-lg w-full shadow-lg shadow-primary/20 flex flex-col items-center py-2 h-auto group">
+                                    <span class="text-sm font-black">ABSEN MASUK</span>
+                                    <span class="text-[10px] opacity-60 font-medium group-disabled:hidden">SIAP KIRIM DATA</span>
+                                    <span class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                </button>
+                            @else
+                                <button type="button" 
+                                        x-on:click="submit('out')"
+                                        :disabled="{{ ($activeAbsensi && $activeAbsensi->jam_pulang) ? 'true' : 'false' }} || !isMatched || gpsStatus !== 'OK'"
+                                        class="btn btn-secondary btn-lg w-full shadow-lg shadow-secondary/20 flex flex-col items-center py-2 h-auto group">
+                                    <span class="text-sm font-black uppercase">Absen Pulang</span>
+                                    <span class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan Kerja Hari Ini</span>
+                                    <span class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                </button>
+                            @endif
+                        </div>
                     @else
-                        <div class="p-6 rounded-2xl bg-error/5 border border-error/20 text-center animate-in zoom-in-95">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 text-error/50 mx-auto mb-3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
-                            </svg>
-                            <h3 class="font-bold text-error uppercase text-sm mb-1">Akses Absensi Ditutup</h3>
-                            <p class="text-xs opacity-60">Status jadwal Anda saat ini adalah <span class="font-bold">{{ $activeJadwal->status }}</span>. Anda tidak diperkenankan melakukan absensi.</p>
+                        <div class="p-6 rounded-2xl bg-error/5 border border-error/20 text-center mt-6">
+                            <h3 class="font-bold text-error uppercase text-xs mb-1">Akses Absensi Ditutup</h3>
+                            <p class="text-[10px] opacity-60 uppercase font-bold tracking-tighter">Status: {{ $activeJadwal->status }}</p>
                         </div>
                     @endif
 
-
-
-                    <div class="mt-8">
-                        <button wire:click="resetForm" class="btn btn-ghost btn-outline btn-block uppercase text-xs tracking-widest">Selesai / Sesi Berakhir</button>
+                    <div class="mt-4">
+                        <button wire:click="resetForm" x-on:click="stopCamera()" class="btn btn-ghost btn-xs btn-block opacity-40 font-bold uppercase tracking-widest hover:bg-transparent">Kembali</button>
                     </div>
                 </div>
             </div>
+
+            <style>
+                @keyframes scan-line {
+                    0% { top: 0; }
+                    100% { top: 100%; }
+                }
+                .animate-scan-line {
+                    animation: scan-line 2s linear infinite;
+                }
+            </style>
         @endif
 
         {{-- ─── Step 4: Result ─────────────────────────────────────────── --}}
@@ -223,7 +281,176 @@
     </div>
     
     {{-- Footer Info --}}
-    <p class="mt-12 text-[10px] text-base-content/40 uppercase tracking-[0.2em] animate-pulse">
+    <div class="mt-12 text-[10px] text-base-content/40 uppercase tracking-[0.2em] animate-pulse text-center">
         Sistem Absensi TRC &copy; {{ date('Y') }}
-    </p>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (!Alpine.data('absensiVerification')) {
+                Alpine.data('absensiVerification', () => ({
+                    isLoadingModels: true,
+                    isScanning: false,
+                    isMatched: false,
+                    gpsStatus: 'WAIT',
+                    gpsMessage: 'Mencari...',
+                    faceMessage: 'Siapkan AI...',
+                    lat: null,
+                    lng: null,
+                    stream: null,
+                    detector: null,
+                    refDescriptor: null,
+                    
+                    async initVerification(refImageUrl) {
+                        // Reset state for new attempt
+                        this.isMatched = false;
+                        this.isScanning = false;
+                        this.faceMessage = 'Menyiapkan...';
+                        this.gpsStatus = 'WAIT';
+                        this.refDescriptor = null;
+
+                        this.$nextTick(async () => {
+                            try {
+                                await this.loadModels();
+                                await this.startCamera();
+                                if (refImageUrl) {
+                                    await this.loadReference(refImageUrl);
+                                }
+                                this.startGps();
+                                this.startRecognitionLoop();
+                            } catch (e) {
+                                console.error('Initialization Error:', e);
+                                this.faceMessage = 'Gagal Akses';
+                            }
+                        });
+                    },
+
+                    async loadModels() {
+                        const MODEL_URL = '/models';
+                        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+                        this.isLoadingModels = false;
+                        this.isScanning = true;
+                        this.faceMessage = 'Pindai Wajah...';
+                    },
+
+                    async startCamera() {
+                        try {
+                            this.stream = await navigator.mediaDevices.getUserMedia({ 
+                                video: { facingMode: 'user' } 
+                            });
+                            this.$refs.video.srcObject = this.stream;
+                        } catch (e) {
+                            alert('Mohon izinkan akses kamera untuk melanjutkan.');
+                            throw e;
+                        }
+                    },
+
+                    async loadReference(url) {
+                        try {
+                            const img = await faceapi.fetchImage(url);
+                            const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                            if (detections) {
+                                this.refDescriptor = detections.descriptor;
+                            }
+                        } catch (e) {
+                            console.error('Failed to load reference image:', e);
+                        }
+                    },
+
+                    startGps() {
+                        if (!navigator.geolocation) {
+                            this.gpsStatus = 'ERROR';
+                            this.gpsMessage = 'Tidak Support';
+                            return;
+                        }
+
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                this.lat = pos.coords.latitude;
+                                this.lng = pos.coords.longitude;
+                                this.gpsStatus = 'OK';
+                                this.gpsMessage = 'Terkunci';
+                            },
+                            (err) => {
+                                this.gpsStatus = 'ERROR';
+                                this.gpsMessage = 'Izin Ditolak';
+                            },
+                            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                        );
+                    },
+
+                    async startRecognitionLoop() {
+                        const video = this.$refs.video;
+                        const overlay = this.$refs.overlay;
+                        
+                        const loop = async () => {
+                            if (this.isMatched || !video) return;
+
+                            // Ensure video is ready before processing
+                            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                                requestAnimationFrame(loop);
+                                return;
+                            }
+
+                            const displaySize = { width: video.clientWidth, height: video.clientHeight };
+                            faceapi.matchDimensions(overlay, displaySize);
+
+                            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                                .withFaceLandmarks()
+                                .withFaceDescriptors();
+
+                            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                            overlay.getContext('2d').clearRect(0, 0, overlay.width, overlay.height);
+                            
+                            if (resizedDetections.length > 0) {
+                                if (this.refDescriptor) {
+                                    const faceMatcher = new faceapi.FaceMatcher(this.refDescriptor, 0.6);
+                                    const match = faceMatcher.findBestMatch(resizedDetections[0].descriptor);
+                                    
+                                    if (match.label !== 'unknown') {
+                                        this.isMatched = true;
+                                        this.faceMessage = 'Dikenali';
+                                        return;
+                                    }
+                                } else {
+                                    this.isMatched = true; 
+                                    this.faceMessage = 'Terdeteksi';
+                                    return;
+                                }
+                            }
+                            
+                            requestAnimationFrame(loop);
+                        };
+                        loop();
+                    },
+
+                    stopCamera() {
+                        if (this.stream) {
+                            this.stream.getTracks().forEach(track => track.stop());
+                        }
+                    },
+
+                        async submit(type) {
+                            const video = this.$refs.video;
+                            if (!video) return;
+                            
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            canvas.getContext('2d').drawImage(video, 0, 0);
+                            const image = canvas.toDataURL('image/jpeg', 0.8);
+
+                            this.$wire.call('submitAttendance', type, this.lat, this.lng, image);
+                            this.stopCamera();
+                        },
+                        
+                        destroy() {
+                            this.stopCamera();
+                        }
+                    }));
+            }
+        });
+    </script>
 </div>

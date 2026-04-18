@@ -18,74 +18,6 @@
         </div>
     </div>
 
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <div class="card bg-linear-to-r from-secondary to-neutral text-base-100 p-5">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-lg text-white font-bold">Manajemen OPD</div>
-                    <div class="text-sm text-white opacity-80">Data Organisasi Perangkat Daerah</div>
-                </div>
-                <div class="flex flex-wrap gap-4 md:gap-0 mt-1 md:mt-0">
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total OPD</div>
-                    </div>
-                    <div class="text-center md:pl-6 md:ml-6 md:border-l md:border-dotted md:border-white/40">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total_users'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Pengguna</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div class="card bg-base-100 shadow-sm">
-                <div class="card-body p-5">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="card-title text-sm text-base-content/60 font-medium">Total OPD</h2>
-                            <div class="flex items-center gap-2 mt-2">
-                                <span class="text-2xl font-bold">{{ $this->stats['total'] ?? 0 }}</span>
-                                <span class="text-xs text-base-content/50">Organisasi</span>
-                            </div>
-                        </div>
-                        <div class="p-2 bg-base-200 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-sm">
-                <div class="card-body p-5">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="card-title text-sm text-base-content/60 font-medium">OPD Terbesar</h2>
-                            <div class="flex items-center gap-2 mt-2">
-                                <span class="text-2xl font-bold">{{ $this->stats['top_opd_users'] ?? 0 }}</span>
-                                <span class="text-xs text-success">Pengguna di {{ $this->stats['top_opd_name'] }}</span>
-                            </div>
-                        </div>
-                        <div class="p-2 bg-base-200 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M12 14c3.866 0 7 1.343 7 3v1H5v-1c0-1.657 3.134-3 7-3z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M12 12a4 4 0 100-8 4 4 0 000 8z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ─── Toolbar: Search + Buttons ──────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <div class="form-control">
@@ -155,8 +87,7 @@
                                     @if ($r->logo_url)
                                         <div class="avatar">
                                             <div class="w-12 h-12 rounded bg-base-200 p-1">
-                                                <img src="{{ $r->logo_url }}" alt="Logo"
-                                                    class="object-contain" />
+                                                <img src="{{ $r->logo_url }}" alt="Logo" class="object-contain" />
                                             </div>
                                         </div>
                                     @else
@@ -202,9 +133,8 @@
                                 <td class="text-center">
                                     <div class="dropdown dropdown-left dropdown-end">
                                         <button tabindex="0" class="btn btn-ghost btn-xs btn-square rounded-full">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-5 h-5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                                             </svg>
@@ -212,8 +142,7 @@
                                         <ul tabindex="0"
                                             class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
                                             <li>
-                                                <button type="button"
-                                                    wire:click="openEditModal({{ $r->id }})">
+                                                <button type="button" wire:click="openEditModal({{ $r->id }})">
                                                     Edit
                                                 </button>
                                             </li>

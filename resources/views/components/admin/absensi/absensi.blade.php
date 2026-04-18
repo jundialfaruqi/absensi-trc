@@ -31,6 +31,24 @@
                 </select>
             </div>
 
+            <div class="join w-full sm:w-auto">
+                <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
+                            {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                        </option>
+                    @endfor
+                </select>
+                <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
+                    @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
+                        <option value="{{ $y }}">{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 justify-end">
+            {{-- Optional Action Buttons for Absensi --}}
             <div class="relative w-full sm:w-64">
                 <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
                     class="input input-bordered w-full pl-10 pr-10 bg-base-100" />
@@ -50,25 +68,6 @@
                     </button>
                 @endif
             </div>
-
-            <div class="join w-full sm:w-auto">
-                <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
-                    @for ($i = 1; $i <= 12; $i++)
-                        <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
-                            {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
-                        </option>
-                    @endfor
-                </select>
-                <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
-                    @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
-                        <option value="{{ $y }}">{{ $y }}</option>
-                    @endfor
-                </select>
-            </div>
-        </div>
-
-        <div class="flex flex-wrap gap-2 justify-end">
-            {{-- Optional Action Buttons for Absensi --}}
         </div>
     </div>
 

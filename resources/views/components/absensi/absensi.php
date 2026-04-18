@@ -32,6 +32,11 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public string $message = '';
     public ?Absensi $lastAbsensi = null;
 
+    // GPS & Image Data (Sent from Client)
+    public string $lat = '';
+    public string $lng = '';
+    public string $imageData = ''; // Base64 selfie
+
     public function selectPersonnel(int $id)
     {
         $this->selectedPersonnelId = $id;
@@ -114,8 +119,13 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $this->step = 3;
     }
 
-    public function submitAttendance(string $type)
+    public function submitAttendance(string $type, $clientLat = null, $clientLng = null, $clientImage = null)
     {
+        // Update state with data from client
+        if ($clientLat) $this->lat = $clientLat;
+        if ($clientLng) $this->lng = $clientLng;
+        if ($clientImage) $this->imageData = $clientImage;
+
         if (!$this->selectedPersonnel || !$this->activeJadwal || !$this->activeJadwal->shift) {
             $this->isSuccess = false;
             $this->message = 'Anda tidak dapat melakukan absensi pada jadwal ini (' . ($this->activeJadwal->status ?? 'ALPHA') . ')';
@@ -127,6 +137,16 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $nowTime = $now->format('H:i:s');
 
         try {
+            // Process Image Storage
+            $imagePath = null;
+            if ($this->imageData) {
+                $imageData = str_replace('data:image/jpeg;base64,', '', $this->imageData);
+                $imageData = str_replace(' ', '+', $imageData);
+                $imageName = 'absensi/' . $type . '_' . $this->selectedPersonnel->id . '_' . time() . '.jpg';
+                Storage::disk('public')->put($imageName, base64_decode($imageData));
+                $imagePath = $imageName;
+            }
+
             if ($type === 'in') {
                 if ($this->activeAbsensi) {
                     $this->isSuccess = false;
@@ -164,8 +184,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     'tanggal' => $this->activeDate,
                     'jam_masuk' => $now->format('H:i:s'),
                     'status_masuk' => $status_masuk,
-                    'lat_masuk' => 0,
-                    'lng_masuk' => 0,
+                    'foto_masuk' => $imagePath,
+                    'lat_masuk' => $this->lat ?: 0,
+                    'lng_masuk' => $this->lng ?: 0,
                 ]);
 
                 $this->isSuccess = true;
@@ -209,8 +230,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $this->activeAbsensi->update([
                     'jam_pulang' => $now->format('H:i:s'),
                     'status_pulang' => $status_pulang,
-                    'lat_pulang' => 0,
-                    'lng_pulang' => 0,
+                    'foto_pulang' => $imagePath,
+                    'lat_pulang' => $this->lat ?: 0,
+                    'lng_pulang' => $this->lng ?: 0,
                 ]);
 
                 $this->lastAbsensi = $this->activeAbsensi;
@@ -227,7 +249,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function resetForm()
     {
-        $this->reset(['step', 'selectedPersonnelId', 'selectedPersonnel', 'pin', 'isSuccess', 'message', 'lastAbsensi', 'search', 'activeJadwal', 'activeAbsensi', 'activeDate']);
+        $this->reset(['step', 'selectedPersonnelId', 'selectedPersonnel', 'pin', 'isSuccess', 'message', 'lastAbsensi', 'search', 'activeJadwal', 'activeAbsensi', 'activeDate', 'lat', 'lng', 'imageData']);
     }
 
     public function personnels()
