@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('jadwals', function (Blueprint $table) {
             $table->foreignId('shift_id')->nullable()->change();
-            $table->string('status')->default('SHIFT')->after('shift_id'); // SHIFT, LIBUR, SAKIT, IZIN, CUTI
+            $table->string('status')->default('SHIFT')->after('shift_id'); // SHIFT, LIBUR
             $table->text('keterangan')->nullable()->after('status');
         });
     }

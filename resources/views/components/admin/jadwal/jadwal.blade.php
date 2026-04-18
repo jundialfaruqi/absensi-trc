@@ -133,9 +133,6 @@
 
                                         $cellClass = match ($j->status ?? '') {
                                             'LIBUR' => 'bg-neutral text-neutral-content',
-                                            'SAKIT' => 'bg-error text-error-content',
-                                            'IZIN' => 'bg-warning text-warning-content',
-                                            'CUTI' => 'bg-info text-info-content',
                                             default => '',
                                         };
 
@@ -217,8 +214,8 @@
                         <label class="label mb-1 px-1">
                             <span class="label-text font-medium text-xs">Pilih Status Kehadiran</span>
                         </label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            @foreach (['SHIFT', 'LIBUR', 'SAKIT', 'IZIN', 'CUTI'] as $status)
+                        <div class="grid grid-cols-2 gap-2">
+                            @foreach (['SHIFT', 'LIBUR'] as $status)
                                 <label
                                     class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
                                     <input type="radio" wire:model.live="quickStatus" value="{{ $status }}"

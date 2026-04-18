@@ -36,11 +36,13 @@
                             <button wire:click="selectPersonnel({{ $p->id }})"
                                 class="btn btn-outline btn-lg w-full justify-between h-auto py-4 group hover:bg-primary hover:text-primary-content transition-all border-base-300">
                                 <div class="flex items-center gap-4">
-                                    <div class="avatar placeholder">
-                                        <div
-                                            class="bg-primary/10 text-primary group-hover:bg-white/20 group-hover:text-white w-10 rounded-full">
-                                            <span
-                                                class="text-sm font-bold">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
+                                    <div class="avatar {{ !$p->foto ? 'placeholder' : '' }}">
+                                        <div class="bg-primary/10 text-primary group-hover:bg-white/20 group-hover:text-white w-10 rounded-full overflow-hidden">
+                                            @if ($p->foto)
+                                                <img src="{{ asset('storage/' . $p->foto) }}" class="object-cover" />
+                                            @else
+                                                <span class="text-sm font-bold">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="text-left">
@@ -67,10 +69,13 @@
             <div class="card bg-base-100 shadow-xl border border-base-300 animate-in fade-in slide-in-from-bottom-4">
                 <div class="card-body">
                     <div class="text-center mb-6">
-                        <div class="avatar placeholder mb-4">
-                            <div class="bg-primary/10 text-primary w-20 rounded-full border-4 border-white shadow-md">
-                                <span
-                                    class="text-2xl font-black">{{ strtoupper(substr($selectedPersonnel->name, 0, 1)) }}</span>
+                        <div class="avatar mb-4 {{ !$selectedPersonnel->foto ? 'placeholder' : '' }}">
+                            <div class="bg-primary/10 text-primary w-20 rounded-full border-4 border-white shadow-md overflow-hidden">
+                                @if ($selectedPersonnel->foto)
+                                    <img src="{{ asset('storage/' . $selectedPersonnel->foto) }}" class="object-cover" alt="Foto Personnel" />
+                                @else
+                                    <span class="text-2xl font-black">{{ strtoupper(substr($selectedPersonnel->name, 0, 1)) }}</span>
+                                @endif
                             </div>
                         </div>
                         <h2 class="text-xl font-bold uppercase truncate px-4">{{ $selectedPersonnel->name }}</h2>

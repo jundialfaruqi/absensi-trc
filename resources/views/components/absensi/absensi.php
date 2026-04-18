@@ -112,6 +112,13 @@ new #[Layout('layouts.absensi.app')] class extends Component
             return;
         }
 
+        if ($this->activeJadwal->status === 'LIBUR') {
+            $this->isSuccess = false;
+            $this->message = 'Anda sedang LIBUR hari ini.';
+            $this->step = 4;
+            return;
+        }
+
         $this->activeAbsensi = Absensi::where('personnel_id', $this->selectedPersonnel->id)
             ->where('tanggal', $this->activeDate)
             ->first();
@@ -126,9 +133,11 @@ new #[Layout('layouts.absensi.app')] class extends Component
         if ($clientLng) $this->lng = $clientLng;
         if ($clientImage) $this->imageData = $clientImage;
 
-        if (!$this->selectedPersonnel || !$this->activeJadwal || !$this->activeJadwal->shift) {
+        if (!$this->selectedPersonnel || !$this->activeJadwal || $this->activeJadwal->status === 'LIBUR' || !$this->activeJadwal->shift) {
             $this->isSuccess = false;
-            $this->message = 'Anda tidak dapat melakukan absensi pada jadwal ini (' . ($this->activeJadwal->status ?? 'ALPHA') . ')';
+            $this->message = $this->activeJadwal->status === 'LIBUR' 
+                ? 'Anda sedang LIBUR hari ini.' 
+                : 'Anda tidak dapat melakukan absensi pada jadwal ini (' . ($this->activeJadwal->status ?? 'ALPHA') . ')';
             $this->step = 4;
             return;
         }

@@ -304,21 +304,6 @@
                         </li>
 
                         <li>
-                            <a wire:navigate href="/manajemen-jadwal-operasional"
-                                class="{{ request()->is('manajemen-jadwal-operasional*') || request()->is('jadwal-operasional-create*') || request()->is('jadwal-operasional-update*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z" />
-                                    </svg>
-                                    <span>Menu 3</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">Deskripsi Menu 3</span>
-                            </a>
-                        </li>
-
-                        <li>
                             <a wire:navigate href="{{ route('personnel') }}"
                                 class="{{ request()->routeIs('personnel*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
                                 <div class="flex items-center gap-2">
@@ -375,7 +360,8 @@
                                 <div class="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                     </svg>
                                     <span>Shift</span>
                                 </div>
@@ -406,8 +392,10 @@
                             <a wire:navigate href="{{ route('absensi') }}"
                                 class="{{ request()->routeIs('absensi*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
                                 <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                     </svg>
                                     <span>Absensi</span>
                                 </div>
@@ -453,13 +441,13 @@
                         </li>
 
                         <li class="mt-4">
-                            <a wire:navigate href="/" class="text-primary font-medium">
+                            <a href="{{ route('absensi-web') }}" class="text-primary font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
                                 </svg>
-                                DISKOMINFO
+                                Isi Absen
                             </a>
                         </li>
                     </ul>

@@ -69,9 +69,8 @@ class JadwalImport implements ToCollection
  
                     // If no shift found, check if it represents a special status
                     if (!$shiftId) {
-                        $upperVal = strtoupper($shiftValue);
-                        if (in_array($upperVal, ['LIBUR', 'SAKIT', 'IZIN', 'CUTI'])) {
-                            $status = $upperVal;
+                        if (strtoupper($shiftValue) === 'LIBUR') {
+                            $status = 'LIBUR';
                         }
                     }
  
