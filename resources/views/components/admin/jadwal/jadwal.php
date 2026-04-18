@@ -43,16 +43,16 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     {
         $this->quickPersonnelId = $personnelId;
         $this->quickDate = $date;
-        
+
         // Find existing jadwal for this date if any
         $jadwal = Jadwal::where('personnel_id', $personnelId)
             ->where('tanggal', $date)
             ->first();
-            
+
         $this->quickShiftId = $jadwal ? $jadwal->shift_id : '';
         $this->quickStatus = $jadwal ? $jadwal->status : 'SHIFT';
         $this->quickKeterangan = $jadwal ? $jadwal->keterangan : '';
-        
+
         $this->dispatch('open-modal', id: 'quick-add-modal');
     }
 
@@ -117,25 +117,6 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     }
 
     #[Computed]
-    public function stats(): array
-    {
-        $query = Jadwal::whereMonth('tanggal', $this->month)
-            ->whereYear('tanggal', $this->year);
-
-        if (!Auth::user()->hasRole('super-admin')) {
-            $opdId = Auth::user()->opd()?->id;
-            $query->whereHas('personnel', function ($q) use ($opdId) {
-                $q->where('opd_id', $opdId);
-            });
-        }
-
-        return [
-            'total' => $query->count(),
-            'personnel_count' => $query->distinct('personnel_id')->count('personnel_id'),
-        ];
-    }
-
-    #[Computed]
     public function dates(): array
     {
         $daysInMonth = Carbon::create($this->year, $this->month, 1)->daysInMonth;
@@ -183,7 +164,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     public function executeDelete(): void
     {
         $item = Jadwal::findOrFail($this->deleteId);
-        
+
         // Authorization Check
         if (!Auth::user()->hasRole('super-admin') && $item->personnel->opd_id !== Auth::user()->opd()?->id) {
              throw new \Exception('Unauthorized');
@@ -200,17 +181,17 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     {
         $this->resetPage();
     }
-    
+
     public function updatedMonth(): void
     {
         $this->resetPage();
     }
-    
+
     public function updatedYear(): void
     {
         $this->resetPage();
     }
-    
+
     public function updatedPerPage(): void
     {
         $this->resetPage();

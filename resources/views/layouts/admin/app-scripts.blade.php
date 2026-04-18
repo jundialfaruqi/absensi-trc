@@ -32,14 +32,14 @@
         function init() {
             var body = document.body;
             var saved = localStorage.getItem('adminTheme');
-            var current = saved || body.getAttribute('data-theme') || 'dracula';
+            var current = saved || body.getAttribute('data-theme') || 'winter';
             body.setAttribute('data-theme', current);
             setIcons(current);
             var btn = document.getElementById('theme-toggle');
             if (btn && !btn.__bound) {
                 btn.addEventListener('click', function() {
-                    var now = body.getAttribute('data-theme') || 'dracula';
-                    var next = now === 'dracula' ? 'winter' : 'dracula';
+                    var now = body.getAttribute('data-theme') || 'winter';
+                    var next = now === 'winter' ? 'dracula' : 'winter';
                     body.setAttribute('data-theme', next);
                     localStorage.setItem('adminTheme', next);
                     setIcons(next);

@@ -233,7 +233,11 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public function personnels()
     {
         return Personnel::query()
-            ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+            ->when($this->search, function ($q) {
+                // Escape special characters to prevent "Wildcard Injection"
+                $term = str_replace(['%', '_'], ['\%', '\_'], $this->search);
+                $q->where('name', 'like', '%' . $term . '%');
+            })
             ->orderBy('name')
             ->take(5)
             ->get();

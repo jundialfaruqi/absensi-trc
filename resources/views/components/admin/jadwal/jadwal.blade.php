@@ -18,30 +18,6 @@
         </div>
     </div>
 
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <div class="card bg-linear-to-r from-secondary to-neutral text-base-100 p-5">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-lg text-white font-bold">Data Jadwal</div>
-                    <div class="text-sm text-white opacity-80">Bulan
-                        {{ \Carbon\Carbon::createFromFormat('m', $month)->translatedFormat('F') }} {{ $year }}
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-4 md:gap-8 mt-1 md:mt-0">
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Jadwal</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['personnel_count'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Personnel Terjadwal</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ─── Toolbar: Search + Filters + Buttons ──────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
         <div class="flex flex-col sm:flex-row items-center gap-3">
@@ -154,34 +130,40 @@
                                     @php
                                         $j = $p->jadwal_map[$date] ?? null;
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
-                                        
-                                        $cellClass = match($j->status ?? '') {
+
+                                        $cellClass = match ($j->status ?? '') {
                                             'LIBUR' => 'bg-neutral text-neutral-content',
                                             'SAKIT' => 'bg-error text-error-content',
-                                            'IZIN'  => 'bg-warning text-warning-content',
-                                            'CUTI'  => 'bg-info text-info-content',
-                                            default => ''
+                                            'IZIN' => 'bg-warning text-warning-content',
+                                            'CUTI' => 'bg-info text-info-content',
+                                            default => '',
                                         };
 
-                                        $style = ($j && $j->status === 'SHIFT') 
-                                            ? 'background-color: ' . ($j->shift->color ?? '#64748b') . '; color: white;' 
-                                            : '';
+                                        $style =
+                                            $j && $j->status === 'SHIFT'
+                                                ? 'background-color: ' .
+                                                    ($j->shift->color ?? '#64748b') .
+                                                    '; color: white;'
+                                                : '';
                                     @endphp
                                     <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }}"
                                         style="{{ $style }}"
                                         wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
                                         @if ($j)
-                                            <div class="flex flex-col items-center justify-center w-full h-full relative font-bold">
-                                                @if($j->status === 'SHIFT')
-                                                    <span class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
+                                            <div
+                                                class="flex flex-col items-center justify-center w-full h-full relative font-bold">
+                                                @if ($j->status === 'SHIFT')
+                                                    <span
+                                                        class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
                                                     <span class="text-[8px] opacity-80 mt-0.5">
                                                         {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
                                                     </span>
                                                 @else
-                                                    <span class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
+                                                    <span
+                                                        class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
                                                 @endif
-                                                
-                                             </div>
+
+                                            </div>
                                         @else
                                             <div class="w-full h-full flex items-center justify-center opacity-10">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -200,8 +182,7 @@
                                 <td colspan="32" class="text-center text-sm text-base-content/60 py-12">
                                     <div class="flex flex-col items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="size-12 opacity-20 mb-3">
+                                            stroke-width="1.5" stroke="currentColor" class="size-12 opacity-20 mb-3">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                         </svg>
@@ -237,9 +218,11 @@
                             <span class="label-text font-medium text-xs">Pilih Status Kehadiran</span>
                         </label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            @foreach(['SHIFT', 'LIBUR', 'SAKIT', 'IZIN', 'CUTI'] as $status)
-                                <label class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
-                                    <input type="radio" wire:model.live="quickStatus" value="{{ $status }}" class="radio radio-primary radio-xs">
+                            @foreach (['SHIFT', 'LIBUR', 'SAKIT', 'IZIN', 'CUTI'] as $status)
+                                <label
+                                    class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
+                                    <input type="radio" wire:model.live="quickStatus" value="{{ $status }}"
+                                        class="radio radio-primary radio-xs">
                                     <span class="text-xs font-bold">{{ $status }}</span>
                                 </label>
                             @endforeach
@@ -247,7 +230,7 @@
                     </div>
 
                     {{-- Shift Selection (Only if status is SHIFT) --}}
-                    @if($quickStatus === 'SHIFT')
+                    @if ($quickStatus === 'SHIFT')
                         <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
                             <label class="label mb-1 px-1">
                                 <span class="label-text font-medium text-xs">Pilih Shift</span>
@@ -274,13 +257,16 @@
                     @endif
 
                     {{-- Keterangan (Only for non-SHIFT) --}}
-                    @if($quickStatus !== 'SHIFT')
+                    @if ($quickStatus !== 'SHIFT')
                         <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
                             <label class="label mb-1 px-1">
                                 <span class="label-text font-medium text-xs">Keterangan Status</span>
                             </label>
-                            <textarea wire:model="quickKeterangan" class="textarea textarea-bordered w-full h-24 text-sm focus:textarea-primary" placeholder="Tulis catatan alasan di sini..."></textarea>
-                            @error('quickKeterangan') <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span> @enderror
+                            <textarea wire:model="quickKeterangan" class="textarea textarea-bordered w-full h-24 text-sm focus:textarea-primary"
+                                placeholder="Tulis catatan alasan di sini..."></textarea>
+                            @error('quickKeterangan')
+                                <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
+                            @enderror
                         </div>
                     @endif
                 </div>

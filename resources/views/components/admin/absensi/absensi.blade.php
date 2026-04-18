@@ -18,113 +18,57 @@
         </div>
     </div>
 
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4 flex flex-row items-center gap-4">
-                <div class="p-3 bg-primary/10 text-primary rounded-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm opacity-60">Total Logs</div>
-                    <div class="text-2xl font-bold">{{ $this->stats['total_logs'] }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4 flex flex-row items-center gap-4">
-                <div class="p-3 bg-success/10 text-success rounded-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm opacity-60">Tepat Waktu</div>
-                    <div class="text-2xl font-bold text-success">{{ $this->stats['hadir_tepat_waktu'] }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4 flex flex-row items-center gap-4">
-                <div class="p-3 bg-error/10 text-error rounded-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm opacity-60">Terlambat</div>
-                    <div class="text-2xl font-bold text-error">{{ $this->stats['terlambat'] }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ─── Matrix Toolbar ──────────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
-        <div class="card-body p-4">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                {{-- Left Side: Filters Group --}}
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="join shadow-xs border border-base-200">
-                        <div class="join-item btn btn-sm bg-base-200 pointer-events-none px-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="size-4 opacity-60">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                            </svg>
-                        </div>
-                        <select wire:model.live="month"
-                            class="select select-sm join-item focus:outline-none border-l border-base-200 min-w-35 font-medium">
-                            @for ($m = 1; $m <= 12; $m++)
-                                <option value="{{ sprintf('%02d', $m) }}">
-                                    {{ \Carbon\Carbon::create(null, $m, 1)->translatedFormat('F') }}
-                                </option>
-                            @endfor
-                        </select>
-                        <select wire:model.live="year"
-                            class="select select-sm join-item focus:outline-none border-l border-base-200 w-22.5 font-medium">
-                            @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
-                                <option value="{{ $y }}">{{ $y }}</option>
-                            @endfor
-                        </select>
-                    </div>
-
-                    <div class="join shadow-xs border border-base-200">
-                        <div
-                            class="join-item btn btn-sm bg-base-200 pointer-events-none px-3 text-[10px] uppercase font-bold opacity-60">
-                            Limit</div>
-                        <select wire:model.live="perPage"
-                            class="select select-sm join-item focus:outline-none border-l border-base-200 font-medium">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
-                    </div>
-                </div>
-
-                {{-- Right Side: Search --}}
-                <div class="flex items-center gap-3 w-full lg:w-auto">
-                    <div class="relative w-full lg:w-72">
-                        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari personnel..."
-                            class="input input-bordered input-sm w-full pl-9 bg-base-50 focus:bg-base-100 transition-all shadow-xs" />
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="size-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
+    <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+            <div class="join">
+                <span
+                    class="btn btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
+                <select wire:model.live="perPage" class="select select-bordered join-item w-20 rounded-end-md">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
             </div>
+
+            <div class="relative w-full sm:w-64">
+                <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
+                    class="input input-bordered w-full pl-10 pr-10 bg-base-100" />
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </span>
+                @if ($search)
+                    <button type="button" wire:click="$set('search', '')"
+                        class="absolute inset-y-0 right-0 pr-3 text-base-content/50">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                @endif
+            </div>
+
+            <div class="join w-full sm:w-auto">
+                <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
+                            {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                        </option>
+                    @endfor
+                </select>
+                <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
+                    @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
+                        <option value="{{ $y }}">{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 justify-end">
+            {{-- Optional Action Buttons for Absensi --}}
         </div>
     </div>
 
@@ -197,7 +141,7 @@
                                                 {{-- Masuk Section --}}
                                                 <div class="flex flex-col items-center">
                                                     <span
-                                                        class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_masuk === 'TELAT' ? 'text-error border-error/30 bg-error/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-[2px] leading-none mb-0.5">
+                                                        class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_masuk === 'TELAT' ? 'text-error border-error/30 bg-error/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-xs leading-none mb-0.5">
                                                         {{ $a->status_masuk }}
                                                     </span>
                                                     <span
@@ -213,7 +157,7 @@
                                                     </span>
                                                     @if ($a->jam_pulang)
                                                         <span
-                                                            class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_pulang === 'PC' ? 'text-warning border-warning/30 bg-warning/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-[2px] leading-none mt-0.5">
+                                                            class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_pulang === 'PC' ? 'text-warning border-warning/30 bg-warning/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-xs leading-none mt-0.5">
                                                             {{ $a->status_pulang }}
                                                         </span>
                                                     @else
@@ -263,15 +207,15 @@
     <div class="mt-4 flex flex-wrap gap-4 text-xs opacity-60">
         <div class="flex items-center gap-1.5">
             <div class="w-3 h-3 bg-success/20 border border-success/30 rounded"></div>
-            <span>Hadir Tepat Waktu</span>
+            <span>Hadir tepat waktu (HADIR)</span>
         </div>
         <div class="flex items-center gap-1.5">
             <div class="w-3 h-3 bg-error/20 border border-error/30 rounded"></div>
-            <span>Terlambat</span>
+            <span>Telat (TELAT)</span>
         </div>
         <div class="flex items-center gap-1.5">
             <div class="w-3 h-3 bg-base-300/50 border border-base-400/50 rounded"></div>
-            <span>Jadwal Terlewati (Tanpa Absen)</span>
+            <span>Tidak Absen (ALPHA)</span>
         </div>
     </div>
 </div>

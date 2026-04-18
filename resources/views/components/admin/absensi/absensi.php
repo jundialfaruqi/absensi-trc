@@ -5,7 +5,6 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Absensi;
 use App\Models\Personnel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -23,26 +22,6 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     {
         $this->month = Carbon::now()->format('m');
         $this->year = Carbon::now()->format('Y');
-    }
-
-    #[Computed]
-    public function stats(): array
-    {
-        $query = Absensi::whereMonth('tanggal', $this->month)
-            ->whereYear('tanggal', $this->year);
-
-        if (!Auth::user()->hasRole('super-admin')) {
-            $opdId = Auth::user()->opd()?->id;
-            $query->whereHas('personnel', function ($q) use ($opdId) {
-                $q->where('opd_id', $opdId);
-            });
-        }
-
-        return [
-            'total_logs' => $query->count(),
-            'hadir_tepat_waktu' => (clone $query)->where('status_masuk', 'HADIR')->count(),
-            'terlambat' => (clone $query)->where('status_masuk', 'TELAT')->count(),
-        ];
     }
 
     #[Computed]
