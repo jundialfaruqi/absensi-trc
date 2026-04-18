@@ -1,0 +1,7 @@
+beberapa kekurangan aplikasi
+
+1. Saya bisa mengakali absen di halaman /absensi-web dengan cara memundurkan tanggal dan jam di perangkat Saya. Seharusnya aplikasi tidak bisa absen jika tanggal dan jam di perangkat Saya tidak sesuai dengan tanggal dan jam server.
+2. Fitur untuk edit absen oleh admin belum ada, misalkan untuk merubah status absen menjadi hadir, izin, sakit, atau alpha.
+3. Fitur kantor belum ada, padahal kita butuh fitur kantor untuk membatasi absen di lokasi tertentu, radius kantor, dan lain sebagainya, saya ingin fitur kantor ini terhubung dengan personel, jadi setiap personel bisa memiliki kantor sendiri.
+4. Fitur untuk melihat detail absen di halaman /page/absensi belum ada, padahal kita butuh fitur untuk melihat detail absen di halaman /page/absensi.
+5. Saya ingin desain UI selalu konsistem dengan halaman /page/opd baik warna, font, dan lain sebagainya di halaman /page/absensi maupun pada modal dialog yang digunakan.
