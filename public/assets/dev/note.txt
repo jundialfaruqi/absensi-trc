@@ -5,3 +5,10 @@ beberapa kekurangan aplikasi
 3. Fitur kantor belum ada, padahal kita butuh fitur kantor untuk membatasi absen di lokasi tertentu, radius kantor, dan lain sebagainya, saya ingin fitur kantor ini terhubung dengan personel, jadi setiap personel bisa memiliki kantor sendiri.
 4. Fitur untuk melihat detail absen di halaman /page/absensi belum ada, padahal kita butuh fitur untuk melihat detail absen di halaman /page/absensi.
 5. Saya ingin desain UI selalu konsistem dengan halaman /page/opd baik warna, font, dan lain sebagainya di halaman /page/absensi maupun pada modal dialog yang digunakan.
+
+
+Berikan analisa kebutuhan yang saya butuhkan saat ini, dan berikan solusi terbaik untuk memenuhi kebutuhan tersebut.
+
+Fitur edit absen, biar user admin bisa edit absen personel, misalkan personel sakit, izin, atau alpha, admin bisa merubah status absen tersebut.
+
+Ini halaman admin untuk kelola absensi personel saat ini:
