@@ -1,5 +1,5 @@
-<div x-data="{ 
-    previewUrl: null, 
+<div x-data="{
+    previewUrl: null,
     showPreview: false,
     previewX: 0,
     previewY: 0,
@@ -18,15 +18,15 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
             <h1 class="text-xl font-bold">Monitoring Absensi</h1>
-            <p class="text-sm text-base-content/60 mt-1">Pantau kehadiran personel secara real-time</p>
+            <p class="text-sm text-base-content/60 mt-1">Pantau kehadiran personel</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Data Master</li>
+                <li>Overview</li>
                 <li>
                     <a href="{{ route('absensi') }}">
-                        <span class="text-base-content">Monitoring Absensi</span>
+                        <span class="text-base-content font-bold">Absensi</span>
                     </a>
                 </li>
             </ul>
@@ -163,9 +163,13 @@
                                                     <div class="absolute top-0 right-0 p-0.5 z-20">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-                                                            class="size-2 text-primary opacity-70">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                                            class="size-2 text-primary">
+                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                            <path
+                                                                d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                                                            <path
+                                                                d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+                                                            <path d="M16 5l3 3" />
                                                         </svg>
                                                     </div>
                                                 @endif
@@ -208,7 +212,8 @@
                                                                     viewBox="0 0 24 24" stroke-width="3"
                                                                     stroke="currentColor"
                                                                     class="size-3 {{ $a->is_within_radius ? 'text-success' : 'text-error' }}">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round"
                                                                         d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                                     <path stroke-linecap="round"
                                                                         stroke-linejoin="round"
@@ -272,7 +277,7 @@
                                             </div>
                                         @elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
                                             <div class="flex flex-col items-center justify-center opacity-40">
-                                                <span class="text-[9px] font-bold uppercase text-error">ALPHA</span>
+                                                <span class="text-[9px] font-bold uppercase text-error">ALFA</span>
                                             </div>
                                         @elseif ($j)
                                             <div class="flex flex-col items-center justify-center opacity-30 mt-1">
@@ -318,18 +323,20 @@
         </div>
         <div class="flex items-center gap-1.5">
             <div class="w-3 h-3 bg-base-300/50 border border-base-400/50 rounded"></div>
-            <span>Tidak Absen (ALPHA)</span>
+            <span>Tidak Absen (ALFA)</span>
         </div>
         <div class="flex items-center gap-1.5">
             <div class="w-3 h-3 bg-neutral/20 border border-neutral/30 rounded"></div>
-            <span>Sakit/Izin/Cuti/Alpha (Manual)</span>
+            <span>Sakit/Izin/Cuti/Alfa (Manual)</span>
         </div>
         <div class="flex items-center gap-4 ml-4 pl-4 border-l border-base-300">
-            <div class="flex items-center gap-1 text-primary">
+            <div class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                    stroke="currentColor" class="size-3">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                    stroke="currentColor" class="size-3 text-primary">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                    <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+                    <path d="M16 5l3 3" />
                 </svg>
                 <span class="text-[10px]">Data Diedit Admin</span>
             </div>
@@ -361,15 +368,14 @@
         <div class="modal-box shadow w-11/12 max-w-2xl p-0 overflow-hidden bg-base-100">
             <div class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center">
                 <h3 class="font-bold text-lg">
-                    Edit Absensi: <span class="text-primary">{{ $editingPersonnelName }}</span>
+                    {{ $editingPersonnelName }}
                 </h3>
                 <button type="button" class="btn btn-ghost btn-sm btn-circle"
                     onclick="document.getElementById('edit-absensi-modal').close()">✕</button>
             </div>
 
             <form wire:submit="saveEdit" class="p-6 space-y-5">
-                <div
-                    class="bg-primary/5 p-4 rounded-xl flex items-center justify-between border border-primary/10 shadow-inner">
+                <div class="bg-primary/5 p-4 flex items-center justify-between rounded-xl">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-primary/10 rounded-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -379,9 +385,9 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="text-[10px] uppercase font-black opacity-40 tracking-widest">Tanggal Monitoring
+                            <div class="text-[10px] uppercase font-black opacity-40 tracking-widest">Tanggal Absen
                             </div>
-                            <div class="font-bold text-primary">
+                            <div class="font-bold uppercase">
                                 {{ $editingTanggal ? \Carbon\Carbon::parse($editingTanggal)->translatedFormat('l, d F Y') : '' }}
                             </div>
                         </div>
@@ -466,34 +472,20 @@
                 {{-- Conditional Fields --}}
                 <div class="grid grid-cols-1 gap-4">
                     @if (in_array($statusMasuk, ['SAKIT', 'IZIN']) || in_array($statusPulang, ['SAKIT', 'IZIN']))
-                        <div class="form-control animate-in fade-in slide-in-from-top-1">
-                            <label class="label py-1"><span
-                                    class="label-text font-bold text-warning flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                    </svg>
+                        <div class="form-control">
+                            <label class="label py-1"><span class="label-text font-bold">
                                     Nomor Surat (Sakit/Izin)
                                 </span></label>
                             <input type="text" wire:model="nomorSurat" placeholder="Contoh: 123/SKP/IV/2026..."
-                                class="input input-bordered w-full border-warning/30 bg-warning/5 focus:border-warning" />
+                                class="input w-full" />
                         </div>
                     @endif
 
                     @if ($statusMasuk === 'CUTI' || $statusPulang === 'CUTI')
-                        <div class="form-control animate-in fade-in slide-in-from-top-1">
-                            <label class="label py-1"><span
-                                    class="label-text font-bold text-info flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.756.75.756h1.384c.414 0 .75-.342.75-.756 0-.23-.035-.454-.1-.664m-2.684 0a4.5 4.5 0 0 0-2.25 4.013c0 2.485 2.015 4.5 4.5 4.5s4.5-2.015 4.5-4.5a4.5 4.5 0 0 0-2.25-4.013m-6.75 12.75h1.5m10.5-3v-4.5m2.25 4.5a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                                    </svg>
-                                    Jenis Cuti
-                                </span></label>
+                        <div class="form-control">
+                            <label class="label py-1"><span class="label-text font-bold">Jenis Cuti</span></label>
                             <select wire:model="cutiId"
-                                class="select select-bordered border-info/30 bg-info/5 w-full focus:border-info">
+                                class="select select-bordered w-full bg-base-50 focus:border-primary">
                                 <option value="">Pilih Jenis Cuti</option>
                                 @foreach ($this->cutis as $c)
                                     <option value="{{ $c->id }}">{{ $c->name }}</option>
@@ -505,51 +497,32 @@
 
                 {{-- Alasan Edit --}}
                 <div class="form-control w-full">
-                    <label class="label py-1.5"><span
-                            class="label-text font-bold text-base-content/80 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2.5" stroke="currentColor" class="size-4 text-primary">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
+                    <label class="label py-1.5"><span class="label-text font-bold text-base-content/80">
                             Alasan Perubahan / Keterangan
                         </span></label>
                     <textarea wire:model="alasanEdit"
-                        class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 shadow-sm transition-all"
+                        class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 transition-all"
                         placeholder="Jelaskan alasan pengeditan data secara detail agar tercatat di log sistem..."></textarea>
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/40 italic flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="size-3">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            Alasan wajib diisi untuk riwayat audit sistem
-                        </span>
-                    </label>
                     @error('alasanEdit')
-                        <span class="text-error text-[10px] mt-1 font-semibold">{{ $message }}</span>
+                        <span class="text-error text-[10px] mt-1">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div
                     class="modal-action bg-base-200/40 p-5 -mx-6 -mb-6 border-t border-base-200 flex justify-end gap-3 rounded-b-xl">
                     @if ($isEdited)
-                        <button type="button" wire:click="resetToOriginal"
-                            class="btn btn-outline btn-error btn-sm rounded-lg mr-auto">
+                        <button type="button" wire:click="resetToOriginal" class="btn btn-error mr-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="2" stroke="currentColor" class="size-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
-                            Reset ke Original
+                            Reset
                         </button>
                     @endif
-                    <button type="button" class="btn btn-ghost btn-sm rounded-lg border border-base-300"
+                    <button type="button" class="btn btn-ghost"
                         onclick="document.getElementById('edit-absensi-modal').close()">Batal</button>
-                    <button type="submit"
-                        class="btn btn-primary btn-sm rounded-lg px-10 shadow-lg shadow-primary/20">
+                    <button type="submit" class="btn btn-secondary">
                         <span wire:loading.remove wire:target="saveEdit">Simpan Perubahan</span>
                         <span wire:loading wire:target="saveEdit" class="loading loading-spinner"></span>
                     </button>
@@ -559,16 +532,12 @@
     </dialog>
     {{-- Teleport Preview Overlay --}}
     @teleport('body')
-        <div x-show="showPreview" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-90"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-90"
-             class="fixed pointer-events-none z-[9999]"
-             :style="`left: ${previewX}px; top: ${previewY}px; transform: translate(-50%, -100%) translateY(-20px);`"
-             x-cloak>
+        <div x-show="showPreview" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-90" class="fixed pointer-events-none z-[9999]"
+            :style="`left: ${previewX}px; top: ${previewY}px; transform: translate(-50%, -100%) translateY(-20px);`"
+            x-cloak>
             <div class="bg-base-100 p-1.5 rounded-2xl shadow-2xl ring-1 ring-base-content/10">
                 <img :src="previewUrl" class="w-64 h-64 object-cover rounded-xl shadow-inner bg-base-200" />
             </div>

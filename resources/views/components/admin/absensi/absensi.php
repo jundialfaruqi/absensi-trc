@@ -95,9 +95,9 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public function editAbsensi($personnelId, $tanggal)
     {
         $this->resetEditForm();
-        
+
         $personnel = Personnel::findOrFail($personnelId);
-        
+
         // Authorization check
         if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
             return;
@@ -135,7 +135,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         ]);
 
         $personnel = Personnel::findOrFail($this->editingPersonnelId);
-        
+
         // Authorization check
         if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
             return;
@@ -172,7 +172,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
         $this->dispatch('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
-        
+
         // Re-calculate matrix
         unset($this->personnels);
     }
@@ -208,8 +208,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         }
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
-        $this->dispatch('toast', message: 'Data absensi telah dikembalikan ke kondisi awal', type: 'info');
-        
+        $this->dispatch('toast', message: 'Data absensi telah dikembalikan ke kondisi awal', type: 'success');
+
         unset($this->personnels);
     }
 
