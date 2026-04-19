@@ -47,6 +47,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public $apiSource = 'local';
     public $fetchTime;
     public bool $isTimeSynced = false;
+    public bool $isTooLateToIn = false;
 
     public function mount()
     {
@@ -201,6 +202,15 @@ new #[Layout('layouts.absensi.app')] class extends Component
             ->where('tanggal', $this->activeDate)
             ->first();
 
+        // Calculate If Too Late to Check-In (4 Hours after shift start)
+        if ($this->activeJadwal && $this->activeJadwal->shift && !$this->activeAbsensi) {
+            $startDateTime = Carbon::parse($this->activeDate . ' ' . $this->activeJadwal->shift->start_time);
+            $cutoff = $startDateTime->copy()->addHours(4);
+            $this->isTooLateToIn = $now->greaterThan($cutoff);
+        } else {
+            $this->isTooLateToIn = false;
+        }
+
         $this->step = 3;
     }
 
@@ -316,10 +326,19 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $this->message = "Absen Masuk Berhasil ($status_masuk)";
             } else {
                 if (!$this->activeAbsensi) {
-                    $this->isSuccess = false;
-                    $this->message = 'Anda belum melakukan absen masuk.';
-                    $this->step = 4;
-                    return;
+                    // Auto-ALFA logic: create check-in record as ALFA if skipped
+                    $this->activeAbsensi = Absensi::create([
+                        'personnel_id' => $this->selectedPersonnel->id,
+                        'jadwal_id' => $this->activeJadwal->id,
+                        'tanggal' => $this->activeDate,
+                        'jam_masuk' => null,
+                        'status_masuk' => 'ALFA',
+                        'kantor_id' => $lokasiResult['kantor_id'],
+                        'is_within_radius' => false,
+                        'jarak_meter' => 0,
+                        'lat_masuk' => 0,
+                        'lng_masuk' => 0,
+                    ]);
                 }
 
                 if ($this->activeAbsensi->jam_pulang) {

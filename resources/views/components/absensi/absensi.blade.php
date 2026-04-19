@@ -331,28 +331,45 @@
                     {{-- Actions --}}
                     @if ($activeJadwal->shift)
                         <div class="space-y-3 mt-6">
-                            @if (!$activeAbsensi)
+                            @if (!$activeAbsensi && !$isTooLateToIn)
+                                {{-- Mode: Normal Masuk --}}
                                 <button type="button" x-on:click="submit('in')"
+                                    wire:loading.attr="disabled"
                                     :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
-                                    class="btn btn-primary btn-lg w-full shadow-lg shadow-primary/20 flex flex-col items-center py-2 h-auto group">
-                                    <span class="text-sm font-black">ABSEN MASUK</span>
-                                    <span class="text-[10px] opacity-60 font-medium group-disabled:hidden">SIAP KIRIM
-                                        DATA</span>
-                                    <span
-                                        class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
-                                        Identitas & Lokasi...</span>
+                                    class="btn btn-primary btn-lg w-full shadow-lg shadow-primary/20 py-2 h-auto group relative flex items-center justify-center min-h-[64px]">
+                                    
+                                    <div wire:loading wire:target="submitAttendance">
+                                        <span class="loading loading-spinner loading-md"></span>
+                                    </div>
+
+                                    <div wire:loading.remove wire:target="submitAttendance" class="flex flex-col items-center">
+                                        <span class="text-sm font-black">ABSEN MASUK</span>
+                                        <span class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase">SIAP KIRIM DATA</span>
+                                        <span class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                    </div>
                                 </button>
                             @else
+                                {{-- Mode: Pulang (Normal atau Langsung Pulang karena Telat > 4 Jam) --}}
+                                @if(!$activeAbsensi && $isTooLateToIn)
+                                    <div class="alert alert-error py-2 px-3 mb-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight text-center">
+                                        ⚠️ Anda terlambat > 4 jam. Absen masuk tidak tersedia. Silahkan langsung Absen Pulang.
+                                    </div>
+                                @endif
+
                                 <button type="button" x-on:click="submit('out')"
+                                    wire:loading.attr="disabled"
                                     :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
-                                    class="btn btn-secondary btn-lg w-full shadow-lg shadow-secondary/20 flex flex-col items-center py-2 h-auto group">
-                                    <span class="text-sm font-black uppercase">Absen Pulang</span>
-                                    <span
-                                        class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan
-                                        Kerja Hari Ini</span>
-                                    <span
-                                        class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
-                                        Identitas & Lokasi...</span>
+                                    class="btn btn-secondary btn-lg w-full shadow-lg shadow-secondary/20 py-2 h-auto group relative flex items-center justify-center min-h-[64px]">
+                                    
+                                    <div wire:loading wire:target="submitAttendance">
+                                        <span class="loading loading-spinner loading-md"></span>
+                                    </div>
+
+                                    <div wire:loading.remove wire:target="submitAttendance" class="flex flex-col items-center">
+                                        <span class="text-sm font-black uppercase">Absen Pulang</span>
+                                        <span class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan Kerja Hari Ini</span>
+                                        <span class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                    </div>
                                 </button>
                             @endif
                         </div>
