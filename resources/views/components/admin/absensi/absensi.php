@@ -34,6 +34,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public $nomorSurat;
     public $cutiId;
     public $keterangan;
+    public bool $isEdited = false;
 
     public function mount(): void
     {
@@ -114,12 +115,13 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             $this->editingAbsensiId = $absensi->id;
             $this->statusMasuk = $absensi->status_masuk;
             $this->statusPulang = $absensi->status_pulang;
-            $this->jamMasuk = $absensi->jam_masuk;
-            $this->jamPulang = $absensi->jam_pulang;
+            $this->jamMasuk = $absensi->jam_masuk ? Carbon::parse($absensi->jam_masuk)->format('H:i') : null;
+            $this->jamPulang = $absensi->jam_pulang ? Carbon::parse($absensi->jam_pulang)->format('H:i') : null;
             $this->alasanEdit = $absensi->alasan_edit;
             $this->nomorSurat = $absensi->nomor_surat;
             $this->cutiId = $absensi->cuti_id;
             $this->keterangan = $absensi->keterangan;
+            $this->isEdited = !is_null($absensi->original_status_masuk);
         }
 
         $this->dispatch('open-modal', id: 'edit-absensi-modal');
@@ -139,6 +141,14 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             return;
         }
 
+        $existing = Absensi::where('personnel_id', $this->editingPersonnelId)
+            ->where('tanggal', $this->editingTanggal)
+            ->first();
+
+        // Capture original status ONLY if it's the first edit
+        $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALFA';
+        $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALFA';
+
         $absensi = Absensi::updateOrCreate(
             [
                 'personnel_id' => $this->editingPersonnelId,
@@ -155,21 +165,51 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                 'keterangan' => $this->keterangan,
                 'edited_by_user_id' => Auth::id(),
                 'edited_at' => now(),
+                'original_status_masuk' => $originalStatusMasuk,
+                'original_status_pulang' => $originalStatusPulang,
             ]
         );
-
-        // Snapshot original status if this is the first time editing
-        if ($absensi->wasRecentlyCreated || is_null($absensi->original_status_masuk)) {
-             $absensi->update([
-                 'original_status_masuk' => $absensi->getOriginal('status_masuk') ?? $this->statusMasuk,
-                 'original_status_pulang' => $absensi->getOriginal('status_pulang') ?? $this->statusPulang,
-             ]);
-        }
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
         $this->dispatch('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
         
         // Re-calculate matrix
+        unset($this->personnels);
+    }
+
+    public function resetToOriginal()
+    {
+        if (!$this->editingAbsensiId || !$this->isEdited) return;
+
+        $absensi = Absensi::findOrFail($this->editingAbsensiId);
+
+        // Authorization check
+        if (!Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
+            return;
+        }
+
+        if ($absensi->original_status_masuk === 'ALFA' && $absensi->original_status_pulang === 'ALFA') {
+            // It was originally empty, so delete the record
+            $absensi->delete();
+        } else {
+            // Restore original status and clear audit fields
+            $absensi->update([
+                'status_masuk' => $absensi->original_status_masuk,
+                'status_pulang' => $absensi->original_status_pulang,
+                'edited_by_user_id' => null,
+                'edited_at' => null,
+                'alasan_edit' => null,
+                'nomor_surat' => null,
+                'cuti_id' => null,
+                'keterangan' => null,
+                'original_status_masuk' => null, // Reset the "edited" flag
+                'original_status_pulang' => null,
+            ]);
+        }
+
+        $this->dispatch('close-modal', id: 'edit-absensi-modal');
+        $this->dispatch('toast', message: 'Data absensi telah dikembalikan ke kondisi awal', type: 'info');
+        
         unset($this->personnels);
     }
 
@@ -187,6 +227,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         $this->nomorSurat = '';
         $this->cutiId = null;
         $this->keterangan = '';
+        $this->isEdited = false;
     }
 
     public function updatedSearch(): void

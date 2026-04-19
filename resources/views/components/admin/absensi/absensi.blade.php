@@ -431,8 +431,18 @@
                 </div>
 
                 <div class="modal-action bg-base-200/40 p-5 -mx-6 -mb-6 border-t border-base-200 flex justify-end gap-3 rounded-b-xl">
-                    <button type="button" class="btn btn-ghost rounded-lg border border-base-300" onclick="document.getElementById('edit-absensi-modal').close()">Batal</button>
-                    <button type="submit" class="btn btn-primary rounded-lg px-10 shadow-lg shadow-primary/20">
+                    @if($isEdited)
+                        <button type="button" 
+                            wire:click="resetToOriginal" 
+                            class="btn btn-outline btn-error btn-sm rounded-lg mr-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            Reset ke Original
+                        </button>
+                    @endif
+                    <button type="button" class="btn btn-ghost btn-sm rounded-lg border border-base-300" onclick="document.getElementById('edit-absensi-modal').close()">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-lg px-10 shadow-lg shadow-primary/20">
                         <span wire:loading.remove wire:target="saveEdit">Simpan Perubahan</span>
                         <span wire:loading wire:target="saveEdit" class="loading loading-spinner"></span>
                     </button>
