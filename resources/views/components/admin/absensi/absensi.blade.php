@@ -91,7 +91,7 @@
         <div class="card-body p-0">
             <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-400px)]">
                 <table class="table table-sm table-zebra w-full border-separate border-spacing-0">
-                    <thead class="sticky top-0 z-20 bg-base-100">
+                    <thead class="sticky top-0 z-110 bg-base-100">
                         <tr>
                             <th
                                 class="sticky left-0 z-30 bg-base-100 border-b border-r border-base-200 min-w-50 text-center">
@@ -113,7 +113,7 @@
                         @forelse ($this->personnels as $p)
                             <tr class="group">
                                 <td
-                                    class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-2 group-hover:bg-base-200 transition-colors">
+                                    class="sticky left-0 z-120 bg-base-100 border-r border-base-200 p-2 group-hover:bg-base-200 transition-colors">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="avatar placeholder">
                                             @if ($p->foto)
@@ -155,15 +155,15 @@
                                         }
                                     @endphp
                                     <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
-                                        class="text-center border-r border-base-200 p-0 min-h-16 h-16 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all hover:z-[100] relative {{ $cellClass }} {{ $isToday && !$a ? 'bg-primary/5' : '' }}">
+                                        class="text-center border-base-200 p-2 min-h-16 h-16 cursor-pointer hover:bg-base-100 hover:ring-primary/30 transition-all hover:z-100 relative {{ $cellClass }} {{ $isToday && !$a ? 'bg-primary/5' : '' }}">
                                         @if ($a)
                                             <div class="flex flex-col h-full relative">
                                                 {{-- Edited indicator --}}
                                                 @if ($a->edited_at)
-                                                    <div class="absolute top-0 right-0 p-0.5 z-20">
+                                                    <div class="absolute -top-1 -right-1 p-0 z-20">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-                                                            class="size-2 text-primary">
+                                                            class="size-3 text-primary">
                                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                             <path
                                                                 d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
@@ -175,8 +175,7 @@
                                                 @endif
 
                                                 {{-- Top Half: Masuk --}}
-                                                <div
-                                                    class="flex-1 flex flex-col items-center justify-center border-b border-base-200/50 py-1">
+                                                <div class="flex-1 flex flex-col items-center justify-center py-2">
                                                     @if ($a->foto_masuk)
                                                         <div class="avatar mb-1 group/photo relative z-10"
                                                             x-on:mouseenter="triggerPreview('{{ asset('storage/' . $a->foto_masuk) }}', $event)"
@@ -226,7 +225,7 @@
                                                 </div>
 
                                                 {{-- Bottom Half: Pulang --}}
-                                                <div class="flex-1 flex flex-col items-center justify-center py-1">
+                                                <div class="flex-1 flex flex-col items-center justify-center py-2">
                                                     @if ($a->foto_pulang)
                                                         <div class="avatar mb-1 group/photo relative z-10"
                                                             x-on:mouseenter="triggerPreview('{{ asset('storage/' . $a->foto_pulang) }}', $event)"
@@ -238,7 +237,8 @@
                                                             </div>
                                                         </div>
                                                     @endif
-                                                    <span class="text-[12px] font-medium opacity-60">
+                                                    <span
+                                                        class="text-[12px] font-bold {{ $a->status_pulang === 'PC' ? 'text-error' : 'text-success' }}">
                                                         {{ $a->jam_pulang ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '--:--' }}
                                                     </span>
                                                     @if ($a->jam_pulang || in_array($a->status_pulang, ['SAKIT', 'IZIN', 'ALFA', 'CUTI', 'DINAS']))
@@ -329,35 +329,33 @@
             <div class="w-3 h-3 bg-neutral/20 border border-neutral/30 rounded"></div>
             <span>Sakit/Izin/Cuti/Alfa (Manual)</span>
         </div>
-        <div class="flex items-center gap-4 ml-4 pl-4 border-l border-base-300">
-            <div class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                    stroke="currentColor" class="size-3 text-primary">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                    <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
-                    <path d="M16 5l3 3" />
-                </svg>
-                <span class="text-[10px]">Data Diedit Admin</span>
-            </div>
-            <div class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
-                    stroke="currentColor" class="size-3 text-success">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                </svg>
-                <span class="text-[10px]">Dalam Radius</span>
-            </div>
-            <div class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
-                    stroke="currentColor" class="size-3 text-error">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                </svg>
-                <span class="text-[10px]">Luar Radius</span>
-            </div>
+        <div class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor" class="size-3 text-primary">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+                <path d="M16 5l3 3" />
+            </svg>
+            <span>Data Diedit Admin</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                stroke="currentColor" class="size-3 text-success">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+            <span>Dalam Radius</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                stroke="currentColor" class="size-3 text-error">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+            <span>Luar Radius</span>
         </div>
     </div>
 
@@ -502,7 +500,7 @@
                         </span></label>
                     <textarea wire:model="alasanEdit"
                         class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 transition-all"
-                        placeholder="Jelaskan alasan pengeditan data secara detail agar tercatat di log sistem..."></textarea>
+                        placeholder="Jelaskan alasan pengeditan data secara detail untuk justifikasi perubahan data"></textarea>
                     @error('alasanEdit')
                         <span class="text-error text-[10px] mt-1">{{ $message }}</span>
                     @enderror
