@@ -60,3 +60,18 @@ Route::group([
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\JadwalTemplateExport($month, $year, $opdId), "template_jadwal_{$year}_{$month}.xlsx");
     })->name('jadwal.download-template');
 });
+
+// --- Personnel Portal Routes ---
+Route::livewire('/personnel/login', 'personnel::login')
+    ->name('personnel.login');
+
+Route::group([
+    'middleware' => ['auth:personnel'],
+    'prefix' => '/personnel',
+], function () {
+    Route::livewire('/dashboard', 'personnel::dashboard')
+        ->name('personnel.dashboard');
+
+    Route::livewire('/profile', 'personnel::profile')
+        ->name('personnel.profile');
+});
