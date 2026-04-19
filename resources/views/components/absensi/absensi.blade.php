@@ -14,37 +14,38 @@
             <p class="text-base-content/60 font-medium">Satukan Barisan, Tertib Kehadiran</p>
             
             {{-- Network Time Status --}}
-            <div class="mt-4 flex flex-col items-center gap-1">
-                <div x-data="{ 
-                    time: '', 
-                    date: '',
-                    offset: {{ $serverTimestamp }} - Date.now(),
-                    update() {
-                        const now = new Date(Date.now() + this.offset);
-                        this.time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                        this.date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-                    }
-                }" x-init="update(); setInterval(() => update(), 1000)" class="flex flex-col items-center">
+            <div class="mt-4 flex flex-col items-center gap-1" x-data="{ 
+                time: '', 
+                date: '',
+                offset: {{ $serverTimestamp }} - Date.now(),
+                update() {
+                    const now = new Date(Date.now() + this.offset);
+                    this.time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    this.date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+                }
+            }" x-init="update(); setInterval(() => update(), 1000)">
+                <div wire:ignore class="flex flex-col items-center">
                     <div class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1" x-text="date">Memuat Tanggal...</div>
                     <div class="text-4xl font-black tracking-widest text-primary tabular-nums" x-text="time">00:00:00</div>
-                    <div class="flex items-center gap-1.5 mt-1">
-                        @if($apiSource !== 'local')
-                            <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-success bg-success/10 px-2 py-0.5 rounded-full border border-success/20">
-                                <span class="relative flex h-1.5 w-1.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
-                                </span>
-                                Network Time Synced ({{ $apiSource }})
-                            </div>
-                        @else
-                            <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 12 24c4.408 0 8.411-2.384 10.606-6.044M11.277 5.889A11.959 11.959 0 0 1 12 2.25c4.408 0 8.411 2.384 10.606 6.044" />
-                                </svg>
-                                Local Server Time
-                            </div>
-                        @endif
-                    </div>
+                </div>
+                
+                <div class="flex items-center gap-1.5 mt-1">
+                    @if($apiSource !== 'local')
+                        <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-success bg-success/10 px-2 py-0.5 rounded-full border border-success/20">
+                            <span class="relative flex h-1.5 w-1.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
+                            </span>
+                            Network Time Synced ({{ $apiSource }})
+                        </div>
+                    @else
+                        <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 12 24c4.408 0 8.411-2.384 10.606-6.044M11.277 5.889A11.959 11.959 0 0 1 12 2.25c4.408 0 8.411 2.384 10.606 6.044" />
+                            </svg>
+                            Local Server Time
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -185,9 +186,13 @@
                         </button>
                     </div>
 
-                    <button wire:click="verifyPin"
-                        class="btn btn-primary btn-lg w-full text-lg font-black uppercase shadow-lg shadow-primary/20"
-                        @disabled(strlen($pin) < 4)>Lanjut</button>
+                    <button wire:click="verifyPin" wire:loading.attr="disabled"
+                        class="btn btn-primary btn-lg w-full text-lg font-black uppercase shadow-lg shadow-primary/20 flex items-center justify-center gap-3"
+                        @disabled(strlen($pin) < 4)>
+                        <span wire:loading.remove wire:target="verifyPin">Lanjut</span>
+                        <span wire:loading wire:target="verifyPin" class="loading loading-spinner"></span>
+                        <span wire:loading wire:target="verifyPin">Memproses...</span>
+                    </button>
                 </div>
             </div>
         @endif
@@ -414,7 +419,7 @@
                             class="grid grid-cols-2 gap-4 w-full bg-base-200 p-4 rounded-2xl mb-8 border border-base-300 shadow-inner">
                             <div class="text-left">
                                 <div class="text-[10px] uppercase opacity-50 font-bold">Waktu</div>
-                                <div class="font-bold">{{ $lastAbsensi->jam_masuk ?? $lastAbsensi->jam_pulang }}</div>
+                                <div class="font-bold">{{ $lastAbsensi->jam_pulang ?? $lastAbsensi->jam_masuk }}</div>
                             </div>
                             <div class="text-left">
                                 <div class="text-[10px] uppercase opacity-50 font-bold">Tanggal</div>

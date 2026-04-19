@@ -54,8 +54,19 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $this->fetchServerTime();
     }
 
-    private function fetchServerTime()
+    public function fetchServerTime($force = false)
     {
+        // Guard: Skip if already synced recently (within 30 seconds) unless forced
+        if (!$force && $this->isTimeSynced && $this->fetchTime) {
+            try {
+                if (Carbon::parse($this->fetchTime)->diffInSeconds(Carbon::now()) < 30) {
+                    return;
+                }
+            } catch (\Exception $e) {
+                // Fallback to sync if date parsing fails
+            }
+        }
+
         try {
             // Priority 1: timeapi.io (User's preferred API)
             $response = Http::timeout(6)->get('https://timeapi.io/api/time/current/zone?timeZone=Asia/Jakarta');
@@ -98,7 +109,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
             return Carbon::now('Asia/Jakarta');
         }
 
-        $elapsedSeconds = Carbon::now()->diffInSeconds($this->fetchTime);
+        $elapsedSeconds = (int) Carbon::now()->diffInSeconds($this->fetchTime, false);
         return Carbon::parse($this->serverTime)->addSeconds($elapsedSeconds);
     }
 
@@ -128,6 +139,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
         if (!$this->selectedPersonnel) return;
 
         if (Hash::check($this->pin, $this->selectedPersonnel->pin)) {
+            $this->fetchServerTime(true);
             $this->prepareActionStep();
         } else {
             $this->addError('pin', 'PIN yang Anda masukkan salah.');
@@ -209,6 +221,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function submitAttendance(string $type, $clientLat = null, $clientLng = null, $clientImage = null)
     {
+        // Force refresh network time right before saving to prevent stale data
+        $this->fetchServerTime(true);
+
         // Update state with data from client
         if ($clientLat) $this->lat = $clientLat;
         if ($clientLng) $this->lng = $clientLng;
