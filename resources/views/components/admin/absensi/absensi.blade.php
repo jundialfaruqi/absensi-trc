@@ -154,6 +154,13 @@
 
                                                 {{-- Masuk Section --}}
                                                 <div class="flex flex-col items-center">
+                                                    @if($a->foto_masuk)
+                                                        <div class="avatar mb-1 group/photo relative z-10">
+                                                            <div class="w-6 h-6 rounded-full ring-1 ring-primary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[4] hover:z-50 hover:shadow-2xl">
+                                                                <img src="{{ asset('storage/' . $a->foto_masuk) }}" class="object-cover bg-base-200" loading="lazy" />
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                     <div class="flex items-center gap-1">
                                                         <span
                                                             class="text-[7px] font-black uppercase tracking-tighter 
@@ -187,6 +194,13 @@
 
                                                 {{-- Pulang Section --}}
                                                 <div class="flex flex-col items-center">
+                                                    @if($a->foto_pulang)
+                                                        <div class="avatar mb-1 group/photo relative z-10">
+                                                            <div class="w-6 h-6 rounded-full ring-1 ring-secondary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[4] hover:z-50 hover:shadow-2xl">
+                                                                <img src="{{ asset('storage/' . $a->foto_pulang) }}" class="object-cover bg-base-200" loading="lazy" />
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                     <span class="text-[10px] font-medium opacity-60">
                                                         {{ $a->jam_pulang ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '--:--' }}
                                                     </span>
