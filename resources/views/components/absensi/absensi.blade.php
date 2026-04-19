@@ -1,13 +1,117 @@
-<div class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
-    <div class="max-w-md w-full">
+<div class="min-h-screen bg-[#0a192f] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+    {{-- ─── Background Decoration Layers ────────────────────────────────────── --}}
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {{-- Base Gradient --}}
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#1a3a8a_0%,#0a192f_70%)]"></div>
+        
+        {{-- Digital Plexus Dots & Lines (Corner Decorations) --}}
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-25">
+            {{-- Top Left cluster (Enhanced) --}}
+            <svg class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] text-blue-400 animate-float" viewBox="0 0 100 100">
+                <circle cx="10" cy="10" r="1" fill="currentColor"/>
+                <circle cx="30" cy="20" r="1.2" fill="currentColor"/>
+                <circle cx="15" cy="40" r="1" fill="currentColor"/>
+                <circle cx="50" cy="15" r="1.5" fill="currentColor"/>
+                <circle cx="45" cy="45" r="1" fill="currentColor"/>
+                <circle cx="70" cy="10" r="1" fill="currentColor"/>
+                <circle cx="25" cy="65" r="1.2" fill="currentColor"/>
+                <circle cx="55" cy="35" r="1" fill="currentColor"/>
+                <circle cx="20" cy="15" r="0.8" fill="currentColor"/>
+                <circle cx="40" cy="10" r="0.8" fill="currentColor"/>
+                <circle cx="65" cy="40" r="1" fill="currentColor"/>
+                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="10" y1="10" x2="15" y2="40" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="15" y1="40" x2="30" y2="20" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="15" y1="40" x2="25" y2="65" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="30" y1="20" x2="45" y2="45" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="50" y1="15" x2="70" y2="10" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="45" y1="45" x2="50" y2="15" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="55" y1="35" x2="45" y2="45" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="55" y1="35" x2="70" y2="10" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="20" y1="15" x2="10" y2="10" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="20" y1="15" x2="30" y2="20" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="40" y1="10" x2="20" y2="15" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="40" y1="10" x2="50" y2="15" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="65" cy1="40" x2="55" y2="35" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="65" cy1="40" x2="70" y2="10" stroke="currentColor" stroke-width="0.3"/>
+            </svg>
+
+            {{-- Bottom Right cluster (Enhanced) --}}
+            <svg class="absolute bottom-[-15%] right-[-15%] w-[700px] h-[700px] text-blue-400 opacity-80 rotate-12 animate-float-slow" viewBox="0 0 100 100">
+                <circle cx="80" cy="80" r="1" fill="currentColor"/>
+                <circle cx="60" cy="70" r="1.5" fill="currentColor"/>
+                <circle cx="90" cy="50" r="1" fill="currentColor"/>
+                <circle cx="40" cy="90" r="1.2" fill="currentColor"/>
+                <circle cx="30" cy="60" r="1.2" fill="currentColor"/>
+                <circle cx="50" cy="40" r="1" fill="currentColor"/>
+                <circle cx="75" cy="55" r="1" fill="currentColor"/>
+                <circle cx="45" cy="75" r="1" fill="currentColor"/>
+                <circle cx="20" cy="80" r="1" fill="currentColor"/>
+                <circle cx="10" cy="50" r="0.8" fill="currentColor"/>
+                <line x1="80" y1="80" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="60" y1="70" x2="90" y2="50" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="60" y1="70" x2="40" y2="90" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="40" y1="90" x2="30" y2="60" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="30" y1="60" x2="50" y2="40" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="50" y1="40" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="75" y1="55" x2="90" y2="50" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="75" y1="55" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="45" y1="75" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="45" y1="75" x2="40" y2="90" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="20" y1="80" x2="30" y2="60" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="20" y1="80" x2="40" y2="90" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="10" y1="50" x2="20" y2="80" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="10" y1="50" x2="30" y2="60" stroke="currentColor" stroke-width="0.3"/>
+            </svg>
+
+            {{-- Mid Right Cluster (New) --}}
+            <svg class="absolute top-[30%] right-[-5%] w-[400px] h-[400px] text-blue-400 opacity-60 animate-pulse" viewBox="0 0 100 100">
+                <circle cx="90" cy="10" r="1" fill="currentColor"/>
+                <circle cx="70" cy="30" r="1.2" fill="currentColor"/>
+                <circle cx="85" cy="50" r="1" fill="currentColor"/>
+                <circle cx="60" cy="15" r="0.8" fill="currentColor"/>
+                <line x1="90" y1="10" x2="70" y2="30" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="70" y1="30" x2="85" y2="50" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="60" y1="15" x2="70" y2="30" stroke="currentColor" stroke-width="0.3"/>
+                <line x1="60" y1="15" x2="90" y2="10" stroke="currentColor" stroke-width="0.3"/>
+            </svg>
+        </div>
+
+        <style>
+            @keyframes float {
+                0%, 100% { transform: translate(0, 0) rotate(0deg); }
+                50% { transform: translate(10px, 15px) rotate(2deg); }
+            }
+            @keyframes float-slow {
+                0%, 100% { transform: translate(0, 0) rotate(12deg); }
+                50% { transform: translate(-15px, -10px) rotate(15deg); }
+            }
+            .animate-float { animation: float 15s ease-in-out infinite; }
+            .animate-float-slow { animation: float-slow 20s ease-in-out infinite; }
+        </style>
+
+        {{-- Neon Tech Lines (Red/Orange Glow) --}}
+        <div class="absolute top-20 right-[-5%] w-64 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-40 blur-xs"></div>
+        <div class="absolute bottom-40 left-[-5%] w-48 h-px bg-gradient-to-r from-transparent via-red-400 to-transparent opacity-30 blur-xs rotate-45"></div>
+        
+        {{-- Pulse Glow for Red Lines --}}
+        <div class="absolute top-1/4 right-10 w-2 h-2 bg-red-500 rounded-full blur-xs animate-pulse"></div>
+        <div class="absolute bottom-1/3 left-10 w-1.5 h-1.5 bg-red-400 rounded-full blur-xs animate-pulse delay-700"></div>
+
+        {{-- Light Streaks --}}
+        <div class="absolute top-[10%] left-[20%] w-[60%] h-[20%] bg-blue-500/10 blur-[100px] rounded-full"></div>
+    </div>
+
+    <div class="max-w-md w-full relative z-10">
         {{-- ─── Logo & Header ──────────────────────────────────────────────── --}}
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center p-2 rounded-full">
                 <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
                     class="h-20 w-20 sm:h-20 sm:w-20 object-contain" />
             </div>
-            <h1 class="text-3xl font-black tracking-tight text-base-content uppercase">Absensi TRC</h1>
-            <p class="text-base-content/60 font-medium">Satukan Barisan, Tertib Kehadiran</p>
+            <h1 class="text-3xl font-black tracking-tight text-white uppercase drop-shadow-md">Absensi TRC</h1>
+            <p class="text-blue-100/60 font-medium tracking-wide">Satukan Barisan, Tertib Kehadiran</p>
 
             {{-- Network Time Status --}}
             <div class="mt-4 flex flex-col items-center gap-1" x-data="{
@@ -22,9 +126,9 @@
             }" x-init="update();
             setInterval(() => update(), 1000)">
                 <div wire:ignore class="flex flex-col items-center">
-                    <div class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1" x-text="date">Memuat
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 opacity-60 mb-1" x-text="date">Memuat
                         Tanggal...</div>
-                    <div class="text-4xl font-black tracking-widest text-primary tabular-nums" x-text="time">00:00:00
+                    <div class="text-4xl font-black tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tabular-nums" x-text="time">00:00:00
                     </div>
                 </div>
 
@@ -92,16 +196,16 @@
                 </div>
             </div>
         @elseif ($step === 1)
-            <div class="card bg-base-100 shadow-xl border border-base-300">
+            <div class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in-95">
                 <div class="card-body">
-                    <h2 class="card-title justify-center mb-4">Cari Nama Anda</h2>
+                    <h2 class="card-title justify-center mb-4 text-white uppercase tracking-widest text-sm font-bold opacity-80">Cari Nama Anda</h2>
                     <div class="relative mb-6">
                         <input type="text" wire:model.live.debounce.300ms="search"
                             placeholder="Ketik nama di sini..."
-                            class="input input-bordered input-lg w-full pl-12 focus:border-primary shadow-inner"
+                            class="input input-lg w-full pl-12 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-blue-400 focus:bg-white/10 transition-all rounded-2xl"
                             autofocus />
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="size-6 absolute left-4 top-1/2 -translate-y-1/2 opacity-30">
+                            stroke="currentColor" class="size-6 absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                         </svg>
@@ -110,11 +214,11 @@
                     <div class="space-y-2">
                         @foreach ($this->personnels() as $p)
                             <button wire:click="selectPersonnel({{ $p->id }})"
-                                class="btn btn-outline btn-lg w-full justify-between h-auto py-4 group hover:bg-primary hover:text-primary-content transition-all border-base-300">
-                                <div class="flex items-center gap-4">
+                                class="btn btn-ghost btn-lg w-full justify-between h-auto py-4 group hover:bg-white/10 hover:border-white/20 transition-all border-white/5 rounded-2xl bg-white/5">
+                                <div class="flex items-center gap-4 text-white">
                                     <div class="avatar {{ !$p->foto ? 'placeholder' : '' }}">
                                         <div
-                                            class="bg-primary/10 text-primary group-hover:bg-white/20 group-hover:text-white w-10 rounded-full overflow-hidden">
+                                            class="bg-blue-500/20 text-blue-200 group-hover:bg-blue-500/40 w-10 rounded-full overflow-hidden border border-white/10">
                                             @if ($p->foto)
                                                 <img src="{{ asset('storage/' . $p->foto) }}" class="object-cover" />
                                             @else
@@ -144,12 +248,12 @@
 
         {{-- ─── Step 2: PIN Input ─────────────────────────────────────────── --}}
         @if ($step === 2)
-            <div class="card bg-base-100 shadow-xl border border-base-300 animate-in fade-in slide-in-from-bottom-4">
+            <div class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in slide-in-from-bottom-4">
                 <div class="card-body">
                     <div class="text-center mb-6">
                         <div class="avatar mb-4 {{ !$selectedPersonnel->foto ? 'placeholder' : '' }}">
                             <div
-                                class="bg-primary/10 text-primary w-20 rounded-full border-4 border-white shadow-md overflow-hidden">
+                                class="bg-blue-500/20 text-blue-200 w-20 rounded-full border-4 border-white/10 shadow-xl overflow-hidden">
                                 @if ($selectedPersonnel->foto)
                                     <img src="{{ asset('storage/' . $selectedPersonnel->foto) }}" class="object-cover"
                                         alt="Foto Personnel" />
@@ -159,14 +263,14 @@
                                 @endif
                             </div>
                         </div>
-                        <h2 class="text-xl font-bold uppercase truncate px-4">{{ $selectedPersonnel->name }}</h2>
-                        <p class="text-xs opacity-50">Masukkan PIN Keamanan</p>
+                        <h2 class="text-xl font-bold uppercase truncate px-4 text-white drop-shadow-sm">{{ $selectedPersonnel->name }}</h2>
+                        <p class="text-xs text-blue-200/50 uppercase tracking-widest font-bold">Masukkan PIN Keamanan</p>
                     </div>
 
                     <div class="flex justify-center gap-4 mb-8">
                         @for ($i = 0; $i < 4; $i++)
                             <div
-                                class="w-12 h-16 rounded-xl border-2 {{ strlen($pin) > $i ? 'border-primary bg-primary/5' : 'border-base-300' }} flex items-center justify-center text-3xl font-bold transition-all shadow-sm">
+                                class="w-12 h-16 rounded-xl border-2 {{ strlen($pin) > $i ? 'border-primary bg-primary/20 shadow-[0_0_15px_rgba(var(--color-primary),0.3)]' : 'border-white/10 bg-white/5' }} flex items-center justify-center text-3xl font-bold transition-all text-white">
                                 {{ strlen($pin) > $i ? '●' : '' }}
                             </div>
                         @endfor
@@ -183,23 +287,23 @@
                         </div>
                     @enderror
 
-                    <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="grid grid-cols-3 gap-3 mb-6">
                         @foreach ([1, 2, 3, 4, 5, 6, 7, 8, 9] as $num)
                             <button type="button" wire:click="appendPin({{ $num }})"
-                                class="btn btn-ghost bg-base-200 btn-lg h-16 text-xl font-bold hover:bg-primary hover:text-primary-content active:scale-95 transition-all">{{ $num }}</button>
+                                class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-xl font-black text-white hover:bg-white/10 hover:border-white/20 active:scale-95 transition-all rounded-2xl">{{ $num }}</button>
                         @endforeach
                         <button type="button" wire:click="clearPin"
-                            class="btn btn-ghost bg-base-200 btn-lg h-16 text-error active:scale-95">
+                            class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-2xl">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor" class="size-6">
+                                stroke-width="2.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                             </svg>
                         </button>
                         <button type="button" wire:click="appendPin(0)"
-                            class="btn btn-ghost bg-base-200 btn-lg h-16 text-xl font-bold active:scale-95 transition-all">0</button>
-                        <button type="button" wire:click="resetForm" class="btn btn-ghost bg-base-200 btn-lg h-16">
+                            class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-xl font-black text-white hover:bg-white/10 rounded-2xl">0</button>
+                        <button type="button" wire:click="resetForm" class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-blue-400 hover:text-blue-500 rounded-2xl">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor" class="size-6">
+                                stroke-width="2.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                             </svg>
@@ -221,8 +325,8 @@
         @if ($step === 3)
             <div wire:key="step-3-verification-{{ $selectedPersonnel->id }}" x-data="absensiVerification()"
                 x-init="initVerification('{{ $selectedPersonnel->foto ? asset('storage/' . $selectedPersonnel->foto) : '' }}')"
-                class="card bg-base-100 shadow-xl border border-base-300 animate-in zoom-in-95">
-                <div class="card-body p-4 sm:p-6">
+                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in zoom-in-95">
+                <div class="card-body p-4 sm:p-6 text-white">
                     <div class="text-center mb-4">
                         <h2 class="text-lg font-bold uppercase">{{ $selectedPersonnel->name }}</h2>
                         <div class="flex items-center justify-center gap-2 mt-1">
@@ -240,7 +344,7 @@
 
                     {{-- Camera & Detection View --}}
                     <div
-                        class="relative aspect-square w-full max-w-70 mx-auto rounded-3xl overflow-hidden bg-black shadow-2xl border-4 border-base-200 group">
+                        class="relative aspect-square w-full max-w-70 mx-auto rounded-3xl overflow-hidden bg-black shadow-2xl border-4 border-white/10 group">
                         <video x-ref="video" autoplay muted playsinline class="w-full h-full object-cover"></video>
                         <canvas x-ref="overlay" class="absolute inset-0 w-full h-full"></canvas>
 
@@ -276,16 +380,16 @@
                                             d="m4.5 12.75 6 6 9-13.5" />
                                     </svg>
                                 </div>
-                                <div class="text-[10px] font-black uppercase tracking-widest">Wajah Terverifikasi</div>
+                                <div class="text-[10px] font-black uppercase tracking-widest text-white shadow-sm">Wajah Terverifikasi</div>
                             </div>
                         </template>
                     </div>
 
                     {{-- Status Indicators --}}
                     <div class="grid grid-cols-2 gap-2 mt-4">
-                        <div :class="gpsStatus === 'OK' ? 'bg-success/5 border-success/20' : 'bg-base-200 border-base-300'"
-                            class="p-2 rounded-xl border flex items-center gap-2 transition-all">
-                            <div :class="gpsStatus === 'OK' ? 'text-success' : 'text-base-content/30'">
+                        <div :class="gpsStatus === 'OK' ? 'bg-success/10 border-success/30 text-success' : 'bg-white/5 border-white/10 text-white/40'"
+                            class="p-2 rounded-xl border flex items-center gap-2 transition-all shadow-sm">
+                            <div :class="gpsStatus === 'OK' ? 'text-success' : 'text-white/20'">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="2" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -295,59 +399,47 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Lokasi
-                                </div>
+                                <div class="text-[8px] font-black uppercase opacity-60 leading-none mb-0.5">Lokasi</div>
                                 <div class="text-[10px] font-bold" x-text="gpsMessage">Mencari...</div>
                             </div>
                         </div>
 
-                        <div :class="isMatched ? 'bg-success/5 border-success/20' : 'bg-base-200 border-base-300'"
-                            class="p-2 rounded-xl border flex items-center gap-2 transition-all">
-                            <div :class="isMatched ? 'text-success' : 'text-base-content/30'">
+                        <div :class="isMatched ? 'bg-success/10 border-success/30 text-success' : 'bg-white/5 border-white/10 text-white/40'"
+                            class="p-2 rounded-xl border flex items-center gap-2 transition-all shadow-sm">
+                            <div :class="isMatched ? 'text-success' : 'text-white/20'">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="2" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M15.191 6.062h.008v.008h-.008V6.062ZM18 8.812h.008v.008H18V8.812ZM15.191 11.562h.008v.008h-.008v-.008ZM18 14.312h.008v.008H18v-.008ZM21 17.062h.008v.008H21v-.008ZM12.181 8.68c.341-1.107 1.467-1.875 2.65-1.875 1.157 0 2.1 1.607 1.969 2.45-.12.772-.646 1.393-1.307 1.816-.656.422-1.202.911-1.377 1.513l-.111.452m-1.146-5.303-.01.013m2.706 3.103c.19.116.446.126.646.017a1.322 1.322 0 0 0 .512-.575 1.31 1.31 0 0 0 .08-.611c-.027-.317-.184-.504-.39-.554a.705.705 0 0 0-.662.131.6.6 0 0 0-.186.418.604.604 0 0 0 0 .15l.019.014c.032.022.03.024.03.024a.5.5 0 0 1-.038-.027ZM11.182 18H9.122a2 2 0 0 1-1.928-1.464l-1.071-3.75a2 2 0 0 1 .728-2.22l3.07-2.1c.176-.121.377-.183.583-.183h.004c.158 0 .313.036.452.106l1.652.825" />
                                 </svg>
-                            </div>
-                            <div>
-                                <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Biometrik
-                                </div>
-                                <div class="text-[10px] font-bold" x-text="faceMessage">Memindai...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Info Lokasi Kantor --}}
+                       {{-- Info Lokasi Kantor --}}
                     @if (!empty($infoLokasi))
                         <div class="mt-4 animate-in fade-in slide-in-from-top-2">
                             @if (is_null($infoLokasi['is_within_radius']))
-                                {{-- Tidak ada kantor terhubung, tidak perlu tampilkan info --}}
+                                {{-- Tidak ada kantor terhubung --}}
                             @elseif($infoLokasi['boleh'] && $infoLokasi['is_within_radius'])
                                 <div
-                                    class="alert alert-success py-2 px-3 border-none bg-success/10 text-success text-[10px] font-bold uppercase tracking-tight">
+                                    class="alert py-2 px-3 border-none bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-tight backdrop-blur-md border border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.1)]">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }}
-                                        (±{{ $infoLokasi['jarak_meter'] }}m)</span>
+                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }} (±{{ $infoLokasi['jarak_meter'] }}m)</span>
                                 </div>
                             @elseif($infoLokasi['boleh'] && !$infoLokasi['is_within_radius'])
                                 <div
-                                    class="alert alert-warning py-2 px-3 border-none bg-warning/10 text-warning text-[10px] font-bold uppercase tracking-tight">
+                                    class="alert py-2 px-3 border-none bg-amber-500/10 text-amber-400 text-[10px] font-bold uppercase tracking-tight backdrop-blur-md border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
-                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }}
-                                        ({{ $infoLokasi['jarak_meter'] }}m). Absensi diperbolehkan.</span>
+                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }} ({{ $infoLokasi['jarak_meter'] }}m). Aktif.</span>
                                 </div>
                             @else
                                 <div
-                                    class="alert alert-error py-2 px-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight leading-tight">
+                                    class="alert py-2 px-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight leading-tight backdrop-blur-md border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -366,7 +458,7 @@
                                 {{-- Mode: Normal Masuk --}}
                                 <button type="button" x-on:click="submit('in')" wire:loading.attr="disabled"
                                     :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
-                                    class="btn btn-primary btn-lg w-full shadow-lg shadow-primary/20 py-2 h-auto group relative flex items-center justify-center min-h-[64px]">
+                                    class="btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 border-none btn-lg w-full shadow-[0_0_20px_rgba(37,99,235,0.3)] py-2 h-auto group relative flex items-center justify-center min-h-[64px] text-white rounded-2xl">
 
                                     <div wire:loading wire:target="submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
@@ -374,29 +466,22 @@
 
                                     <div wire:loading.remove wire:target="submitAttendance"
                                         class="flex flex-col items-center">
-                                        <span class="text-sm font-black">ABSEN MASUK</span>
-                                        <span
-                                            class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase">SIAP
-                                            KIRIM DATA</span>
-                                        <span
-                                            class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
-                                            Identitas & Lokasi...</span>
+                                        <span class="text-sm font-black tracking-widest drop-shadow-md">ABSEN MASUK</span>
+                                        <span class="text-[10px] opacity-70 font-medium group-disabled:hidden uppercase tracking-tighter">SIAP KIRIM DATA</span>
+                                        <span class="text-[10px] opacity-50 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
                                     </div>
                                 </button>
                             @else
-                                {{-- Mode: Pulang (Normal atau Langsung Pulang karena Telat > 4 Jam) --}}
+                                {{-- Mode: Pulang --}}
                                 @if (!$activeAbsensi && $isTooLateToIn)
-                                    <div
-                                        class="alert alert-error py-2 px-3 mb-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight text-center">
-                                        ⚠️ Anda terlambat > 4 jam. Absen masuk tidak tersedia. Silahkan langsung Absen
-                                        Pulang.
+                                    <div class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight text-center backdrop-blur-md border border-red-500/20">
+                                        ⚠️ Terlambat > 4 jam. Absen masuk ditutup.
                                     </div>
                                 @endif
 
                                 <button type="button" x-on:click="submit('out')" wire:loading.attr="disabled"
-                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !
-                                        isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
-                                    class="btn btn-secondary btn-lg w-full shadow-lg shadow-secondary/20 py-2 h-auto group relative flex items-center justify-center min-h-[64px]">
+                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
+                                    class="btn bg-gradient-to-r from-secondary to-purple-600 hover:from-secondary/80 hover:to-purple-500 border-none btn-lg w-full shadow-[0_0_20px_rgba(var(--color-secondary),0.3)] py-2 h-auto group relative flex items-center justify-center min-h-[64px] text-white rounded-2xl">
 
                                     <div wire:loading wire:target="submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
@@ -404,28 +489,23 @@
 
                                     <div wire:loading.remove wire:target="submitAttendance"
                                         class="flex flex-col items-center">
-                                        <span class="text-sm font-black uppercase">Absen Pulang</span>
-                                        <span
-                                            class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan
-                                            Kerja Hari Ini</span>
-                                        <span
-                                            class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
-                                            Identitas & Lokasi...</span>
+                                        <span class="text-sm font-black uppercase tracking-widest drop-shadow-md">Absen Pulang</span>
+                                        <span class="text-[10px] opacity-70 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan Kerja Hari Ini</span>
+                                        <span class="text-[10px] opacity-50 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
                                     </div>
                                 </button>
                             @endif
                         </div>
                     @else
-                        <div class="p-6 rounded-2xl bg-error/5 border border-error/20 text-center mt-6">
-                            <h3 class="font-bold text-error uppercase text-xs mb-1">Akses Absensi Ditutup</h3>
-                            <p class="text-[10px] opacity-60 uppercase font-bold tracking-tighter">Status:
-                                {{ $activeJadwal->status }}</p>
+                        <div class="p-6 rounded-2xl bg-white/5 border border-white/10 text-center mt-6 backdrop-blur-md">
+                            <h3 class="font-black text-rose-400 uppercase text-[10px] mb-1 tracking-widest">Akses Ditutup</h3>
+                            <p class="text-[10px] text-white/40 uppercase font-medium tracking-widest">Status: {{ $activeJadwal->status }}</p>
                         </div>
                     @endif
 
                     <div class="mt-4">
                         <button wire:click="resetForm" x-on:click="stopCamera()"
-                            class="btn btn-ghost btn-xs btn-block opacity-40 font-bold uppercase tracking-widest hover:bg-transparent">Kembali</button>
+                            class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest hover:bg-white/10 rounded-xl">Kembali</button>
                     </div>
                 </div>
             </div>
@@ -450,11 +530,11 @@
         {{-- ─── Step 4: Result ─────────────────────────────────────────── --}}
         @if ($step === 4)
             <div
-                class="card bg-base-100 shadow-2xl border-t-8 {{ $isSuccess ? 'border-success' : 'border-error' }} animate-in zoom-in-95 duration-300">
-                <div class="card-body items-center text-center py-10">
+                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+                <div class="card-body items-center text-center py-10 text-white">
                     @if ($isSuccess)
                         <div
-                            class="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mb-6 scale-animation">
+                            class="w-24 h-24 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6 scale-animation border border-green-500/30 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="3" stroke="currentColor" class="size-12">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -462,7 +542,7 @@
                         </div>
                     @else
                         <div
-                            class="w-24 h-24 bg-error/10 text-error rounded-full flex items-center justify-center mb-6">
+                            class="w-24 h-24 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mb-6 border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="3" stroke="currentColor" class="size-12">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -470,27 +550,26 @@
                         </div>
                     @endif
 
-                    <h2 class="text-3xl font-black uppercase mb-2">{{ $isSuccess ? 'Berhasil' : 'Gagal' }}</h2>
-                    <p class="text-base-content/60 font-medium mb-8">{{ $message }}</p>
+                    <h2 class="text-3xl font-black uppercase mb-2 tracking-tighter drop-shadow-md text-white">{{ $isSuccess ? 'Berhasil' : 'Gagal' }}</h2>
+                    <p class="text-blue-100/60 font-medium mb-8 text-sm uppercase tracking-widest">{{ $message }}</p>
 
                     @if ($isSuccess && $lastAbsensi)
                         <div
-                            class="grid grid-cols-2 gap-4 w-full bg-base-200 p-4 rounded-2xl mb-8 border border-base-300 shadow-inner">
+                            class="grid grid-cols-2 gap-4 w-full bg-white/5 p-4 rounded-2xl mb-8 border border-white/10 shadow-inner backdrop-blur-sm">
                             <div class="text-left">
-                                <div class="text-[10px] uppercase opacity-50 font-bold">Waktu</div>
-                                <div class="font-bold">{{ $lastAbsensi->jam_pulang ?? $lastAbsensi->jam_masuk }}</div>
+                                <div class="text-[10px] uppercase text-white/40 font-black tracking-widest">Waktu</div>
+                                <div class="font-black text-white text-lg">{{ $lastAbsensi->jam_pulang ?? $lastAbsensi->jam_masuk }}</div>
                             </div>
                             <div class="text-left">
-                                <div class="text-[10px] uppercase opacity-50 font-bold">Tanggal</div>
-                                <div class="font-bold">
+                                <div class="text-[10px] uppercase text-white/40 font-black tracking-widest">Tanggal</div>
+                                <div class="font-black text-white text-lg">
                                     {{ \Carbon\Carbon::parse($lastAbsensi->tanggal)->format('d/m/Y') }}</div>
                             </div>
                         </div>
                     @endif
 
                     <button wire:click="resetForm"
-                        class="btn btn-outline btn-lg w-full uppercase font-bold tracking-widest">Kembali Ke
-                        Awal</button>
+                        class="btn bg-white/10 hover:bg-white/20 border-white/20 text-white btn-lg w-full uppercase font-black tracking-widest rounded-2xl transition-all">Kembali Ke Awal</button>
                 </div>
             </div>
 
@@ -515,7 +594,7 @@
     </div>
 
     {{-- Footer Info --}}
-    <div class="mt-12 text-[10px] text-base-content/40 uppercase tracking-[0.2em] animate-pulse text-center">
+    <div class="mt-12 text-[10px] text-blue-300 opacity-40 uppercase tracking-[0.2em] animate-pulse text-center">
         Sistem Absensi TRC &copy; {{ date('Y') }}
     </div>
 
