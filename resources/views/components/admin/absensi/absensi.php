@@ -6,6 +6,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Personnel;
+use App\Models\Absensi;
+use App\Models\Cuti;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,6 +19,21 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public string $search = '';
     public string $month = '';
     public string $year = '';
+
+    // Form Edit properties
+    public $editingPersonnelId;
+    public $editingTanggal;
+    public $editingAbsensiId;
+    public $editingPersonnelName;
+
+    public $statusMasuk;
+    public $statusPulang;
+    public $jamMasuk;
+    public $jamPulang;
+    public $alasanEdit;
+    public $nomorSurat;
+    public $cutiId;
+    public $keterangan;
 
     public function mount(): void
     {
@@ -66,6 +83,110 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         });
 
         return $paginator;
+    }
+
+    #[Computed]
+    public function cutis()
+    {
+        return Cuti::orderBy('name')->get();
+    }
+
+    public function editAbsensi($personnelId, $tanggal)
+    {
+        $this->resetEditForm();
+        
+        $personnel = Personnel::findOrFail($personnelId);
+        
+        // Authorization check
+        if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
+            return;
+        }
+
+        $this->editingPersonnelId = $personnelId;
+        $this->editingPersonnelName = $personnel->name;
+        $this->editingTanggal = $tanggal;
+
+        $absensi = Absensi::where('personnel_id', $personnelId)
+            ->whereDate('tanggal', $tanggal)
+            ->first();
+
+        if ($absensi) {
+            $this->editingAbsensiId = $absensi->id;
+            $this->statusMasuk = $absensi->status_masuk;
+            $this->statusPulang = $absensi->status_pulang;
+            $this->jamMasuk = $absensi->jam_masuk;
+            $this->jamPulang = $absensi->jam_pulang;
+            $this->alasanEdit = $absensi->alasan_edit;
+            $this->nomorSurat = $absensi->nomor_surat;
+            $this->cutiId = $absensi->cuti_id;
+            $this->keterangan = $absensi->keterangan;
+        }
+
+        $this->dispatch('open-modal', id: 'edit-absensi-modal');
+    }
+
+    public function saveEdit()
+    {
+        $this->validate([
+            'statusMasuk' => 'required',
+            'alasanEdit' => 'required|min:5',
+        ]);
+
+        $personnel = Personnel::findOrFail($this->editingPersonnelId);
+        
+        // Authorization check
+        if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
+            return;
+        }
+
+        $absensi = Absensi::updateOrCreate(
+            [
+                'personnel_id' => $this->editingPersonnelId,
+                'tanggal' => $this->editingTanggal,
+            ],
+            [
+                'status_masuk' => $this->statusMasuk,
+                'status_pulang' => $this->statusPulang,
+                'jam_masuk' => $this->jamMasuk,
+                'jam_pulang' => $this->jamPulang,
+                'alasan_edit' => $this->alasanEdit,
+                'nomor_surat' => $this->nomorSurat,
+                'cuti_id' => ($this->statusMasuk === 'CUTI' || $this->statusPulang === 'CUTI') ? $this->cutiId : null,
+                'keterangan' => $this->keterangan,
+                'edited_by_user_id' => Auth::id(),
+                'edited_at' => now(),
+            ]
+        );
+
+        // Snapshot original status if this is the first time editing
+        if ($absensi->wasRecentlyCreated || is_null($absensi->original_status_masuk)) {
+             $absensi->update([
+                 'original_status_masuk' => $absensi->getOriginal('status_masuk') ?? $this->statusMasuk,
+                 'original_status_pulang' => $absensi->getOriginal('status_pulang') ?? $this->statusPulang,
+             ]);
+        }
+
+        $this->dispatch('close-modal', id: 'edit-absensi-modal');
+        $this->dispatch('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
+        
+        // Re-calculate matrix
+        unset($this->personnels);
+    }
+
+    private function resetEditForm()
+    {
+        $this->editingPersonnelId = null;
+        $this->editingTanggal = null;
+        $this->editingAbsensiId = null;
+        $this->editingPersonnelName = '';
+        $this->statusMasuk = '';
+        $this->statusPulang = '';
+        $this->jamMasuk = '';
+        $this->jamPulang = '';
+        $this->alasanEdit = '';
+        $this->nomorSurat = '';
+        $this->cutiId = null;
+        $this->keterangan = '';
     }
 
     public function updatedSearch(): void

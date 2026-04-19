@@ -45,6 +45,8 @@ Route::group([
 
     Route::livewire('/jadwal', 'admin::jadwal')
         ->name('jadwal');
+    Route::livewire('/cuti', 'admin::cutis')
+        ->name('cuti');
     Route::livewire('/jadwal/import', 'admin::jadwal-import')
         ->name('jadwal.import');
     

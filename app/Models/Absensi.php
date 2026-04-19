@@ -27,10 +27,19 @@ class Absensi extends Model
         'lng_pulang',
         'is_within_radius',
         'jarak_meter',
+        'edited_by_user_id',
+        'edited_at',
+        'alasan_edit',
+        'original_status_masuk',
+        'original_status_pulang',
+        'nomor_surat',
+        'cuti_id',
+        'keterangan',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
+        'edited_at' => 'datetime',
     ];
 
     public function personnel(): BelongsTo
@@ -46,5 +55,15 @@ class Absensi extends Model
     public function kantor(): BelongsTo
     {
         return $this->belongsTo(Kantor::class);
+    }
+
+    public function editor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'edited_by_user_id');
+    }
+
+    public function cuti(): BelongsTo
+    {
+        return $this->belongsTo(Cuti::class);
     }
 }

@@ -46,3 +46,7 @@ Ubah jam_pulang dan status_pulang (HADIR / PC)
 Ubah keterangan / alasan (field baru: keterangan_edit)
 Set status khusus: SAKIT, IZIN, atau ALPHA (tidak hadir)
 Buat record absensi baru jika personel belum absen (admin input manual)
+
+🗂️ Gambaran Wajib yg tidak boleh dilanggar
+
+1. UI harus 100% konsisten dengan halaman Monitoring Absensi yang sudah ada.
