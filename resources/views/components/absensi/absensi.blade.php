@@ -2,20 +2,16 @@
     <div class="max-w-md w-full">
         {{-- ─── Logo & Header ──────────────────────────────────────────────── --}}
         <div class="text-center mb-8">
-            <div
-                class="inline-flex items-center justify-center p-4 bg-primary text-primary-content rounded-2xl shadow-lg mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="size-10">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
+            <div class="inline-flex items-center justify-center p-2 rounded-full">
+                <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
+                    class="h-20 w-20 sm:h-20 sm:w-20 object-contain" />
             </div>
-            <h1 class="text-3xl font-black tracking-tight text-base-content uppercase">Absensi Personnel</h1>
+            <h1 class="text-3xl font-black tracking-tight text-base-content uppercase">Absensi TRC</h1>
             <p class="text-base-content/60 font-medium">Satukan Barisan, Tertib Kehadiran</p>
-            
+
             {{-- Network Time Status --}}
-            <div class="mt-4 flex flex-col items-center gap-1" x-data="{ 
-                time: '', 
+            <div class="mt-4 flex flex-col items-center gap-1" x-data="{
+                time: '',
                 date: '',
                 offset: {{ $serverTimestamp }} - Date.now(),
                 update() {
@@ -23,25 +19,33 @@
                     this.time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                     this.date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
                 }
-            }" x-init="update(); setInterval(() => update(), 1000)">
+            }" x-init="update();
+            setInterval(() => update(), 1000)">
                 <div wire:ignore class="flex flex-col items-center">
-                    <div class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1" x-text="date">Memuat Tanggal...</div>
-                    <div class="text-4xl font-black tracking-widest text-primary tabular-nums" x-text="time">00:00:00</div>
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1" x-text="date">Memuat
+                        Tanggal...</div>
+                    <div class="text-4xl font-black tracking-widest text-primary tabular-nums" x-text="time">00:00:00
+                    </div>
                 </div>
-                
+
                 <div class="flex items-center gap-1.5 mt-1">
-                    @if($apiSource !== 'local')
-                        <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-success bg-success/10 px-2 py-0.5 rounded-full border border-success/20">
+                    @if ($apiSource !== 'local')
+                        <div
+                            class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-success bg-success/10 px-2 py-0.5 rounded-full border border-success/20">
                             <span class="relative flex h-1.5 w-1.5">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                                <span
+                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
                             </span>
                             Network Time Synced ({{ $apiSource }})
                         </div>
                     @else
-                        <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 12 24c4.408 0 8.411-2.384 10.606-6.044M11.277 5.889A11.959 11.959 0 0 1 12 2.25c4.408 0 8.411 2.384 10.606 6.044" />
+                        <div
+                            class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2.5" stroke="currentColor" class="size-3">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 12 24c4.408 0 8.411-2.384 10.606-6.044M11.277 5.889A11.959 11.959 0 0 1 12 2.25c4.408 0 8.411 2.384 10.606 6.044" />
                             </svg>
                             Local Server Time
                         </div>
@@ -52,27 +56,38 @@
 
         {{-- ─── Step 1: Selection & Time Sync Check ────────────────────────── --}}
         @if (!$isTimeSynced)
-            <div class="card bg-base-100 shadow-xl border border-error/20 overflow-hidden animate-in fade-in zoom-in-95">
+            <div
+                class="card bg-base-100 shadow-xl border border-error/20 overflow-hidden animate-in fade-in zoom-in-95">
                 <div class="bg-error/10 p-6 flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-error text-error-content rounded-full flex items-center justify-center mb-4 shadow-lg shadow-error/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    <div
+                        class="w-16 h-16 bg-error text-error-content rounded-full flex items-center justify-center mb-4 shadow-lg shadow-error/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" class="size-8">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                         </svg>
                     </div>
                     <h2 class="text-xl font-black text-error uppercase tracking-tight">Sinkronisasi Gagal</h2>
-                    <p class="text-xs font-medium text-base-content/60 mt-2 px-4">Sistem tidak dapat memverifikasi waktu jaringan yang akurat. Akses absensi ditutup untuk mencegah manipulasi data.</p>
+                    <p class="text-xs font-medium text-base-content/60 mt-2 px-4">Sistem tidak dapat memverifikasi waktu
+                        jaringan yang akurat. Akses absensi ditutup untuk mencegah manipulasi data.</p>
                 </div>
                 <div class="card-body p-6 bg-base-50">
                     <div class="space-y-3">
                         <div class="flex items-center gap-3 p-3 bg-base-100 rounded-xl border border-base-200">
                             <div class="p-2 bg-base-200 rounded-lg text-base-content/40">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" />
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="size-4">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <span class="text-[10px] font-bold opacity-70 uppercase">Periksa Koneksi Internet Server</span>
+                            <span class="text-[10px] font-bold opacity-70 uppercase">Periksa Koneksi Internet
+                                Server</span>
                         </div>
-                        <button onclick="window.location.reload()" class="btn btn-outline btn-block rounded-xl font-bold uppercase tracking-widest text-[10px]">Coba Lagi</button>
+                        <button onclick="window.location.reload()"
+                            class="btn btn-outline btn-block rounded-xl font-bold uppercase tracking-widest text-[10px]">Coba
+                            Lagi</button>
                     </div>
                 </div>
             </div>
@@ -98,11 +113,13 @@
                                 class="btn btn-outline btn-lg w-full justify-between h-auto py-4 group hover:bg-primary hover:text-primary-content transition-all border-base-300">
                                 <div class="flex items-center gap-4">
                                     <div class="avatar {{ !$p->foto ? 'placeholder' : '' }}">
-                                        <div class="bg-primary/10 text-primary group-hover:bg-white/20 group-hover:text-white w-10 rounded-full overflow-hidden">
+                                        <div
+                                            class="bg-primary/10 text-primary group-hover:bg-white/20 group-hover:text-white w-10 rounded-full overflow-hidden">
                                             @if ($p->foto)
                                                 <img src="{{ asset('storage/' . $p->foto) }}" class="object-cover" />
                                             @else
-                                                <span class="text-sm font-bold">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
+                                                <span
+                                                    class="text-sm font-bold">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -131,11 +148,14 @@
                 <div class="card-body">
                     <div class="text-center mb-6">
                         <div class="avatar mb-4 {{ !$selectedPersonnel->foto ? 'placeholder' : '' }}">
-                            <div class="bg-primary/10 text-primary w-20 rounded-full border-4 border-white shadow-md overflow-hidden">
+                            <div
+                                class="bg-primary/10 text-primary w-20 rounded-full border-4 border-white shadow-md overflow-hidden">
                                 @if ($selectedPersonnel->foto)
-                                    <img src="{{ asset('storage/' . $selectedPersonnel->foto) }}" class="object-cover" alt="Foto Personnel" />
+                                    <img src="{{ asset('storage/' . $selectedPersonnel->foto) }}" class="object-cover"
+                                        alt="Foto Personnel" />
                                 @else
-                                    <span class="text-2xl font-black">{{ strtoupper(substr($selectedPersonnel->name, 0, 1)) }}</span>
+                                    <span
+                                        class="text-2xl font-black">{{ strtoupper(substr($selectedPersonnel->name, 0, 1)) }}</span>
                                 @endif
                             </div>
                         </div>
@@ -154,8 +174,8 @@
 
                     @error('pin')
                         <div class="alert alert-error my-4 py-2 px-4 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                                viewBox="0 0 24 24">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6"
+                                fill="none" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -170,16 +190,16 @@
                         @endforeach
                         <button type="button" wire:click="clearPin"
                             class="btn btn-ghost bg-base-200 btn-lg h-16 text-error active:scale-95">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="size-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                             </svg>
                         </button>
                         <button type="button" wire:click="appendPin(0)"
                             class="btn btn-ghost bg-base-200 btn-lg h-16 text-xl font-bold active:scale-95 transition-all">0</button>
                         <button type="button" wire:click="resetForm" class="btn btn-ghost bg-base-200 btn-lg h-16">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="size-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                             </svg>
@@ -299,28 +319,39 @@
                     </div>
 
                     {{-- Info Lokasi Kantor --}}
-                    @if(!empty($infoLokasi))
+                    @if (!empty($infoLokasi))
                         <div class="mt-4 animate-in fade-in slide-in-from-top-2">
-                            @if(is_null($infoLokasi['is_within_radius']))
+                            @if (is_null($infoLokasi['is_within_radius']))
                                 {{-- Tidak ada kantor terhubung, tidak perlu tampilkan info --}}
                             @elseif($infoLokasi['boleh'] && $infoLokasi['is_within_radius'])
-                                <div class="alert alert-success py-2 px-3 border-none bg-success/10 text-success text-[10px] font-bold uppercase tracking-tight">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                <div
+                                    class="alert alert-success py-2 px-3 border-none bg-success/10 text-success text-[10px] font-bold uppercase tracking-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }} (±{{ $infoLokasi['jarak_meter'] }}m)</span>
+                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }}
+                                        (±{{ $infoLokasi['jarak_meter'] }}m)</span>
                                 </div>
                             @elseif($infoLokasi['boleh'] && !$infoLokasi['is_within_radius'])
-                                <div class="alert alert-warning py-2 px-3 border-none bg-warning/10 text-warning text-[10px] font-bold uppercase tracking-tight">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                <div
+                                    class="alert alert-warning py-2 px-3 border-none bg-warning/10 text-warning text-[10px] font-bold uppercase tracking-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
-                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }} ({{ $infoLokasi['jarak_meter'] }}m). Absensi diperbolehkan.</span>
+                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }}
+                                        ({{ $infoLokasi['jarak_meter'] }}m). Absensi diperbolehkan.</span>
                                 </div>
                             @else
-                                <div class="alert alert-error py-2 px-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight leading-tight">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                <div
+                                    class="alert alert-error py-2 px-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight leading-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                     <span>{{ $infoLokasi['pesan'] }}</span>
                                 </div>
@@ -333,42 +364,53 @@
                         <div class="space-y-3 mt-6">
                             @if (!$activeAbsensi && !$isTooLateToIn)
                                 {{-- Mode: Normal Masuk --}}
-                                <button type="button" x-on:click="submit('in')"
-                                    wire:loading.attr="disabled"
+                                <button type="button" x-on:click="submit('in')" wire:loading.attr="disabled"
                                     :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn btn-primary btn-lg w-full shadow-lg shadow-primary/20 py-2 h-auto group relative flex items-center justify-center min-h-[64px]">
-                                    
+
                                     <div wire:loading wire:target="submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
                                     </div>
 
-                                    <div wire:loading.remove wire:target="submitAttendance" class="flex flex-col items-center">
+                                    <div wire:loading.remove wire:target="submitAttendance"
+                                        class="flex flex-col items-center">
                                         <span class="text-sm font-black">ABSEN MASUK</span>
-                                        <span class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase">SIAP KIRIM DATA</span>
-                                        <span class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase">SIAP
+                                            KIRIM DATA</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
+                                            Identitas & Lokasi...</span>
                                     </div>
                                 </button>
                             @else
                                 {{-- Mode: Pulang (Normal atau Langsung Pulang karena Telat > 4 Jam) --}}
-                                @if(!$activeAbsensi && $isTooLateToIn)
-                                    <div class="alert alert-error py-2 px-3 mb-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight text-center">
-                                        ⚠️ Anda terlambat > 4 jam. Absen masuk tidak tersedia. Silahkan langsung Absen Pulang.
+                                @if (!$activeAbsensi && $isTooLateToIn)
+                                    <div
+                                        class="alert alert-error py-2 px-3 mb-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight text-center">
+                                        ⚠️ Anda terlambat > 4 jam. Absen masuk tidak tersedia. Silahkan langsung Absen
+                                        Pulang.
                                     </div>
                                 @endif
 
-                                <button type="button" x-on:click="submit('out')"
-                                    wire:loading.attr="disabled"
-                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
+                                <button type="button" x-on:click="submit('out')" wire:loading.attr="disabled"
+                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !
+                                        isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn btn-secondary btn-lg w-full shadow-lg shadow-secondary/20 py-2 h-auto group relative flex items-center justify-center min-h-[64px]">
-                                    
+
                                     <div wire:loading wire:target="submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
                                     </div>
 
-                                    <div wire:loading.remove wire:target="submitAttendance" class="flex flex-col items-center">
+                                    <div wire:loading.remove wire:target="submitAttendance"
+                                        class="flex flex-col items-center">
                                         <span class="text-sm font-black uppercase">Absen Pulang</span>
-                                        <span class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan Kerja Hari Ini</span>
-                                        <span class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan
+                                            Kerja Hari Ini</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
+                                            Identitas & Lokasi...</span>
                                     </div>
                                 </button>
                             @endif

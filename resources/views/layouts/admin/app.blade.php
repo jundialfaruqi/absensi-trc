@@ -240,15 +240,16 @@
             <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
             <aside class="menu p-0 w-64 h-full bg-base-100 border-r border-base-300 flex flex-col overflow-hidden">
                 <!-- Logo -->
-                <div class="h-16 flex items-center px-6 border-b border-base-200 shrink-0">
+                <div class="h-16 flex items-center px-2 border-b border-base-200 shrink-0">
                     <div class="flex items-center gap-0 text-secondary font-bold text-2xl group">
-                        <img src="{{ asset('assets/logo/logo-pemko.webp') }}" alt="Logo"
-                            class="h-10 w-10 sm:h-11 sm:w-11 object-contain">
+                        <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo"
+                            class="h-13 w-13 sm:h-13 sm:w-13 object-contain">
                         <div class="flex flex-col">
                             <span
-                                class="font-black tracking-tight uppercase text-base-content group-hover:text-base-content transition-colors leading-none">DISKOMINFO</span>
+                                class="font-black tracking-tight uppercase text-base-content group-hover:text-base-content transition-colors leading-none">Absensi
+                                TRC</span>
                             <span
-                                class="text-[10px] tracking-widest uppercase text-base-content/50 group-hover:text-base-content/70 transition-colors leading-none">Dinas
+                                class="text-[8px] tracking-widest uppercase text-base-content/50 group-hover:text-base-content/70 transition-colors leading-none">Dinas
                                 Komunikasi, Informatika & Statistik</span>
                         </div>
                     </div>
@@ -258,19 +259,24 @@
                 <div class="flex-1 overflow-y-auto no-scrollbar py-4">
                     <ul class="menu w-full px-4 gap-1">
 
+                        <li class="menu-title text-xs font-semibold opacity-50 uppercase mb-1">Overview</li>
+
                         <li>
-                            <a wire:navigate href="/page/dashboard"
-                                class="{{ request()->is('page/dashboard*') ? 'active bg-base-300 text-base-content font-medium' : '' }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                                </svg>
-                                Dashboard
+                            <a wire:navigate href="{{ route('dashboard') }}"
+                                class="{{ request()->routeIs('dashboard*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                <div class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                    </svg>
+                                    <span>Dashboard</span>
+                                </div>
+                                <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                    Halaman utama
+                                </span>
                             </a>
                         </li>
-
-                        <li class="menu-title text-xs font-semibold opacity-50 uppercase mb-1">Overview</li>
 
                         <li>
                             <a wire:navigate href="{{ route('absensi') }}"
@@ -295,20 +301,37 @@
                             </a>
                         </li>
 
-                        <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Apps</li>
-
                         <li>
                             <a wire:navigate href="{{ route('personnel') }}"
                                 class="{{ request()->routeIs('personnel*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
                                 <div class="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="size-5">
+                                        stroke-width="2" stroke="currentColor" class="size-5">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                     </svg>
                                     <span>Personnel</span>
                                 </div>
                                 <span class="text-[8px] text-base-content opacity-50 ml-7">Data Personnel</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
+
+                        <li>
+                            <a wire:navigate href="{{ route('opd') }}"
+                                class="{{ request()->routeIs('opd*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                <div class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="size-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                                    </svg>
+                                    <span>OPD</span>
+                                </div>
+                                <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                    Data Master OPD
+                                </span>
                             </a>
                         </li>
 
@@ -325,23 +348,6 @@
                                 </div>
                                 <span class="text-[8px] text-base-content opacity-50 ml-7">
                                     Data Penugasan Karyawan
-                                </span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a wire:navigate href="{{ route('opd') }}"
-                                class="{{ request()->routeIs('opd*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-                                    </svg>
-                                    <span>OPD</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Data Master OPD
                                 </span>
                             </a>
                         </li>

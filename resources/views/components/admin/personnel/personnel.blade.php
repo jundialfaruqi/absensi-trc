@@ -2,37 +2,19 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Manajemen Personnel</h1>
+            <h1 class="text-xl font-bold">Personnel</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola data dan akun personnel</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Data Master</li>
+                <li>Overview</li>
                 <li>
                     <a href="{{ route('personnel') }}">
-                        <span class="text-base-content">Manajemen Personnel</span>
+                        <span class="text-base-content font-bold">Personnel</span>
                     </a>
                 </li>
             </ul>
-        </div>
-    </div>
-
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <div class="card bg-linear-to-r from-secondary to-neutral text-base-100 p-5">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-lg text-white font-bold">Manajemen Personnel</div>
-                    <div class="text-sm text-white opacity-80">Daftar Personnel beserta info detail</div>
-                </div>
-                <div class="flex flex-wrap gap-4 md:gap-8 mt-1 md:mt-0">
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Personnel</div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -138,10 +120,13 @@
                                 <td>
                                     @if ($r->kantor)
                                         <div class="text-sm font-bold">{{ $r->kantor->name }}</div>
-                                        @if($r->wajib_absen_di_lokasi)
-                                            <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">Wajib Lokasi</div>
+                                        @if ($r->wajib_absen_di_lokasi)
+                                            <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">Wajib
+                                                Lokasi</div>
                                         @else
-                                            <div class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">Luar Lokasi OK</div>
+                                            <div
+                                                class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
+                                                Luar Lokasi OK</div>
                                         @endif
                                     @else
                                         <div class="text-xs italic text-base-content/50">Belum diatur</div>
@@ -196,18 +181,20 @@
     <dialog id="personnel-modal" class="modal backdrop-blur-xs" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'personnel-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'personnel-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-4xl">
-            <h3 class="font-bold text-lg mb-4">
-                {{ $personnelId ? 'Edit Personnel' : 'Tambah Personnel' }}
-            </h3>
-            <form wire:submit="save">
+        <div class="modal-box shadow w-11/12 max-w-4xl p-0 flex flex-col max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div class="p-4 sm:p-6 border-b border-base-200">
+                <h3 class="font-bold text-lg">
+                    {{ $personnelId ? 'Edit Personnel' : 'Tambah Personnel' }}
+                </h3>
+            </div>
+            <form wire:submit="save" class="p-4 sm:p-6 overflow-y-auto flex-1">
                 <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-6 md:gap-y-4">
 
                         {{-- Nama --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Nama Lengkap <span
+                                <span class="label-text text-sm font-medium">Nama Lengkap <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
@@ -221,7 +208,7 @@
                         {{-- Email --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Alamat Email <span
+                                <span class="label-text text-sm font-medium">Alamat Email <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="email" wire:model="email"
@@ -235,12 +222,12 @@
                         {{-- Password --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Password @if (!$personnelId)
+                                <span class="label-text text-sm font-medium">Password @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
                             </label>
-                            <div class="relative items-center">
+                            <div class="relative flex items-center">
                                 <input x-bind:type="show ? 'text' : 'password'" wire:model="password"
                                     class="input input-bordered focus:input-primary w-full pr-10 transition-all @error('password') input-error @enderror"
                                     placeholder="{{ $personnelId ? '(Kosongkan jika tidak diubah)' : 'Masukkan password...' }}">
@@ -270,12 +257,12 @@
                         {{-- Password Confirmation --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Ketik Ulang Password @if (!$personnelId)
+                                <span class="label-text text-sm font-medium">Ketik Ulang Password @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
                             </label>
-                            <div class="relative items-center">
+                            <div class="relative flex items-center">
                                 <input x-bind:type="show ? 'text' : 'password'" wire:model="password_confirmation"
                                     class="input input-bordered focus:input-primary w-full pr-10 transition-all"
                                     placeholder="{{ $personnelId ? '(Kosongkan jika tidak diubah)' : 'Masukkan ulang password...' }}">
@@ -302,12 +289,12 @@
                         {{-- PIN --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">PIN (4 Digit) @if (!$personnelId)
+                                <span class="label-text text-sm font-medium">PIN (4 Digit) @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
                             </label>
-                            <div class="relative items-center">
+                            <div class="relative flex items-center">
                                 <input x-bind:type="show ? 'text' : 'password'" wire:model="pin" maxlength="4"
                                     pattern="[0-9]*" inputmode="numeric"
                                     class="input input-bordered focus:input-primary w-full pr-10 transition-all @error('pin') input-error @enderror"
@@ -338,7 +325,7 @@
                         {{-- Nomor HP --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Nomor HP</span>
+                                <span class="label-text text-sm font-medium">Nomor HP</span>
                             </label>
                             <input type="tel" wire:model="nomor_hp"
                                 class="input input-bordered focus:input-primary w-full transition-all @error('nomor_hp') input-error @enderror"
@@ -350,7 +337,7 @@
 
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Pilih OPD Induk <span
+                                <span class="label-text text-sm font-medium">Pilih OPD Induk <span
                                         class="text-error">*</span></span>
                             </label>
                             <select wire:model="opd_id"
@@ -368,8 +355,8 @@
 
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Penugasan <span
-                                         class="text-error">*</span></span>
+                                <span class="label-text text-sm font-medium">Penugasan <span
+                                        class="text-error">*</span></span>
                             </label>
                             <select wire:model="penugasan_id"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('penugasan_id') select-error @enderror">
@@ -383,9 +370,9 @@
                             @enderror
                         </div>
 
-                        <div class="form-control w-full">
+                        <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Kantor Absensi</span>
+                                <span class="label-text text-sm font-medium">Pilih Kantor</span>
                             </label>
                             <select wire:model="kantor_id"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('kantor_id') select-error @enderror">
@@ -400,11 +387,17 @@
                         </div>
 
                         <div class="form-control w-full md:col-span-2">
-                             <label class="label cursor-pointer justify-start gap-4 bg-base-200/50 p-4 rounded-xl border border-base-300">
-                                <input type="checkbox" wire:model="wajib_absen_di_lokasi" class="checkbox checkbox-primary">
-                                <div>
-                                    <span class="label-text font-bold block uppercase text-xs">Wajib Absen di Lokasi Kantor</span>
-                                    <span class="text-[10px] opacity-60">Jika dicentang, personil tidak bisa absen jika berada di luar radius kantor.</span>
+                            <label
+                                class="label w-full cursor-pointer justify-start gap-4 bg-base-200/50 p-4 rounded-xl border border-base-300">
+                                <input type="checkbox" wire:model="wajib_absen_di_lokasi"
+                                    class="checkbox checkbox-md checkbox-primary">
+                                <div class="flex-1 min-w-0">
+                                    <span class="label-text font-bold block uppercase text-xs whitespace-normal">Wajib
+                                        Absen di Lokasi
+                                        Kantor</span>
+                                    <span class="text-[10px] opacity-60 block whitespace-normal wrap-break-word">Jika
+                                        dicentang, personil tidak bisa absen jika
+                                        berada di luar radius kantor.</span>
                                 </div>
                             </label>
                         </div>
@@ -412,7 +405,7 @@
                         {{-- Foto --}}
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Foto Personnel @if (!$personnelId)
+                                <span class="label-text text-sm font-medium">Foto Personnel @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
@@ -449,12 +442,12 @@
                     </div>
                 </div>
 
-                <div class="modal-action mt-6">
+                <div class="modal-action mt-8 pt-4 border-t border-base-200">
                     <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('personnel-modal').close()">Batal</button>
-                    <button type="submit" class="btn btn-neutral" wire:loading.attr="disabled">
+                    <button type="submit" class="btn btn-secondary px-8" wire:loading.attr="disabled">
                         <span wire:loading wire:target="save" class="loading loading-spinner loading-xs"></span>
-                        <span wire:loading.remove wire:target="save">Simpan</span>
+                        <span wire:loading.remove wire:target="save text-white">Simpan Data</span>
                     </button>
                 </div>
             </form>

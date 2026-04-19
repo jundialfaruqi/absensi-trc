@@ -20,7 +20,7 @@
                     </div>
 
                     <h1 class="text-4xl font-bold text-base-content leading-tight">
-                        Digitalisasi Tata Kelola <span class="text-primary italic">Absensi Pegawai</span> secara online!
+                        Digitalisasi Tata Kelola <span class="text-primary italic">Absensi TRC</span> secara online!
                     </h1>
                 </div>
 

@@ -40,15 +40,6 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public string $deleteName = '';
 
     #[Computed]
-    public function stats(): array
-    {
-        $total = Personnel::count();
-        return [
-            'total' => $total,
-        ];
-    }
-
-    #[Computed]
     public function personnels()
     {
         $query = Personnel::with(['opd', 'penugasan', 'kantor'])
@@ -105,11 +96,11 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     {
         $this->resetForm();
         $item = Personnel::findOrFail($id);
-        
+
         if (!auth()->user()->hasRole('super-admin') && $item->opd_id !== auth()->user()->opd()?->id) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $this->personnelId = $item->id;
         $this->name = $item->name;
         $this->opd_id = (string) $item->opd_id;
@@ -119,7 +110,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->oldFoto = $item->foto;
         $this->kantor_id = (string) $item->kantor_id;
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
-        
+
         $this->dispatch('open-modal', id: 'personnel-modal');
     }
 
@@ -213,7 +204,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public function executeDelete(): void
     {
         $item = Personnel::findOrFail($this->deleteId);
-        
+
         if (!auth()->user()->hasRole('super-admin') && $item->opd_id !== auth()->user()->opd()?->id) {
             abort(403, 'Unauthorized action.');
         }
@@ -251,7 +242,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     {
         $this->resetPage();
     }
-    
+
     public function updatedPerPage(): void
     {
         $this->resetPage();
