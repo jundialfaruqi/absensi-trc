@@ -139,10 +139,21 @@
                                             <div class="flex flex-col items-center justify-center h-full gap-0.5">
                                                 {{-- Masuk Section --}}
                                                 <div class="flex flex-col items-center">
-                                                    <span
-                                                        class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_masuk === 'TELAT' ? 'text-error border-error/30 bg-error/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-xs leading-none mb-0.5">
-                                                        {{ $a->status_masuk }}
-                                                    </span>
+                                                    <div class="flex items-center gap-1">
+                                                        <span
+                                                            class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_masuk === 'TELAT' ? 'text-error border-error/30 bg-error/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-xs leading-none">
+                                                            {{ $a->status_masuk }}
+                                                        </span>
+                                                        @if(!is_null($a->is_within_radius))
+                                                            <div class="tooltip tooltip-right" data-tip="{{ $a->kantor?->name }}: ±{{ $a->jarak_meter }}m">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" 
+                                                                    class="size-2.5 {{ $a->is_within_radius ? 'text-success' : 'text-error' }}">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                                                </svg>
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                     <span
                                                         class="text-[10px] font-bold {{ $a->status_masuk === 'TELAT' ? 'text-error' : 'text-success' }}">
                                                         {{ $a->jam_masuk ? \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') : '--:--' }}
@@ -155,10 +166,21 @@
                                                         {{ $a->jam_pulang ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '--:--' }}
                                                     </span>
                                                     @if ($a->jam_pulang)
-                                                        <span
-                                                            class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_pulang === 'PC' ? 'text-warning border-warning/30 bg-warning/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-xs leading-none mt-0.5">
-                                                            {{ $a->status_pulang }}
-                                                        </span>
+                                                        <div class="flex items-center gap-1 mt-0.5">
+                                                            <span
+                                                                class="text-[7px] font-black uppercase tracking-tighter {{ $a->status_pulang === 'PC' ? 'text-warning border-warning/30 bg-warning/10' : 'text-success border-success/30 bg-success/10' }} border px-1 rounded-xs leading-none">
+                                                                {{ $a->status_pulang }}
+                                                            </span>
+                                                            @if(!is_null($a->is_within_radius))
+                                                                <div class="tooltip tooltip-right" data-tip="{{ $a->kantor?->name }}: ±{{ $a->jarak_meter }}m">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" 
+                                                                        class="size-2.5 {{ $a->is_within_radius ? 'text-success' : 'text-error' }}">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                                                    </svg>
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     @else
                                                         <div
                                                             class="text-[7px] font-bold text-base-content/20 uppercase mt-0.5">
@@ -215,6 +237,22 @@
         <div class="flex items-center gap-1.5">
             <div class="w-3 h-3 bg-base-300/50 border border-base-400/50 rounded"></div>
             <span>Tidak Absen (ALPHA)</span>
+        </div>
+        <div class="flex items-center gap-4 ml-4 pl-4 border-l border-base-300">
+            <div class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-3 text-success">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                <span class="text-[10px]">Dalam Radius</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-3 text-error">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                <span class="text-[10px]">Luar Radius</span>
+            </div>
         </div>
     </div>
 </div>

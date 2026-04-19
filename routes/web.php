@@ -37,6 +37,9 @@ Route::group([
     Route::livewire('/personnel', 'admin::personnel')
         ->name('personnel');
 
+    Route::livewire('/kantor', 'admin::kantors')
+        ->name('kantor');
+
     Route::livewire('/shift', 'admin::shift')
         ->name('shift');
 

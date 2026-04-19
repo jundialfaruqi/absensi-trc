@@ -13,6 +13,7 @@ class Absensi extends Model
     protected $fillable = [
         'personnel_id',
         'jadwal_id',
+        'kantor_id',
         'tanggal',
         'jam_masuk',
         'jam_pulang',
@@ -24,6 +25,8 @@ class Absensi extends Model
         'lng_masuk',
         'lat_pulang',
         'lng_pulang',
+        'is_within_radius',
+        'jarak_meter',
     ];
 
     protected $casts = [
@@ -38,5 +41,10 @@ class Absensi extends Model
     public function jadwal(): BelongsTo
     {
         return $this->belongsTo(Jadwal::class);
+    }
+
+    public function kantor(): BelongsTo
+    {
+        return $this->belongsTo(Kantor::class);
     }
 }

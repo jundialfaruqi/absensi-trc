@@ -32,6 +32,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public string $password = '';
     public string $password_confirmation = '';
     public string $pin = '';
+    public string $kantor_id = '';
+    public bool $wajib_absen_di_lokasi = false;
 
     // Delete
     public ?int $deleteId = null;
@@ -49,7 +51,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     #[Computed]
     public function personnels()
     {
-        $query = Personnel::with(['opd', 'penugasan'])
+        $query = Personnel::with(['opd', 'penugasan', 'kantor'])
             ->when($this->search, fn($q) => $q->where(function ($sub) {
                 $sub->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('email', 'like', '%' . $this->search . '%');
@@ -80,6 +82,16 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         return Penugasan::orderBy('name')->get();
     }
 
+    #[Computed]
+    public function kantors()
+    {
+        $query = App\Models\Kantor::orderBy('name');
+        if (!auth()->user()->hasRole('super-admin')) {
+            $query->where('opd_id', auth()->user()->opd()?->id);
+        }
+        return $query->get();
+    }
+
     public function openAddModal(): void
     {
         $this->resetForm();
@@ -105,6 +117,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->nomor_hp = $item->nomor_hp ?? '';
         $this->email = $item->email;
         $this->oldFoto = $item->foto;
+        $this->kantor_id = (string) $item->kantor_id;
+        $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
         
         $this->dispatch('open-modal', id: 'personnel-modal');
     }
@@ -128,6 +142,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
                 Rule::unique('personnels')->ignore($this->personnelId),
             ],
             'foto' => $this->personnelId ? 'nullable|image|max:2048' : 'required|image|max:2048',
+            'kantor_id' => 'nullable|exists:kantors,id',
+            'wajib_absen_di_lokasi' => 'boolean',
         ];
 
         if (!$this->personnelId || $this->password) {
@@ -150,6 +166,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'penugasan_id' => $this->penugasan_id,
             'nomor_hp' => $this->nomor_hp,
             'email' => $this->email,
+            'kantor_id' => $this->kantor_id ?: null,
+            'wajib_absen_di_lokasi' => $this->wajib_absen_di_lokasi,
         ];
 
         if ($this->foto) {
@@ -224,6 +242,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->password = '';
         $this->password_confirmation = '';
         $this->pin = '';
+        $this->kantor_id = '';
+        $this->wajib_absen_di_lokasi = false;
         $this->resetErrorBag();
     }
 

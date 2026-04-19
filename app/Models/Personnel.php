@@ -12,7 +12,7 @@ class Personnel extends Model
     use HasApiTokens;
 
     protected $fillable = [
-        'name', 'opd_id', 'penugasan_id', 'nomor_hp', 'foto', 'email', 'password', 'pin'
+        'name', 'opd_id', 'penugasan_id', 'kantor_id', 'nomor_hp', 'foto', 'email', 'password', 'pin', 'wajib_absen_di_lokasi'
     ];
 
     protected $hidden = [
@@ -27,6 +27,11 @@ class Personnel extends Model
     public function penugasan(): BelongsTo
     {
         return $this->belongsTo(Penugasan::class);
+    }
+
+    public function kantor(): BelongsTo
+    {
+        return $this->belongsTo(Kantor::class);
     }
 
     public function jadwals()

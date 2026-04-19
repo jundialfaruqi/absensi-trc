@@ -42,7 +42,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
         $paginator = Personnel::with(['absensis' => function ($query) {
                 $query->whereYear('tanggal', $this->year)
-                      ->whereMonth('tanggal', $this->month);
+                      ->whereMonth('tanggal', $this->month)
+                      ->with('kantor');
             }, 'jadwals' => function ($query) {
                 $query->whereYear('tanggal', $this->year)
                       ->whereMonth('tanggal', $this->month)

@@ -93,6 +93,7 @@
                             <th>Personnel</th>
                             <th>Kontak</th>
                             <th>Penugasan</th>
+                            <th>Kantor / Lokasi</th>
                             <th>OPD Induk</th>
                             <th class="text-center w-24">Action</th>
                         </tr>
@@ -132,6 +133,18 @@
                                             {{ $r->penugasan->name }}</div>
                                     @else
                                         <div class="text-xs italic text-base-content/50">-</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($r->kantor)
+                                        <div class="text-sm font-bold">{{ $r->kantor->name }}</div>
+                                        @if($r->wajib_absen_di_lokasi)
+                                            <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">Wajib Lokasi</div>
+                                        @else
+                                            <div class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">Luar Lokasi OK</div>
+                                        @endif
+                                    @else
+                                        <div class="text-xs italic text-base-content/50">Belum diatur</div>
                                     @endif
                                 </td>
                                 <td>
@@ -356,7 +369,7 @@
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
                                 <span class="label-text font-medium">Penugasan <span
-                                        class="text-error">*</span></span>
+                                         class="text-error">*</span></span>
                             </label>
                             <select wire:model="penugasan_id"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('penugasan_id') select-error @enderror">
@@ -368,6 +381,32 @@
                             @error('penugasan_id')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                             @enderror
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text font-medium">Kantor Absensi</span>
+                            </label>
+                            <select wire:model="kantor_id"
+                                class="select select-bordered focus:select-primary w-full transition-all @error('kantor_id') select-error @enderror">
+                                <option value="">-- Tidak Terikat Kantor --</option>
+                                @foreach ($this->kantors as $k)
+                                    <option value="{{ $k->id }}">{{ $k->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('kantor_id')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-control w-full md:col-span-2">
+                             <label class="label cursor-pointer justify-start gap-4 bg-base-200/50 p-4 rounded-xl border border-base-300">
+                                <input type="checkbox" wire:model="wajib_absen_di_lokasi" class="checkbox checkbox-primary">
+                                <div>
+                                    <span class="label-text font-bold block uppercase text-xs">Wajib Absen di Lokasi Kantor</span>
+                                    <span class="text-[10px] opacity-60">Jika dicentang, personil tidak bisa absen jika berada di luar radius kantor.</span>
+                                </div>
+                            </label>
                         </div>
 
                         {{-- Foto --}}

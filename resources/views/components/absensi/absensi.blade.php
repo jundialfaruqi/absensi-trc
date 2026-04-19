@@ -233,12 +233,42 @@
                         </div>
                     </div>
 
+                    {{-- Info Lokasi Kantor --}}
+                    @if(!empty($infoLokasi))
+                        <div class="mt-4 animate-in fade-in slide-in-from-top-2">
+                            @if(is_null($infoLokasi['is_within_radius']))
+                                {{-- Tidak ada kantor terhubung, tidak perlu tampilkan info --}}
+                            @elseif($infoLokasi['boleh'] && $infoLokasi['is_within_radius'])
+                                <div class="alert alert-success py-2 px-3 border-none bg-success/10 text-success text-[10px] font-bold uppercase tracking-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }} (±{{ $infoLokasi['jarak_meter'] }}m)</span>
+                                </div>
+                            @elseif($infoLokasi['boleh'] && !$infoLokasi['is_within_radius'])
+                                <div class="alert alert-warning py-2 px-3 border-none bg-warning/10 text-warning text-[10px] font-bold uppercase tracking-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }} ({{ $infoLokasi['jarak_meter'] }}m). Absensi diperbolehkan.</span>
+                                </div>
+                            @else
+                                <div class="alert alert-error py-2 px-3 border-none bg-error/10 text-error text-[10px] font-bold uppercase tracking-tight leading-tight">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>{{ $infoLokasi['pesan'] }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     {{-- Actions --}}
                     @if ($activeJadwal->shift)
                         <div class="space-y-3 mt-6">
                             @if (!$activeAbsensi)
                                 <button type="button" x-on:click="submit('in')"
-                                    :disabled="!isMatched || gpsStatus !== 'OK'"
+                                    :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn btn-primary btn-lg w-full shadow-lg shadow-primary/20 flex flex-col items-center py-2 h-auto group">
                                     <span class="text-sm font-black">ABSEN MASUK</span>
                                     <span class="text-[10px] opacity-60 font-medium group-disabled:hidden">SIAP KIRIM
@@ -249,8 +279,7 @@
                                 </button>
                             @else
                                 <button type="button" x-on:click="submit('out')"
-                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !
-                                        isMatched || gpsStatus !== 'OK'"
+                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn btn-secondary btn-lg w-full shadow-lg shadow-secondary/20 flex flex-col items-center py-2 h-auto group">
                                     <span class="text-sm font-black uppercase">Absen Pulang</span>
                                     <span
@@ -457,6 +486,8 @@
                                 this.lng = pos.coords.longitude;
                                 this.gpsStatus = 'OK';
                                 this.gpsMessage = 'Terkunci';
+
+                                @this.terimaCoordsLokasi(this.lat, this.lng);
                             },
                             (err) => {
                                 this.gpsStatus = 'ERROR';

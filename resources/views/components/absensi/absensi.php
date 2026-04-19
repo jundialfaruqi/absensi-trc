@@ -32,6 +32,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public string $message = '';
     public ?Absensi $lastAbsensi = null;
 
+    // Location info for Step 3
+    public array $infoLokasi = [];
+
     // GPS & Image Data (Sent from Client)
     public string $lat = '';
     public string $lng = '';
@@ -132,12 +135,42 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $this->step = 3;
     }
 
+    public function terimaCoordsLokasi(float $lat, float $lng): void
+    {
+        $this->lat = (string) $lat;
+        $this->lng = (string) $lng;
+
+        if ($this->selectedPersonnel && $this->step === 3) {
+            $service = app(\App\Services\AbsensiLokasiService::class);
+            $this->infoLokasi = $service->validasiLokasi(
+                $this->selectedPersonnel,
+                $lat,
+                $lng
+            );
+        }
+    }
+
     public function submitAttendance(string $type, $clientLat = null, $clientLng = null, $clientImage = null)
     {
         // Update state with data from client
         if ($clientLat) $this->lat = $clientLat;
         if ($clientLng) $this->lng = $clientLng;
         if ($clientImage) $this->imageData = $clientImage;
+
+        // Validasi lokasi kantor
+        $lokasiService = app(\App\Services\AbsensiLokasiService::class);
+        $lokasiResult = $lokasiService->validasiLokasi(
+            $this->selectedPersonnel,
+            (float) $this->lat,
+            (float) $this->lng
+        );
+
+        if (!$lokasiResult['boleh']) {
+            $this->isSuccess = false;
+            $this->message = $lokasiResult['pesan'];
+            $this->step = 4;
+            return;
+        }
 
         if (!$this->selectedPersonnel || !$this->activeJadwal || $this->activeJadwal->status === 'LIBUR' || !$this->activeJadwal->shift) {
             $this->isSuccess = false;
@@ -202,6 +235,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     'foto_masuk' => $imagePath,
                     'lat_masuk' => $this->lat ?: 0,
                     'lng_masuk' => $this->lng ?: 0,
+                    'kantor_id'        => $lokasiResult['kantor_id'],
+                    'is_within_radius' => $lokasiResult['is_within_radius'],
+                    'jarak_meter'      => $lokasiResult['jarak_meter'],
                 ]);
 
                 $this->isSuccess = true;
@@ -248,6 +284,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     'foto_pulang' => $imagePath,
                     'lat_pulang' => $this->lat ?: 0,
                     'lng_pulang' => $this->lng ?: 0,
+                    'kantor_id'        => $lokasiResult['kantor_id'],
+                    'is_within_radius' => $lokasiResult['is_within_radius'],
+                    'jarak_meter'      => $lokasiResult['jarak_meter'],
                 ]);
 
                 $this->lastAbsensi = $this->activeAbsensi;
@@ -264,7 +303,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function resetForm()
     {
-        $this->reset(['step', 'selectedPersonnelId', 'selectedPersonnel', 'pin', 'isSuccess', 'message', 'lastAbsensi', 'search', 'activeJadwal', 'activeAbsensi', 'activeDate', 'lat', 'lng', 'imageData']);
+        $this->reset(['step', 'selectedPersonnelId', 'selectedPersonnel', 'pin', 'isSuccess', 'message', 'lastAbsensi', 'search', 'activeJadwal', 'activeAbsensi', 'activeDate', 'lat', 'lng', 'imageData', 'infoLokasi']);
         $this->resetErrorBag();
     }
 
