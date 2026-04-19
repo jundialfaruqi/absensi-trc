@@ -140,7 +140,7 @@
                                         }
                                     @endphp
                                     <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
-                                        class="text-center border-r border-base-200 p-0 min-h-16 h-16 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all {{ $cellClass }} {{ $isToday && !$a ? 'bg-primary/5' : '' }}">
+                                        class="text-center border-r border-base-200 p-0 min-h-16 h-16 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all hover:z-[100] relative {{ $cellClass }} {{ $isToday && !$a ? 'bg-primary/5' : '' }}">
                                         @if ($a)
                                             <div class="flex flex-col h-full relative">
                                                 {{-- Edited indicator --}}
@@ -161,7 +161,7 @@
                                                     @if ($a->foto_masuk)
                                                         <div class="avatar mb-1 group/photo relative z-10">
                                                             <div
-                                                                class="w-15 h-15 rounded-full ring-1 ring-primary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[5] hover:z-50 hover:shadow-2xl">
+                                                                class="w-15 h-15 rounded-full ring-1 ring-primary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[5] hover:relative hover:z-50 hover:shadow-2xl">
                                                                 <img src="{{ asset('storage/' . $a->foto_masuk) }}"
                                                                     class="object-cover bg-base-200" loading="lazy" />
                                                             </div>
@@ -208,7 +208,7 @@
                                                     @if ($a->foto_pulang)
                                                         <div class="avatar mb-1 group/photo relative z-10">
                                                             <div
-                                                                class="w-15 h-15 rounded-full ring-1 ring-secondary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[5] hover:z-50 hover:shadow-2xl">
+                                                                class="w-15 h-15 rounded-full ring-1 ring-secondary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[5] hover:relative hover:z-50 hover:shadow-2xl">
                                                                 <img src="{{ asset('storage/' . $a->foto_pulang) }}"
                                                                     class="object-cover bg-base-200" loading="lazy" />
                                                             </div>
