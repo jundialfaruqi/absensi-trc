@@ -27,6 +27,9 @@ class Absensi extends Model
         'lng_pulang',
         'is_within_radius',
         'jarak_meter',
+        'kantor_id_pulang',
+        'is_within_radius_pulang',
+        'jarak_meter_pulang',
         'edited_by_user_id',
         'edited_at',
         'alasan_edit',
@@ -55,6 +58,11 @@ class Absensi extends Model
     public function kantor(): BelongsTo
     {
         return $this->belongsTo(Kantor::class);
+    }
+
+    public function kantorPulang(): BelongsTo
+    {
+        return $this->belongsTo(Kantor::class, 'kantor_id_pulang');
     }
 
     public function editor(): BelongsTo

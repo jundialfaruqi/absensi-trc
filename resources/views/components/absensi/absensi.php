@@ -341,9 +341,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     'foto_pulang' => $imagePath,
                     'lat_pulang' => $this->lat ?: 0,
                     'lng_pulang' => $this->lng ?: 0,
-                    'kantor_id'        => $lokasiResult['kantor_id'],
-                    'is_within_radius' => $lokasiResult['is_within_radius'],
-                    'jarak_meter'      => $lokasiResult['jarak_meter'],
+                    'kantor_id_pulang'        => $lokasiResult['kantor_id'],
+                    'is_within_radius_pulang' => $lokasiResult['is_within_radius'],
+                    'jarak_meter_pulang'      => $lokasiResult['jarak_meter'],
                 ]);
 
                 $this->lastAbsensi = $this->activeAbsensi;
