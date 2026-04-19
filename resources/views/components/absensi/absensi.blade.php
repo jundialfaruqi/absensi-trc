@@ -12,10 +12,70 @@
             </div>
             <h1 class="text-3xl font-black tracking-tight text-base-content uppercase">Absensi Personnel</h1>
             <p class="text-base-content/60 font-medium">Satukan Barisan, Tertib Kehadiran</p>
+            
+            {{-- Network Time Status --}}
+            <div class="mt-4 flex flex-col items-center gap-1">
+                <div x-data="{ 
+                    time: '', 
+                    date: '',
+                    offset: {{ $serverTimestamp }} - Date.now(),
+                    update() {
+                        const now = new Date(Date.now() + this.offset);
+                        this.time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                        this.date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+                    }
+                }" x-init="update(); setInterval(() => update(), 1000)" class="flex flex-col items-center">
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1" x-text="date">Memuat Tanggal...</div>
+                    <div class="text-4xl font-black tracking-widest text-primary tabular-nums" x-text="time">00:00:00</div>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        @if($apiSource !== 'local')
+                            <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-success bg-success/10 px-2 py-0.5 rounded-full border border-success/20">
+                                <span class="relative flex h-1.5 w-1.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
+                                </span>
+                                Network Time Synced ({{ $apiSource }})
+                            </div>
+                        @else
+                            <div class="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 12 24c4.408 0 8.411-2.384 10.606-6.044M11.277 5.889A11.959 11.959 0 0 1 12 2.25c4.408 0 8.411 2.384 10.606 6.044" />
+                                </svg>
+                                Local Server Time
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
 
-        {{-- ─── Step 1: Selection ────────────────────────────────────────── --}}
-        @if ($step === 1)
+        {{-- ─── Step 1: Selection & Time Sync Check ────────────────────────── --}}
+        @if (!$isTimeSynced)
+            <div class="card bg-base-100 shadow-xl border border-error/20 overflow-hidden animate-in fade-in zoom-in-95">
+                <div class="bg-error/10 p-6 flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-error text-error-content rounded-full flex items-center justify-center mb-4 shadow-lg shadow-error/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-black text-error uppercase tracking-tight">Sinkronisasi Gagal</h2>
+                    <p class="text-xs font-medium text-base-content/60 mt-2 px-4">Sistem tidak dapat memverifikasi waktu jaringan yang akurat. Akses absensi ditutup untuk mencegah manipulasi data.</p>
+                </div>
+                <div class="card-body p-6 bg-base-50">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-base-100 rounded-xl border border-base-200">
+                            <div class="p-2 bg-base-200 rounded-lg text-base-content/40">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <span class="text-[10px] font-bold opacity-70 uppercase">Periksa Koneksi Internet Server</span>
+                        </div>
+                        <button onclick="window.location.reload()" class="btn btn-outline btn-block rounded-xl font-bold uppercase tracking-widest text-[10px]">Coba Lagi</button>
+                    </div>
+                </div>
+            </div>
+        @elseif ($step === 1)
             <div class="card bg-base-100 shadow-xl border border-base-300">
                 <div class="card-body">
                     <h2 class="card-title justify-center mb-4">Cari Nama Anda</h2>

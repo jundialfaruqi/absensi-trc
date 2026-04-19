@@ -8,6 +8,7 @@ use App\Models\Jadwal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 new #[Layout('layouts.absensi.app')] class extends Component
 {
@@ -40,9 +41,65 @@ new #[Layout('layouts.absensi.app')] class extends Component
     public string $lng = '';
     public string $imageData = ''; // Base64 selfie
 
+    // Server Time Sync
+    public $serverTime;
+    public $serverTimestamp;
+    public $apiSource = 'local';
+    public $fetchTime;
+    public bool $isTimeSynced = false;
+
     public function mount()
     {
         $this->resetErrorBag();
+        $this->fetchServerTime();
+    }
+
+    private function fetchServerTime()
+    {
+        try {
+            // Priority 1: timeapi.io (User's preferred API)
+            $response = Http::timeout(6)->get('https://timeapi.io/api/time/current/zone?timeZone=Asia/Jakarta');
+            if ($response->successful()) {
+                $data = $response->json();
+                $serverNow = Carbon::parse($data['dateTime']);
+                $this->serverTime = $serverNow->toDateTimeString();
+                $this->serverTimestamp = $serverNow->timestamp * 1000;
+                $this->apiSource = 'timeapi';
+                $this->isTimeSynced = true;
+            } else {
+                throw new \Exception("TimeAPI Failed");
+            }
+        } catch (\Exception $e) {
+            try {
+                // Priority 2: worldtimeapi (reliable public API)
+                $response = Http::timeout(6)->get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $serverNow = Carbon::createFromTimestamp($data['unixtime'], 'Asia/Jakarta');
+                    $this->serverTime = $serverNow->toDateTimeString();
+                    $this->serverTimestamp = $serverNow->timestamp * 1000;
+                    $this->apiSource = 'worldtimeapi';
+                    $this->isTimeSynced = true;
+                } else {
+                    throw new \Exception("WorldTimeAPI Failed");
+                }
+            } catch (\Exception $e2) {
+                // NO FALLBACK TO LOCAL TIME - per user request
+                $this->isTimeSynced = false;
+                $this->apiSource = 'failed';
+            }
+        }
+        $this->fetchTime = Carbon::now();
+    }
+
+    private function getCorrectedNow()
+    {
+        if (!$this->serverTime || !$this->fetchTime) {
+            return Carbon::now('Asia/Jakarta');
+        }
+
+        $elapsedSeconds = Carbon::now()->diffInSeconds($this->fetchTime);
+        return Carbon::parse($this->serverTime)->addSeconds($elapsedSeconds);
     }
 
     public function selectPersonnel(int $id)
@@ -80,7 +137,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function prepareActionStep()
     {
-        $now = Carbon::now();
+        $now = $this->getCorrectedNow();
         $today = $now->format('Y-m-d');
         $yesterday = $now->copy()->subDay()->format('Y-m-d');
         $nowTime = $now->format('H:i:s');
@@ -181,7 +238,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
             return;
         }
 
-        $now = Carbon::now();
+        $now = $this->getCorrectedNow();
         $nowTime = $now->format('H:i:s');
 
         try {
