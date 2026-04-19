@@ -1,4 +1,19 @@
-<div>
+<div x-data="{ 
+    previewUrl: null, 
+    showPreview: false,
+    previewX: 0,
+    previewY: 0,
+    triggerPreview(url, event) {
+        this.previewUrl = url;
+        this.showPreview = true;
+        // Position centering management
+        this.previewX = event.clientX;
+        this.previewY = event.clientY;
+    },
+    hidePreview() {
+        this.showPreview = false;
+    }
+}">
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -159,9 +174,11 @@
                                                 <div
                                                     class="flex-1 flex flex-col items-center justify-center border-b border-base-200/50 py-1">
                                                     @if ($a->foto_masuk)
-                                                        <div class="avatar mb-1 group/photo relative z-10">
+                                                        <div class="avatar mb-1 group/photo relative z-10"
+                                                            x-on:mouseenter="triggerPreview('{{ asset('storage/' . $a->foto_masuk) }}', $event)"
+                                                            x-on:mouseleave="hidePreview()">
                                                             <div
-                                                                class="w-15 h-15 rounded-full ring-1 ring-primary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[5] hover:relative hover:z-50 hover:shadow-2xl">
+                                                                class="w-15 h-15 rounded-full ring-1 ring-primary/30 ring-offset-1 overflow-hidden transition-all duration-300">
                                                                 <img src="{{ asset('storage/' . $a->foto_masuk) }}"
                                                                     class="object-cover bg-base-200" loading="lazy" />
                                                             </div>
@@ -206,9 +223,11 @@
                                                 {{-- Bottom Half: Pulang --}}
                                                 <div class="flex-1 flex flex-col items-center justify-center py-1">
                                                     @if ($a->foto_pulang)
-                                                        <div class="avatar mb-1 group/photo relative z-10">
+                                                        <div class="avatar mb-1 group/photo relative z-10"
+                                                            x-on:mouseenter="triggerPreview('{{ asset('storage/' . $a->foto_pulang) }}', $event)"
+                                                            x-on:mouseleave="hidePreview()">
                                                             <div
-                                                                class="w-15 h-15 rounded-full ring-1 ring-secondary/30 ring-offset-1 overflow-hidden transition-all duration-300 hover:scale-[5] hover:relative hover:z-50 hover:shadow-2xl">
+                                                                class="w-15 h-15 rounded-full ring-1 ring-secondary/30 ring-offset-1 overflow-hidden transition-all duration-300">
                                                                 <img src="{{ asset('storage/' . $a->foto_pulang) }}"
                                                                     class="object-cover bg-base-200" loading="lazy" />
                                                             </div>
@@ -538,4 +557,21 @@
             </form>
         </div>
     </dialog>
+    {{-- Teleport Preview Overlay --}}
+    @teleport('body')
+        <div x-show="showPreview" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-90"
+             class="fixed pointer-events-none z-[9999]"
+             :style="`left: ${previewX}px; top: ${previewY}px; transform: translate(-50%, -100%) translateY(-20px);`"
+             x-cloak>
+            <div class="bg-base-100 p-1.5 rounded-2xl shadow-2xl ring-1 ring-base-content/10">
+                <img :src="previewUrl" class="w-64 h-64 object-cover rounded-xl shadow-inner bg-base-200" />
+            </div>
+        </div>
+    @endteleport
 </div>
