@@ -42,7 +42,7 @@
                                         {{ $item->tanggal->translatedFormat('d F Y') }}
                                     </span>
                                     <span class="text-[9px] font-bold text-blue-400 uppercase tracking-widest">
-                                        {{ $item->jadwal?->shift?->nama ?? 'Shift Khusus' }}
+                                        {{ $item->jadwal?->shift?->name ?? $item->status_masuk }}
                                     </span>
                                 </div>
                             </td>
@@ -65,7 +65,8 @@
                                                 {{ str_replace('_', ' ', $item->status_masuk) }}
                                             </span>
                                         @else
-                                            <span class="text-xs font-bold text-slate-600 italic">BELUM ABSEN</span>
+                                            <span
+                                                class="text-xs font-bold text-slate-600 italic">{{ $item->status_masuk }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -89,7 +90,8 @@
                                                 {{ str_replace('_', ' ', $item->status_pulang) }}
                                             </span>
                                         @else
-                                            <span class="text-xs font-bold text-slate-600 italic">-</span>
+                                            <span
+                                                class="text-xs font-bold text-slate-600 italic">{{ $item->status_masuk }}</span>
                                         @endif
                                     </div>
                                 </div>
