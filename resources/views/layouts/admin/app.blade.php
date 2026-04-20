@@ -99,7 +99,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
                     <!-- Section Notifications -->
                     @php
                         $user = auth()->user();
@@ -125,17 +125,22 @@
                                     'category' => 'PENGAJUAN CUTI',
                                     'type' => 'PENDING',
                                     'title' => $req->personnel->name,
-                                    'message' => 'Mengajukan ' . $req->cuti->name . ' (' . \Carbon\Carbon::parse($req->tanggal_mulai)->format('d/m/Y') . ')',
+                                    'message' =>
+                                        'Mengajukan ' .
+                                        $req->cuti->name .
+                                        ' (' .
+                                        \Carbon\Carbon::parse($req->tanggal_mulai)->format('d/m/Y') .
+                                        ')',
                                 ];
                             });
                     @endphp
                     <div class="dropdown dropdown-end">
-                        <button tabindex="0" class="btn btn-ghost btn-circle btn-sm">
+                        <button tabindex="0" class="btn btn-secondary btn-circle">
                             <div class="indicator">
                                 @if ($dashboardNotifications->count() > 0)
                                     <div class="indicator-item inline-grid *:[grid-area:1/1] scale-75">
-                                        <div class="status status-primary animate-ping"></div>
-                                        <div class="status status-primary"></div>
+                                        <div class="status status-error animate-ping"></div>
+                                        <div class="status status-error"></div>
                                     </div>
                                 @endif
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -219,8 +224,7 @@
                         </div>
                     </div>
                     <!-- Theme Toggle -->
-                    <button id="theme-toggle"
-                        class="btn btn-circle btn-sm btn-primary hover:bg-base hover:text-base-content">
+                    <button id="theme-toggle" class="btn btn-circle btn-primary hover:bg-base hover:text-white">
                         <!-- Sun Icon -->
                         <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
