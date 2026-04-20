@@ -250,7 +250,7 @@
                     </svg>
                 </div>
                 <h4 class="text-lg font-black text-slate-500 uppercase italic tracking-wider leading-tight">
-                    Akses<br />Mobile APP</h4>
+                    Ajukan<br />Cuti</h4>
                 <p class="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2 italic">Fitur Terkunci
                 </p>
             </div>
