@@ -537,7 +537,8 @@
                     <div class="flex items-center gap-3">
                         <div class="avatar">
                             <div class="w-10 rounded-md">
-                                <img src="{{ asset('assets/logo/logo-pemko.webp') }}" alt="Logo Pemko" />
+                                <img src="{{ auth()->user()->foto ? asset('storage/' . auth()->user()->foto) : asset('assets/logo/logo-pemko.webp') }}"
+                                    alt="User Photo" />
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">

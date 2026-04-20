@@ -48,13 +48,16 @@ Route::group([
 
     Route::livewire('/jadwal', 'admin::jadwal')
         ->name('jadwal');
+
     Route::livewire('/cuti', 'admin::cutis')
         ->name('cuti');
+
     Route::livewire('/jadwal/import', 'admin::jadwal-import')
         ->name('jadwal.import');
 
     Route::livewire('/absensi', 'admin::absensi')
         ->name('absensi');
+
     Route::get('/jadwal/download-template', function () {
         $month = request('month', date('m'));
         $year = request('year', date('Y'));

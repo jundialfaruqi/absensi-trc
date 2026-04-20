@@ -280,33 +280,38 @@
     </dialog>
 
     {{-- ─── Scripts ─────────────────────────────────────────────────────── --}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" data-navigate-once />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" data-navigate-once />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
+    <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js" data-navigate-once></script>
 
     <script>
-        document.addEventListener('livewire:initialized', () => {
-            let map, marker, circle;
+        (function() {
+            const initMapHandler = () => {
+                // Prevent multiple listeners if navigated back/forth
+                if (window.kantorMapInitialized) return;
+                
+                let map, marker, circle;
 
-            Livewire.on('init-map', (data) => {
-                const {
-                    lat,
-                    lng,
-                    radius
-                } = data;
+                Livewire.on('init-map', (data) => {
+                    const { lat, lng, radius } = data;
 
-                // Give time for modal to render
-                setTimeout(() => {
-                    if (!map) {
+                    setTimeout(() => {
+                        // Cleanup existing map if any to prevent "already initialized" errors
+                        const container = document.getElementById('map-selection');
+                        if (!container) return;
+
+                        if (map) {
+                            map.remove();
+                            map = null;
+                        }
+
                         map = L.map('map-selection').setView([lat, lng], 15);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors'
                         }).addTo(map);
 
-                        marker = L.marker([lat, lng], {
-                            draggable: true
-                        }).addTo(map);
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
                         circle = L.circle([lat, lng], {
                             radius: radius,
                             color: '#1d4ed8',
@@ -326,13 +331,10 @@
                             updateCoords(e.latlng.lat, e.latlng.lng);
                         });
 
-                        // Add Search Control (Only Once)
+                        // Add Search Control
                         const searchControl = new GeoSearch.GeoSearchControl({
                             provider: new GeoSearch.OpenStreetMapProvider({
-                                params: {
-                                    'accept-language': 'id',
-                                    countrycodes: 'id'
-                                }
+                                params: { 'accept-language': 'id', countrycodes: 'id' }
                             }),
                             style: 'bar',
                             showMarker: false,
@@ -346,78 +348,65 @@
                         map.addControl(searchControl);
 
                         map.on('geosearch/showlocation', (result) => {
-                            const {
-                                x,
-                                y
-                            } = result.location;
+                            const { x, y } = result.location;
                             updateCoords(y, x);
                             marker.setLatLng([y, x]);
                             circle.setLatLng([y, x]);
                         });
-                    } else {
-                        const newPos = [lat, lng];
-                        map.setView(newPos, 15);
-                        marker.setLatLng(newPos);
-                        circle.setLatLng(newPos);
-                        circle.setRadius(radius);
+
+                        map.invalidateSize();
+                    }, 400);
+                });
+
+                // Instant Radius Update
+                const handleInput = (e) => {
+                    if (e.target.id === 'radius-slider' && circle) {
+                        circle.setRadius(parseInt(e.target.value));
                     }
+                };
+                document.addEventListener('input', handleInput);
 
-                    // Always reflow to fix map display issues
-                    map.invalidateSize();
-                }, 400);
-            });
-
-            // Instant Radius Update (Zero Latency)
-            document.addEventListener('input', (e) => {
-                if (e.target.id === 'radius-slider' && circle) {
-                    circle.setRadius(parseInt(e.target.value));
+                function updateCoords(lat, lng) {
+                    @this.set('latitude', lat);
+                    @this.set('longitude', lng);
                 }
-            });
 
-            // Watch for radius changes
-            Livewire.on('radius_updated', (newRadius) => {
-                if (circle) circle.setRadius(newRadius);
-            });
+                Livewire.hook('commit', ({ succeed }) => {
+                    succeed(({ snapshot }) => {
+                        const snap = snapshot.memo.data;
+                        if (map && marker && circle) {
+                            const newLat = parseFloat(snap.latitude);
+                            const newLng = parseFloat(snap.longitude);
+                            const newRad = parseInt(snap.radius_meter);
 
-            function updateCoords(lat, lng) {
-                @this.set('latitude', lat);
-                @this.set('longitude', lng);
-            }
-
-            // Sync coordinates and radius when property changes (Typed or Slider)
-            Livewire.hook('commit', ({
-                component,
-                commit,
-                respond,
-                succeed,
-                fail
-            }) => {
-                succeed(({
-                    snapshot,
-                    effect
-                }) => {
-                    const snap = snapshot.memo.data;
-                    if (map && marker && circle) {
-                        const newLat = parseFloat(snap.latitude);
-                        const newLng = parseFloat(snap.longitude);
-                        const newRad = parseInt(snap.radius_meter);
-
-                        if (!isNaN(newLat) && !isNaN(newLng)) {
-                            const newPos = [newLat, newLng];
-                            // Only update if marker position is actually different to avoid snap loop
-                            if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !== newLng) {
-                                marker.setLatLng(newPos);
-                                circle.setLatLng(newPos);
-                                map.panTo(newPos);
+                            if (!isNaN(newLat) && !isNaN(newLng)) {
+                                const newPos = [newLat, newLng];
+                                if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !== newLng) {
+                                    marker.setLatLng(newPos);
+                                    circle.setLatLng(newPos);
+                                    map.panTo(newPos);
+                                }
+                            }
+                            if (!isNaN(newRad)) {
+                                circle.setRadius(newRad);
                             }
                         }
-
-                        if (!isNaN(newRad)) {
-                            circle.setRadius(newRad);
-                        }
-                    }
+                    });
                 });
-            });
-        });
+
+                window.kantorMapInitialized = true;
+            };
+
+            // Initial load
+            if (window.Livewire) {
+                initMapHandler();
+            }
+            
+            // On navigation
+            document.addEventListener('livewire:navigated', () => {
+                window.kantorMapInitialized = false; // Allow re-init for new DOM
+                initMapHandler();
+            }, { once: true });
+        })();
     </script>
 </div>
