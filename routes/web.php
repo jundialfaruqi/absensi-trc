@@ -22,6 +22,9 @@ Route::group([
     Route::livewire('/dashboard', 'admin::dashboard')
         ->name('dashboard');
 
+    Route::livewire('/permohonan-cuti', 'admin::permohonan-cuti')
+        ->name('permohonan-cuti');
+
     Route::livewire('/role-permission', 'admin::role-permission')
         ->name('role-permission');
 
@@ -80,4 +83,7 @@ Route::group([
 
     Route::livewire('/jadwal', 'personnel::jadwal')
         ->name('personnel.jadwal');
+
+    Route::livewire('/ajukan-cuti', 'personnel::ajukan-cuti')
+        ->name('personnel.ajukan-cuti');
 });

@@ -101,7 +101,7 @@
 
                 <div class="flex items-center gap-2">
                     <!-- Notifications -->
-                    {{-- <div class="dropdown dropdown-end">
+                    <div class="dropdown dropdown-end">
                         <button tabindex="0" class="btn btn-ghost btn-circle btn-sm">
                             <div class="indicator">
                                 @if ($dashboardNotifications->count() > 0)
@@ -189,7 +189,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
                     <!-- Theme Toggle -->
                     <button id="theme-toggle"
                         class="btn btn-circle btn-sm btn-primary hover:bg-base hover:text-base-content">
@@ -297,6 +297,36 @@
                                 </div>
                                 <span class="text-[8px] text-base-content opacity-50 ml-7">
                                     Monitoring Kehadiran
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            @php
+                                $pendingCutiCount = \App\Models\LeaveRequest::where('status', 'PENDING')
+                                    ->when(!auth()->user()->hasRole('super-admin'), function ($q) {
+                                        $q->whereHas('personnel', function ($pq) {
+                                            $pq->where('opd_id', auth()->user()->opd()?->id);
+                                        });
+                                    })
+                                    ->count();
+                            @endphp
+                            <a wire:navigate href="{{ route('permohonan-cuti') }}"
+                                class="{{ request()->routeIs('permohonan-cuti*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5 relative">
+                                <div class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="size-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+                                    </svg>
+                                    <span>Permohonan Cuti</span>
+                                    @if ($pendingCutiCount > 0)
+                                        <span
+                                            class="absolute top-2 right-4 badge badge-xs badge-error animate-pulse">{{ $pendingCutiCount }}</span>
+                                    @endif
+                                </div>
+                                <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                    Persetujuan Izin & Cuti
                                 </span>
                             </a>
                         </li>

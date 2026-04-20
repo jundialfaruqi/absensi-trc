@@ -239,21 +239,38 @@
                 </div>
             </a>
 
-            <div
-                class="relative p-8 glass-panel rounded-[2.5rem] border-white/5 opacity-40 grayscale group cursor-not-allowed">
+            {{-- Ajukan Cuti --}}
+            <a href="{{ route('personnel.ajukan-cuti') }}"
+                class="group relative p-8 glass-panel rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
                 <div
-                    class="h-16 w-16 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-500 mb-6">
+                    class="absolute -top-12 -right-12 h-32 w-32 bg-blue-600/10 blur-3xl group-hover:bg-blue-600/20 transition-all">
+                </div>
+
+                <div
+                    class="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <h4 class="text-lg font-black text-slate-500 uppercase italic tracking-wider leading-tight">
+
+                <h4 class="text-lg font-black text-white uppercase italic tracking-wider leading-tight">
                     Ajukan<br />Cuti</h4>
-                <p class="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2 italic">Fitur Terkunci
-                </p>
-            </div>
+                <p
+                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
+                    Permohonan Izin & Cuti</p>
+
+                <div
+                    class="mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    <span class="text-[9px] font-black uppercase tracking-widest italic">Ajukan Sekarang</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </a>
         </div>
     </div>
 </div>
