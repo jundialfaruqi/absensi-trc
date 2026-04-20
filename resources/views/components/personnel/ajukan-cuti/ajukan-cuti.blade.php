@@ -138,93 +138,128 @@
                                 default => '64748B',
                             };
                         @endphp
-                        
+
                         <div class="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
                             {{-- Personnel Request Bubble --}}
                             <div class="chat chat-start group">
                                 <div class="chat-image avatar">
                                     <div class="w-10 rounded-xl border border-white/10 shadow-lg">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($this->personnel->name) }}&background={{ $avatarColor }}&color=fff&bold=true" />
+                                        <img
+                                            src="https://ui-avatars.com/api/?name={{ urlencode($this->personnel->name) }}&background={{ $avatarColor }}&color=fff&bold=true" />
                                     </div>
                                 </div>
                                 <div class="chat-header mb-1.5 flex items-center gap-2">
-                                    <span class="text-[10px] font-black text-white uppercase italic tracking-wider">{{ $this->personnel->name }}</span>
-                                    <time class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{{ $req->created_at->diffForHumans() }}</time>
+                                    <span
+                                        class="text-[10px] font-black text-white uppercase italic tracking-wider">{{ $this->personnel->name }}</span>
+                                    <time
+                                        class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{{ $req->created_at->diffForHumans() }}</time>
                                 </div>
-                                <div class="chat-bubble chat-bubble-neutral bg-white/5 border border-white/10 text-white min-w-[200px] p-4 rounded-2xl shadow-xl backdrop-blur-md group-hover:border-white/20 transition-all">
+                                <div
+                                    class="bg-white/5 border border-white/10 text-white min-w-[200px] p-4 rounded-2xl shadow-xl backdrop-blur-md group-hover:border-white/20 transition-all">
                                     <div class="flex items-center gap-2 mb-2">
-                                        <span class="px-2 py-0.5 rounded bg-{{ $statusColor }}-500/10 border border-{{ $statusColor }}-500/20 text-[8px] font-black text-{{ $statusColor }}-500 uppercase italic">
+                                        <span
+                                            class="px-2 py-0.5 rounded bg-{{ $statusColor }}-500/10 border border-{{ $statusColor }}-500/20 text-[8px] font-black text-{{ $statusColor }}-500 uppercase italic">
                                             {{ $req->cuti->name }}
                                         </span>
                                     </div>
                                     <div class="text-[11px] font-bold leading-relaxed mb-3">
-                                        Mengajukan permohonan {{ strtolower($req->cuti->name) }} dari tanggal 
-                                        <span class="text-blue-400">{{ $req->tanggal_mulai->translatedFormat('d M') }}</span> s/d 
-                                        <span class="text-blue-400">{{ $req->tanggal_selesai->translatedFormat('d M Y') }}</span>.
+                                        Mengajukan permohonan {{ strtolower($req->cuti->name) }} dari tanggal
+                                        <span
+                                            class="text-blue-400">{{ $req->tanggal_mulai->translatedFormat('d M') }}</span>
+                                        s/d
+                                        <span
+                                            class="text-blue-400">{{ $req->tanggal_selesai->translatedFormat('d M Y') }}</span>.
                                     </div>
-                                    <div class="p-3 bg-black/20 rounded-xl border border-white/5 italic text-[10px] text-slate-400 leading-snug">
+                                    <div
+                                        class="p-3 bg-black/20 rounded-xl border border-white/5 italic text-[10px] text-slate-400 leading-snug">
                                         "{{ $req->alasan }}"
                                     </div>
                                 </div>
                                 <div class="chat-footer opacity-60 mt-1.5 flex items-center gap-2">
-                                    <span class="text-[9px] font-black text-{{ $statusColor }}-500 uppercase italic tracking-widest">{{ $req->status }}</span>
-                                    @if($req->status === 'PENDING')
-                                        <button wire:click="cancelRequest({{ $req->id }})" class="btn btn-ghost btn-xs h-auto min-h-0 py-1 px-2 text-[8px] font-black text-red-400 hover:bg-red-500/10 uppercase italic tracking-tighter">Batalkan Pengajuan</button>
+                                    <span
+                                        class="text-[9px] font-black text-{{ $statusColor }}-500 uppercase italic tracking-widest">{{ $req->status }}</span>
+                                    @if ($req->status === 'PENDING')
+                                        <button wire:click="cancelRequest({{ $req->id }})"
+                                            class="btn btn-ghost btn-xs h-auto min-h-0 py-1 px-2 text-[8px] font-black text-red-400 hover:bg-red-500/10 uppercase italic tracking-tighter">Batalkan
+                                            Pengajuan</button>
                                     @endif
                                 </div>
                             </div>
 
                             {{-- Admin Response Bubble (if processed) --}}
-                            @if($req->status !== 'PENDING')
-                                <div class="chat chat-end animate-in fade-in slide-in-from-right-4 duration-700 delay-300">
+                            @if ($req->status !== 'PENDING')
+                                <div
+                                    class="chat chat-end animate-in fade-in slide-in-from-right-4 duration-700 delay-300">
                                     <div class="chat-image avatar">
-                                        <div class="w-10 rounded-xl border border-white/10 shadow-lg bg-slate-800 flex items-center justify-center p-1">
-                                            <img src="{{ asset('assets/logo/trc-logo.webp') }}" class="object-contain" />
+                                        <div
+                                            class="w-10 rounded-xl border border-white/10 shadow-lg bg-slate-800 flex items-center justify-center p-1">
+                                            <img src="{{ asset('assets/logo/trc-logo.webp') }}"
+                                                class="object-contain" />
                                         </div>
                                     </div>
                                     <div class="chat-header mb-1.5 flex flex-row-reverse items-center gap-2">
-                                        <span class="text-[10px] font-black text-white uppercase italic tracking-wider">Admin TRC</span>
-                                        <time class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{{ $req->processed_at?->diffForHumans() }}</time>
+                                        <span
+                                            class="text-[10px] font-black text-white uppercase italic tracking-wider">Admin
+                                            TRC</span>
+                                        <time
+                                            class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{{ $req->processed_at?->diffForHumans() }}</time>
                                     </div>
-                                    <div class="chat-bubble {{ $req->status === 'APPROVED' ? 'chat-bubble-success bg-emerald-500/10 border-emerald-500/20' : 'chat-bubble-error bg-red-500/10 border-red-500/20' }} border text-white p-4 rounded-2xl shadow-xl backdrop-blur-md">
-                                        <div class="text-[11px] font-black uppercase italic tracking-widest mb-1.5 {{ $req->status === 'APPROVED' ? 'text-emerald-400' : 'text-red-400' }}">
+                                    <div
+                                        class="{{ $req->status === 'APPROVED' ? 'chat-bubble-success bg-emerald-500/10 border-emerald-500/20' : 'chat-bubble-error bg-red-500/10 border-red-500/20' }} border text-white p-4 rounded-2xl shadow-xl backdrop-blur-md">
+                                        <div
+                                            class="text-[11px] font-black uppercase italic tracking-widest mb-1.5 {{ $req->status === 'APPROVED' ? 'text-emerald-400' : 'text-red-400' }}">
                                             Permohonan {{ $req->status === 'APPROVED' ? 'Disetujui' : 'Ditolak' }}
                                         </div>
-                                        @if($req->admin_note)
+                                        @if ($req->admin_note)
                                             <div class="text-[11px] font-medium leading-relaxed italic text-slate-300">
                                                 "{{ $req->admin_note }}"
                                             </div>
                                         @endif
                                     </div>
                                     <div class="chat-footer opacity-60 mt-1.5 flex flex-row-reverse gap-2">
-                                        <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Sistem TRC Pekanbaru</span>
+                                        <span
+                                            class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Sistem
+                                            TRC Pekanbaru</span>
                                     </div>
                                 </div>
                             @endif
                         </div>
                     @empty
-                        <div class="flex flex-col items-center justify-center py-24 bg-white/2 rounded-[2.5rem] border border-dashed border-white/10">
-                            <div class="h-20 w-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-slate-600 mb-6 scale-110">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        <div
+                            class="flex flex-col items-center justify-center py-24 bg-white/2 rounded-[2.5rem] border border-dashed border-white/10">
+                            <div
+                                class="h-20 w-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-slate-600 mb-6 scale-110">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                 </svg>
                             </div>
-                            <p class="text-xs font-black text-slate-500 uppercase italic tracking-[0.2em]">Belum ada riwayat percakapan</p>
+                            <p class="text-xs font-black text-slate-500 uppercase italic tracking-[0.2em]">Belum ada
+                                riwayat percakapan</p>
                         </div>
                     @endforelse
 
-                    @if($this->hasMore)
+                    @if ($this->hasMore)
                         <div class="flex justify-center pt-8">
-                            <button wire:click="loadMore" wire:loading.attr="disabled" class="group flex flex-col items-center gap-3">
-                                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-blue-500/30 transition-all group-active:scale-95">
+                            <button wire:click="loadMore" wire:loading.attr="disabled"
+                                class="group flex flex-col items-center gap-3">
+                                <div
+                                    class="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-blue-500/30 transition-all group-active:scale-95">
                                     <span wire:loading.remove wire:target="loadMore">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5 text-slate-400 group-hover:text-blue-400" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
                                         </svg>
                                     </span>
-                                    <span wire:loading wire:target="loadMore" class="loading loading-spinner loading-xs text-blue-400"></span>
+                                    <span wire:loading wire:target="loadMore"
+                                        class="loading loading-spinner loading-xs text-blue-400"></span>
                                 </div>
-                                <span class="text-[10px] font-black text-slate-500 group-hover:text-white uppercase italic tracking-[0.2em] transition-colors">Muat Lebih Banyak</span>
+                                <span
+                                    class="text-[10px] font-black text-slate-500 group-hover:text-white uppercase italic tracking-[0.2em] transition-colors">Muat
+                                    Lebih Banyak</span>
                             </button>
                         </div>
                     @endif
