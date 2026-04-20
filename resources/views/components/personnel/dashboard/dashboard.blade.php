@@ -42,7 +42,7 @@
                         class="absolute -inset-2 bg-blue-500/20 rounded-3xl blur-xl group-hover:bg-blue-500/30 transition-all opacity-0 group-hover:opacity-100">
                     </div>
                     <div
-                        class="h-32 w-32 rounded-3xl border-2 border-white/10 overflow-hidden shadow-2xl relative z-10">
+                        class="h-40 w-32 rounded-3xl border-2 border-white/10 overflow-hidden shadow-2xl relative z-10">
                         <img src="{{ $personnel->foto ? asset('storage/' . $personnel->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($personnel->name) . '&size=256&background=1e293b&color=38bdf8' }}"
                             alt="Foto Personil" class="h-full w-full object-cover">
                     </div>
