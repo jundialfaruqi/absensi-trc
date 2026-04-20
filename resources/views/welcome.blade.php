@@ -62,6 +62,79 @@
         .neon-text-blue {
             text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
+
+        .carousel-view {
+            perspective: 2000px;
+            transform-style: preserve-3d;
+        }
+
+        .carousel-card {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-active {
+            transform: translate3d(0, 0, 100px) rotateY(0deg);
+            z-index: 50;
+            opacity: 1;
+            filter: blur(0) brightness(1.1);
+        }
+
+        .card-prev {
+            transform: translate3d(-60%, 0, -100px) rotateY(35deg);
+            z-index: 30;
+            opacity: 0.4;
+            filter: blur(4px) grayscale(0.5);
+        }
+
+        .card-next {
+            transform: translate3d(60%, 0, -100px) rotateY(-35deg);
+            z-index: 30;
+            opacity: 0.4;
+            filter: blur(4px) grayscale(0.5);
+        }
+
+        .card-far-left {
+            transform: translate3d(-100%, 0, -300px) rotateY(45deg);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card-far-right {
+            transform: translate3d(100%, 0, -300px) rotateY(-45deg);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .hud-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.05));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .scan-line {
+            width: 100%;
+            height: 100px;
+            z-index: 60;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(59, 130, 246, 0.1) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                bottom: 100%;
+            }
+
+            100% {
+                bottom: -20%;
+            }
+        }
     </style>
 </head>
 
@@ -225,78 +298,85 @@
             </div>
         </div>
 
-        {{-- Visual HUD Element --}}
-        <div class="hidden lg:flex justify-center items-center relative">
-            <div
-                class="absolute w-125 h-125 rounded-full border-2 border-blue-500/10 animate-[spin_30s_linear_infinite]">
+        {{-- Visual HUD Element: 3D Holographic Carousel --}}
+        <div class="hidden lg:flex justify-center items-center relative min-h-[500px] w-full"
+            x-data="{ 
+                active: 0, 
+                total: 7,
+                images: [
+                    '{{ asset('assets/images/carousel/1.jpg') }}',
+                    '{{ asset('assets/images/carousel/2.jpg') }}',
+                    '{{ asset('assets/images/carousel/3.jpg') }}',
+                    '{{ asset('assets/images/carousel/4.jpg') }}',
+                    '{{ asset('assets/images/carousel/5.jpg') }}',
+                    '{{ asset('assets/images/carousel/6.jpg') }}',
+                    '{{ asset('assets/images/carousel/7.jpg') }}'
+                ],
+                next() { this.active = (this.active + 1) % this.total },
+                prev() { this.active = (this.active - 1 + this.total) % this.total },
+                getCardClass(index) {
+                    if (index === this.active) return 'card-active';
+                    if (index === (this.active - 1 + this.total) % this.total) return 'card-prev';
+                    if (index === (this.active + 1) % this.total) return 'card-next';
+                    if (index < this.active) return 'card-far-left';
+                    return 'card-far-right';
+                }
+            }" x-init="setInterval(() => next(), 5000)">
+
+            {{-- HUD Background Decorations --}}
+            <div class="absolute w-140 h-140 rounded-full border-2 border-blue-500/5 animate-[spin_40s_linear_infinite]">
             </div>
             <div
-                class="absolute w-100 h-100 rounded-full border border-blue-400/5 animate-[spin_20s_linear_infinite_reverse]">
+                class="absolute w-110 h-110 rounded-full border border-blue-400/5 animate-[spin_25s_linear_infinite_reverse]">
             </div>
 
-            <div
-                class="relative glass-panel rounded-[2.5rem] p-8 w-95 shadow-2xl border-white/10 overflow-hidden transform">
-                <div class="absolute top-0 right-0 p-4">
-                    <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                </div>
+            {{-- 3D Carousel Container --}}
+            <div class="relative w-full h-[400px] carousel-view flex items-center justify-center">
+                <template x-for="(img, index) in images" :key="index">
+                    <div class="absolute w-[320px] h-[450px] carousel-card rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+                        :class="getCardClass(index)">
 
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-black tracking-widest text-blue-400 uppercase">System
-                            Status</span>
-                        <span class="text-[10px] font-bold text-emerald-400 uppercase">Operational</span>
-                    </div>
+                        {{-- Image with HUD Overlay --}}
+                        <div class="relative w-full h-full">
+                            <img :src="img" class="w-full h-full object-cover" alt="Carousel Image">
 
-                    <div class="p-6 bg-slate-900/50 rounded-2xl border border-white/5 space-y-4">
-                        <div class="flex justify-between items-end">
-                            <span class="text-xs font-bold text-slate-400 uppercase">Current Load</span>
-                            <span class="text-2xl font-black text-white">82%</span>
-                        </div>
-                        <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full w-4/5 bg-linear-to-r from-blue-600 to-cyan-400 rounded-full"></div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div
-                            class="p-4 glass-panel rounded-2xl border-white/5 flex flex-col items-center text-center space-y-2">
-                            <div class="h-8 w-8 rounded-lg bg-red-500/20 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                            {{-- Holographic HUD Overlay --}}
+                            <div class="absolute inset-0 hud-overlay opacity-40"></div>
+                            <div class="absolute inset-0 bg-linear-to-t from-slate-900 via-transparent to-transparent">
                             </div>
-                            <span class="text-[10px] font-black text-white uppercase tracking-tighter">Emergency</span>
-                        </div>
-                        <div
-                            class="p-4 glass-panel rounded-2xl border-white/5 flex flex-col items-center text-center space-y-2">
-                            <div class="h-8 w-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4a1 1 0 01-.8 1.6H6a1 1 0 01-1-1V7a1 1 0 00-1-1H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <span class="text-[10px] font-black text-white uppercase tracking-tighter">Response</span>
-                        </div>
-                    </div>
+                            <div class="scan-line"></div>
 
-                    <div class="pt-4 border-t border-white/5 flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full border border-blue-500/30 overflow-hidden bg-slate-800">
+                            {{-- Digital Corner Labels --}}
+                            <div class="absolute top-4 left-4 flex gap-1">
+                                <div class="h-1 w-4 bg-blue-500/50"></div>
+                                <div class="h-4 w-1 bg-blue-500/50"></div>
+                            </div>
+                            <div class="absolute bottom-4 right-4 flex flex-col items-end">
+                                <span class="text-[8px] font-black text-blue-400/70 tracking-widest uppercase"
+                                    x-text="'CAM-' + (index + 1).toString().padStart(3, '0')"></span>
+                                <span class="text-[10px] font-bold text-white/50"
+                                    x-text="new Date().toLocaleTimeString()"></span>
+                            </div>
+
+                            {{-- Central Target Reticle --}}
                             <div
-                                class="w-full h-full bg-blue-600/20 flex items-center justify-center italic font-black text-blue-400">
-                                112</div>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-xs font-black text-white">Dispatcher 051</span>
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active
-                                Session</span>
+                                class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                                <div class="w-12 h-12 border border-blue-400/30 rounded-full flex items-center justify-center">
+                                    <div class="w-1 h-1 bg-blue-400 rounded-full"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </template>
+            </div>
+
+            {{-- Technical Pagination dots --}}
+            <div class="absolute -bottom-8 flex gap-3">
+                <template x-for="i in total" :key="i-1">
+                    <button @click="active = i-1" class="h-1 transition-all duration-500 rounded-full"
+                        :class="active === i - 1 ? 'w-8 bg-blue-500 shadow-lg shadow-blue-500/50' : 'w-2 bg-slate-700 hover:bg-slate-500'">
+                    </button>
+                </template>
             </div>
         </div>
     </main>
