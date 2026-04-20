@@ -419,7 +419,7 @@
                     {{-- Name --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text">Name</span>
+                            <span class="label-text text-sm font-medium">Nama Permission</span>
                         </label>
                         <input type="text" wire:model="permissionName" id="permission-name"
                             class="input input-bordered w-full @error('permissionName') input-error @enderror">
@@ -430,7 +430,7 @@
                     {{-- Group --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text">Group</span>
+                            <span class="label-text text-sm font-medium">Nama Group Permission</span>
                         </label>
                         <input type="text" wire:model="permissionGroup" id="permission-group"
                             class="input input-bordered w-full @error('permissionGroup') input-error @enderror">
@@ -441,7 +441,7 @@
                     {{-- Guard --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text">Guard Name</span>
+                            <span class="label-text text-sm font-medium">Guard Name</span>
                         </label>
                         <select wire:model="permissionGuard" id="permission-guard"
                             class="select select-bordered w-full @error('permissionGuard') select-error @enderror">
@@ -454,7 +454,7 @@
                     </div>
                 </div>
                 <div class="modal-action">
-                    <button type="button" class="btn"
+                    <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('permission-modal').close()">Batal</button>
                     <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">
                         <span wire:loading wire:target="savePermission"
@@ -478,7 +478,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {{-- Name --}}
                     <div class="form-control mb-2">
-                        <label class="label mb-2"><span class="label-text">Nama</span></label>
+                        <label class="label mb-2"><span class="label-text text-sm font-medium">Nama
+                                Role</span></label>
                         <input type="text" wire:model="roleName" id="role-name"
                             class="input input-bordered @error('roleName') input-error @enderror">
                         @error('roleName')
@@ -487,7 +488,8 @@
                     </div>
                     {{-- Guard --}}
                     <div class="form-control mb-2">
-                        <label class="label mb-2"><span class="label-text">Pilih Guard</span></label>
+                        <label class="label mb-2"><span class="label-text text-sm font-medium">Pilih
+                                Guard</span></label>
                         <select wire:model="roleGuard" id="role-guard"
                             class="select select-bordered w-full @error('roleGuard') select-error @enderror">
                             <option value="web">web</option>
@@ -517,7 +519,8 @@
                         }
                     }"
                         x-on:click.outside="open = false">
-                        <label class="label mb-2"><span class="label-text">Pilih Warna</span></label>
+                        <label class="label mb-2"><span class="label-text text-sm font-medium">Pilih
+                                Warna Badge</span></label>
                         <div class="flex gap-2 items-center">
                             {{-- Preview button: klik buka/tutup swatch grid --}}
                             <button type="button" id="role-color-preview" x-on:click="open = !open"
@@ -570,7 +573,8 @@
                     </div>
                     {{-- Permissions --}}
                     <div class="form-control md:col-span-2">
-                        <label class="label mb-2"><span class="label-text">Permissions</span></label>
+                        <label class="label mb-2"><span
+                                class="label-text text-sm font-medium">Permissions</span></label>
                         <p class="text-xs text-base-content/60">Pilih semua permission/izin yang diperlukan</p>
                         <div class="max-h-85 overflow-auto py-3 px-1">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -597,7 +601,7 @@
                     </div>
                 </div>
                 <div class="modal-action">
-                    <button type="button" class="btn"
+                    <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('role-modal').close()">Batal</button>
                     <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">
                         <span wire:loading wire:target="saveRole" class="loading loading-spinner loading-xs"></span>

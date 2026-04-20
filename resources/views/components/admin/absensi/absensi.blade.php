@@ -395,7 +395,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {{-- Status Masuk --}}
                     <div class="form-control">
-                        <label class="label py-1"><span class="label-text font-bold text-base-content/70">Status
+                        <label class="label py-1"><span class="label-text text-sm font-medium">Status
                                 Masuk</span></label>
                         <select wire:model.live="statusMasuk"
                             class="select select-bordered w-full bg-base-50 focus:border-primary">
@@ -415,7 +415,7 @@
 
                     {{-- Status Pulang --}}
                     <div class="form-control">
-                        <label class="label py-1"><span class="label-text font-bold text-base-content/70">Status
+                        <label class="label py-1"><span class="label-text text-sm font-medium">Status
                                 Pulang</span></label>
                         <select wire:model.live="statusPulang"
                             class="select select-bordered w-full bg-base-50 focus:border-primary">
@@ -432,7 +432,7 @@
 
                     {{-- Jam Masuk --}}
                     <div class="form-control">
-                        <label class="label py-1"><span class="label-text font-bold text-base-content/70">Jam
+                        <label class="label py-1"><span class="label-text text-sm font-medium">Jam
                                 Masuk</span></label>
                         <div class="relative">
                             <input type="time" wire:model="jamMasuk" step="60"
@@ -450,7 +450,7 @@
 
                     {{-- Jam Pulang --}}
                     <div class="form-control">
-                        <label class="label py-1"><span class="label-text font-bold text-base-content/70">Jam
+                        <label class="label py-1"><span class="label-text text-sm font-medium">Jam
                                 Pulang</span></label>
                         <div class="relative">
                             <input type="time" wire:model="jamPulang" step="60"
@@ -471,7 +471,7 @@
                 <div class="grid grid-cols-1 gap-4">
                     @if (in_array($statusMasuk, ['SAKIT', 'IZIN']) || in_array($statusPulang, ['SAKIT', 'IZIN']))
                         <div class="form-control">
-                            <label class="label py-1"><span class="label-text font-bold">
+                            <label class="label py-1"><span class="label-text text-sm font-medium">
                                     Nomor Surat (Sakit/Izin)
                                 </span></label>
                             <input type="text" wire:model="nomorSurat" placeholder="Contoh: 123/SKP/IV/2026..."
@@ -481,7 +481,8 @@
 
                     @if ($statusMasuk === 'CUTI' || $statusPulang === 'CUTI')
                         <div class="form-control">
-                            <label class="label py-1"><span class="label-text font-bold">Jenis Cuti</span></label>
+                            <label class="label py-1"><span class="label-text text-sm font-medium">Jenis
+                                    Cuti</span></label>
                             <select wire:model="cutiId"
                                 class="select select-bordered w-full bg-base-50 focus:border-primary">
                                 <option value="">Pilih Jenis Cuti</option>
@@ -495,7 +496,7 @@
 
                 {{-- Alasan Edit --}}
                 <div class="form-control w-full">
-                    <label class="label py-1.5"><span class="label-text font-bold text-base-content/80">
+                    <label class="label py-1.5"><span class="label-text text-sm font-medium">
                             Alasan Perubahan / Keterangan
                         </span></label>
                     <textarea wire:model="alasanEdit"
