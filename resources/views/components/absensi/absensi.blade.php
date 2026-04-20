@@ -3,101 +3,164 @@
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         {{-- Base Gradient --}}
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#1a3a8a_0%,#0a192f_70%)]"></div>
-        
+
         {{-- Digital Plexus Dots & Lines (Corner Decorations) --}}
         <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-25">
             {{-- Top Left cluster (Enhanced) --}}
-            <svg class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] text-blue-400 animate-float" viewBox="0 0 100 100">
-                <circle cx="10" cy="10" r="1" fill="currentColor"/>
-                <circle cx="30" cy="20" r="1.2" fill="currentColor"/>
-                <circle cx="15" cy="40" r="1" fill="currentColor"/>
-                <circle cx="50" cy="15" r="1.5" fill="currentColor"/>
-                <circle cx="45" cy="45" r="1" fill="currentColor"/>
-                <circle cx="70" cy="10" r="1" fill="currentColor"/>
-                <circle cx="25" cy="65" r="1.2" fill="currentColor"/>
-                <circle cx="55" cy="35" r="1" fill="currentColor"/>
-                <circle cx="20" cy="15" r="0.8" fill="currentColor"/>
-                <circle cx="40" cy="10" r="0.8" fill="currentColor"/>
-                <circle cx="65" cy="40" r="1" fill="currentColor"/>
-                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="10" y1="10" x2="15" y2="40" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="15" y1="40" x2="30" y2="20" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="15" y1="40" x2="25" y2="65" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="30" y1="20" x2="45" y2="45" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="50" y1="15" x2="70" y2="10" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="45" y1="45" x2="50" y2="15" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="55" y1="35" x2="45" y2="45" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="55" y1="35" x2="70" y2="10" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="20" y1="15" x2="10" y2="10" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="20" y1="15" x2="30" y2="20" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="40" y1="10" x2="20" y2="15" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="40" y1="10" x2="50" y2="15" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="65" cy1="40" x2="55" y2="35" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="65" cy1="40" x2="70" y2="10" stroke="currentColor" stroke-width="0.3"/>
+            <svg class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] text-blue-400 animate-float"
+                viewBox="0 0 100 100">
+                <circle cx="10" cy="10" r="1" fill="currentColor" />
+                <circle cx="30" cy="20" r="1.2" fill="currentColor" />
+                <circle cx="15" cy="40" r="1" fill="currentColor" />
+                <circle cx="50" cy="15" r="1.5" fill="currentColor" />
+                <circle cx="45" cy="45" r="1" fill="currentColor" />
+                <circle cx="70" cy="10" r="1" fill="currentColor" />
+                <circle cx="25" cy="65" r="1.2" fill="currentColor" />
+                <circle cx="55" cy="35" r="1" fill="currentColor" />
+                <circle cx="20" cy="15" r="0.8" fill="currentColor" />
+                <circle cx="40" cy="10" r="0.8" fill="currentColor" />
+                <circle cx="65" cy="40" r="1" fill="currentColor" />
+                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="10" y1="10" x2="15" y2="40" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="15" y1="40" x2="30" y2="20" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="15" y1="40" x2="25" y2="65" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="30" y1="20" x2="45" y2="45" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="50" y1="15" x2="70" y2="10" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="45" y1="45" x2="50" y2="15" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="55" y1="35" x2="45" y2="45" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="55" y1="35" x2="70" y2="10" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="20" y1="15" x2="10" y2="10" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="20" y1="15" x2="30" y2="20" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="40" y1="10" x2="20" y2="15" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="40" y1="10" x2="50" y2="15" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="65" cy1="40" x2="55" y2="35" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="65" cy1="40" x2="70" y2="10" stroke="currentColor"
+                    stroke-width="0.3" />
             </svg>
 
             {{-- Bottom Right cluster (Enhanced) --}}
-            <svg class="absolute bottom-[-15%] right-[-15%] w-[700px] h-[700px] text-blue-400 opacity-80 rotate-12 animate-float-slow" viewBox="0 0 100 100">
-                <circle cx="80" cy="80" r="1" fill="currentColor"/>
-                <circle cx="60" cy="70" r="1.5" fill="currentColor"/>
-                <circle cx="90" cy="50" r="1" fill="currentColor"/>
-                <circle cx="40" cy="90" r="1.2" fill="currentColor"/>
-                <circle cx="30" cy="60" r="1.2" fill="currentColor"/>
-                <circle cx="50" cy="40" r="1" fill="currentColor"/>
-                <circle cx="75" cy="55" r="1" fill="currentColor"/>
-                <circle cx="45" cy="75" r="1" fill="currentColor"/>
-                <circle cx="20" cy="80" r="1" fill="currentColor"/>
-                <circle cx="10" cy="50" r="0.8" fill="currentColor"/>
-                <line x1="80" y1="80" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="60" y1="70" x2="90" y2="50" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="60" y1="70" x2="40" y2="90" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="40" y1="90" x2="30" y2="60" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="30" y1="60" x2="50" y2="40" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="50" y1="40" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="75" y1="55" x2="90" y2="50" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="75" y1="55" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="45" y1="75" x2="60" y2="70" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="45" y1="75" x2="40" y2="90" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="20" y1="80" x2="30" y2="60" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="20" y1="80" x2="40" y2="90" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="10" y1="50" x2="20" y2="80" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="10" y1="50" x2="30" y2="60" stroke="currentColor" stroke-width="0.3"/>
+            <svg class="absolute bottom-[-15%] right-[-15%] w-[700px] h-[700px] text-blue-400 opacity-80 rotate-12 animate-float-slow"
+                viewBox="0 0 100 100">
+                <circle cx="80" cy="80" r="1" fill="currentColor" />
+                <circle cx="60" cy="70" r="1.5" fill="currentColor" />
+                <circle cx="90" cy="50" r="1" fill="currentColor" />
+                <circle cx="40" cy="90" r="1.2" fill="currentColor" />
+                <circle cx="30" cy="60" r="1.2" fill="currentColor" />
+                <circle cx="50" cy="40" r="1" fill="currentColor" />
+                <circle cx="75" cy="55" r="1" fill="currentColor" />
+                <circle cx="45" cy="75" r="1" fill="currentColor" />
+                <circle cx="20" cy="80" r="1" fill="currentColor" />
+                <circle cx="10" cy="50" r="0.8" fill="currentColor" />
+                <line x1="80" y1="80" x2="60" y2="70" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="60" y1="70" x2="90" y2="50" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="60" y1="70" x2="40" y2="90" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="40" y1="90" x2="30" y2="60" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="30" y1="60" x2="50" y2="40" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="50" y1="40" x2="60" y2="70" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="75" y1="55" x2="90" y2="50" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="75" y1="55" x2="60" y2="70" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="45" y1="75" x2="60" y2="70" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="45" y1="75" x2="40" y2="90" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="20" y1="80" x2="30" y2="60" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="20" y1="80" x2="40" y2="90" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="10" y1="50" x2="20" y2="80" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="10" y1="50" x2="30" y2="60" stroke="currentColor"
+                    stroke-width="0.3" />
             </svg>
 
             {{-- Mid Right Cluster (New) --}}
-            <svg class="absolute top-[30%] right-[-5%] w-[400px] h-[400px] text-blue-400 opacity-60 animate-pulse" viewBox="0 0 100 100">
-                <circle cx="90" cy="10" r="1" fill="currentColor"/>
-                <circle cx="70" cy="30" r="1.2" fill="currentColor"/>
-                <circle cx="85" cy="50" r="1" fill="currentColor"/>
-                <circle cx="60" cy="15" r="0.8" fill="currentColor"/>
-                <line x1="90" y1="10" x2="70" y2="30" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="70" y1="30" x2="85" y2="50" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="60" y1="15" x2="70" y2="30" stroke="currentColor" stroke-width="0.3"/>
-                <line x1="60" y1="15" x2="90" y2="10" stroke="currentColor" stroke-width="0.3"/>
+            <svg class="absolute top-[30%] right-[-5%] w-[400px] h-[400px] text-blue-400 opacity-60 animate-pulse"
+                viewBox="0 0 100 100">
+                <circle cx="90" cy="10" r="1" fill="currentColor" />
+                <circle cx="70" cy="30" r="1.2" fill="currentColor" />
+                <circle cx="85" cy="50" r="1" fill="currentColor" />
+                <circle cx="60" cy="15" r="0.8" fill="currentColor" />
+                <line x1="90" y1="10" x2="70" y2="30" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="70" y1="30" x2="85" y2="50" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="60" y1="15" x2="70" y2="30" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="60" y1="15" x2="90" y2="10" stroke="currentColor"
+                    stroke-width="0.3" />
             </svg>
         </div>
 
         <style>
             @keyframes float {
-                0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                50% { transform: translate(10px, 15px) rotate(2deg); }
+
+                0%,
+                100% {
+                    transform: translate(0, 0) rotate(0deg);
+                }
+
+                50% {
+                    transform: translate(10px, 15px) rotate(2deg);
+                }
             }
+
             @keyframes float-slow {
-                0%, 100% { transform: translate(0, 0) rotate(12deg); }
-                50% { transform: translate(-15px, -10px) rotate(15deg); }
+
+                0%,
+                100% {
+                    transform: translate(0, 0) rotate(12deg);
+                }
+
+                50% {
+                    transform: translate(-15px, -10px) rotate(15deg);
+                }
             }
-            .animate-float { animation: float 15s ease-in-out infinite; }
-            .animate-float-slow { animation: float-slow 20s ease-in-out infinite; }
+
+            .animate-float {
+                animation: float 15s ease-in-out infinite;
+            }
+
+            .animate-float-slow {
+                animation: float-slow 20s ease-in-out infinite;
+            }
         </style>
 
         {{-- Neon Tech Lines (Red/Orange Glow) --}}
-        <div class="absolute top-20 right-[-5%] w-64 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-40 blur-xs"></div>
-        <div class="absolute bottom-40 left-[-5%] w-48 h-px bg-gradient-to-r from-transparent via-red-400 to-transparent opacity-30 blur-xs rotate-45"></div>
-        
+        <div
+            class="absolute top-20 right-[-5%] w-64 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-40 blur-xs">
+        </div>
+        <div
+            class="absolute bottom-40 left-[-5%] w-48 h-px bg-gradient-to-r from-transparent via-red-400 to-transparent opacity-30 blur-xs rotate-45">
+        </div>
+
         {{-- Pulse Glow for Red Lines --}}
         <div class="absolute top-1/4 right-10 w-2 h-2 bg-red-500 rounded-full blur-xs animate-pulse"></div>
-        <div class="absolute bottom-1/3 left-10 w-1.5 h-1.5 bg-red-400 rounded-full blur-xs animate-pulse delay-700"></div>
+        <div class="absolute bottom-1/3 left-10 w-1.5 h-1.5 bg-red-400 rounded-full blur-xs animate-pulse delay-700">
+        </div>
 
         {{-- Light Streaks --}}
         <div class="absolute top-[10%] left-[20%] w-[60%] h-[20%] bg-blue-500/10 blur-[100px] rounded-full"></div>
@@ -126,9 +189,11 @@
             }" x-init="update();
             setInterval(() => update(), 1000)">
                 <div wire:ignore class="flex flex-col items-center">
-                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 opacity-60 mb-1" x-text="date">Memuat
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 opacity-60 mb-1"
+                        x-text="date">Memuat
                         Tanggal...</div>
-                    <div class="text-4xl font-black tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tabular-nums" x-text="time">00:00:00
+                    <div class="text-4xl font-black tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tabular-nums"
+                        x-text="time">00:00:00
                     </div>
                 </div>
 
@@ -165,14 +230,15 @@
                 <div class="bg-error/10 p-6 flex flex-col items-center text-center">
                     <div
                         class="w-16 h-16 bg-error text-error-content rounded-full flex items-center justify-center mb-4 shadow-lg shadow-error/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" class="size-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="2.5" stroke="currentColor" class="size-8">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                         </svg>
                     </div>
                     <h2 class="text-xl font-black text-error uppercase tracking-tight">Sinkronisasi Gagal</h2>
-                    <p class="text-xs font-medium text-base-content/60 mt-2 px-4">Sistem tidak dapat memverifikasi waktu
+                    <p class="text-xs font-medium text-base-content/60 mt-2 px-4">Sistem tidak dapat memverifikasi
+                        waktu
                         jaringan yang akurat. Akses absensi ditutup untuk mencegah manipulasi data.</p>
                 </div>
                 <div class="card-body p-6 bg-base-50">
@@ -196,16 +262,20 @@
                 </div>
             </div>
         @elseif ($step === 1)
-            <div class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in-95">
+            <div
+                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in-95">
                 <div class="card-body">
-                    <h2 class="card-title justify-center mb-4 text-white uppercase tracking-widest text-sm font-bold opacity-80">Cari Nama Anda</h2>
+                    <h2
+                        class="card-title justify-center mb-4 text-white uppercase tracking-widest text-sm font-bold opacity-80">
+                        Cari Nama Anda</h2>
                     <div class="relative mb-6">
                         <input type="text" wire:model.live.debounce.300ms="search"
                             placeholder="Ketik nama di sini..."
                             class="input input-lg w-full pl-12 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-blue-400 focus:bg-white/10 transition-all rounded-2xl"
                             autofocus />
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="size-6 absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
+                            stroke="currentColor"
+                            class="size-6 absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                         </svg>
@@ -248,23 +318,26 @@
 
         {{-- ─── Step 2: PIN Input ─────────────────────────────────────────── --}}
         @if ($step === 2)
-            <div class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+            <div
+                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in slide-in-from-bottom-4">
                 <div class="card-body">
                     <div class="text-center mb-6">
                         <div class="avatar mb-4 {{ !$selectedPersonnel->foto ? 'placeholder' : '' }}">
                             <div
                                 class="bg-blue-500/20 text-blue-200 w-20 rounded-full border-4 border-white/10 shadow-xl overflow-hidden">
                                 @if ($selectedPersonnel->foto)
-                                    <img src="{{ asset('storage/' . $selectedPersonnel->foto) }}" class="object-cover"
-                                        alt="Foto Personnel" />
+                                    <img src="{{ asset('storage/' . $selectedPersonnel->foto) }}"
+                                        class="object-cover" alt="Foto Personnel" />
                                 @else
                                     <span
                                         class="text-2xl font-black">{{ strtoupper(substr($selectedPersonnel->name, 0, 1)) }}</span>
                                 @endif
                             </div>
                         </div>
-                        <h2 class="text-xl font-bold uppercase truncate px-4 text-white drop-shadow-sm">{{ $selectedPersonnel->name }}</h2>
-                        <p class="text-xs text-blue-200/50 uppercase tracking-widest font-bold">Masukkan PIN Keamanan</p>
+                        <h2 class="text-xl font-bold uppercase truncate px-4 text-white drop-shadow-sm">
+                            {{ $selectedPersonnel->name }}</h2>
+                        <p class="text-xs text-blue-200/50 uppercase tracking-widest font-bold">Masukkan PIN Keamanan
+                        </p>
                     </div>
 
                     <div class="flex justify-center gap-4 mb-8">
@@ -301,7 +374,8 @@
                         </button>
                         <button type="button" wire:click="appendPin(0)"
                             class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-xl font-black text-white hover:bg-white/10 rounded-2xl">0</button>
-                        <button type="button" wire:click="resetForm" class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-blue-400 hover:text-blue-500 rounded-2xl">
+                        <button type="button" wire:click="resetForm"
+                            class="btn btn-ghost bg-white/5 border border-white/5 btn-lg h-16 text-blue-400 hover:text-blue-500 rounded-2xl">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="2.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -380,14 +454,16 @@
                                             d="m4.5 12.75 6 6 9-13.5" />
                                     </svg>
                                 </div>
-                                <div class="text-[10px] font-black uppercase tracking-widest text-white shadow-sm">Wajah Terverifikasi</div>
+                                <div class="text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
+                                    Wajah Terverifikasi</div>
                             </div>
                         </template>
                     </div>
 
                     {{-- Status Indicators --}}
                     <div class="grid grid-cols-2 gap-2 mt-4">
-                        <div :class="gpsStatus === 'OK' ? 'bg-success/10 border-success/30 text-success' : 'bg-white/5 border-white/10 text-white/40'"
+                        <div :class="gpsStatus === 'OK' ? 'bg-success/10 border-success/30 text-success' :
+                            'bg-white/5 border-white/10 text-white/40'"
                             class="p-2 rounded-xl border flex items-center gap-2 transition-all shadow-sm">
                             <div :class="gpsStatus === 'OK' ? 'text-success' : 'text-white/20'">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -399,12 +475,14 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-[8px] font-black uppercase opacity-60 leading-none mb-0.5">Lokasi</div>
+                                <div class="text-[8px] font-black uppercase opacity-60 leading-none mb-0.5">Lokasi
+                                </div>
                                 <div class="text-[10px] font-bold" x-text="gpsMessage">Mencari...</div>
                             </div>
                         </div>
 
-                        <div :class="isMatched ? 'bg-success/10 border-success/30 text-success' : 'bg-white/5 border-white/10 text-white/40'"
+                        <div :class="isMatched ? 'bg-success/10 border-success/30 text-success' :
+                            'bg-white/5 border-white/10 text-white/40'"
                             class="p-2 rounded-xl border flex items-center gap-2 transition-all shadow-sm">
                             <div :class="isMatched ? 'text-success' : 'text-white/20'">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -412,7 +490,16 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M15.191 6.062h.008v.008h-.008V6.062ZM18 8.812h.008v.008H18V8.812ZM15.191 11.562h.008v.008h-.008v-.008ZM18 14.312h.008v.008H18v-.008ZM21 17.062h.008v.008H21v-.008ZM12.181 8.68c.341-1.107 1.467-1.875 2.65-1.875 1.157 0 2.1 1.607 1.969 2.45-.12.772-.646 1.393-1.307 1.816-.656.422-1.202.911-1.377 1.513l-.111.452m-1.146-5.303-.01.013m2.706 3.103c.19.116.446.126.646.017a1.322 1.322 0 0 0 .512-.575 1.31 1.31 0 0 0 .08-.611c-.027-.317-.184-.504-.39-.554a.705.705 0 0 0-.662.131.6.6 0 0 0-.186.418.604.604 0 0 0 0 .15l.019.014c.032.022.03.024.03.024a.5.5 0 0 1-.038-.027ZM11.182 18H9.122a2 2 0 0 1-1.928-1.464l-1.071-3.75a2 2 0 0 1 .728-2.22l3.07-2.1c.176-.121.377-.183.583-.183h.004c.158 0 .313.036.452.106l1.652.825" />
                                 </svg>
-                       {{-- Info Lokasi Kantor --}}
+                            </div>
+                            <div>
+                                <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Biometrik
+                                </div>
+                                <div class="text-[10px] font-bold" x-text="faceMessage">Memindai...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Info Lokasi Kantor --}}
                     @if (!empty($infoLokasi))
                         <div class="mt-4 animate-in fade-in slide-in-from-top-2">
                             @if (is_null($infoLokasi['is_within_radius']))
@@ -425,7 +512,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }} (±{{ $infoLokasi['jarak_meter'] }}m)</span>
+                                    <span>Dalam radius {{ $infoLokasi['kantor_name'] }}
+                                        (±{{ $infoLokasi['jarak_meter'] }}m)</span>
                                 </div>
                             @elseif($infoLokasi['boleh'] && !$infoLokasi['is_within_radius'])
                                 <div
@@ -435,7 +523,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
-                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }} ({{ $infoLokasi['jarak_meter'] }}m). Aktif.</span>
+                                    <span>Luar radius {{ $infoLokasi['kantor_name'] }}
+                                        ({{ $infoLokasi['jarak_meter'] }}m). Aktif.</span>
                                 </div>
                             @else
                                 <div
@@ -466,21 +555,28 @@
 
                                     <div wire:loading.remove wire:target="submitAttendance"
                                         class="flex flex-col items-center">
-                                        <span class="text-sm font-black tracking-widest drop-shadow-md">ABSEN MASUK</span>
-                                        <span class="text-[10px] opacity-70 font-medium group-disabled:hidden uppercase tracking-tighter">SIAP KIRIM DATA</span>
-                                        <span class="text-[10px] opacity-50 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                        <span class="text-sm font-black tracking-widest drop-shadow-md">ABSEN
+                                            MASUK</span>
+                                        <span
+                                            class="text-[10px] opacity-70 font-medium group-disabled:hidden uppercase tracking-tighter">SIAP
+                                            KIRIM DATA</span>
+                                        <span
+                                            class="text-[10px] opacity-50 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
+                                            Identitas & Lokasi...</span>
                                     </div>
                                 </button>
                             @else
                                 {{-- Mode: Pulang --}}
                                 @if (!$activeAbsensi && $isTooLateToIn)
-                                    <div class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight text-center backdrop-blur-md border border-red-500/20">
+                                    <div
+                                        class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight text-center backdrop-blur-md border border-red-500/20">
                                         ⚠️ Terlambat > 4 jam. Absen masuk ditutup.
                                     </div>
                                 @endif
 
                                 <button type="button" x-on:click="submit('out')" wire:loading.attr="disabled"
-                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
+                                    :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !
+                                        isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn bg-gradient-to-r from-secondary to-purple-600 hover:from-secondary/80 hover:to-purple-500 border-none btn-lg w-full shadow-[0_0_20px_rgba(var(--color-secondary),0.3)] py-2 h-auto group relative flex items-center justify-center min-h-[64px] text-white rounded-2xl">
 
                                     <div wire:loading wire:target="submitAttendance">
@@ -489,42 +585,49 @@
 
                                     <div wire:loading.remove wire:target="submitAttendance"
                                         class="flex flex-col items-center">
-                                        <span class="text-sm font-black uppercase tracking-widest drop-shadow-md">Absen Pulang</span>
-                                        <span class="text-[10px] opacity-70 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan Kerja Hari Ini</span>
-                                        <span class="text-[10px] opacity-50 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi Identitas & Lokasi...</span>
+                                        <span class="text-sm font-black uppercase tracking-widest drop-shadow-md">Absen
+                                            Pulang</span>
+                                        <span
+                                            class="text-[10px] opacity-70 font-medium group-disabled:hidden uppercase tracking-tighter">Selesaikan
+                                            Kerja Hari Ini</span>
+                                        <span
+                                            class="text-[10px] opacity-50 font-medium hidden group-disabled:block uppercase tracking-tighter">Verifikasi
+                                            Identitas & Lokasi...</span>
                                     </div>
                                 </button>
                             @endif
                         </div>
                     @else
-                        <div class="p-6 rounded-2xl bg-white/5 border border-white/10 text-center mt-6 backdrop-blur-md">
-                            <h3 class="font-black text-rose-400 uppercase text-[10px] mb-1 tracking-widest">Akses Ditutup</h3>
-                            <p class="text-[10px] text-white/40 uppercase font-medium tracking-widest">Status: {{ $activeJadwal->status }}</p>
+                        <div
+                            class="p-6 rounded-2xl bg-white/5 border border-white/10 text-center mt-6 backdrop-blur-md">
+                            <h3 class="font-black text-rose-400 uppercase text-[10px] mb-1 tracking-widest">Akses
+                                Ditutup</h3>
+                            <p class="text-[10px] text-white/40 uppercase font-medium tracking-widest">Status:
+                                {{ $activeJadwal->status }}</p>
                         </div>
                     @endif
 
                     <div class="mt-4">
                         <button wire:click="resetForm" x-on:click="stopCamera()"
-                            class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest hover:bg-white/10 rounded-xl">Kembali</button>
+                            class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest rounded-xl hover:bg-transparent hover:text-white/30 hover:shadow-none hover:border-none">Kembali</button>
                     </div>
                 </div>
-            </div>
 
-            <style>
-                @keyframes scan-line {
-                    0% {
-                        top: 0;
+                <style>
+                    @keyframes scan-line {
+                        0% {
+                            top: 0;
+                        }
+
+                        100% {
+                            top: 100%;
+                        }
                     }
 
-                    100% {
-                        top: 100%;
+                    .animate-scan-line {
+                        animation: scan-line 2s linear infinite;
                     }
-                }
-
-                .animate-scan-line {
-                    animation: scan-line 2s linear infinite;
-                }
-            </style>
+                </style>
         @endif
 
         {{-- ─── Step 4: Result ─────────────────────────────────────────── --}}
@@ -550,18 +653,22 @@
                         </div>
                     @endif
 
-                    <h2 class="text-3xl font-black uppercase mb-2 tracking-tighter drop-shadow-md text-white">{{ $isSuccess ? 'Berhasil' : 'Gagal' }}</h2>
-                    <p class="text-blue-100/60 font-medium mb-8 text-sm uppercase tracking-widest">{{ $message }}</p>
+                    <h2 class="text-3xl font-black uppercase mb-2 tracking-tighter drop-shadow-md text-white">
+                        {{ $isSuccess ? 'Berhasil' : 'Gagal' }}</h2>
+                    <p class="text-blue-100/60 font-medium mb-8 text-sm uppercase tracking-widest">{{ $message }}
+                    </p>
 
                     @if ($isSuccess && $lastAbsensi)
                         <div
                             class="grid grid-cols-2 gap-4 w-full bg-white/5 p-4 rounded-2xl mb-8 border border-white/10 shadow-inner backdrop-blur-sm">
                             <div class="text-left">
                                 <div class="text-[10px] uppercase text-white/40 font-black tracking-widest">Waktu</div>
-                                <div class="font-black text-white text-lg">{{ $lastAbsensi->jam_pulang ?? $lastAbsensi->jam_masuk }}</div>
+                                <div class="font-black text-white text-lg">
+                                    {{ $lastAbsensi->jam_pulang ?? $lastAbsensi->jam_masuk }}</div>
                             </div>
                             <div class="text-left">
-                                <div class="text-[10px] uppercase text-white/40 font-black tracking-widest">Tanggal</div>
+                                <div class="text-[10px] uppercase text-white/40 font-black tracking-widest">Tanggal
+                                </div>
                                 <div class="font-black text-white text-lg">
                                     {{ \Carbon\Carbon::parse($lastAbsensi->tanggal)->format('d/m/Y') }}</div>
                             </div>
@@ -569,7 +676,8 @@
                     @endif
 
                     <button wire:click="resetForm"
-                        class="btn bg-white/10 hover:bg-white/20 border-white/20 text-white btn-lg w-full uppercase font-black tracking-widest rounded-2xl transition-all">Kembali Ke Awal</button>
+                        class="btn bg-white/10 hover:bg-white/20 border-white/20 text-white btn-lg w-full uppercase font-black tracking-widest rounded-2xl transition-all">Kembali
+                        Ke Awal</button>
                 </div>
             </div>
 
