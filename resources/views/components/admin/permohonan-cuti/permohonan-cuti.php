@@ -16,11 +16,17 @@ new #[Layout('layouts::admin.app')] #[Title('Permohonan Cuti')] class extends Co
 
     public $search = '';
     public $statusFilter = 'PENDING';
+    public $perPage = 10;
 
     // Process Modal
     public $processingId;
     public $processingAction; // 'APPROVE' or 'REJECT'
     public $adminNote = '';
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
 
     public function updatedSearch()
     {
@@ -55,7 +61,7 @@ new #[Layout('layouts::admin.app')] #[Title('Permohonan Cuti')] class extends Co
                 $q->where('status', $this->statusFilter);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate($this->perPage);
     }
 
     public function openProcessModal($id, $action)
