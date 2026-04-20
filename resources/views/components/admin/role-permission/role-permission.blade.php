@@ -11,7 +11,7 @@
                 <li>Settings</li>
                 <li>
                     <a href="{{ route('role-permission') }}">
-                        <span class="text-base-content">Role &amp; Permission</span>
+                        <span class="text-base-content font-bold">Role &amp; Permission</span>
                     </a>
                 </li>
             </ul>
@@ -101,9 +101,9 @@
                 <div class="card-body p-5">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h2 class="card-title text-sm text-base-content/60 font-medium">Role User</h2>
+                            <h2 class="card-title text-sm text-base-content/60 font-medium">Role Admin OPD</h2>
                             <div class="flex items-center gap-2 mt-2">
-                                <span class="text-2xl font-bold">{{ $this->stats['user_role_count'] ?? 0 }}</span>
+                                <span class="text-2xl font-bold">{{ $this->stats['opd_role_count'] ?? 0 }}</span>
                                 <span class="text-xs text-warning">Pengguna</span>
                             </div>
                         </div>

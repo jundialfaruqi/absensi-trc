@@ -8,10 +8,10 @@
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Data Master</li>
+                <li>Data</li>
                 <li>
                     <a href="{{ route('jadwal') }}">
-                        <span class="text-base-content">Manajemen Jadwal</span>
+                        <span class="text-base-content font-bold">Jadwal</span>
                     </a>
                 </li>
             </ul>

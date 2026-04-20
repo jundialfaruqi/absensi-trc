@@ -71,7 +71,7 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
             'total'               => $roles->count() + $permissions->count(),
             'top_role_users'      => $topRole?->users_count ?? 0,
             'top_role_name'       => $topRole?->name ?? '-',
-            'user_role_count'     => Role::where('name', 'user')->withCount('users')->first()?->users_count ?? 0,
+            'opd_role_count'     => Role::where('name', 'admin-opd')->withCount('users')->first()?->users_count ?? 0,
             'superadmin_role_count' => Role::where('name', 'super-admin')->withCount('users')->first()?->users_count ?? 0,
         ];
     }

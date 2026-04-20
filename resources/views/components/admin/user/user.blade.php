@@ -8,10 +8,10 @@
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Pusat</li>
+                <li>Settings</li>
                 <li>
                     <a href="{{ route('user') }}">
-                        <span class="text-base-content">Manajemen Pengguna</span>
+                        <span class="text-base-content font-bold">Pengguna</span>
                     </a>
                 </li>
             </ul>
@@ -197,7 +197,7 @@
                         {{-- Nama --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Nama Lengkap <span
+                                <span class="label-text text-sm font-medium">Nama Lengkap <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
@@ -211,7 +211,7 @@
                         {{-- Email --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Alamat Email <span
+                                <span class="label-text text-sm font-medium">Alamat Email <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="email" wire:model="email"
@@ -225,7 +225,7 @@
                         {{-- Nomor HP --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Nomor HP</span>
+                                <span class="label-text text-sm font-medium">Nomor HP</span>
                             </label>
                             <input type="tel" wire:model="nomor_hp"
                                 class="input input-bordered focus:input-primary w-full transition-all @error('nomor_hp') input-error @enderror"
@@ -238,7 +238,7 @@
                         {{-- Role --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Pilih Role</span>
+                                <span class="label-text text-sm font-medium">Pilih Role</span>
                             </label>
                             <select wire:model="role"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('role') select-error @enderror">
@@ -255,7 +255,7 @@
                         {{-- Password --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Password @if (!$userId)
+                                <span class="label-text text-sm font-medium">Password @if (!$userId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
@@ -290,7 +290,7 @@
                         {{-- Password Confirmation --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Ketik Ulang Password @if (!$userId)
+                                <span class="label-text text-sm font-medium">Ketik Ulang Password @if (!$userId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
@@ -322,7 +322,7 @@
                         {{-- Foto Profil --}}
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Foto Profil</span>
+                                <span class="label-text text-sm font-medium">Foto Profil</span>
                             </label>
                             <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                                 <div class="w-full sm:flex-1">
@@ -360,7 +360,7 @@
                 <div class="modal-action mt-6">
                     <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('user-modal').close()">Batal</button>
-                    <button type="submit" class="btn btn-neutral" wire:loading.attr="disabled">
+                    <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">
                         <span wire:loading wire:target="save" class="loading loading-spinner loading-xs"></span>
                         <span wire:loading.remove wire:target="save">Simpan</span>
                     </button>
