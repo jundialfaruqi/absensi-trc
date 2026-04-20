@@ -311,6 +311,11 @@
                             </button>
                         @endforeach
                     </div>
+
+                    <div class="mt-4">
+                        <a href="/"
+                            class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest rounded-xl hover:bg-transparent hover:text-white/30 hover:shadow-none hover:border-none">Kembali</a>
+                    </div>
                 </div>
             </div>
         @endif

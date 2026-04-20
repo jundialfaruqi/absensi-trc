@@ -40,15 +40,19 @@
         {{-- Main Navigation (Top-Bar) --}}
         <header class="relative z-50 border-b border-white/5 backdrop-blur-md bg-[#0a192f]/50">
             <div class="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 p-1.5 bg-white/5 rounded-lg border border-white/10">
+                <div class="flex items-center gap-2">
+                    <div class="h-10 w-10 p-1.5 bg-white/5 rounded-lg flex items-center justify-center">
                         <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo"
                             class="h-full w-full object-contain">
                     </div>
-                    <div>
-                        <span class="block text-sm font-black text-white italic leading-none">TRC PEKANBARU</span>
-                        <span class="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Personnel
-                            Portal</span>
+
+                    <div class="flex flex-col justify-center leading-tight">
+                        <span class="text-sm font-black text-white italic">
+                            TRC PEKANBARU
+                        </span>
+                        <span class="text-[8px] font-bold text-blue-400 uppercase tracking-widest">
+                            Personnel Portal
+                        </span>
                     </div>
                 </div>
 

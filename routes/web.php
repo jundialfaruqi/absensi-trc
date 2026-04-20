@@ -49,7 +49,7 @@ Route::group([
         ->name('cuti');
     Route::livewire('/jadwal/import', 'admin::jadwal-import')
         ->name('jadwal.import');
-    
+
     Route::livewire('/absensi', 'admin::absensi')
         ->name('absensi');
     Route::get('/jadwal/download-template', function () {

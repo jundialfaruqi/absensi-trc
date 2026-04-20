@@ -125,9 +125,9 @@
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                         </div>
-                        
+
                         <span wire:loading.remove class="col-start-1 row-start-1">Masuk</span>
-                        
+
                         <div wire:loading class="col-start-1 row-start-1">
                             <div class="flex items-center gap-3">
                                 <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
@@ -143,7 +143,12 @@
                     </button>
                 </form>
 
-                <div class="mt-8 pt-8 border-t border-white/5 text-center">
+                <div class="mt-4">
+                    <a href="/"
+                        class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest rounded-xl hover:bg-transparent hover:text-white/30 hover:shadow-none hover:border-none">Kembali</a>
+                </div>
+
+                <div class="mt-6 pt-8 border-t border-white/5 text-center">
                     <p class="text-[9px] font-bold text-slate-600 uppercase tracking-[0.2em] leading-relaxed">
                         Sistem Monitoring Personil Terpadu <br />
                         Dinas Kominfo Kota Pekanbaru
