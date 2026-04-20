@@ -415,7 +415,7 @@
                         </li>
 
                         <li>
-                            <a href="{{ route('kantor') }}"
+                            <a wire:navigate href="{{ route('kantor') }}"
                                 class="{{ request()->routeIs('kantor*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
                                 <div class="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

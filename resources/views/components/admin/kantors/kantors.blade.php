@@ -218,10 +218,11 @@
                     <div class="form-control">
                         <label class="label flex justify-between">
                             <span class="label-text text-sm font-medium">Radius Absensi</span>
-                            <span class="text-xs font-black text-primary">{{ $radius_meter }} Meter</span>
+                            <span class="text-xs font-black text-primary" id="radius-label">{{ $radius_meter }} Meter</span>
                         </label>
-                        <input type="range" min="50" max="1000" step="10"
-                            wire:model.live="radius_meter" class="range range-primary range-xs">
+                        <input type="range" id="radius-slider" min="50" max="1000" step="10"
+                            wire:model.live="radius_meter" class="range range-primary range-xs"
+                            oninput="document.getElementById('radius-label').innerText = this.value + ' Meter'">
                         <div class="w-full flex justify-between text-[10px] px-2 mt-1 opacity-50 uppercase font-bold">
                             <span>50m</span>
                             <span>1km</span>
@@ -250,19 +251,6 @@
                 {{-- Right Side: Map --}}
                 <div class="w-full md:w-2/3 h-100 md:h-full relative bg-base-300" wire:ignore>
                     <div id="map-selection" class="w-full h-full"></div>
-                    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-1000 pointer-events-none">
-                        <div
-                            class="badge badge-neutral p-4 shadow-xl border-none opacity-90 text-[10px] uppercase font-black tracking-widest gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor" class="size-4 text-primary">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                            </svg>
-                            Klik atau Seret Marker Untuk Pilih Lokasi
-                        </div>
-                    </div>
                 </div>
             </form>
         </div>
@@ -293,7 +281,9 @@
 
     {{-- ─── Scripts ─────────────────────────────────────────────────────── --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js"></script>
 
     <script>
         document.addEventListener('livewire:initialized', () => {
@@ -335,17 +325,53 @@
                             circle.setLatLng(e.latlng);
                             updateCoords(e.latlng.lat, e.latlng.lng);
                         });
+
+                        // Add Search Control (Only Once)
+                        const searchControl = new GeoSearch.GeoSearchControl({
+                            provider: new GeoSearch.OpenStreetMapProvider({
+                                params: {
+                                    'accept-language': 'id',
+                                    countrycodes: 'id'
+                                }
+                            }),
+                            style: 'bar',
+                            showMarker: false,
+                            showPopup: false,
+                            autoClose: true,
+                            retainZoomLevel: false,
+                            animateZoom: true,
+                            keepResult: true,
+                            searchLabel: 'Cari alamat atau tempat...'
+                        });
+                        map.addControl(searchControl);
+
+                        map.on('geosearch/showlocation', (result) => {
+                            const {
+                                x,
+                                y
+                            } = result.location;
+                            updateCoords(y, x);
+                            marker.setLatLng([y, x]);
+                            circle.setLatLng([y, x]);
+                        });
                     } else {
                         const newPos = [lat, lng];
                         map.setView(newPos, 15);
                         marker.setLatLng(newPos);
                         circle.setLatLng(newPos);
                         circle.setRadius(radius);
-
-                        // Force redraw
-                        map.invalidateSize();
                     }
-                }, 300);
+
+                    // Always reflow to fix map display issues
+                    map.invalidateSize();
+                }, 400);
+            });
+
+            // Instant Radius Update (Zero Latency)
+            document.addEventListener('input', (e) => {
+                if (e.target.id === 'radius-slider' && circle) {
+                    circle.setRadius(parseInt(e.target.value));
+                }
             });
 
             // Watch for radius changes
