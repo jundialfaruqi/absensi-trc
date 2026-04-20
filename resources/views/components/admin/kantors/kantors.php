@@ -22,8 +22,8 @@ new #[Title('Manajemen Kantor')] #[Layout('layouts::admin.app')] class extends C
     public string $name = '';
     public string $opd_id = '';
     public string $alamat = '';
-    public float $latitude = -2.5; // Default Indonesia
-    public float $longitude = 118.0;
+    public float $latitude = 0.507068; // Default Pekanbaru
+    public float $longitude = 101.447779;
     public int $radius_meter = 100;
     public bool $is_active = true;
 
@@ -164,8 +164,8 @@ new #[Title('Manajemen Kantor')] #[Layout('layouts::admin.app')] class extends C
         $this->name = '';
         $this->opd_id = '';
         $this->alamat = '';
-        $this->latitude = -2.5;
-        $this->longitude = 118.0;
+        $this->latitude = 0.507068;
+        $this->longitude = 101.447779;
         $this->radius_meter = 100;
         $this->is_active = true;
         $this->resetErrorBag();

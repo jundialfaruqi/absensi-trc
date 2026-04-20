@@ -151,18 +151,18 @@
     <dialog id="kantor-modal" class="modal backdrop-blur-xs" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'kantor-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'kantor-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-5xl p-0 overflow-hidden">
-            <div class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center">
+        <div class="modal-box shadow w-11/12 max-w-5xl p-0 overflow-y-auto md:overflow-hidden">
+            <div class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
                 <h3 class="font-bold text-lg">
                     {{ $kantorId ? 'Edit Kantor' : 'Tambah Kantor Baru' }}
                 </h3>
                 <button type="button" class="btn btn-ghost btn-sm btn-circle"
                     onclick="document.getElementById('kantor-modal').close()">✕</button>
             </div>
-
+ 
             <form wire:submit="save" class="flex flex-col md:flex-row h-auto md:h-150">
                 {{-- Left Side: Form --}}
-                <div class="w-full md:w-1/3 p-6 space-y-4 overflow-y-auto border-r border-base-200">
+                <div class="w-full md:w-1/3 p-6 space-y-4 md:overflow-y-auto border-b md:border-b-0 md:border-r border-base-200">
                     <div class="form-control">
                         <label class="label"><span class="label-text text-sm font-medium">Nama Kantor</span></label>
                         <input type="text" wire:model="name" class="input input-bordered w-full"
@@ -198,8 +198,8 @@
                         <div class="form-control">
                             <label class="label"><span
                                     class="label-text font-bold text-[10px] uppercase">Latitude</span></label>
-                            <input type="text" wire:model="latitude"
-                                class="input input-bordered input-sm font-mono" readonly>
+                            <input type="number" step="any" wire:model.live.debounce.500ms="latitude"
+                                class="input input-bordered input-sm font-mono">
                             @error('latitude')
                                 <span class="text-error text-xs mt-1">{{ $message }}</span>
                             @enderror
@@ -207,8 +207,8 @@
                         <div class="form-control">
                             <label class="label"><span
                                     class="label-text font-bold text-[10px] uppercase">Longitude</span></label>
-                            <input type="text" wire:model="longitude"
-                                class="input input-bordered input-sm font-mono" readonly>
+                            <input type="number" step="any" wire:model.live.debounce.500ms="longitude"
+                                class="input input-bordered input-sm font-mono">
                             @error('longitude')
                                 <span class="text-error text-xs mt-1">{{ $message }}</span>
                             @enderror
@@ -358,7 +358,7 @@
                 @this.set('longitude', lng);
             }
 
-            // Sync radius when slider moves (interactivity)
+            // Sync coordinates and radius when property changes (Typed or Slider)
             Livewire.hook('commit', ({
                 component,
                 commit,
@@ -370,8 +370,25 @@
                     snapshot,
                     effect
                 }) => {
-                    if (circle && component.canonical.radius_meter) {
-                        circle.setRadius(component.canonical.radius_meter);
+                    const snap = snapshot.memo.data;
+                    if (map && marker && circle) {
+                        const newLat = parseFloat(snap.latitude);
+                        const newLng = parseFloat(snap.longitude);
+                        const newRad = parseInt(snap.radius_meter);
+
+                        if (!isNaN(newLat) && !isNaN(newLng)) {
+                            const newPos = [newLat, newLng];
+                            // Only update if marker position is actually different to avoid snap loop
+                            if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !== newLng) {
+                                marker.setLatLng(newPos);
+                                circle.setLatLng(newPos);
+                                map.panTo(newPos);
+                            }
+                        }
+
+                        if (!isNaN(newRad)) {
+                            circle.setRadius(newRad);
+                        }
                     }
                 });
             });
