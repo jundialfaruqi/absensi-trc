@@ -8,10 +8,10 @@
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Settings</li>
+                <li>Data</li>
                 <li>
                     <a href="{{ route('opd') }}">
-                        <span class="text-base-content">Manajemen OPD</span>
+                        <span class="text-base-content font-bold">OPD</span>
                     </a>
                 </li>
             </ul>
@@ -86,7 +86,7 @@
                                 <td>
                                     @if ($r->logo_url)
                                         <div class="avatar">
-                                            <div class="w-12 h-12 rounded bg-base-200 p-1">
+                                            <div class="w-12 h-12 rounded p-1">
                                                 <img src="{{ $r->logo_url }}" alt="Logo" class="object-contain" />
                                             </div>
                                         </div>
@@ -185,7 +185,8 @@
                         {{-- Nama --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Nama OPD <span class="text-error">*</span></span>
+                                <span class="label-text text-sm font-medium">Nama OPD <span
+                                        class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
                                 class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"
@@ -198,7 +199,7 @@
                         {{-- Singkatan --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium">Singkatan</span>
+                                <span class="label-text text-sm font-medium">Singkatan</span>
                             </label>
                             <input type="text" wire:model="singkatan"
                                 class="input input-bordered focus:input-primary w-full transition-all @error('singkatan') input-error @enderror"
@@ -212,7 +213,7 @@
                     {{-- Alamat --}}
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text font-medium">Alamat Lengkap</span>
+                            <span class="label-text text-sm font-medium">Alamat Lengkap</span>
                         </label>
                         <textarea wire:model="alamat"
                             class="textarea textarea-bordered focus:textarea-primary w-full transition-all h-20 @error('alamat') textarea-error @enderror"
@@ -225,7 +226,7 @@
                     {{-- Logo --}}
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text font-medium">Logo Instansi</span>
+                            <span class="label-text text-sm font-medium">Logo Instansi</span>
                         </label>
                         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                             <div class="w-full sm:flex-1">
@@ -264,7 +265,7 @@
                     <div class="form-control w-full">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-2 gap-2 px-1">
                             <div>
-                                <label class="label p-0 pb-1"><span class="label-text font-medium">Pengguna
+                                <label class="label p-0 pb-1"><span class="label-text text-sm font-medium">Pengguna
                                         Terkait</span></label>
                                 <p class="text-xs text-base-content/60">Pilih pengguna. (Otomatis dilepas dari OPD lain
                                     jika ditambahkan kesini)</p>
@@ -319,7 +320,7 @@
                 <div class="modal-action mt-6">
                     <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('opd-modal').close()">Batal</button>
-                    <button type="submit" class="btn btn-neutral" wire:loading.attr="disabled">
+                    <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">
                         <span wire:loading wire:target="save" class="loading loading-spinner loading-xs"></span>
                         <span wire:loading.remove wire:target="save">Simpan</span>
                     </button>
@@ -351,25 +352,4 @@
             </div>
         </div>
     </dialog>
-
-    {{-- ─── FAB ─────────────────────────────────────────────────────────────── --}}
-    <div class="fab fab-flower fab-bottom fab-end mb-12 sm:hidden relative z-40">
-        <div tabindex="0" role="button" class="btn btn-circle btn-lg btn-neutral">
-            <svg aria-label="New" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                class="size-6">
-                <path
-                    d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
-            </svg>
-        </div>
-        <div class="fab-close">
-            <span class="btn btn-circle btn-lg btn-error">✕</span>
-        </div>
-        <button type="button" class="tooltip btn btn-circle btn-neutral" wire:click="openAddModal"
-            data-tip="Tambah OPD">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-        </button>
-    </div>
 </div>

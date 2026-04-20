@@ -75,8 +75,7 @@
         {{-- Digital Plexus Dots & Lines --}}
         <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
             {{-- Top Left cluster --}}
-            <svg class="absolute top-[-5%] left-[-5%] w-[600px] h-[600px] text-blue-400 animate-float"
-                viewBox="0 0 100 100">
+            <svg class="absolute top-[-5%] left-[-5%] w-150 h-150 text-blue-400 animate-float" viewBox="0 0 100 100">
                 <circle cx="10" cy="10" r="1" fill="currentColor" />
                 <circle cx="30" cy="20" r="1.2" fill="currentColor" />
                 <circle cx="15" cy="40" r="1" fill="currentColor" />
@@ -98,7 +97,7 @@
             </svg>
 
             {{-- Bottom Right cluster --}}
-            <svg class="absolute bottom-[-10%] right-[-10%] w-[700px] h-[700px] text-blue-400 opacity-80 rotate-12 animate-float-slow"
+            <svg class="absolute bottom-[-10%] right-[-10%] w-175 h-175 text-blue-400 opacity-80 rotate-12 animate-float-slow"
                 viewBox="0 0 100 100">
                 <circle cx="80" cy="80" r="1" fill="currentColor" />
                 <circle cx="60" cy="70" r="1.5" fill="currentColor" />
@@ -120,10 +119,10 @@
 
         {{-- Neon Tech Lines --}}
         <div
-            class="absolute top-1/4 left-[-10%] w-full h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent rotate-12">
+            class="absolute top-1/4 left-[-10%] w-full h-px bg-linear-to-r from-transparent via-blue-500/30 to-transparent rotate-12">
         </div>
         <div
-            class="absolute top-1/3 right-[-10%] w-full h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent -rotate-12">
+            class="absolute top-1/3 right-[-10%] w-full h-px bg-linear-to-r from-transparent via-red-500/20 to-transparent -rotate-12">
         </div>
     </div>
 
@@ -131,7 +130,7 @@
     <nav
         class="relative z-50 px-4 md:px-6 py-4 md:py-6 flex items-center justify-between max-w-7xl mx-auto w-full gap-2">
         <div class="flex items-center gap-1">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
                     class="h-10 w-10 md:h-13 md:w-13 object-contain" />
             </div>
@@ -139,7 +138,7 @@
                 <span class="text-sm md:text-xl font-black tracking-tighter text-white uppercase whitespace-nowrap">TRC
                     PEKANBARU</span>
                 <span
-                    class="text-[8px] md:text-[10px] font-bold text-blue-400 tracking-[0.1em] md:tracking-[0.2em] uppercase whitespace-nowrap">Emergency
+                    class="text-[8px] md:text-[10px] font-bold text-blue-400 tracking-widest md:tracking-[0.2em] uppercase whitespace-nowrap">Emergency
                     112</span>
             </div>
         </div>
@@ -176,7 +175,7 @@
 
             <h1 class="text-5xl lg:text-7xl font-black text-white leading-[1.05] tracking-tighter">
                 PEKANBARU <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">AMAN</span> DALAM
+                    class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300">AMAN</span> DALAM
                 SATU GENGGAMAN.
             </h1>
 
@@ -187,7 +186,7 @@
 
             <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
                 <a href="tel:112"
-                    class="w-full sm:w-auto px-10 py-5 bg-gradient-to-br from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-lg font-black rounded-2xl shadow-xl transition-all neon-glow-red text-center">
+                    class="w-full sm:w-auto px-10 py-5 bg-linear-to-br from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-lg font-black rounded-2xl shadow-xl transition-all neon-glow-red text-center">
                     HUBUNGI 112
                 </a>
                 <div class="flex items-center gap-4 px-6 py-5 glass-panel rounded-2xl border-white/5">
@@ -229,14 +228,14 @@
         {{-- Visual HUD Element --}}
         <div class="hidden lg:flex justify-center items-center relative">
             <div
-                class="absolute w-[500px] h-[500px] rounded-full border-2 border-blue-500/10 animate-[spin_30s_linear_infinite]">
+                class="absolute w-125 h-125 rounded-full border-2 border-blue-500/10 animate-[spin_30s_linear_infinite]">
             </div>
             <div
-                class="absolute w-[400px] h-[400px] rounded-full border border-blue-400/5 animate-[spin_20s_linear_infinite_reverse]">
+                class="absolute w-100 h-100 rounded-full border border-blue-400/5 animate-[spin_20s_linear_infinite_reverse]">
             </div>
 
             <div
-                class="relative glass-panel rounded-[2.5rem] p-8 w-[380px] shadow-2xl border-white/10 overflow-hidden transform rotate-3">
+                class="relative glass-panel rounded-[2.5rem] p-8 w-95 shadow-2xl border-white/10 overflow-hidden transform">
                 <div class="absolute top-0 right-0 p-4">
                     <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
                 </div>
@@ -254,7 +253,7 @@
                             <span class="text-2xl font-black text-white">82%</span>
                         </div>
                         <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full w-4/5 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full"></div>
+                            <div class="h-full w-4/5 bg-linear-to-r from-blue-600 to-cyan-400 rounded-full"></div>
                         </div>
                     </div>
 
@@ -314,7 +313,7 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {{-- Fire --}}
             <div
-                class="glass-panel p-8 rounded-[2rem] hover:border-red-500/30 transition-all group overflow-hidden relative">
+                class="glass-panel p-8 rounded-4xl hover:border-red-500/30 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-4 -top-4 text-slate-800/20 rotate-12 group-hover:scale-110 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24"
@@ -340,7 +339,7 @@
 
             {{-- Medical --}}
             <div
-                class="glass-panel p-8 rounded-[2rem] hover:border-blue-500/30 transition-all group overflow-hidden relative">
+                class="glass-panel p-8 rounded-4xl hover:border-blue-500/30 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-4 -top-4 text-slate-800/20 rotate-12 group-hover:scale-110 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24"
@@ -365,7 +364,7 @@
 
             {{-- Security --}}
             <div
-                class="glass-panel p-8 rounded-[2rem] hover:border-amber-500/30 transition-all group overflow-hidden relative">
+                class="glass-panel p-8 rounded-4xl hover:border-amber-500/30 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-4 -top-4 text-slate-800/20 rotate-12 group-hover:scale-110 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24"
@@ -390,7 +389,7 @@
 
             {{-- Disaster --}}
             <div
-                class="glass-panel p-8 rounded-[2rem] hover:border-emerald-500/30 transition-all group overflow-hidden relative">
+                class="glass-panel p-8 rounded-4xl hover:border-emerald-500/30 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-4 -top-4 text-slate-800/20 rotate-12 group-hover:scale-110 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24"
@@ -432,13 +431,14 @@
                         class="relative glass-panel rounded-[2.8rem] overflow-hidden border-white/10 shadow-2xl transform group-hover:-translate-y-2 transition-all duration-500">
                         <img src="{{ asset('assets/images/agug-nugroho.jpeg') }}"
                             alt="Wali Kota Pekanbaru saat Peluncuran TRC"
-                            class="w-full h-auto object-cover aspect-[3/4] filter contrast-110 grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100">
+                            class="w-full h-auto object-cover aspect-3/4 filter contrast-110 grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100">
 
                         {{-- Identity Badge --}}
                         <div
-                            class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0a192f] via-[#0a192f]/80 to-transparent">
+                            class="absolute bottom-0 left-0 right-0 p-8 bg-linear-to-t from-[#0a192f] via-[#0a192f]/80 to-transparent">
                             <div class="space-y-1">
-                                <h3 class="text-xl font-black text-white tracking-widest uppercase italic">Agung Nugroho
+                                <h3 class="text-xl font-black text-white tracking-widest uppercase italic">Agung
+                                    Nugroho
                                 </h3>
                                 <p class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">Wali Kota
                                     Pekanbaru</p>
@@ -447,14 +447,15 @@
 
                         {{-- Decoration Labels --}}
                         <div
-                            class="absolute top-6 right-6 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-md">
+                            class="absolute flex top-6 right-6 px-3 py-2 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-md">
                             <span class="text-[8px] font-black text-blue-400 uppercase tracking-widest">Official
                                 Speech</span>
                         </div>
                     </div>
 
                     {{-- Decorative Corners --}}
-                    <div class="absolute -top-2 -left-2 w-12 h-12 border-t-2 border-l-2 border-blue-500/40 rounded-tl-3xl">
+                    <div
+                        class="absolute -top-2 -left-2 w-12 h-12 border-t-2 border-l-2 border-blue-500/40 rounded-tl-3xl">
                     </div>
                     <div
                         class="absolute -bottom-2 -right-2 w-12 h-12 border-b-2 border-r-2 border-blue-500/40 rounded-br-3xl">
@@ -472,16 +473,18 @@
                     </div>
                     <h2 class="text-4xl lg:text-5xl font-black text-white leading-none uppercase tracking-tighter">
                         TRANSFORMASI <br />
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">POTENSI
+                        <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300">POTENSI
                             LAYANAN</span> PUBLIK.
                     </h2>
                     <div
-                        class="h-1 w-24 bg-gradient-to-r from-blue-600 to-transparent rounded-full shadow-lg shadow-blue-600/50">
+                        class="h-1 w-24 bg-linear-to-r from-blue-600 to-transparent rounded-full shadow-lg shadow-blue-600/50">
                     </div>
                 </div>
 
                 <div class="relative">
-                    <div class="absolute -top-10 -left-6 text-9xl font-serif text-blue-500/5 select-none tracking-tighter">“
+                    <div
+                        class="absolute -top-10 -left-6 text-9xl font-serif text-blue-500/5 select-none tracking-tighter">
+                        “
                     </div>
                     <p
                         class="text-xl lg:text-2xl font-medium text-slate-300 leading-relaxed italic relative z-10 border-l-4 border-blue-500/30 pl-8">
@@ -524,7 +527,8 @@
                                 </svg>
                             </div>
                             <h4 class="text-xs font-black text-white uppercase tracking-widest">Lintas Sektor</h4>
-                            <p class="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">Integrasi 7 instansi
+                            <p class="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">Integrasi 7
+                                instansi
                                 strategis untuk penanganan darurat yang komprehensif.</p>
                         </div>
                     </div>

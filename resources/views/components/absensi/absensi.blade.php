@@ -7,8 +7,7 @@
         {{-- Digital Plexus Dots & Lines (Corner Decorations) --}}
         <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-25">
             {{-- Top Left cluster (Enhanced) --}}
-            <svg class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] text-blue-400 animate-float"
-                viewBox="0 0 100 100">
+            <svg class="absolute top-[-10%] left-[-10%] w-150 h-150 text-blue-400 animate-float" viewBox="0 0 100 100">
                 <circle cx="10" cy="10" r="1" fill="currentColor" />
                 <circle cx="30" cy="20" r="1.2" fill="currentColor" />
                 <circle cx="15" cy="40" r="1" fill="currentColor" />
@@ -55,7 +54,7 @@
             </svg>
 
             {{-- Bottom Right cluster (Enhanced) --}}
-            <svg class="absolute bottom-[-15%] right-[-15%] w-[700px] h-[700px] text-blue-400 opacity-80 rotate-12 animate-float-slow"
+            <svg class="absolute bottom-[-15%] right-[-15%] w-175 h-175 text-blue-400 opacity-80 rotate-12 animate-float-slow"
                 viewBox="0 0 100 100">
                 <circle cx="80" cy="80" r="1" fill="currentColor" />
                 <circle cx="60" cy="70" r="1.5" fill="currentColor" />
@@ -98,7 +97,7 @@
             </svg>
 
             {{-- Mid Right Cluster (New) --}}
-            <svg class="absolute top-[30%] right-[-5%] w-[400px] h-[400px] text-blue-400 opacity-60 animate-pulse"
+            <svg class="absolute top-[30%] right-[-5%] w-100 h-100 text-blue-400 opacity-60 animate-pulse"
                 viewBox="0 0 100 100">
                 <circle cx="90" cy="10" r="1" fill="currentColor" />
                 <circle cx="70" cy="30" r="1.2" fill="currentColor" />
@@ -151,10 +150,10 @@
 
         {{-- Neon Tech Lines (Red/Orange Glow) --}}
         <div
-            class="absolute top-20 right-[-5%] w-64 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-40 blur-xs">
+            class="absolute top-20 right-[-5%] w-64 h-px bg-linear-to-r from-transparent via-red-500 to-transparent opacity-40 blur-xs">
         </div>
         <div
-            class="absolute bottom-40 left-[-5%] w-48 h-px bg-gradient-to-r from-transparent via-red-400 to-transparent opacity-30 blur-xs rotate-45">
+            class="absolute bottom-40 left-[-5%] w-48 h-px bg-linear-to-r from-transparent via-red-400 to-transparent opacity-30 blur-xs rotate-45">
         </div>
 
         {{-- Pulse Glow for Red Lines --}}
@@ -542,12 +541,12 @@
 
                     {{-- Actions --}}
                     @if ($activeJadwal->shift)
-                        <div class="space-y-3 mt-6">
+                        <div class="space-y-3 mt-4">
                             @if (!$activeAbsensi && !$isTooLateToIn)
                                 {{-- Mode: Normal Masuk --}}
                                 <button type="button" x-on:click="submit('in')" wire:loading.attr="disabled"
                                     :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
-                                    class="btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 border-none btn-lg w-full shadow-[0_0_20px_rgba(37,99,235,0.3)] py-2 h-auto group relative flex items-center justify-center min-h-[64px] text-white rounded-2xl">
+                                    class="btn bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 border-none btn-lg w-full shadow-[0_0_20px_rgba(37,99,235,0.3)] py-2 h-auto group relative flex items-center justify-center min-h-16 text-white rounded-2xl disabled:bg-none disabled:bg-base-300 disabled:shadow-none disabled:opacity-70">
 
                                     <div wire:loading wire:target="submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
@@ -577,7 +576,7 @@
                                 <button type="button" x-on:click="submit('out')" wire:loading.attr="disabled"
                                     :disabled="{{ $activeAbsensi && $activeAbsensi->jam_pulang ? 'true' : 'false' }} || !
                                         isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
-                                    class="btn bg-gradient-to-r from-secondary to-purple-600 hover:from-secondary/80 hover:to-purple-500 border-none btn-lg w-full shadow-[0_0_20px_rgba(var(--color-secondary),0.3)] py-2 h-auto group relative flex items-center justify-center min-h-[64px] text-white rounded-2xl">
+                                    class="btn bg-linear-to-r from-secondary to-purple-600 hover:from-secondary/80 hover:to-purple-500 border-none btn-lg w-full shadow-[0_0_20px_rgba(var(--color-secondary),0.3)] py-2 h-auto group relative flex items-center justify-center min-h-16 text-white rounded-2xl disabled:bg-none disabled:bg-base-300 disabled:shadow-none disabled:opacity-70">
 
                                     <div wire:loading wire:target="submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
