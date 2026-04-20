@@ -35,6 +35,7 @@ Route::group([
         ->name('penugasan');
 
     Route::livewire('/user', 'admin::user')
+        ->middleware('role:super-admin')
         ->name('user');
 
     Route::livewire('/personnel', 'admin::personnel')

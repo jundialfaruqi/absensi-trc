@@ -497,15 +497,17 @@
                                     User
                                 </summary>
                                 <ul>
-                                    <li>
-                                        <a wire:navigate href="{{ route('user') }}"
-                                            class="{{ request()->routeIs('user*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                            Manajemen User
-                                            <span class="text-[8px] text-base-content opacity-50">
-                                                Lihat, Ubah dan Aktivasi User
-                                            </span>
-                                        </a>
-                                    </li>
+                                    @role('super-admin')
+                                        <li>
+                                            <a wire:navigate href="{{ route('user') }}"
+                                                class="{{ request()->routeIs('user*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                                Manajemen User
+                                                <span class="text-[8px] text-base-content opacity-50">
+                                                    Lihat, Ubah dan Aktivasi User
+                                                </span>
+                                            </a>
+                                        </li>
+                                    @endrole
                                     <li>
                                         <a wire:navigate href="{{ route('role-permission') }}"
                                             class="{{ request()->routeIs('role-permission*') || request()->routeIs('role-permission*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
