@@ -155,8 +155,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center text-sm text-base-content/60 py-12">
-                                    Belum ada data permohonan cuti yang perlu disetujui, pilih status untuk melihat
-                                    permohonan cuti yang lain.
+                                    Belum ada data permohonan cuti baru
                                 </td>
                             </tr>
                         @endforelse

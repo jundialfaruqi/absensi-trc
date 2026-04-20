@@ -135,6 +135,24 @@
                 bottom: -20%;
             }
         }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 30s linear infinite;
+        }
+
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
     </style>
 </head>
 
@@ -264,15 +282,22 @@
                 </a>
                 <div class="flex items-center gap-4 px-6 py-5 glass-panel rounded-2xl border-white/5">
                     <div class="flex -space-x-3">
-                        <div
-                            class="h-8 w-8 rounded-full border-2 border-slate-900 bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
-                            BPBD</div>
-                        <div
-                            class="h-8 w-8 rounded-full border-2 border-slate-900 bg-red-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
-                            DMK</div>
-                        <div
-                            class="h-8 w-8 rounded-full border-2 border-slate-900 bg-emerald-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
-                            MED</div>
+                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-bpbd.jpg') }}" alt="BPBD"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-damkar.png') }}" alt="DAMKAR"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-kominfo-logo-only.png') }}" alt="DISKOMINFO"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-kemenkes.png') }}" alt="KEMENKES"
+                                class="w-full h-full object-cover">
+                        </div>
                     </div>
                     <span class="text-xs font-bold text-slate-300">Terintegrasi Lintas Sektoral</span>
                 </div>
@@ -299,32 +324,33 @@
         </div>
 
         {{-- Visual HUD Element: 3D Holographic Carousel --}}
-        <div class="hidden lg:flex justify-center items-center relative min-h-[500px] w-full"
-            x-data="{ 
-                active: 0, 
-                total: 7,
-                images: [
-                    '{{ asset('assets/images/carousel/1.jpg') }}',
-                    '{{ asset('assets/images/carousel/2.jpg') }}',
-                    '{{ asset('assets/images/carousel/3.jpg') }}',
-                    '{{ asset('assets/images/carousel/4.jpg') }}',
-                    '{{ asset('assets/images/carousel/5.jpg') }}',
-                    '{{ asset('assets/images/carousel/6.jpg') }}',
-                    '{{ asset('assets/images/carousel/7.jpg') }}'
-                ],
-                next() { this.active = (this.active + 1) % this.total },
-                prev() { this.active = (this.active - 1 + this.total) % this.total },
-                getCardClass(index) {
-                    if (index === this.active) return 'card-active';
-                    if (index === (this.active - 1 + this.total) % this.total) return 'card-prev';
-                    if (index === (this.active + 1) % this.total) return 'card-next';
-                    if (index < this.active) return 'card-far-left';
-                    return 'card-far-right';
-                }
-            }" x-init="setInterval(() => next(), 5000)">
+        <div class="hidden lg:flex justify-center items-center relative min-h-[500px] w-full" x-data="{
+            active: 0,
+            total: 7,
+            images: [
+                '{{ asset('assets/images/carousel/1.jpg') }}',
+                '{{ asset('assets/images/carousel/2.jpg') }}',
+                '{{ asset('assets/images/carousel/3.jpg') }}',
+                '{{ asset('assets/images/carousel/4.jpg') }}',
+                '{{ asset('assets/images/carousel/5.jpg') }}',
+                '{{ asset('assets/images/carousel/6.jpg') }}',
+                '{{ asset('assets/images/carousel/7.jpg') }}'
+            ],
+            next() { this.active = (this.active + 1) % this.total },
+            prev() { this.active = (this.active - 1 + this.total) % this.total },
+            getCardClass(index) {
+                if (index === this.active) return 'card-active';
+                if (index === (this.active - 1 + this.total) % this.total) return 'card-prev';
+                if (index === (this.active + 1) % this.total) return 'card-next';
+                if (index < this.active) return 'card-far-left';
+                return 'card-far-right';
+            }
+        }"
+            x-init="setInterval(() => next(), 5000)">
 
             {{-- HUD Background Decorations --}}
-            <div class="absolute w-140 h-140 rounded-full border-2 border-blue-500/5 animate-[spin_40s_linear_infinite]">
+            <div
+                class="absolute w-140 h-140 rounded-full border-2 border-blue-500/5 animate-[spin_40s_linear_infinite]">
             </div>
             <div
                 class="absolute w-110 h-110 rounded-full border border-blue-400/5 animate-[spin_25s_linear_infinite_reverse]">
@@ -361,7 +387,8 @@
                             {{-- Central Target Reticle --}}
                             <div
                                 class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-                                <div class="w-12 h-12 border border-blue-400/30 rounded-full flex items-center justify-center">
+                                <div
+                                    class="w-12 h-12 border border-blue-400/30 rounded-full flex items-center justify-center">
                                     <div class="w-1 h-1 bg-blue-400 rounded-full"></div>
                                 </div>
                             </div>
@@ -372,9 +399,10 @@
 
             {{-- Technical Pagination dots --}}
             <div class="absolute -bottom-8 flex gap-3">
-                <template x-for="i in total" :key="i-1">
+                <template x-for="i in total" :key="i - 1">
                     <button @click="active = i-1" class="h-1 transition-all duration-500 rounded-full"
-                        :class="active === i - 1 ? 'w-8 bg-blue-500 shadow-lg shadow-blue-500/50' : 'w-2 bg-slate-700 hover:bg-slate-500'">
+                        :class="active === i - 1 ? 'w-8 bg-blue-500 shadow-lg shadow-blue-500/50' :
+                            'w-2 bg-slate-700 hover:bg-slate-500'">
                     </button>
                 </template>
             </div>
@@ -666,6 +694,43 @@
                     <p class="text-xs font-medium text-slate-400 mt-2">Manajemen Sistem Absensi TRC.</p>
                 </div>
             </a>
+        </div>
+    </section>
+
+    {{-- ─── Lintas Sektoral Section ────────────────────────────────────────── --}}
+    <section class="relative z-10 py-12 lg:py-20 overflow-hidden border-t border-white/5 bg-slate-900/10">
+        <div class="max-w-7xl mx-auto px-6 mb-12 text-center">
+            <h2 class="text-3xl font-black text-white tracking-widest uppercase">Lintas Sektoral</h2>
+            <div class="h-1 w-20 bg-blue-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="flex relative overflow-hidden">
+            <div class="flex animate-marquee whitespace-nowrap gap-8 py-8">
+                @php
+                    $partners = [
+                        ['logo' => 'logo-bpbd.jpg', 'name' => 'BPBD Pekanbaru'],
+                        ['logo' => 'logo-damkar.png', 'name' => 'Damkar Pekanbaru'],
+                        ['logo' => 'logo-kemenkes.png', 'name' => 'Dinas Kesehatan Pekanbaru'],
+                        ['logo' => 'logo-kominfo-logo-only.png', 'name' => 'Dinas Kominfo Pekanbaru'],
+                    ];
+                @endphp
+
+                @foreach (array_merge($partners, $partners, $partners) as $p)
+                    <div
+                        class="flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-2xl w-64 shrink-0 gap-6 border border-slate-200 transform transition-transform hover:scale-105">
+                        <div class="h-24 w-24 flex items-center justify-center">
+                            <img src="{{ asset('assets/logo/' . $p['logo']) }}" alt="{{ $p['name'] }}"
+                                class="max-h-full max-w-full object-contain">
+                        </div>
+                        <span
+                            class="text-sm font-black text-slate-800 uppercase tracking-tighter text-center whitespace-normal leading-tight h-10 flex items-center">{{ $p['name'] }}</span>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Atmospheric Overlays --}}
+            <div class="absolute inset-y-0 left-0 w-40 bg-linear-to-r from-[#0a192f] to-transparent z-10"></div>
+            <div class="absolute inset-y-0 right-0 w-40 bg-linear-to-l from-[#0a192f] to-transparent z-10"></div>
         </div>
     </section>
 
