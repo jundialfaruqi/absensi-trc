@@ -15,6 +15,8 @@ new #[Layout('layouts::personnel.dashboard.app')] #[Title('Ajukan Cuti')] class 
     public $tanggal_mulai;
     public $tanggal_selesai;
     public $alasan;
+    public $perPage = 4;
+
 
     public function mount()
     {
@@ -36,7 +38,19 @@ new #[Layout('layouts::personnel.dashboard.app')] #[Title('Ajukan Cuti')] class 
         return LeaveRequest::where('personnel_id', $this->personnel->id)
             ->with('cuti')
             ->orderBy('created_at', 'desc')
+            ->take($this->perPage)
             ->get();
+    }
+
+    #[Computed]
+    public function hasMore()
+    {
+        return LeaveRequest::where('personnel_id', $this->personnel->id)->count() > $this->perPage;
+    }
+
+    public function loadMore()
+    {
+        $this->perPage += 4;
     }
 
     public function submit()
