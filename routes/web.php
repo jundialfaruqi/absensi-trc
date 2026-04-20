@@ -74,4 +74,10 @@ Route::group([
 
     Route::livewire('/profile', 'personnel::profile')
         ->name('personnel.profile');
+
+    Route::livewire('/riwayat', 'personnel::riwayat-absensi')
+        ->name('personnel.riwayat');
+
+    Route::livewire('/jadwal', 'personnel::jadwal')
+        ->name('personnel.jadwal');
 });
