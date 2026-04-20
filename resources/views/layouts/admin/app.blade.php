@@ -100,7 +100,35 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <!-- Notifications -->
+                    <!-- Section Notifications -->
+                    @php
+                        $user = auth()->user();
+                        $isSuperAdmin = $user->hasRole('super-admin');
+                        $opdId = $user->opd()?->id;
+
+                        $dashboardNotifications = \App\Models\LeaveRequest::query()
+                            ->with(['personnel', 'cuti'])
+                            ->where('status', 'PENDING')
+                            ->when(!$isSuperAdmin, function ($q) use ($opdId) {
+                                $q->whereHas('personnel', function ($pq) use ($opdId) {
+                                    $pq->where('opd_id', $opdId);
+                                });
+                            })
+                            ->orderBy('created_at', 'desc')
+                            ->take(10)
+                            ->get()
+                            ->map(function ($req) {
+                                return [
+                                    'url' => route('permohonan-cuti'),
+                                    'color' => 'warning',
+                                    'icon' => 'calendar',
+                                    'category' => 'PENGAJUAN CUTI',
+                                    'type' => 'PENDING',
+                                    'title' => $req->personnel->name,
+                                    'message' => 'Mengajukan ' . $req->cuti->name . ' (' . \Carbon\Carbon::parse($req->tanggal_mulai)->format('d/m/Y') . ')',
+                                ];
+                            });
+                    @endphp
                     <div class="dropdown dropdown-end">
                         <button tabindex="0" class="btn btn-ghost btn-circle btn-sm">
                             <div class="indicator">
