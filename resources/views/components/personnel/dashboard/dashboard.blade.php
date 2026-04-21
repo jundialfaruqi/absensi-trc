@@ -133,10 +133,10 @@
     {{-- Dashboard Menu Navigation --}}
     <div class="space-y-6 pt-4">
         <div class="flex items-center gap-3 px-2">
-            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+            <div class="h-px flex-1 bg-linear-to-r from-transparent via-slate-700 to-transparent"></div>
             <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] italic whitespace-nowrap">Menu
                 Utama Navigasi</h3>
-            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+            <div class="h-px flex-1 bg-linear-to-r from-transparent via-slate-700 to-transparent"></div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -23,16 +23,19 @@ Route::group([
         ->name('dashboard');
 
     Route::livewire('/permohonan-cuti', 'admin::permohonan-cuti')
+        ->middleware('permission:manajemen-permohonan-cuti')
         ->name('permohonan-cuti');
 
     Route::livewire('/role-permission', 'admin::role-permission')
-    ->middleware('permission:manajemen-role-permission')
-    ->name('role-permission');
+        ->middleware('permission:manajemen-role-permission')
+        ->name('role-permission');
 
     Route::livewire('/opd', 'admin::opd')
+        ->middleware('permission:manajemen-opd')
         ->name('opd');
 
     Route::livewire('/penugasan', 'admin::penugasan')
+        ->middleware('permission:manajemen-penugasan')
         ->name('penugasan');
 
     Route::livewire('/user', 'admin::user')
@@ -40,24 +43,31 @@ Route::group([
         ->name('user');
 
     Route::livewire('/personnel', 'admin::personnel')
+        ->middleware('permission:manajemen-personel')
         ->name('personnel');
 
     Route::livewire('/kantor', 'admin::kantors')
+        ->middleware('permission:manajemen-kantor')
         ->name('kantor');
 
     Route::livewire('/shift', 'admin::shift')
+        ->middleware('permission:manajemen-shift')
         ->name('shift');
 
     Route::livewire('/jadwal', 'admin::jadwal')
+        ->middleware('permission:manajemen-jadwal')
         ->name('jadwal');
 
     Route::livewire('/cuti', 'admin::cutis')
+        ->middleware('permission:manajemen-master-cuti')
         ->name('cuti');
 
     Route::livewire('/jadwal/import', 'admin::jadwal-import')
+        ->middleware('permission:manajemen-jadwal-import')
         ->name('jadwal.import');
 
     Route::livewire('/absensi', 'admin::absensi')
+        ->middleware('permission:manajemen-absensi')
         ->name('absensi');
 
     Route::get('/jadwal/download-template', function () {

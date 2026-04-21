@@ -310,179 +310,197 @@
                             </a>
                         </li>
 
-                        <li>
-                            <a wire:navigate href="{{ route('absensi') }}"
-                                class="{{ request()->routeIs('absensi*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round"
-                                        class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check size-5">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
-                                        <path d="M16 3v4" />
-                                        <path d="M8 3v4" />
-                                        <path d="M4 11h16" />
-                                        <path d="M15 19l2 2l4 -4" />
-                                    </svg>
-                                    <span>Absensi</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Monitoring Kehadiran
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-absensi')
+                            <li>
+                                <a wire:navigate href="{{ route('absensi') }}"
+                                    class="{{ request()->routeIs('absensi*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check size-5">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
+                                            <path d="M16 3v4" />
+                                            <path d="M8 3v4" />
+                                            <path d="M4 11h16" />
+                                            <path d="M15 19l2 2l4 -4" />
+                                        </svg>
+                                        <span>Absensi</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Monitoring Kehadiran
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            @php
-                                $pendingCutiCount = \App\Models\LeaveRequest::where('status', 'PENDING')
-                                    ->when(!auth()->user()->hasRole('super-admin'), function ($q) {
-                                        $q->whereHas('personnel', function ($pq) {
-                                            $pq->where('opd_id', auth()->user()->opd()?->id);
-                                        });
-                                    })
-                                    ->count();
-                            @endphp
-                            <a wire:navigate href="{{ route('permohonan-cuti') }}"
-                                class="{{ request()->routeIs('permohonan-cuti*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5 relative">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
-                                    </svg>
-                                    <span>Permohonan Cuti</span>
-                                    @if ($pendingCutiCount > 0)
-                                        <span
-                                            class="absolute top-2 right-4 badge badge-xs badge-error animate-pulse">{{ $pendingCutiCount }}</span>
-                                    @endif
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Persetujuan Izin & Cuti
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-permohonan-cuti')
+                            <li>
+                                @php
+                                    $pendingCutiCount = \App\Models\LeaveRequest::where('status', 'PENDING')
+                                        ->when(!auth()->user()->hasRole('super-admin'), function ($q) {
+                                            $q->whereHas('personnel', function ($pq) {
+                                                $pq->where('opd_id', auth()->user()->opd()?->id);
+                                            });
+                                        })
+                                        ->count();
+                                @endphp
+                                <a wire:navigate href="{{ route('permohonan-cuti') }}"
+                                    class="{{ request()->routeIs('permohonan-cuti*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5 relative">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+                                        </svg>
+                                        <span>Permohonan Cuti</span>
+                                        @if ($pendingCutiCount > 0)
+                                            <span
+                                                class="absolute top-2 right-4 badge badge-xs badge-error animate-pulse">{{ $pendingCutiCount }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Persetujuan Izin & Cuti
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a wire:navigate href="{{ route('personnel') }}"
-                                class="{{ request()->routeIs('personnel*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                    </svg>
-                                    <span>Personnel</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">Data Personnel</span>
-                            </a>
-                        </li>
+                        @can('manajemen-personel')
+                            <li>
+                                <a wire:navigate href="{{ route('personnel') }}"
+                                    class="{{ request()->routeIs('personnel*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                        </svg>
+                                        <span>Personnel</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">Data Personnel</span>
+                                </a>
+                            </li>
+                        @endcan
 
                         <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
 
-                        <li>
-                            <a wire:navigate href="{{ route('opd') }}"
-                                class="{{ request()->routeIs('opd*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-                                    </svg>
-                                    <span>OPD</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Data Master OPD
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-opd')
+                            <li>
+                                <a wire:navigate href="{{ route('opd') }}"
+                                    class="{{ request()->routeIs('opd*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                                        </svg>
+                                        <span>OPD</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Data Master OPD
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a wire:navigate href="{{ route('penugasan') }}"
-                                class="{{ request()->routeIs('penugasan*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                                    </svg>
-                                    <span>Penugasan</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Data Penugasan Karyawan
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-penugasan')
+                            <li>
+                                <a wire:navigate href="{{ route('penugasan') }}"
+                                    class="{{ request()->routeIs('penugasan*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                                        </svg>
+                                        <span>Penugasan</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Data Penugasan Karyawan
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a wire:navigate href="{{ route('kantor') }}"
-                                class="{{ request()->routeIs('kantor*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                                    </svg>
-                                    <span>Kantor</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Lokasi & Radius Absensi
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-kantor')
+                            <li>
+                                <a wire:navigate href="{{ route('kantor') }}"
+                                    class="{{ request()->routeIs('kantor*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                        </svg>
+                                        <span>Kantor</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Lokasi & Radius Absensi
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a wire:navigate href="{{ route('shift') }}"
-                                class="{{ request()->routeIs('shift*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <span>Shift</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Data Jam Kerja
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-shift')
+                            <li>
+                                <a wire:navigate href="{{ route('shift') }}"
+                                    class="{{ request()->routeIs('shift*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span>Shift</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Data Jam Kerja
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a wire:navigate href="{{ route('jadwal') }}"
-                                class="{{ request()->routeIs('jadwal*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-18 0h18" />
-                                    </svg>
-                                    <span>Jadwal</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Penjadwalan Personnel
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-jadwal')
+                            <li>
+                                <a wire:navigate href="{{ route('jadwal') }}"
+                                    class="{{ request()->routeIs('jadwal*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-18 0h18" />
+                                        </svg>
+                                        <span>Jadwal</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Penjadwalan Personnel
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
-                        <li>
-                            <a wire:navigate href="{{ route('cuti') }}"
-                                class="{{ request()->routeIs('cuti*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
-                                    </svg>
-                                    <span>Master Cuti</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Manajemen Jenis Cuti
-                                </span>
-                            </a>
-                        </li>
+                        @can('manajemen-master-cuti')
+                            <li>
+                                <a wire:navigate href="{{ route('cuti') }}"
+                                    class="{{ request()->routeIs('cuti*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+                                        </svg>
+                                        <span>Master Cuti</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Manajemen Jenis Cuti
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
                         @canany(['manajemen-user', 'manajemen-role-permission'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Settings</li>

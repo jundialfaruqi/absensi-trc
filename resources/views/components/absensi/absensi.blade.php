@@ -185,8 +185,13 @@
                     this.time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                     this.date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
                 }
-            }" x-init="update();
-            setInterval(() => update(), 1000)">
+            }" x-init="
+                update();
+                setInterval(() => update(), 1000);
+                $watch('$wire.serverTimestamp', value => {
+                    offset = value - Date.now();
+                });
+            ">
                 <div wire:ignore class="flex flex-col items-center">
                     <div class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 opacity-60 mb-1"
                         x-text="date">Memuat
@@ -553,11 +558,11 @@
                                     :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 border-none btn-lg w-full shadow-[0_0_20px_rgba(37,99,235,0.3)] py-2 h-auto group relative flex items-center justify-center min-h-16 text-white rounded-2xl disabled:bg-none disabled:bg-base-300 disabled:shadow-none disabled:opacity-70">
 
-                                    <div wire:loading wire:target="submitAttendance">
+                                    <div wire:loading wire:target="fetchServerTime, submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
                                     </div>
 
-                                    <div wire:loading.remove wire:target="submitAttendance"
+                                    <div wire:loading.remove wire:target="fetchServerTime, submitAttendance"
                                         class="flex flex-col items-center">
                                         <span class="text-sm font-black tracking-widest drop-shadow-md">ABSEN
                                             MASUK</span>
@@ -583,11 +588,11 @@
                                         isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
                                     class="btn bg-linear-to-r from-secondary to-purple-600 hover:from-secondary/80 hover:to-purple-500 border-none btn-lg w-full shadow-[0_0_20px_rgba(var(--color-secondary),0.3)] py-2 h-auto group relative flex items-center justify-center min-h-16 text-white rounded-2xl disabled:bg-none disabled:bg-base-300 disabled:shadow-none disabled:opacity-70">
 
-                                    <div wire:loading wire:target="submitAttendance">
+                                    <div wire:loading wire:target="fetchServerTime, submitAttendance">
                                         <span class="loading loading-spinner loading-md"></span>
                                     </div>
 
-                                    <div wire:loading.remove wire:target="submitAttendance"
+                                    <div wire:loading.remove wire:target="fetchServerTime, submitAttendance"
                                         class="flex flex-col items-center">
                                         <span class="text-sm font-black uppercase tracking-widest drop-shadow-md">Absen
                                             Pulang</span>
@@ -877,6 +882,9 @@
                     async submit(type) {
                         const video = this.$refs.video;
                         if (!video) return;
+
+                        // Sync server time right before submission
+                        await this.$wire.fetchServerTime(true);
 
                         const canvas = document.createElement('canvas');
                         canvas.width = video.videoWidth;

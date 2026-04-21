@@ -281,21 +281,33 @@
                     HUBUNGI 112
                 </a>
                 <div class="flex items-center gap-4 px-6 py-5 glass-panel rounded-2xl border-white/5">
-                    <div class="flex -space-x-3">
-                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
-                            <img src="{{ asset('assets/logo/logo-bpbd.jpg') }}" alt="BPBD"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
-                            <img src="{{ asset('assets/logo/logo-damkar.png') }}" alt="DAMKAR"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
+                    <div class="flex -space-x-4">
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
                             <img src="{{ asset('assets/logo/logo-kominfo-logo-only.png') }}" alt="DISKOMINFO"
                                 class="w-full h-full object-cover">
                         </div>
-                        <div class="h-8 w-8 rounded-full border-2 border-slate-900 overflow-hidden bg-white">
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-bpbd.jpg') }}" alt="BPBD"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-damkar.png') }}" alt="DAMKAR"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
                             <img src="{{ asset('assets/logo/logo-kemenkes.png') }}" alt="KEMENKES"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-polresta-pku.jpg') }}" alt="POLRESTA"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-satpol-pp.png') }}" alt="SATPOL PP"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-white">
+                            <img src="{{ asset('assets/logo/logo-tni.png') }}" alt="TNI"
                                 class="w-full h-full object-cover">
                         </div>
                     </div>
@@ -324,7 +336,7 @@
         </div>
 
         {{-- Visual HUD Element: 3D Holographic Carousel --}}
-        <div class="hidden lg:flex justify-center items-center relative min-h-[500px] w-full" x-data="{
+        <div class="hidden lg:flex justify-center items-center relative min-h-125 w-full" x-data="{
             active: 0,
             total: 7,
             images: [
@@ -357,9 +369,9 @@
             </div>
 
             {{-- 3D Carousel Container --}}
-            <div class="relative w-full h-[400px] carousel-view flex items-center justify-center">
+            <div class="relative w-full h-100 carousel-view flex items-center justify-center">
                 <template x-for="(img, index) in images" :key="index">
-                    <div class="absolute w-[320px] h-[450px] carousel-card rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+                    <div class="absolute w-[320px] h-112.5 carousel-card rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
                         :class="getCardClass(index)">
 
                         {{-- Image with HUD Overlay --}}
@@ -708,10 +720,13 @@
             <div class="flex animate-marquee whitespace-nowrap gap-8 py-8">
                 @php
                     $partners = [
+                        ['logo' => 'logo-kominfo-logo-only.png', 'name' => 'Dinas Kominfo Pekanbaru'],
                         ['logo' => 'logo-bpbd.jpg', 'name' => 'BPBD Pekanbaru'],
                         ['logo' => 'logo-damkar.png', 'name' => 'Damkar Pekanbaru'],
                         ['logo' => 'logo-kemenkes.png', 'name' => 'Dinas Kesehatan Pekanbaru'],
-                        ['logo' => 'logo-kominfo-logo-only.png', 'name' => 'Dinas Kominfo Pekanbaru'],
+                        ['logo' => 'logo-polresta-pku.jpg', 'name' => 'Polresta Pekanbaru'],
+                        ['logo' => 'logo-satpol-pp.png', 'name' => 'Satpol PP Pekanbaru'],
+                        ['logo' => 'logo-tni.png', 'name' => 'TNI Kodim 0301/PBR'],
                     ];
                 @endphp
 

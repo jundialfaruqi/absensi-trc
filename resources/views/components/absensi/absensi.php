@@ -69,36 +69,43 @@ new #[Layout('layouts.absensi.app')] class extends Component
         }
 
         try {
-            // Priority 1: timeapi.io (User's preferred API)
-            $response = Http::timeout(6)->get('https://timeapi.io/api/time/current/zone?timeZone=Asia/Jakarta');
-            if ($response->successful()) {
-                $data = $response->json();
-                $serverNow = Carbon::parse($data['dateTime']);
-                $this->serverTime = $serverNow->toDateTimeString();
-                $this->serverTimestamp = $serverNow->timestamp * 1000;
-                $this->apiSource = 'timeapi';
-                $this->isTimeSynced = true;
-            } else {
-                throw new \Exception("TimeAPI Failed");
-            }
+            // Priority 1: Local Server (Main Priority)
+            $this->serverTime = Carbon::now('Asia/Jakarta')->toDateTimeString();
+            $this->serverTimestamp = Carbon::now('Asia/Jakarta')->timestamp * 1000; // in milliseconds
+            $this->apiSource = 'server';
+            $this->isTimeSynced = true;
         } catch (\Exception $e) {
             try {
-                // Priority 2: worldtimeapi (reliable public API)
-                $response = Http::timeout(6)->get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+                // Priority 2: timeapi.io
+                $response = Http::timeout(6)->get('https://timeapi.io/api/time/current/zone?timeZone=Asia/Jakarta');
                 if ($response->successful()) {
                     $data = $response->json();
-                    $serverNow = Carbon::createFromTimestamp($data['unixtime'], 'Asia/Jakarta');
+                    $serverNow = Carbon::parse($data['dateTime']);
                     $this->serverTime = $serverNow->toDateTimeString();
                     $this->serverTimestamp = $serverNow->timestamp * 1000;
-                    $this->apiSource = 'worldtimeapi';
+                    $this->apiSource = 'timeapi';
                     $this->isTimeSynced = true;
                 } else {
-                    throw new \Exception("WorldTimeAPI Failed");
+                    throw new \Exception("TimeAPI Failed");
                 }
-            } catch (\Exception $e2) {
-                // NO FALLBACK TO LOCAL TIME - per user request
-                $this->isTimeSynced = false;
-                $this->apiSource = 'failed';
+            } catch (\Exception $ex) {
+                try {
+                    // Priority 3: worldtimeapi (reliable public API)
+                    $response = Http::timeout(6)->get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        $serverNow = Carbon::createFromTimestamp($data['unixtime'], 'Asia/Jakarta');
+                        $this->serverTime = $serverNow->toDateTimeString();
+                        $this->serverTimestamp = $serverNow->timestamp * 1000;
+                        $this->apiSource = 'worldtimeapi';
+                        $this->isTimeSynced = true;
+                    } else {
+                        throw new \Exception("WorldTimeAPI Failed");
+                    }
+                } catch (\Exception $ex2) {
+                    $this->isTimeSynced = false;
+                    $this->apiSource = 'failed';
+                }
             }
         }
         $this->fetchTime = Carbon::now();
