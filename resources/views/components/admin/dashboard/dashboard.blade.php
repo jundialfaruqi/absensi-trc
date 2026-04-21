@@ -75,134 +75,343 @@
         </div>
     </div>
 
-    {{-- Activity Log Section --}}
+    {{-- Main Dashboard Grid --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {{-- Log Timeline --}}
-        <div class="lg:col-span-2 space-y-4">
-            <div class="flex items-center justify-between px-2">
-                <div class="flex items-center gap-2">
-                    <div class="h-8 w-1 bg-primary rounded-full"></div>
-                    <h2 class="text-lg font-black text-base-content uppercase italic">Log Aktifitas Hari Ini</h2>
+        
+        {{-- Left Column (Main Content) --}}
+        <div class="lg:col-span-2 space-y-8">
+            
+            {{-- Log Aktifitas --}}
+            <div class="space-y-4">
+                <div class="flex items-center justify-between px-2">
+                    <div class="flex items-center gap-2">
+                        <div class="h-8 w-1 bg-primary rounded-full"></div>
+                        <h2 class="text-lg font-black text-base-content uppercase italic">Log Aktifitas Hari Ini</h2>
+                    </div>
+                    <button wire:click="$refresh" class="btn btn-ghost btn-xs gap-2 text-base-content/40 hover:text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        Refresh
+                    </button>
                 </div>
-                <button wire:click="$refresh" class="btn btn-ghost btn-xs gap-2 text-base-content/40 hover:text-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                    Refresh
-                </button>
+
+                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="table table-md">
+                            <thead>
+                                <tr class="bg-base-200/50">
+                                    <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest">Waktu</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($activities as $log)
+                                    <tr class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
+                                        <td>
+                                            <div class="flex items-center gap-3">
+                                                <div class="avatar">
+                                                    <div class="mask mask-squircle w-10 h-10 bg-base-200">
+                                                        @if($log->personnel->foto)
+                                                            <img src="{{ asset('storage/' . $log->personnel->foto) }}" alt="Avatar" />
+                                                        @else
+                                                            <div class="flex items-center justify-center h-full text-base-content/20">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                                </svg>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
+                                                    <span class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->name }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="flex flex-col gap-1">
+                                                @if($log->jam_masuk)
+                                                    <div class="flex items-center gap-1.5">
+                                                        <div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+                                                        <span class="text-[11px] font-bold text-base-content/70">In: {{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
+                                                    </div>
+                                                @endif
+                                                @if($log->jam_pulang)
+                                                    <div class="flex items-center gap-1.5">
+                                                        <div class="h-1.5 w-1.5 rounded-full bg-secondary"></div>
+                                                        <span class="text-[11px] font-bold text-base-content/70">Out: {{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="flex flex-col gap-1">
+                                                @if($log->status_masuk)
+                                                    <span class="badge badge-{{ $log->status_masuk === 'HADIR' ? 'success' : 'warning' }} badge-xs font-black text-[8px] tracking-widest">{{ $log->status_masuk }}</span>
+                                                @endif
+                                                @if($log->status_pulang)
+                                                    <span class="badge badge-secondary badge-xs font-black text-[8px] tracking-widest uppercase">{{ $log->status_pulang }}</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="flex flex-col gap-1">
+                                                @if($log->is_within_radius === true)
+                                                    <span class="text-[9px] font-bold text-success/70 flex items-center gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        Radius OK
+                                                    </span>
+                                                @elseif($log->is_within_radius === false)
+                                                    <span class="text-[9px] font-bold text-error/70 flex items-center gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        Luar Radius
+                                                    </span>
+                                                @endif
+                                                <span class="text-[9px] text-base-content/40 font-medium italic truncate max-w-[100px]">
+                                                    {{ $log->keterangan ?: '-' }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="py-12 text-center">
+                                            <div class="flex flex-col items-center opacity-20">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                                </svg>
+                                                <p class="text-sm font-black uppercase tracking-widest">Belum ada aktifitas hari ini</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if($activities->count() > 0)
+                        <div class="p-4 bg-base-200/50 border-t border-base-200">
+                            <a href="{{ route('absensi') }}" class="btn btn-sm btn-ghost btn-block text-[10px] font-black uppercase tracking-widest">
+                                Lihat Semua Data Monitoring
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
 
-            <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="table table-md">
-                        <thead>
-                            <tr class="bg-base-200/50">
-                                <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
-                                <th class="text-[10px] font-black uppercase tracking-widest">Waktu</th>
-                                <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
-                                <th class="text-[10px] font-black uppercase tracking-widest">Detail</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($activities as $log)
-                                <tr class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
-                                    <td>
-                                        <div class="flex items-center gap-3">
-                                            <div class="avatar">
-                                                <div class="mask mask-squircle w-10 h-10 bg-base-200">
-                                                    @if($log->personnel->foto)
-                                                        <img src="{{ asset('storage/' . $log->personnel->foto) }}" alt="Avatar" />
-                                                    @else
-                                                        <div class="flex items-center justify-center h-full text-base-content/20">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                                            </svg>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
-                                                <span class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->name }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="flex flex-col gap-1">
-                                            @if($log->jam_masuk)
-                                                <div class="flex items-center gap-1.5">
-                                                    <div class="h-1.5 w-1.5 rounded-full bg-success"></div>
-                                                    <span class="text-[11px] font-bold text-base-content/70">In: {{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
-                                                </div>
-                                            @endif
-                                            @if($log->jam_pulang)
-                                                <div class="flex items-center gap-1.5">
-                                                    <div class="h-1.5 w-1.5 rounded-full bg-secondary"></div>
-                                                    <span class="text-[11px] font-bold text-base-content/70">Out: {{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="flex flex-col gap-1">
-                                            @if($log->status_masuk)
-                                                <span class="badge badge-{{ $log->status_masuk === 'HADIR' ? 'success' : 'warning' }} badge-xs font-black text-[8px] tracking-widest">{{ $log->status_masuk }}</span>
-                                            @endif
-                                            @if($log->status_pulang)
-                                                <span class="badge badge-secondary badge-xs font-black text-[8px] tracking-widest uppercase">{{ $log->status_pulang }}</span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="flex flex-col gap-1">
-                                            @if($log->is_within_radius === true)
-                                                <span class="text-[9px] font-bold text-success/70 flex items-center gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    Radius OK
-                                                </span>
-                                            @elseif($log->is_within_radius === false)
-                                                <span class="text-[9px] font-bold text-error/70 flex items-center gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    Luar Radius
-                                                </span>
-                                            @endif
-                                            <span class="text-[9px] text-base-content/40 font-medium italic truncate max-w-[100px]">
-                                                {{ $log->keterangan ?: '-' }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="py-12 text-center">
-                                        <div class="flex flex-col items-center opacity-20">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                                            </svg>
-                                            <p class="text-sm font-black uppercase tracking-widest">Belum ada aktifitas hari ini</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                @if($activities->count() > 0)
-                    <div class="p-4 bg-base-200/50 border-t border-base-200">
-                        <a href="{{ route('absensi') }}" class="btn btn-sm btn-ghost btn-block text-[10px] font-black uppercase tracking-widest">
-                            Lihat Semua Data Monitoring
-                        </a>
+            {{-- Monitoring Hub: Late & Absent --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {{-- Pegawai Terlambat --}}
+                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                    <div class="p-4 bg-error/5 border-b border-base-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-error">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 class="text-xs font-black uppercase tracking-widest italic">Terlambat Hari Ini</h3>
+                        </div>
+                        <span class="badge badge-error badge-sm font-black text-[10px]">{{ $latePersonnel->count() }}</span>
                     </div>
-                @endif
+                    <div class="max-h-[400px] overflow-y-auto divide-y divide-base-200">
+                        @forelse($latePersonnel as $late)
+                            <div class="flex items-center gap-4 p-4 hover:bg-base-200/30 transition-colors">
+                                <div class="avatar">
+                                    <div class="mask mask-squircle w-12 h-12">
+                                        @if($late->personnel->foto)
+                                            <img src="{{ asset('storage/' . $late->personnel->foto) }}" />
+                                        @else
+                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($late->personnel->name) }}&background=fee2e2&color=ef4444" />
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-[11px] font-black text-base-content uppercase truncate">{{ $late->personnel->name }}</div>
+                                    <div class="text-[9px] font-bold text-base-content/40 uppercase truncate tracking-tighter">{{ $late->personnel->opd->name }}</div>
+                                </div>
+                                <div class="flex-none text-right">
+                                    <div class="text-xs font-black text-error italic uppercase">{{ $late->jam_masuk->format('H:i') }}</div>
+                                    <div class="text-[8px] font-bold text-base-content/30 uppercase tracking-widest">Jam Masuk</div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="p-12 text-center">
+                                <div class="opacity-20 italic text-xs uppercase font-black tracking-widest mb-1">Tidak Ada Keterlambatan</div>
+                                <div class="text-[9px] font-bold text-base-content/30 uppercase">Semua staff hadir tepat waktu</div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- Belum Absen --}}
+                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                    <div class="p-4 bg-warning/5 border-b border-base-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                            <h3 class="text-xs font-black uppercase tracking-widest italic">Belum Absen Masuk</h3>
+                        </div>
+                        <span class="badge badge-warning badge-sm font-black text-[10px]">{{ $absentPersonnel->count() }}</span>
+                    </div>
+                    <div class="max-h-[400px] overflow-y-auto divide-y divide-base-200">
+                        @forelse($absentPersonnel as $absent)
+                            <div class="flex items-center gap-4 p-4 hover:bg-base-200/30 transition-colors">
+                                <div class="avatar">
+                                    <div class="mask mask-squircle w-12 h-12">
+                                        @if($absent->personnel->foto)
+                                            <img src="{{ asset('storage/' . $absent->personnel->foto) }}" />
+                                        @else
+                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($absent->personnel->name) }}&background=fef3c7&color=d97706" />
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-[11px] font-black text-base-content uppercase truncate">{{ $absent->personnel->name }}</div>
+                                    <div class="text-[9px] font-bold text-base-content/40 uppercase truncate tracking-tighter">{{ $absent->personnel->opd->name }}</div>
+                                </div>
+                                <div class="flex-none">
+                                    <span class="badge badge-warning badge-outline text-[8px] font-black uppercase px-2">{{ $absent->shift->name }}</span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="p-12 text-center">
+                                <div class="opacity-20 italic text-xs uppercase font-black tracking-widest mb-1">Semua Telah Absen</div>
+                                <div class="text-[9px] font-bold text-base-content/30 uppercase">Monitoring kehadiran lengkap</div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            {{-- Statistik: Weekly Chart --}}
+            <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                <div class="p-6 border-b border-base-200 bg-base-200/30 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-widest italic leading-none">Statistik Kedisiplinan</h3>
+                        <p class="text-[10px] font-bold text-base-content/40 uppercase mt-1 tracking-widest">Aktivitas 7 Hari Terakhir</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-primary shadow-sm"></span>
+                            <span class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Tepat Waktu</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-error shadow-sm"></span>
+                            <span class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Terlambat</span>
+                        </div>
+                        <div class="h-4 w-px bg-base-300 hidden sm:block"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <div class="text-[10px] font-black text-base-content leading-none">{{ collect($weeklyStats)->sum('total') }}</div>
+                                <div class="text-[7px] font-bold text-base-content/30 uppercase">Total Absen</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-12 overflow-x-auto">
+                    <div class="min-w-[500px] flex items-end justify-between h-72 gap-6 md:gap-10 px-4 pb-4">
+                        @php
+                            $totals = array_column($weeklyStats, 'total');
+                            $maxCount = !empty($totals) && max($totals) > 0 ? max($totals) : 10;
+                        @endphp
+                        @foreach($weeklyStats as $stat)
+                            <div class="flex-1 flex flex-col items-center gap-6 group relative">
+                                {{-- Bar Container (Full height bg) --}}
+                                <div class="w-full max-w-[60px] bg-base-200/50 rounded-2xl transition-all duration-700 relative group-hover:bg-base-200 h-full overflow-hidden">
+                                    
+                                    {{-- Stacked Bars --}}
+                                    <div class="absolute bottom-0 left-0 right-0 w-full flex flex-col justify-end transition-all duration-1000 ease-out" 
+                                         style="height: {{ ($stat['total'] / $maxCount) * 100 }}%">
+                                        
+                                        {{-- Late Segment (Top) --}}
+                                        @if($stat['late'] > 0)
+                                            <div class="w-full bg-error rounded-t-2xl relative group/late" 
+                                                 style="height: {{ ($stat['late'] / $stat['total']) * 100 }}%">
+                                                <div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/late:opacity-100 transition-opacity bg-error text-error-content text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap z-10">
+                                                    {{ $stat['late'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        {{-- Ontime Segment (Bottom) --}}
+                                        @if($stat['ontime'] > 0)
+                                            <div class="w-full bg-primary {{ $stat['late'] == 0 ? 'rounded-t-2xl' : '' }} relative group/ontime" 
+                                                 style="height: {{ ($stat['ontime'] / $stat['total']) * 100 }}%">
+                                                <div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/ontime:opacity-100 transition-opacity bg-primary text-primary-content text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap z-10">
+                                                    {{ $stat['ontime'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        
+                                        {{-- Catch-all for others (if any) --}}
+                                        @php $other = $stat['total'] - ($stat['ontime'] + $stat['late']); @endphp
+                                        @if($other > 0)
+                                            <div class="w-full bg-base-content opacity-20" style="height: {{ ($other / $stat['total']) * 100 }}%"></div>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                {{-- Data Label --}}
+                                <div class="flex flex-col items-center">
+                                    <span class="text-[10px] font-black {{ $stat['date'] === date('Y-m-d') ? 'text-primary' : 'text-base-content/40' }} uppercase tracking-[0.2em] transition-colors">
+                                        {{ $stat['label'] }}
+                                    </span>
+                                    @if($stat['date'] === date('Y-m-d'))
+                                        <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1 shadow-[0_0_8px_rgb(var(--p))]"></div>
+                                    @endif
+                                </div>
+
+                                {{-- Hover Tooltip --}}
+                                <div class="absolute -top-20 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none scale-90 group-hover:scale-100 z-50">
+                                    <div class="bg-base-content text-base-100 p-3 rounded-2xl shadow-2xl min-w-[120px] border border-white/10">
+                                        <div class="text-[8px] font-black text-base-100/50 uppercase tracking-widest mb-1">
+                                            {{ Carbon\Carbon::parse($stat['date'])->translatedFormat('d M Y') }}
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-[9px] font-bold text-success uppercase">Tepat</span>
+                                                <span class="text-[10px] font-black">{{ $stat['ontime'] }}</span>
+                                            </div>
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-[9px] font-bold text-error uppercase">Telat</span>
+                                                <span class="text-[10px] font-black">{{ $stat['late'] }}</span>
+                                            </div>
+                                            <div class="pt-1 mt-1 border-t border-white/10 flex items-center justify-between gap-4">
+                                                <span class="text-[9px] font-black uppercase">Total</span>
+                                                <span class="text-[11px] font-black">{{ $stat['total'] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="w-3 h-3 bg-base-content rotate-45 mx-auto -mt-1.5 border-r border-b border-white/10"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    
+                    {{-- Scroll Indicator for Mobile --}}
+                    <div class="lg:hidden flex items-center justify-center gap-2 mt-2 opacity-30">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 animate-bounce-x">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                        </svg>
+                        <span class="text-[8px] font-black uppercase tracking-widest">Geser untuk melihat detail</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 animate-bounce-x-right">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
 
-        {{-- Side Cards --}}
-        <div class="space-y-6">
+        {{-- Side Column (Right) --}}
+        <div class="space-y-8">
             {{-- Quick Actions: Leave Approval --}}
             <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
                 <div class="p-4 bg-base-200/50 border-b border-base-200 flex items-center justify-between">
@@ -222,8 +431,8 @@
                                 <div class="flex items-center gap-1">
                                     <button 
                                         wire:click="approveLeave({{ $leave->id }})" 
-                                        wire:loading.attr="disabled"
                                         wire:target="approveLeave({{ $leave->id }})"
+                                        wire:loading.attr="disabled"
                                         class="btn btn-square btn-xs btn-success rounded-lg hover:scale-110 transition-transform shadow-sm"
                                         title="Setujui">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
@@ -232,8 +441,8 @@
                                     </button>
                                     <button 
                                         wire:click="rejectLeave({{ $leave->id }})" 
-                                        wire:loading.attr="disabled"
                                         wire:target="rejectLeave({{ $leave->id }})"
+                                        wire:loading.attr="disabled"
                                         class="btn btn-square btn-xs btn-error rounded-lg hover:scale-110 transition-transform shadow-sm"
                                         title="Tolak">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
@@ -270,6 +479,7 @@
                 @endif
             </div>
 
+            {{-- Kinerja Analytics --}}
             <div class="card bg-base-100 shadow-xl border border-base-200 p-6 space-y-4">
                 <h3 class="text-xs font-black text-base-content/50 uppercase tracking-widest italic">Kinerja Attendance</h3>
                 <div class="flex items-center justify-between">
@@ -290,6 +500,7 @@
                 </div>
             </div>
 
+            {{-- Help Card --}}
             <div class="card bg-primary text-primary-content shadow-xl p-6 relative overflow-hidden group">
                 <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-32 h-32">

@@ -1,5 +1,5 @@
 <?php
-
+ 
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -9,6 +9,7 @@ use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -47,12 +48,68 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ->latest('updated_at')
             ->take(15)
             ->get();
-
-        // Pending Leave Requests for Quick Action
+        
+        // Pending Leave Requests
         $pendingLeaves = $leaveRequestQuery->with(['personnel.opd', 'cuti'])
             ->latest()
             ->take(5)
             ->get();
+
+        // --- Monitoring: Pegawai Terlambat (Today) ---
+        $latePersonnel = Absensi::whereDate('tanggal', $today)
+            ->where('status_masuk', 'TELAT')
+            ->when(!$isSuperAdmin, function($q) use ($opdId) {
+                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            })
+            ->with(['personnel.opd'])
+            ->latest('jam_masuk')
+            ->get();
+
+        // --- Monitoring: Belum Absen (Today) ---
+        $absentPersonnel = \App\Models\Jadwal::whereDate('tanggal', $today)
+            ->whereDoesntHave('absensis', function($q) use ($today) {
+                $q->whereDate('tanggal', $today);
+            })
+            ->when(!$isSuperAdmin, function($q) use ($opdId) {
+                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            })
+            ->with(['personnel.opd', 'shift'])
+            ->get();
+
+        // --- Statistics: Weekly Chart ---
+        $startDay = Carbon::now()->subDays(6)->startOfDay();
+        $endDay = Carbon::now()->endOfDay();
+
+        $rawWeeklyStats = Absensi::whereBetween('tanggal', [$startDay, $endDay])
+            ->when(!$isSuperAdmin, function($q) use ($opdId) {
+                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            })
+            ->select(
+                DB::raw('DATE(tanggal) as date'),
+                DB::raw("SUM(CASE WHEN status_masuk = 'HADIR' THEN 1 ELSE 0 END) as ontime_count"),
+                DB::raw("SUM(CASE WHEN status_masuk = 'TELAT' THEN 1 ELSE 0 END) as late_count"),
+                DB::raw('count(*) as total_count')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date')
+            ->toArray();
+
+        $weeklyStats = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->format('Y-m-d');
+            $label = Carbon::now()->subDays($i)->isoFormat('ddd');
+            $data = $rawWeeklyStats[$date] ?? null;
+            
+            $weeklyStats[] = [
+                'date' => $date,
+                'label' => $label,
+                'total' => $data['total_count'] ?? 0,
+                'ontime' => $data['ontime_count'] ?? 0,
+                'late' => $data['late_count'] ?? 0,
+            ];
+        }
 
         return [
             'stats' => [
@@ -65,6 +122,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ],
             'activities' => $activities,
             'pendingLeaves' => $pendingLeaves,
+            'latePersonnel' => $latePersonnel,
+            'absentPersonnel' => $absentPersonnel,
+            'weeklyStats' => $weeklyStats,
             'isSuperAdmin' => $isSuperAdmin,
             'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
         ];
@@ -92,11 +152,11 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $period = CarbonPeriod::create($request->tanggal_mulai, $request->tanggal_selesai);
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
-
+            
             $existing = Absensi::where('personnel_id', $request->personnel_id)
                 ->whereDate('tanggal', $dateStr)
                 ->first();
-
+            
             $originalMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALFA';
             $originalPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALFA';
 
