@@ -2,7 +2,7 @@
     {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-base-content tracking-tight uppercase italic">Dashboard Admin</h1>
+            <h1 class="text-2xl font-black text-base-content tracking-tight uppercase italic">Dashboard TRC</h1>
             <p class="text-xs font-bold text-base-content/50 uppercase tracking-[0.3em]">
                 {{ $opdName }} • {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
             </p>
