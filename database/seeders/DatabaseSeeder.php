@@ -17,10 +17,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        $user = User::factory()->create([
             'name' => 'Super Admin',
             'email' => 'superadmin@mail.com',
             'password' => bcrypt('admin123'),
         ]);
+
+        $user->assignRole('super-admin');
+
+        $user->givePermissionTo('manajemen-user');
+        $user->givePermissionTo('manajemen-role-permission');
+        $user->givePermissionTo('manajemen-opd');
+        $user->givePermissionTo('manajemen-kantor');
+        $user->givePermissionTo('manajemen-personnel');
+        $user->givePermissionTo('manajemen-penugasan');
     }
 }

@@ -26,7 +26,8 @@ Route::group([
         ->name('permohonan-cuti');
 
     Route::livewire('/role-permission', 'admin::role-permission')
-        ->name('role-permission');
+    ->middleware('permission:manajemen-role-permission')
+    ->name('role-permission');
 
     Route::livewire('/opd', 'admin::opd')
         ->name('opd');
@@ -35,7 +36,7 @@ Route::group([
         ->name('penugasan');
 
     Route::livewire('/user', 'admin::user')
-        ->middleware('role:super-admin')
+        ->middleware('permission:manajemen-user')
         ->name('user');
 
     Route::livewire('/personnel', 'admin::personnel')
