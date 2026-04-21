@@ -205,7 +205,7 @@
                             class="label-text font-black text-[10px] uppercase tracking-widest italic opacity-50">Catatan
                             Admin (Opsional)</span>
                     </label>
-                    <textarea wire:model="adminNote" class="textarea textarea-bordered h-24 font-medium text-sm"
+                    <textarea wire:model="adminNote" class="textarea textarea-bordered w-full h-24 font-medium text-sm"
                         placeholder="{{ $processingAction === 'APPROVE' ? 'Tambahkan catatan persetujuan...' : 'Jelaskan alasan penolakan permohonan...' }}"></textarea>
                 </div>
             </div>
