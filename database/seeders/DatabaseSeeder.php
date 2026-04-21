@@ -17,18 +17,18 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Seed Permissions with Groups
         $permissions = [
-            ['name' => 'manajemen-absensi', 'group' => 'Overview'],
-            ['name' => 'manajemen-permohonan-cuti', 'group' => 'Overview'],
-            ['name' => 'manajemen-personel', 'group' => 'Overview'],
-            ['name' => 'manajemen-opd', 'group' => 'Data'],
-            ['name' => 'manajemen-penugasan', 'group' => 'Data'],
-            ['name' => 'manajemen-kantor', 'group' => 'Data'],
-            ['name' => 'manajemen-shift', 'group' => 'Data'],
-            ['name' => 'manajemen-jadwal', 'group' => 'Data'],
-            ['name' => 'manajemen-master-cuti', 'group' => 'Data'],
-            ['name' => 'manajemen-jadwal-import', 'group' => 'Data'],
-            ['name' => 'manajemen-user', 'group' => 'Settings'],
-            ['name' => 'manajemen-role-permission', 'group' => 'Settings'],
+            ['name' => 'manajemen-absensi', 'group' => 'Absensi'],
+            ['name' => 'manajemen-permohonan-cuti', 'group' => 'Cuti'],
+            ['name' => 'manajemen-personel', 'group' => 'Personel'],
+            ['name' => 'manajemen-opd', 'group' => 'OPD'],
+            ['name' => 'manajemen-penugasan', 'group' => 'Penugasan'],
+            ['name' => 'manajemen-kantor', 'group' => 'Kantor'],
+            ['name' => 'manajemen-shift', 'group' => 'Shift'],
+            ['name' => 'manajemen-jadwal', 'group' => 'Jadwal'],
+            ['name' => 'manajemen-master-cuti', 'group' => 'Cuti'],
+            ['name' => 'manajemen-jadwal-import', 'group' => 'Jadwal'],
+            ['name' => 'manajemen-user', 'group' => 'Pengguna'],
+            ['name' => 'manajemen-role-permission', 'group' => "Role & Permission"],
         ];
 
         foreach ($permissions as $permission) {
@@ -36,8 +36,8 @@ class DatabaseSeeder extends Seeder
         }
 
         // 2. Seed Roles
-        $superAdminRole = \Spatie\Permission\Models\Role::create(['name' => 'super-admin', 'color' => 'error']);
-        \Spatie\Permission\Models\Role::create(['name' => 'admin', 'color' => 'primary']);
+        $superAdminRole = \Spatie\Permission\Models\Role::create(['name' => 'super-admin', 'color' => '#ef4444']);
+        \Spatie\Permission\Models\Role::create(['name' => 'admin-opd', 'color' => '#ef4444']);
 
         // 3. Assign all permissions to super-admin
         $superAdminRole->givePermissionTo(\Spatie\Permission\Models\Permission::all());
