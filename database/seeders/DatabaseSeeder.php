@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
 
         // 2. Seed Roles
         $superAdminRole = \Spatie\Permission\Models\Role::create(['name' => 'super-admin', 'color' => '#ef4444']);
-        \Spatie\Permission\Models\Role::create(['name' => 'admin-opd', 'color' => '#ef4444']);
+        \Spatie\Permission\Models\Role::create(['name' => 'admin-opd', 'color' => '#3b82f6']);
 
         // 3. Assign all permissions to super-admin
         $superAdminRole->givePermissionTo(\Spatie\Permission\Models\Permission::all());
