@@ -17,6 +17,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     // Form attributes
     public ?int $shiftId = null;
     public string $name = '';
+    public string $keterangan = '';
     public string $start_time = '';
     public string $end_time = '';
     public string $color = '#64748b';
@@ -51,13 +52,14 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     {
         $this->resetForm();
         $item = Shift::findOrFail($id);
-        
+
         $this->shiftId = $item->id;
         $this->name = $item->name;
+        $this->keterangan = $item->keterangan;
         $this->start_time = \Carbon\Carbon::parse($item->start_time)->format('H:i');
         $this->end_time = \Carbon\Carbon::parse($item->end_time)->format('H:i');
         $this->color = $item->color ?? '#64748b';
-        
+
         $this->dispatch('open-modal', id: 'shift-modal');
     }
 
@@ -74,6 +76,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
 
         $data = [
             'name' => $this->name,
+            'keterangan' => $this->keterangan,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'color' => $this->color,
@@ -113,6 +116,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     {
         $this->shiftId = null;
         $this->name = '';
+        $this->keterangan = '';
         $this->start_time = '';
         $this->end_time = '';
         $this->color = '#64748b';
@@ -123,7 +127,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     {
         $this->resetPage();
     }
-    
+
     public function updatedPerPage(): void
     {
         $this->resetPage();

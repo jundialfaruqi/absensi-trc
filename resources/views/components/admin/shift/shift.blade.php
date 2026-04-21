@@ -91,6 +91,7 @@
                         <tr>
                             <th class="text-center w-16">#</th>
                             <th>Nama Shift</th>
+                            <th>Keterangan</th>
                             <th>Jam Mulai (Masuk)</th>
                             <th>Jam Selesai (Pulang)</th>
                             <th class="text-center w-24">Action</th>
@@ -106,6 +107,9 @@
                                             style="background-color: {{ $r->color ?? '#64748b' }}"></div>
                                         {{ $r->name }}
                                     </div>
+                                </td>
+                                <td>
+                                    <span class="text-xs">{{ $r->keterangan }}</span>
                                 </td>
                                 <td>
                                     <div class="badge badge-lg badge-outline">
@@ -172,6 +176,19 @@
                             class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"
                             placeholder="Cth: Shift Pagi">
                         @error('name')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label mb-1 px-1">
+                            <span class="label-text text-sm font-medium">Keterangan <span
+                                    class="text-error">*</span></span>
+                        </label>
+                        <input type="text" wire:model="keterangan"
+                            class="input input-bordered focus:input-primary w-full transition-all @error('keterangan') input-error @enderror"
+                            placeholder="Cth: Shift Pagi">
+                        @error('keterangan')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
                     </div>

@@ -319,6 +319,23 @@
                             </div>
                         </div>
 
+                        {{-- OPD --}}
+                        <div class="form-control w-full md:col-span-2">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text text-sm font-medium">Pilih OPD</span>
+                            </label>
+                            <select wire:model="opdId"
+                                class="select select-bordered focus:select-primary w-full transition-all @error('opdId') select-error @enderror">
+                                <option value="">-- Tanpa OPD --</option>
+                                @foreach ($this->opds as $opd)
+                                    <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('opdId')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Foto Profil --}}
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">

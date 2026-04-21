@@ -11,6 +11,7 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Models\Opd;
 
 new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -29,6 +30,7 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
     public string $password = '';
     public string $password_confirmation = '';
     public string $role = '';
+    public ?int $opdId = null;
 
     // Delete
     public ?int $deleteId = null;
@@ -67,6 +69,12 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
         return Role::orderBy('name')->get();
     }
 
+    #[Computed]
+    public function opds()
+    {
+        return Opd::orderBy('name')->get();
+    }
+
     public function openAddModal(): void
     {
         $this->resetForm();
@@ -84,6 +92,7 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
         $this->nomor_hp = $item->nomor_hp ?? '';
         $this->oldFoto = $item->foto;
         $this->role = $item->roles->first()?->name ?? '';
+        $this->opdId = $item->opd()?->id;
         
         $this->dispatch('open-modal', id: 'user-modal');
     }
@@ -99,6 +108,7 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
             'nomor_hp' => 'nullable|string|max:30',
             'foto' => 'nullable|image|max:2048',
             'role' => 'nullable|string|exists:roles,name',
+            'opdId' => 'nullable|integer|exists:opds,id',
         ];
 
         if (!$this->userId || $this->password) {
@@ -139,6 +149,8 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
         } else {
             $user->syncRoles([]);
         }
+
+        $user->opds()->sync($this->opdId ? [$this->opdId] : []);
 
         $this->resetForm();
         $this->dispatch('close-modal', id: 'user-modal');
@@ -183,6 +195,7 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
         $this->password = '';
         $this->password_confirmation = '';
         $this->role = '';
+        $this->opdId = null;
         $this->resetErrorBag();
     }
 

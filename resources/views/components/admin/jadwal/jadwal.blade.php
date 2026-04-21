@@ -155,6 +155,9 @@
                                                     <span class="text-[8px] opacity-80 mt-0.5">
                                                         {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
                                                     </span>
+                                                    <span class="text-[8px] opacity-80 mt-0.1">
+                                                        {{ $j->shift ? \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') : '' }}
+                                                    </span>
                                                 @else
                                                     <span
                                                         class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
@@ -240,6 +243,7 @@
                                             class="radio radio-primary radio-sm">
                                         <div class="flex flex-col">
                                             <span class="font-bold text-xs">{{ $s->name }}</span>
+                                            <span class="text-[10px] opacity-60">{{ $s->keterangan }}</span>
                                             <span
                                                 class="text-[10px] opacity-60">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
                                                 - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>

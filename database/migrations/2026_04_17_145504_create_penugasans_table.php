@@ -16,6 +16,16 @@ return new class extends Migration
             $table->string('name');
             $table->timestamps();
         });
+
+        // Seed default data
+            DB::table('penugasans')->insert([
+                ['name' => 'DEV', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Call Taker', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Dokter', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Perawat', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Responder', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Security', 'created_at' => now(), 'updated_at' => now()],
+            ]);
     }
 
     /**
