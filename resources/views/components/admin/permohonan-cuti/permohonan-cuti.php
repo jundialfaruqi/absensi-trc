@@ -110,6 +110,7 @@ new #[Layout('layouts::admin.app')] #[Title('Permohonan Cuti')] class extends Co
                         'tanggal' => $dateStr,
                     ],
                     [
+                        'status' => 'CUTI',
                         'status_masuk' => 'CUTI',
                         'status_pulang' => 'CUTI',
                         'cuti_id' => $request->cuti_id,

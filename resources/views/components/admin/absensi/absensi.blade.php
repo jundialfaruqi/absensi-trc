@@ -166,7 +166,7 @@
                                     @endphp
                                     <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                         class="text-center border-base-200 p-2 min-h-16 h-16 cursor-pointer hover:bg-base-100 hover:ring-primary/30 transition-all hover:z-100 relative {{ $cellClass }} {{ $isToday && !$a ? 'bg-primary/5' : '' }}">
-                                        @if ($a)
+                                        @if ($a && ($a->jam_masuk || $a->jam_pulang || !in_array($a->status, ['ALFA', 'LIBUR'])))
                                             <div class="flex flex-col h-full relative">
                                                 {{-- Edited indicator --}}
                                                 @if ($a->edited_at)
@@ -285,9 +285,13 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                        @elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
+                                        @elseif ($a && $a->status === 'ALFA' && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
                                             <div class="flex flex-col items-center justify-center opacity-40">
                                                 <span class="text-[9px] font-bold uppercase text-error">ALFA</span>
+                                            </div>
+                                        @elseif ($a && $a->status === 'LIBUR')
+                                            <div class="flex flex-col items-center justify-center opacity-40">
+                                                <span class="text-[9px] font-bold uppercase text-info">LIBUR</span>
                                             </div>
                                         @elseif ($j)
                                             <div class="flex flex-col items-center justify-center opacity-30 mt-1">

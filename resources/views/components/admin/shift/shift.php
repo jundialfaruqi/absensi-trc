@@ -67,6 +67,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     {
         $rules = [
             'name' => 'required|string|max:255',
+            'keterangan' => 'nullable|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
             'color' => 'required|string|max:7',

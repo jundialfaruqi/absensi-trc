@@ -20,6 +20,7 @@ new #[Layout('layouts::personnel.dashboard.app')] #[Title('Riwayat Absensi')] cl
     public function getRiwayatProperty()
     {
         return Absensi::where('personnel_id', $this->personnel->id)
+            ->where('tanggal', '<=', now()->format('Y-m-d'))
             ->with(['jadwal.shift'])
             ->orderBy('tanggal', 'desc')
             ->limit(50)

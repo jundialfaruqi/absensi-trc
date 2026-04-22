@@ -80,7 +80,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
             return;
         }
 
-        Jadwal::updateOrCreate(
+        $jadwal = Jadwal::updateOrCreate(
             [
                 'personnel_id' => $this->quickPersonnelId,
                 'tanggal'      => $this->quickDate,
@@ -91,6 +91,28 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                 'keterangan' => $this->quickKeterangan,
             ]
         );
+
+        // Also create/update the Absensi record as a placeholder
+        // Only if it doesn't have actual clock-in data yet, OR we want to force status (like LIBUR)
+        $absensi = \App\Models\Absensi::where('personnel_id', $this->quickPersonnelId)
+            ->where('tanggal', $this->quickDate)
+            ->first();
+
+        if (!$absensi || in_array($absensi->status, ['ALFA', 'LIBUR'])) {
+             \App\Models\Absensi::updateOrCreate(
+                [
+                    'personnel_id' => $this->quickPersonnelId,
+                    'tanggal'      => $this->quickDate,
+                ],
+                [
+                    'jadwal_id' => $jadwal->id,
+                    'status'    => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                ]
+            );
+        } else {
+            // Just update the jadwal_id link if it already has clock-in data
+            $absensi->update(['jadwal_id' => $jadwal->id]);
+        }
 
         $this->dispatch('close-modal', id: 'quick-add-modal');
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil disimpan.');

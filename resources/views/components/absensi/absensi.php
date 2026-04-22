@@ -285,7 +285,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
             }
 
             if ($type === 'in') {
-                if ($this->activeAbsensi) {
+                if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk) {
                     $this->isSuccess = false;
                     $this->message = 'Anda sudah melakukan absen masuk.';
                     $this->step = 4;
@@ -315,30 +315,39 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     }
                 }
 
-                $this->lastAbsensi = Absensi::create([
-                    'personnel_id' => $this->selectedPersonnel->id,
-                    'jadwal_id' => $this->activeJadwal->id,
-                    'tanggal' => $this->activeDate,
-                    'jam_masuk' => $now->format('H:i:s'),
-                    'status_masuk' => $status_masuk,
-                    'foto_masuk' => $imagePath,
-                    'lat_masuk' => $this->lat ?: 0,
-                    'lng_masuk' => $this->lng ?: 0,
-                    'kantor_id'        => $lokasiResult['kantor_id'],
-                    'is_within_radius' => $lokasiResult['is_within_radius'],
-                    'jarak_meter'      => $lokasiResult['jarak_meter'],
-                ]);
+                // Update existing placeholder or create if missing
+                $this->activeAbsensi = Absensi::updateOrCreate(
+                    [
+                        'personnel_id' => $this->selectedPersonnel->id,
+                        'tanggal' => $this->activeDate,
+                    ],
+                    [
+                        'jadwal_id' => $this->activeJadwal->id,
+                        'status' => $status_masuk,
+                        'jam_masuk' => $now->format('H:i:s'),
+                        'status_masuk' => $status_masuk,
+                        'foto_masuk' => $imagePath,
+                        'lat_masuk' => $this->lat ?: 0,
+                        'lng_masuk' => $this->lng ?: 0,
+                        'kantor_id'        => $lokasiResult['kantor_id'],
+                        'is_within_radius' => $lokasiResult['is_within_radius'],
+                        'jarak_meter'      => $lokasiResult['jarak_meter'],
+                    ]
+                );
+                
+                $this->lastAbsensi = $this->activeAbsensi;
 
                 $this->isSuccess = true;
                 $this->message = "Absen Masuk Berhasil ($status_masuk)";
             } else {
                 if (!$this->activeAbsensi) {
-                    // Auto-ALFA logic: create check-in record as ALFA if skipped
-                    $this->activeAbsensi = Absensi::create([
+                    // This case shouldn't really happen with pre-created records, but for safety:
+                    $this->activeAbsensi = Absensi::updateOrCreate([
                         'personnel_id' => $this->selectedPersonnel->id,
-                        'jadwal_id' => $this->activeJadwal->id,
                         'tanggal' => $this->activeDate,
-                        'jam_masuk' => null,
+                    ], [
+                        'jadwal_id' => $this->activeJadwal->id,
+                        'status' => 'ALFA',
                         'status_masuk' => 'ALFA',
                         'kantor_id' => $lokasiResult['kantor_id'],
                         'is_within_radius' => false,

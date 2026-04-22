@@ -35,14 +35,19 @@
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse ($this->riwayat as $item)
-                        <tr class="group hover:bg-white/2 transition-colors">
+                        @php
+                            $isAlfa = $item->status === 'ALFA' && !$item->jam_masuk;
+                            $isLibur = $item->status === 'LIBUR';
+                            $rowClass = $isAlfa ? 'bg-red-500/5' : ($isLibur ? 'bg-blue-500/5' : '');
+                        @endphp
+                        <tr class="group hover:bg-white/2 transition-colors {{ $rowClass }}">
                             <td class="px-6 py-6">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-sm font-black text-white italic uppercase tracking-tighter">
                                         {{ $item->tanggal->translatedFormat('d F Y') }}
                                     </span>
                                     <span class="text-[9px] font-bold text-blue-400 uppercase tracking-widest">
-                                        {{ $item->jadwal?->shift?->name ?? $item->status_masuk }}
+                                        {{ $item->jadwal?->shift?->name ?? ($isLibur ? 'LIBUR' : 'OFF SCHEDULE') }}
                                     </span>
                                 </div>
                             </td>
@@ -61,12 +66,18 @@
                                                 {{ \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') }}
                                             </span>
                                             <span
-                                                class="text-[8px] font-bold uppercase tracking-widest {{ $item->status_masuk === 'tepat_waktu' ? 'text-emerald-500' : 'text-amber-500' }}">
-                                                {{ str_replace('_', ' ', $item->status_masuk) }}
+                                                class="text-[8px] font-bold uppercase tracking-widest {{ in_array($item->status_masuk, ['HADIR', 'DINAS']) ? 'text-emerald-500' : 'text-amber-500' }}">
+                                                {{ $item->status_masuk }}
                                             </span>
+                                        @elseif($isAlfa)
+                                            <span
+                                                class="text-[10px] font-black text-red-500 uppercase tracking-widest italic">ALFA</span>
+                                        @elseif($isLibur)
+                                            <span
+                                                class="text-[10px] font-black text-blue-400 uppercase tracking-widest italic">LIBUR</span>
                                         @else
                                             <span
-                                                class="text-xs font-bold text-slate-600 italic">{{ $item->status_masuk }}</span>
+                                                class="text-xs font-bold text-slate-500 uppercase tracking-tighter italic">{{ $item->status_masuk ?: $item->status }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -86,20 +97,26 @@
                                                 {{ \Carbon\Carbon::parse($item->jam_pulang)->format('H:i') }}
                                             </span>
                                             <span
-                                                class="text-[8px] font-bold uppercase tracking-widest {{ $item->status_pulang === 'tepat_waktu' ? 'text-emerald-500' : 'text-amber-500' }}">
-                                                {{ str_replace('_', ' ', $item->status_pulang) }}
+                                                class="text-[8px] font-bold uppercase tracking-widest {{ $item->status_pulang === 'HADIR' ? 'text-emerald-500' : 'text-amber-500' }}">
+                                                {{ $item->status_pulang }}
                                             </span>
                                         @else
-                                            <span
-                                                class="text-xs font-bold text-slate-600 italic">{{ $item->status_masuk }}</span>
+                                            <span class="text-xs font-bold text-slate-600 italic">--:--</span>
                                         @endif
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-6">
-                                <span class="text-[10px] font-medium text-slate-400 capitalize">
-                                    {{ $item->keterangan ?: '-' }}
-                                </span>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[10px] font-medium text-slate-400">
+                                        {{ $item->status ?: '-' }}
+                                    </span>
+                                    @if ($item->edited_at)
+                                        <span
+                                            class="text-[8px] font-black text-blue-400/50 uppercase italic tracking-tighter">DIEDIT
+                                            ADMIN</span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

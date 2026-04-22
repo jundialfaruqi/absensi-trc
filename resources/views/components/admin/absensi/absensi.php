@@ -155,6 +155,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                 'tanggal' => $this->editingTanggal,
             ],
             [
+                'status' => $this->statusMasuk,
                 'status_masuk' => $this->statusMasuk,
                 'status_pulang' => $this->statusPulang,
                 'jam_masuk' => $this->jamMasuk,
@@ -189,11 +190,29 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         }
 
         if ($absensi->original_status_masuk === 'ALFA' && $absensi->original_status_pulang === 'ALFA') {
-            // It was originally empty, so delete the record
-            $absensi->delete();
+            // It was originally a placeholder (ALFA/LIBUR), so restore that state
+            $jadwal = $absensi->jadwal;
+            $placeholderStatus = ($jadwal && $jadwal->status === 'LIBUR') ? 'LIBUR' : 'ALFA';
+            
+            $absensi->update([
+                'status' => $placeholderStatus,
+                'status_masuk' => null,
+                'status_pulang' => null,
+                'jam_masuk' => null,
+                'jam_pulang' => null,
+                'edited_by_user_id' => null,
+                'edited_at' => null,
+                'alasan_edit' => null,
+                'nomor_surat' => null,
+                'cuti_id' => null,
+                'keterangan' => null,
+                'original_status_masuk' => null,
+                'original_status_pulang' => null,
+            ]);
         } else {
             // Restore original status and clear audit fields
             $absensi->update([
+                'status' => $absensi->original_status_masuk,
                 'status_masuk' => $absensi->original_status_masuk,
                 'status_pulang' => $absensi->original_status_pulang,
                 'edited_by_user_id' => null,

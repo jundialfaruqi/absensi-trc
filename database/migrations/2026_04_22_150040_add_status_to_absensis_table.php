@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shifts', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('keterangan')->nullable();
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->timestamps();
+        Schema::table('absensis', function (Blueprint $table) {
+            $table->string('status')->nullable()->after('tanggal'); // ALFA, HADIR, TELAT, LIBUR, etc.
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shifts');
+        Schema::table('absensis', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
     }
 };

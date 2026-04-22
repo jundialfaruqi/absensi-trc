@@ -112,7 +112,7 @@
                             $display = '';
                             $class = '';
                             
-                            if ($a) {
+                            if ($a && ($a->jam_masuk || $a->jam_pulang || !in_array($a->status, ['ALFA', 'LIBUR']))) {
                                 if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) {
                                     $display = substr($a->status_masuk, 0, 1);
                                     $class = 'status-izin';
@@ -125,9 +125,11 @@
                                 } else {
                                     $display = 'D'; // Dinas
                                 }
-                            } elseif ($j && $isPast) {
+                            } elseif ($a && $a->status === 'ALFA' && $isPast) {
                                 $display = 'A'; // ALFA
                                 $class = 'status-alfa';
+                            } elseif ($a && $a->status === 'LIBUR') {
+                                $display = 'L'; // LIBUR
                             } elseif ($j) {
                                 $display = '.'; // Scheduled but not yet
                             } else {

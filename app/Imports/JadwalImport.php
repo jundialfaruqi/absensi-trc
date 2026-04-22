@@ -75,7 +75,7 @@ class JadwalImport implements ToCollection
                     }
  
                     if ($shiftId || $status !== 'SHIFT') {
-                        Jadwal::updateOrCreate(
+                        $jadwal = Jadwal::updateOrCreate(
                             [
                                 'personnel_id' => $personnel->id,
                                 'tanggal'      => $tanggal,
@@ -86,6 +86,26 @@ class JadwalImport implements ToCollection
                                 // we don't handle keterangan from Excel yet as the template doesn't have it
                             ]
                         );
+
+                        // CREATE/UPDATE ABSENSI PLACEHOLDER
+                        $absensi = \App\Models\Absensi::where('personnel_id', $personnel->id)
+                            ->where('tanggal', $tanggal)
+                            ->first();
+
+                        if (!$absensi || in_array($absensi->status, ['ALFA', 'LIBUR'])) {
+                            \App\Models\Absensi::updateOrCreate(
+                                [
+                                    'personnel_id' => $personnel->id,
+                                    'tanggal'      => $tanggal,
+                                ],
+                                [
+                                    'jadwal_id' => $jadwal->id,
+                                    'status'    => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                                ]
+                            );
+                        } else {
+                            $absensi->update(['jadwal_id' => $jadwal->id]);
+                        }
                     } else {
                         Log::warning("JadwalImport: Data '{$shiftValue}' tidak dikenali sebagai Shift atau Status (Personnel {$personnel->name}, Day {$day}).");
                     }

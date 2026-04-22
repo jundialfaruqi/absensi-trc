@@ -552,7 +552,7 @@
                     {{-- Actions --}}
                     @if ($activeJadwal->shift)
                         <div class="space-y-3 mt-4">
-                            @if (!$activeAbsensi && !$isTooLateToIn)
+                            @if ((!$activeAbsensi || !$activeAbsensi->jam_masuk) && !$isTooLateToIn)
                                 {{-- Mode: Normal Masuk --}}
                                 <button type="button" x-on:click="submit('in')" wire:loading.attr="disabled"
                                     :disabled="!isMatched || gpsStatus !== 'OK' || @js(!empty($infoLokasi) && $infoLokasi['boleh'] === false)"
