@@ -66,6 +66,10 @@ Route::group([
         ->middleware('permission:manajemen-jadwal-import')
         ->name('jadwal.import');
 
+    Route::livewire('/jadwal/generate', 'admin::jadwal-generate')
+        ->middleware('permission:manajemen-jadwal')
+        ->name('jadwal.generate');
+
     Route::livewire('/absensi', 'admin::absensi')
         ->middleware('permission:manajemen-absensi')
         ->name('absensi');
