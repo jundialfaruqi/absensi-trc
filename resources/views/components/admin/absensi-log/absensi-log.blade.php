@@ -30,10 +30,10 @@
                 </select>
             </div>
 
-            @if(Auth::user()->hasRole('super-admin'))
+            @if (Auth::user()->hasRole('super-admin'))
                 <select wire:model.live="selectedOpdId" class="select select-bordered w-full sm:w-64">
                     <option value="">-- Semua OPD --</option>
-                    @foreach($this->opds as $opd)
+                    @foreach ($this->opds as $opd)
                         <option value="{{ $opd->id }}">{{ $opd->name }}</option>
                     @endforeach
                 </select>
@@ -86,13 +86,15 @@
                                 <td>
                                     <div class="flex items-center gap-3">
                                         <div class="avatar placeholder">
-                                            <div class="bg-primary text-primary-content rounded-full w-8">
+                                            <div
+                                                class="bg-primary text-primary-content rounded-full w-8 flex items-center justify-center">
                                                 <span>{{ strtoupper(substr($log->editor->name ?? 'A', 0, 1)) }}</span>
                                             </div>
                                         </div>
                                         <div>
                                             <div class="font-bold">{{ $log->editor->name ?? 'System' }}</div>
-                                            <div class="text-[10px] opacity-50 uppercase">{{ $log->editor->roles->first()?->name ?? 'Admin' }}</div>
+                                            <div class="text-[10px] opacity-50 uppercase">
+                                                {{ $log->editor->roles->first()?->name ?? 'Admin' }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -100,8 +102,8 @@
                                     <div class="flex items-center gap-3">
                                         <div class="avatar placeholder">
                                             <div class="bg-neutral text-neutral-content rounded-full w-8">
-                                                @if($log->personnel->foto)
-                                                    <img src="{{ asset('storage/'.$log->personnel->foto) }}" />
+                                                @if ($log->personnel->foto)
+                                                    <img src="{{ asset('storage/' . $log->personnel->foto) }}" />
                                                 @else
                                                     <span>{{ strtoupper(substr($log->personnel->name, 0, 1)) }}</span>
                                                 @endif
@@ -109,34 +111,44 @@
                                         </div>
                                         <div>
                                             <div class="font-bold">{{ $log->personnel->name }}</div>
-                                            <div class="text-[10px] opacity-50 uppercase">{{ $log->personnel->opd->name }}</div>
+                                            <div class="text-[10px] opacity-50 uppercase">
+                                                {{ $log->personnel->opd->name }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="font-bold text-primary">{{ $log->tanggal->translatedFormat('d F Y') }}</div>
-                                    <div class="text-[10px] opacity-60 uppercase">{{ $log->tanggal->translatedFormat('l') }}</div>
+                                    <div class="font-bold text-primary">{{ $log->tanggal->translatedFormat('d F Y') }}
+                                    </div>
+                                    <div class="text-[10px] opacity-60 uppercase">
+                                        {{ $log->tanggal->translatedFormat('l') }}</div>
                                 </td>
                                 <td class="text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <div class="badge badge-outline badge-neutral text-[9px] font-bold opacity-40">{{ $log->original_status_masuk ?? 'N/A' }}</div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-3 opacity-30">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                        <div class="badge badge-outline badge-neutral text-[9px] font-bold opacity-40">
+                                            {{ $log->original_status_masuk ?? 'N/A' }}</div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2.5" stroke="currentColor" class="size-3 opacity-30">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                         </svg>
-                                        <div class="badge badge-primary text-[9px] font-bold">{{ $log->status_masuk }}</div>
+                                        <div class="badge badge-primary text-[9px] font-bold">{{ $log->status_masuk }}
+                                        </div>
                                     </div>
                                     <div class="mt-1 text-[10px] opacity-50 italic">
-                                        {{ $log->jam_masuk ? $log->jam_masuk->format('H:i') : '--:--' }} - {{ $log->jam_pulang ? $log->jam_pulang->format('H:i') : '--:--' }}
+                                        {{ $log->jam_masuk ? $log->jam_masuk->format('H:i') : '--:--' }} -
+                                        {{ $log->jam_pulang ? $log->jam_pulang->format('H:i') : '--:--' }}
                                     </div>
                                 </td>
                                 <td class="max-w-xs whitespace-normal">
                                     <div class="text-[11px] leading-relaxed">
                                         {{ $log->alasan_edit ?? '-' }}
                                     </div>
-                                    @if($log->nomor_surat)
+                                    @if ($log->nomor_surat)
                                         <div class="mt-1 flex items-center gap-1 text-primary">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2" stroke="currentColor" class="size-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                             </svg>
                                             <span class="text-[10px] font-bold">{{ $log->nomor_surat }}</span>
                                         </div>
@@ -147,10 +159,13 @@
                             <tr>
                                 <td colspan="6" class="text-center py-20">
                                     <div class="flex flex-col items-center opacity-30">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 mb-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-12 mb-2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                                         </svg>
-                                        <span class="text-sm font-bold uppercase tracking-widest">Belum ada aktifitas edit</span>
+                                        <span class="text-sm font-bold uppercase tracking-widest">Belum ada aktifitas
+                                            edit</span>
                                     </div>
                                 </td>
                             </tr>
