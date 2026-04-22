@@ -407,7 +407,7 @@
         {{-- ─── Step 3: Biometric & Location Verification ──────────────────────── --}}
         @if ($step === 3)
             <div wire:key="step-3-verification-{{ $selectedPersonnel->id }}" x-data="absensiVerification()"
-                x-init="initVerification('{{ $selectedPersonnel->foto ? asset('storage/' . $selectedPersonnel->foto) : '' }}')"
+                x-init="initVerification('{{ $selectedPersonnel->foto ? asset('storage/' . $selectedPersonnel->foto) : '' }}', {{ $selectedPersonnel->face_recognition ? 'true' : 'false' }})"
                 class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in zoom-in-95">
                 <div class="card-body p-4 sm:p-6 text-white">
                     <div class="text-center mb-4">
@@ -464,7 +464,8 @@
                                     </svg>
                                 </div>
                                 <div class="text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
-                                    Wajah Terverifikasi</div>
+                                    {{ $selectedPersonnel->face_recognition ? 'Wajah Terverifikasi' : 'Identitas Siap' }}
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -503,7 +504,8 @@
                             <div>
                                 <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Biometrik
                                 </div>
-                                <div class="text-[10px] font-bold" x-text="faceMessage">Memindai...</div>
+                                <div class="text-[10px] font-bold" x-text="faceRecognitionActive ? faceMessage : 'Dilewati'">
+                                    Memindai...</div>
                             </div>
                         </div>
                     </div>
@@ -730,9 +732,11 @@
                     stream: null,
                     detector: null,
                     refDescriptor: null,
+                    faceRecognitionActive: true,
 
-                    async initVerification(refImageUrl) {
+                    async initVerification(refImageUrl, faceRecognitionActive) {
                         // Reset state for new attempt
+                        this.faceRecognitionActive = faceRecognitionActive;
                         this.isMatched = false;
                         this.isScanning = false;
                         this.faceMessage = 'Menyiapkan...';
@@ -741,13 +745,21 @@
 
                         this.$nextTick(async () => {
                             try {
-                                await this.loadModels();
                                 await this.startCamera();
-                                if (refImageUrl) {
-                                    await this.loadReference(refImageUrl);
+
+                                if (this.faceRecognitionActive) {
+                                    await this.loadModels();
+                                    if (refImageUrl) {
+                                        await this.loadReference(refImageUrl);
+                                    }
+                                    this.startRecognitionLoop();
+                                } else {
+                                    this.isLoadingModels = false;
+                                    this.isMatched = true;
+                                    this.faceMessage = 'Scan Dilewati';
                                 }
+
                                 this.startGps();
-                                this.startRecognitionLoop();
                             } catch (e) {
                                 console.error('Initialization Error:', e);
                                 this.faceMessage = 'Gagal Akses';

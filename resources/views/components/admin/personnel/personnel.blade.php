@@ -77,6 +77,7 @@
                             <th>Penugasan</th>
                             <th>Kantor / Lokasi</th>
                             <th>OPD Induk</th>
+                            <th class="text-center">Face</th>
                             <th class="text-center w-24">Action</th>
                         </tr>
                     </thead>
@@ -137,6 +138,16 @@
                                         <div class="text-sm font-semibold mb-1">{{ $r->opd->name }}</div>
                                     @else
                                         <div class="text-sm text-base-content/50 italic mb-1">Tanpa OPD</div>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if ($r->face_recognition)
+                                        <div class="badge badge-success badge-xs font-bold text-[8px] uppercase">Aktif
+                                        </div>
+                                    @else
+                                        <div
+                                            class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
+                                            Non-Aktif</div>
                                     @endif
                                 </td>
                                 <td class="text-center">
@@ -398,6 +409,21 @@
                                     <span class="text-[10px] opacity-60 block whitespace-normal wrap-break-word">Jika
                                         dicentang, personil tidak bisa absen jika
                                         berada di luar radius kantor.</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full md:col-span-2">
+                            <label
+                                class="label w-full cursor-pointer justify-start gap-4 bg-base-200/50 p-4 rounded-xl border border-base-300">
+                                <input type="checkbox" wire:model="face_recognition"
+                                    class="checkbox checkbox-md checkbox-secondary">
+                                <div class="flex-1 min-w-0">
+                                    <span class="label-text font-bold block uppercase text-xs whitespace-normal">Aktifkan
+                                        Face Recognition</span>
+                                    <span class="text-[10px] opacity-60 block whitespace-normal wrap-break-word">Jika
+                                        aktif, personil wajib scan wajah saat absen. Jika tidak, hanya ambil foto
+                                        biasa.</span>
                                 </div>
                             </label>
                         </div>

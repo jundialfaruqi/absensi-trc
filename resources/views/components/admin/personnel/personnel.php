@@ -34,6 +34,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public string $pin = '';
     public string $kantor_id = '';
     public bool $wajib_absen_di_lokasi = false;
+    public bool $face_recognition = false;
 
     // Delete
     public ?int $deleteId = null;
@@ -110,6 +111,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->oldFoto = $item->foto;
         $this->kantor_id = (string) $item->kantor_id;
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
+        $this->face_recognition = (bool) $item->face_recognition;
 
         $this->dispatch('open-modal', id: 'personnel-modal');
     }
@@ -135,6 +137,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'foto' => $this->personnelId ? 'nullable|image|max:2048' : 'required|image|max:2048',
             'kantor_id' => 'nullable|exists:kantors,id',
             'wajib_absen_di_lokasi' => 'boolean',
+            'face_recognition' => 'boolean',
         ];
 
         if (!$this->personnelId || $this->password) {
@@ -159,6 +162,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'email' => $this->email,
             'kantor_id' => $this->kantor_id ?: null,
             'wajib_absen_di_lokasi' => $this->wajib_absen_di_lokasi,
+            'face_recognition' => $this->face_recognition,
         ];
 
         if ($this->foto) {
@@ -255,6 +259,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->pin = '';
         $this->kantor_id = '';
         $this->wajib_absen_di_lokasi = false;
+        $this->face_recognition = false;
         $this->resetErrorBag();
     }
 
