@@ -18,7 +18,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 {
     #[Url]
     public int $step = 1;
-    
+
     // Step 1: OPD Selection
     #[Url]
     public ?int $selectedOpdId = null;
@@ -54,7 +54,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 $this->step = 2;
             }
         }
-        
+
         if (empty($this->startDate)) {
             $this->startDate = date('Y-m-01');
         }
@@ -92,7 +92,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 return;
             }
         }
-        
+
         if ($this->step == 2) {
             if (empty($this->selectedPersonnelIds)) {
                 $this->dispatch('toast', type: 'error', message: 'Silakan pilih minimal satu personel.');
@@ -159,7 +159,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         ]);
 
         $period = CarbonPeriod::create($this->startDate, $this->endDate);
-        
+
         // 1. Construct the Daily Cycle Configuration
         // A cycle is a list of days, where each day has a specific shift type.
         $dailyCycle = [];
@@ -172,7 +172,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 ];
             }
         }
-        
+
         $cycleLength = count($dailyCycle);
         if ($cycleLength === 0) {
             $this->dispatch('toast', type: 'error', message: 'Siklus shift tidak valid.');
@@ -181,17 +181,17 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
         // 2. Map Personnel to Starting Day Offsets (Grouped by 2 as default pair)
         $totalPersonnel = count($this->selectedPersonnelIds);
-        
+
         // 3. Generate Schedule & Update Personnel Regu
         foreach ($this->selectedPersonnelIds as $index => $pId) {
             if ($this->useRegu) {
                 // Determine the group (Regu) for this personnel
                 $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
                 $reguName = 'Regu ' . ($reguIndex + 1);
-                
+
                 // Update personnel's regu for sorting in matrix
                 Personnel::where('id', $pId)->update(['regu' => $reguName]);
-                
+
                 // Starting Day Offset in the cycle
                 $startOffset = $reguIndex % $cycleLength;
             } else {
@@ -199,11 +199,11 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 Personnel::where('id', $pId)->update(['regu' => null]);
                 $startOffset = $index % $cycleLength;
             }
-            
+
             $dayCounter = 0;
             foreach ($period as $date) {
                 $dateStr = $date->format('Y-m-d');
-                
+
                 // The current position in the cycle for this person
                 $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
                 $config = $dailyCycle[$cycleIndex];
@@ -219,7 +219,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     ['personnel_id' => $pId, 'tanggal' => $dateStr],
                     [
                         'jadwal_id' => $jadwal->id,
-                        'status' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA'
+                        'status' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                        'status_masuk' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                        'status_pulang' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
                     ]
                 );
 

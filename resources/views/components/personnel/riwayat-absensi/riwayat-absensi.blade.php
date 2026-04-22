@@ -120,7 +120,8 @@
                                                 {{ $item->status_pulang }}
                                             </span>
                                         @else
-                                            <span class="text-xs font-bold text-slate-600 italic">--:--</span>
+                                            <span
+                                                class="text-xs font-bold text-slate-500 uppercase tracking-tighter italic">{{ $item->status }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -128,7 +129,7 @@
                             <td class="px-6 py-6">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-medium text-slate-400">
-                                        {{ $item->status ?: '-' }}
+                                        {{ $item->keterangan ?: '-' }}
                                     </span>
                                     @if ($item->edited_at)
                                         <span
@@ -162,7 +163,8 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="mt-6 [&_nav]:flex [&_nav]:flex-col [&_nav]:md:flex-row [&_nav]:items-center [&_nav]:justify-between [&_nav]:gap-6 [&_p]:text-[10px] [&_p]:font-black [&_p]:text-slate-500 [&_p]:uppercase [&_p]:tracking-[0.2em] [&_p]:leading-none">
+    <div
+        class="mt-6 [&_nav]:flex [&_nav]:flex-col [&_nav]:md:flex-row [&_nav]:items-center [&_nav]:justify-between [&_nav]:gap-6 [&_p]:text-[10px] [&_p]:font-black [&_p]:text-slate-500 [&_p]:uppercase [&_p]:tracking-[0.2em] [&_p]:leading-none">
         {{ $this->riwayat->links() }}
     </div>
 </div>

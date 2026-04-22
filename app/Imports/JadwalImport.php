@@ -101,6 +101,8 @@ class JadwalImport implements ToCollection
                                 [
                                     'jadwal_id' => $jadwal->id,
                                     'status'    => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                                    'status_masuk' => 'ALFA',
+                                    'status_pulang' => 'ALFA',
                                 ]
                             );
                         } else {

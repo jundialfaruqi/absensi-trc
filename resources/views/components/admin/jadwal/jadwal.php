@@ -106,7 +106,9 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                 ],
                 [
                     'jadwal_id' => $jadwal->id,
-                    'status'    => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                    'status' => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                    'status_masuk' => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                    'status_pulang' => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
                 ]
             );
         } else {
