@@ -92,7 +92,8 @@
                                         </div>
                                     @else
                                         <div class="avatar placeholder">
-                                            <div class="bg-neutral text-neutral-content rounded w-12 h-12">
+                                            <div
+                                                class="bg-neutral text-neutral-content rounded w-12 h-12 flex items-center justify-center">
                                                 <span class="text-xs uppercase">{{ substr($r->name, 0, 2) }}</span>
                                             </div>
                                         </div>
@@ -230,9 +231,9 @@
                         </label>
                         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                             <div class="w-full sm:flex-1">
-                                <input type="file" wire:model="logo"
+                                <input type="file"
                                     class="file-input file-input-bordered focus:file-input-primary transition-all w-full @error('logo') file-input-error @enderror"
-                                    accept="image/*" />
+                                    accept="image/png, image/jpeg, image/jpg" onchange="handleOPDLogoUpload(this)" />
                                 @error('logo')
                                     <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                 @enderror
@@ -241,7 +242,7 @@
                             </div>
 
                             {{-- Preview section --}}
-                            @if ($logo)
+                            @if ($logo && !$errors->has('logo'))
                                 <div
                                     class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-100 shrink-0">
                                     <div class="w-16 h-16 rounded">
@@ -353,3 +354,70 @@
         </div>
     </dialog>
 </div>
+
+<script>
+    function handleOPDLogoUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const extension = file.name.split('.').pop().toLowerCase();
+
+        if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(extension)) {
+            alert('File tidak valid! Hanya format JPG, JPEG, dan PNG yang diperbolehkan.');
+            input.value = '';
+            return;
+        }
+
+        const maxSize = 2000 * 1024; // 2000KB
+
+        if (file.size > maxSize) {
+            console.log('Logo OPD terlalu besar, melakukan kompresi...');
+            resizeOPDLogo(file, 1000, 1000, 0.85, (resizedFile) => {
+                @this.upload('logo', resizedFile);
+            });
+        } else {
+            @this.upload('logo', file);
+        }
+    }
+
+    function resizeOPDLogo(file, maxWidth, maxHeight, quality, callback) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    const resizedFile = new File([blob], file.name, {
+                        type: file.type,
+                        lastModified: Date.now()
+                    });
+                    callback(resizedFile);
+                }, file.type, quality);
+            };
+        };
+    }
+</script>

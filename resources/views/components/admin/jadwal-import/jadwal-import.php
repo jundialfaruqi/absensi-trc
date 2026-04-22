@@ -22,6 +22,37 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
         $this->year = request('year', date('Y'));
     }
 
+    public function updatedFile()
+    {
+        if ($this->file) {
+            try {
+                $mimeType = $this->file->getMimeType();
+                $allowedMimes = [
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-excel',
+                    'text/csv',
+                    'text/plain',
+                    'application/csv',
+                    'application/excel',
+                    'application/vnd.ms-excel',
+                    'application/vnd.msexcel',
+                ];
+
+                if (!in_array($mimeType, $allowedMimes)) {
+                    $this->reset('file');
+                    $this->addError('file', 'File yang diunggah bukan merupakan dokumen Excel atau CSV yang valid.');
+                    return;
+                }
+            } catch (\Exception $e) {
+                $this->reset('file');
+                $this->addError('file', 'File tidak dapat dibaca atau rusak.');
+                return;
+            }
+        }
+
+        $this->validateOnly('file');
+    }
+
     public function import()
     {
         $this->validate([

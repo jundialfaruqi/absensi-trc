@@ -87,12 +87,13 @@
                         </label>
                         <input type="file" wire:model="file"
                             class="file-input file-input-bordered focus:file-input-primary w-full @error('file') file-input-error @enderror"
-                            accept=".xlsx,.xls,.csv" />
+                            accept=".xlsx,.xls,.csv"
+                            onchange="validateImportFile(this)" />
                         @error('file')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
 
-                        @if ($file)
+                        @if ($file && !$errors->has('file'))
                             <div
                                 class="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20 flex gap-3 items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -135,4 +136,18 @@
             </div>
         </div>
     </div>
+    <script>
+        function validateImportFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const allowedExtensions = ['xlsx', 'xls', 'csv'];
+            const extension = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(extension)) {
+                alert('Format file tidak didukung! Harap gunakan file .xlsx, .xls, atau .csv');
+                input.value = '';
+            }
+        }
+    </script>
 </div>

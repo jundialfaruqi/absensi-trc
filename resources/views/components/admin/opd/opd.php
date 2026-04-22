@@ -150,6 +150,26 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Data OPD berhasil dihapus.');
     }
 
+    public function updatedLogo()
+    {
+        if ($this->logo) {
+            try {
+                $mimeType = $this->logo->getMimeType();
+                if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
+                    $this->reset('logo');
+                    $this->addError('logo', 'File yang diunggah bukan merupakan gambar yang valid.');
+                    return;
+                }
+            } catch (\Exception $e) {
+                $this->reset('logo');
+                $this->addError('logo', 'File yang diunggah tidak dapat dibaca atau rusak.');
+                return;
+            }
+        }
+
+        $this->validateOnly('logo');
+    }
+
     private function resetForm(): void
     {
         $this->opdId = null;

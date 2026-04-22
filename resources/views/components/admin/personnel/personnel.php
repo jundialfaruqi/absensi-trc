@@ -220,6 +220,26 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Data Personnel berhasil dihapus.');
     }
 
+    public function updatedFoto()
+    {
+        if ($this->foto) {
+            try {
+                $mimeType = $this->foto->getMimeType();
+                if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
+                    $this->reset('foto');
+                    $this->addError('foto', 'File yang diunggah bukan merupakan gambar yang valid.');
+                    return;
+                }
+            } catch (\Exception $e) {
+                $this->reset('foto');
+                $this->addError('foto', 'File yang diunggah tidak dapat dibaca atau rusak.');
+                return;
+            }
+        }
+
+        $this->validateOnly('foto');
+    }
+
     private function resetForm(): void
     {
         $this->personnelId = null;
