@@ -3,7 +3,7 @@
 
     {{-- Background Glow --}}
     <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none">
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none">
     </div>
 
     @if ($ready)
@@ -26,7 +26,7 @@
                 class="glass-panel p-8 md:p-10 rounded-[2.5rem] shadow-2xl border-white/10 relative group overflow-hidden">
                 {{-- Decorative Line --}}
                 <div
-                    class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent">
+                    class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-blue-500 to-transparent">
                 </div>
 
                 <div class="mb-8">
@@ -123,7 +123,7 @@
                     <button type="submit" wire:loading.attr="disabled"
                         class="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] grid place-items-center group overflow-hidden relative">
                         <div
-                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
+                            class="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                         </div>
 
                         <span wire:loading.remove class="col-start-1 row-start-1">Masuk</span>

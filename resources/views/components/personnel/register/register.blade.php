@@ -1,6 +1,6 @@
 <div class="min-h-screen flex items-center justify-center p-4 md:p-8">
     <div
-        class="w-full max-w-5xl glass-card rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[700px]">
+        class="w-full max-w-5xl glass-card rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-175">
 
         {{-- Left Side: Info & Aesthetic --}}
         <div
@@ -61,7 +61,7 @@
         </div>
 
         {{-- Right Side: Form or Disabled Message --}}
-        <div class="md:w-7/12 p-8 md:p-12 overflow-y-auto max-h-[800px] no-scrollbar bg-slate-900/40">
+        <div class="md:w-7/12 p-8 md:p-12 overflow-y-auto max-h-200 no-scrollbar bg-slate-900/40">
             @if ($registrationEnabled)
                 <div class="mb-10 flex justify-between items-end">
                     <div>
@@ -99,7 +99,7 @@
                                     Foto</span>
                             </div>
                             <div
-                                class="flex items-center gap-5 p-4 rounded-3xl bg-blue-500/5 border border-blue-500/10 min-h-[140px]">
+                                class="flex items-center gap-5 p-4 rounded-3xl bg-blue-500/5 border border-blue-500/10 min-h-35">
                                 <div
                                     class="w-20 h-28 rounded-xl overflow-hidden shrink-0 shadow-2xl border border-white/10">
                                     <img src="{{ asset('assets/images/contoh-foto-profil.png') }}"
@@ -142,7 +142,7 @@
                                     Foto Anda</span>
                             </div>
                             <div
-                                class="flex flex-row items-center justify-start gap-5 p-4 rounded-3xl bg-cyan-500/5 border border-cyan-500/10 border-dashed hover:border-cyan-500/30 transition-all group min-h-[140px] relative">
+                                class="flex flex-row items-center justify-start gap-5 p-4 rounded-3xl bg-cyan-500/5 border border-cyan-500/10 border-dashed hover:border-cyan-500/30 transition-all group min-h-35 relative">
                                 <div class="relative shrink-0">
                                     <div
                                         class="w-20 h-28 rounded-xl overflow-hidden border border-cyan-500/20 shadow-2xl relative transition-transform duration-500 group-hover:scale-105 bg-slate-800">
@@ -455,7 +455,7 @@
         }
     }" x-on:registration-success.window="showSuccess = true; startCountdown()"
         x-on:registration-failed.window="showError = true; errorMessage = $event.detail.message"
-        class="relative z-[100]">
+        class="relative z-100">
 
         {{-- Success Modal --}}
         <div x-show="showSuccess" x-cloak
