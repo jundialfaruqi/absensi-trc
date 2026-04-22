@@ -3,6 +3,7 @@
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use App\Models\Personnel;
 use App\Models\Opd;
@@ -15,35 +16,49 @@ use Carbon\CarbonPeriod;
 
 new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class extends Component
 {
+    #[Url]
     public int $step = 1;
     
     // Step 1: OPD Selection
+    #[Url]
     public ?int $selectedOpdId = null;
 
     // Step 2: Personnel Selection
+    #[Url]
     public array $selectedPersonnelIds = [];
     public bool $selectAll = false;
 
     // Step 3: Shift Sequence
     // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1]
+    #[Url]
     public array $shiftSequence = [
         ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1]
     ];
 
     // Step 4: Date Range
+    #[Url]
     public string $startDate;
+    #[Url]
     public string $endDate;
 
     public function mount()
     {
         $user = Auth::user();
-        if (!$user->hasRole('super-admin')) {
+        $isSuperAdmin = $user->hasRole('super-admin');
+
+        if (!$isSuperAdmin) {
             $this->selectedOpdId = $user->opd()?->id;
-            $this->step = 2; // Skip Step 1 for non-super-admins
+            if ($this->step === 1) {
+                $this->step = 2;
+            }
         }
         
-        $this->startDate = date('Y-m-01');
-        $this->endDate = date('Y-m-t');
+        if (empty($this->startDate)) {
+            $this->startDate = date('Y-m-01');
+        }
+        if (empty($this->endDate)) {
+            $this->endDate = date('Y-m-t');
+        }
     }
 
     #[Computed]
