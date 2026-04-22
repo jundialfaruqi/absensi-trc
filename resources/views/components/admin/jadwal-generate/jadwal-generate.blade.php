@@ -51,7 +51,7 @@
                                         class="radio radio-primary radio-sm">
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-bold text-sm uppercase leading-tight break-words">
+                                    <div class="font-bold text-sm uppercase leading-tight wrap-break-word">
                                         {{ $opd->name }}</div>
                                     <div class="text-[10px] opacity-60 mt-1 line-clamp-2">
                                         {{ $opd->alamat ?? 'Alamat belum diset' }}</div>
@@ -85,7 +85,7 @@
                                 </label>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-125 overflow-y-auto pr-2">
                                 @forelse ($this->personnels as $p)
                                     <label
                                         class="label cursor-pointer flex items-center justify-start gap-4 p-3 border rounded-xl transition-all hover:bg-base-200 {{ in_array($p->id, $selectedPersonnelIds) ? 'border-primary bg-primary/5' : 'border-base-200' }}">
@@ -139,7 +139,7 @@
                             </div>
 
                             <div
-                                class="bg-base-200/30 rounded-2xl border border-base-200 p-4 min-h-[100px] max-h-[500px] overflow-y-auto">
+                                class="bg-base-200/30 rounded-2xl border border-base-200 p-4 min-h-25 max-h-125 overflow-y-auto">
                                 @if (empty($selectedPersonnelIds))
                                     {{-- Empty state --}}
                                     <div
