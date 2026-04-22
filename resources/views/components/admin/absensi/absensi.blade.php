@@ -286,12 +286,12 @@
                                                 </div>
                                             </div>
                                         @elseif ($a && $a->status === 'ALFA' && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
-                                            <div class="flex flex-col items-center justify-center opacity-40">
+                                            <div class="flex flex-col items-center justify-center">
                                                 <span class="text-[9px] font-bold uppercase text-error">ALFA</span>
                                             </div>
                                         @elseif ($a && $a->status === 'LIBUR')
-                                            <div class="flex flex-col items-center justify-center opacity-40">
-                                                <span class="text-[9px] font-bold uppercase text-info">LIBUR</span>
+                                            <div class="flex flex-col items-center justify-center">
+                                                <span class="text-[9px] font-bold uppercase text-gray-500">LIBUR</span>
                                             </div>
                                         @elseif ($j)
                                             <div class="flex flex-col items-center justify-center opacity-30 mt-1">

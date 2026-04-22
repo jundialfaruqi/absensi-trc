@@ -29,10 +29,10 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public bool $selectAll = false;
 
     // Step 3: Shift Sequence
-    // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1]
+    // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1, 'count' => 1]
     #[Url]
     public array $shiftSequence = [
-        ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1]
+        ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1, 'count' => 1]
     ];
 
     // Step 4: Date Range
@@ -108,6 +108,10 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $this->dispatch('toast', type: 'error', message: 'Durasi minimal adalah 1 hari.');
                     return;
                 }
+                if (($seq['count'] ?? 1) < 1) {
+                    $this->dispatch('toast', type: 'error', message: 'Jumlah personel minimal adalah 1.');
+                    return;
+                }
             }
         }
 
@@ -134,7 +138,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
     public function addSequence()
     {
-        $this->shiftSequence[] = ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1];
+        $this->shiftSequence[] = ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1, 'count' => 1];
     }
 
     public function removeSequence($index)
@@ -153,35 +157,57 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         ]);
 
         $period = CarbonPeriod::create($this->startDate, $this->endDate);
-        $personnelCount = count($this->selectedPersonnelIds);
         
-        // Construct full cycle
-        $fullCycle = [];
+        // 1. Construct the Daily Cycle Configuration
+        // A cycle is a list of days, where each day has a specific shift type.
+        $dailyCycle = [];
         foreach ($this->shiftSequence as $seq) {
-            for ($i = 0; $i < $seq['duration']; $i++) {
-                $fullCycle[] = [
+            for ($d = 0; $d < ($seq['duration'] ?? 1); $d++) {
+                $dailyCycle[] = [
                     'status' => $seq['type'],
-                    'shift_id' => $seq['type'] === 'SHIFT' ? $seq['shift_id'] : null
+                    'shift_id' => $seq['type'] === 'SHIFT' ? $seq['shift_id'] : null,
+                    'count' => $seq['count'] ?? 1
                 ];
             }
         }
         
-        $cycleLength = count($fullCycle);
+        $cycleLength = count($dailyCycle);
         if ($cycleLength === 0) {
             $this->dispatch('toast', type: 'error', message: 'Siklus shift tidak valid.');
             return;
         }
 
-        // Process in groups of 2 as per user request example (staggered)
-        // Group size 2, each group offset by 1 day
+        // 2. Map Personnel to Starting Day Offsets
+        // We fill the slots of the cycle day-by-day.
+        // Personnel 0 & 1 take slots for Day 0, Personnel 2 & 3 take Day 1, etc.
+        $personnelDayOffsets = [];
+        $slotCounter = 0;
+        $totalPersonnel = count($this->selectedPersonnelIds);
+        
+        // Create a map of "Personnel Index -> Cycle Day Offset"
+        // We iterate through the cycle and assign personnel to each day's slots
+        $pIdx = 0;
+        $tempCycleIndex = 0;
+        while ($pIdx < $totalPersonnel) {
+            $dayConfig = $dailyCycle[$tempCycleIndex % $cycleLength];
+            for ($c = 0; $c < $dayConfig['count'] && $pIdx < $totalPersonnel; $c++) {
+                $personnelDayOffsets[$pIdx] = $tempCycleIndex % $cycleLength;
+                $pIdx++;
+            }
+            $tempCycleIndex++;
+        }
+
+        // 3. Generate Schedule
         foreach ($this->selectedPersonnelIds as $index => $pId) {
-            $offset = (int) floor($index / 2);
+            $startOffset = $personnelDayOffsets[$index] ?? 0;
             
             $dayCounter = 0;
             foreach ($period as $date) {
                 $dateStr = $date->format('Y-m-d');
-                $cycleIndex = ($dayCounter + $offset) % $cycleLength;
-                $config = $fullCycle[$cycleIndex];
+                
+                // The current position in the cycle for this person
+                $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
+                $config = $dailyCycle[$cycleIndex];
 
                 // Create/Update Jadwal
                 $jadwal = Jadwal::updateOrCreate(

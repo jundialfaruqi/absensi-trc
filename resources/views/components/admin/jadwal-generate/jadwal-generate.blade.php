@@ -162,8 +162,22 @@
                                     </div>
                                 @endif
 
-                                <div class="flex gap-2 items-end">
-                                    <div class="form-control flex flex-col w-20 sm:w-24">
+                                <div class="flex flex-wrap sm:flex-nowrap gap-3 items-end">
+                                    <div class="form-control flex flex-col w-24 sm:w-28">
+                                        <label class="label pt-0"><span
+                                                class="label-text text-[10px] font-bold uppercase opacity-60">Jumlah
+                                                Personel</span></label>
+                                        <div class="join">
+                                            <input type="number"
+                                                wire:model="shiftSequence.{{ $index }}.count"
+                                                class="input input-bordered input-sm font-bold text-center w-full join-item h-9 min-h-0"
+                                                min="1">
+                                            <span
+                                                class="join-item bg-base-300 flex items-center px-2 text-[10px] font-bold uppercase opacity-60">P</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-control flex flex-col w-24 sm:w-28">
                                         <label class="label pt-0"><span
                                                 class="label-text text-[10px] font-bold uppercase opacity-60">Durasi</span></label>
                                         <div class="join">
@@ -209,7 +223,8 @@
                             @foreach ($shiftSequence as $seq)
                                 <div
                                     class="px-3 py-1.5 rounded-lg {{ $seq['type'] == 'SHIFT' ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content' }} text-[10px] font-bold flex items-center gap-2 shadow-sm">
-                                    {{ $seq['duration'] }}D {{ $seq['type'] }}
+                                    <span class="opacity-70">{{ $seq['count'] }}p</span>
+                                    <span>{{ $seq['duration'] }}D {{ $seq['type'] }}</span>
                                 </div>
                                 @if (!$loop->last)
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
