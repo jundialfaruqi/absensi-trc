@@ -116,14 +116,26 @@
 
                         {{-- Order & Regu --}}
                         <div class="lg:col-span-2">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Urutan & Regu
-                                </h3>
-                                <div class="flex items-center gap-2">
-                                    <label class="text-[10px] font-bold opacity-40">PERSONEL / REGU:</label>
-                                    <input type="number" wire:model.live="peoplePerRegu" min="1"
-                                        class="input input-bordered input-xs w-12 text-center font-bold">
+                            <div class="flex flex-col gap-4 mb-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Urutan &
+                                        Regu</h3>
+                                    <label class="label cursor-pointer gap-2 py-0">
+                                        <span class="text-[10px] font-bold uppercase opacity-60">Pakai Regu</span>
+                                        <input type="checkbox" wire:model.live="useRegu"
+                                            class="checkbox checkbox-primary checkbox-xs">
+                                    </label>
                                 </div>
+
+                                @if ($useRegu)
+                                    <div
+                                        class="flex items-center justify-between bg-base-200/50 p-2 rounded-xl border border-base-200">
+                                        <label class="text-[9px] font-bold opacity-60 uppercase">Personel /
+                                            Regu:</label>
+                                        <input type="number" wire:model.live="peoplePerRegu" min="1"
+                                            class="input input-bordered input-xs w-14 text-center font-bold">
+                                    </div>
+                                @endif
                             </div>
 
                             <div
@@ -132,20 +144,28 @@
                                     {{-- Empty state --}}
                                     <div
                                         class="flex flex-col items-center justify-center h-40 text-center opacity-30 gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.998 5.998 0 00-5.414-5.7 aktywna 5.998 5.998 0 00-5.414 5.7m12 0H6.001V18.72a9.094 9.094 0 00-3.741-.479 3 3 0 014.682-2.72m.94 3.198l.001.031c0 .225.012.447.037.666A11.944 11.944 0 0012 21c2.17 0 4.207-.576 5.963-1.584A6.062 6.062 0 0018 18.72V18.72z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="icon icon-tabler icons-tabler-outline icon-tabler-users-group size-8">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                            <path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1" />
+                                            <path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                            <path d="M17 10h2a2 2 0 0 1 2 2v1" />
+                                            <path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                            <path d="M3 13v-1a2 2 0 0 1 2 -2h2" />
                                         </svg>
                                         <span class="text-[10px] font-bold uppercase">Pilih personel untuk mengatur
-                                            regu</span>
+                                            urutan</span>
                                     </div>
                                 @else
                                     <div class="space-y-2">
                                         @foreach ($selectedPersonnelIds as $index => $pId)
                                             @php
                                                 $person = $this->personnels->find($pId);
-                                                $showLabel = $peoplePerRegu > 0 && $index % $peoplePerRegu == 0;
+                                                $showLabel =
+                                                    $useRegu && $peoplePerRegu > 0 && $index % $peoplePerRegu == 0;
                                             @endphp
                                             @if ($showLabel)
                                                 <div class="text-[9px] font-bold opacity-30 mt-4 mb-1 uppercase">Regu
@@ -160,7 +180,8 @@
                                                         @if ($person?->foto)
                                                             <img src="{{ asset('storage/' . $person->foto) }}" />
                                                         @else
-                                                            <span class="text-[10px]">{{ substr($person?->name, 0, 1) }}</span>
+                                                            <span
+                                                                class="text-[10px]">{{ substr($person?->name, 0, 1) }}</span>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -169,22 +190,24 @@
                                                         {{ $person?->name }}</div>
                                                 </div>
                                                 <div class="flex gap-1">
-                                                    <button type="button" wire:click="movePersonnelUp('{{ $pId }}')"
+                                                    <button type="button"
+                                                        wire:click="movePersonnelUp('{{ $pId }}')"
                                                         @if ($index === 0) disabled @endif
                                                         class="btn btn-ghost btn-xs btn-square {{ $index === 0 ? 'opacity-10' : '' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"
-                                                            class="w-3 h-3">
+                                                            viewBox="0 0 24 24" stroke-width="3"
+                                                            stroke="currentColor" class="w-3 h-3">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                                         </svg>
                                                     </button>
-                                                    <button type="button" wire:click="movePersonnelDown('{{ $pId }}')"
+                                                    <button type="button"
+                                                        wire:click="movePersonnelDown('{{ $pId }}')"
                                                         @if ($index === count($selectedPersonnelIds) - 1) disabled @endif
                                                         class="btn btn-ghost btn-xs btn-square {{ $index === count($selectedPersonnelIds) - 1 ? 'opacity-10' : '' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"
-                                                            class="w-3 h-3">
+                                                            viewBox="0 0 24 24" stroke-width="3"
+                                                            stroke="currentColor" class="w-3 h-3">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                                         </svg>
@@ -284,8 +307,9 @@
                                     @if (count($shiftSequence) > 1)
                                         <button type="button" wire:click="removeSequence({{ $index }})"
                                             class="btn btn-error btn-square btn-sm h-9 w-9 min-h-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+                                                class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M6 18L18 6M6 6l12 12" />
                                             </svg>

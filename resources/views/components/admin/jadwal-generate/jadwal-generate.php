@@ -28,6 +28,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public array $selectedPersonnelIds = [];
     public bool $selectAll = false;
     public int $peoplePerRegu = 2;
+    public bool $useRegu = true;
 
     // Step 3: Shift Sequence
     // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1, 'count' => 1]
@@ -183,15 +184,21 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         
         // 3. Generate Schedule & Update Personnel Regu
         foreach ($this->selectedPersonnelIds as $index => $pId) {
-            // Determine the group (Regu) for this personnel
-            $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
-            $reguName = 'Regu ' . ($reguIndex + 1);
-            
-            // Update personnel's regu for sorting in matrix
-            Personnel::where('id', $pId)->update(['regu' => $reguName]);
-
-            // Starting Day Offset in the cycle
-            $startOffset = $reguIndex % $cycleLength;
+            if ($this->useRegu) {
+                // Determine the group (Regu) for this personnel
+                $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
+                $reguName = 'Regu ' . ($reguIndex + 1);
+                
+                // Update personnel's regu for sorting in matrix
+                Personnel::where('id', $pId)->update(['regu' => $reguName]);
+                
+                // Starting Day Offset in the cycle
+                $startOffset = $reguIndex % $cycleLength;
+            } else {
+                // No Regu: individual rotation, no regu name
+                Personnel::where('id', $pId)->update(['regu' => null]);
+                $startOffset = $index % $cycleLength;
+            }
             
             $dayCounter = 0;
             foreach ($period as $date) {
