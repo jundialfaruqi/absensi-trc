@@ -99,7 +99,7 @@
     {{-- ─── Absensi Matrix ────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
         <div class="card-body p-0">
-            <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-400px)]">
+            <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
                 <table class="table table-sm table-zebra w-full border-separate border-spacing-0">
                     <thead class="sticky top-0 z-110 bg-base-100">
                         <tr>

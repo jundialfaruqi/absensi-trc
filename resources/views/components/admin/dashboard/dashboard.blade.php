@@ -54,7 +54,7 @@
                     Masuk</div>
                 <div class="stat-value text-success">{{ number_format($stats['total_masuk']) }}</div>
                 <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">
-                    {{ $stats['hadi_percentage'] }}% dari total personel</div>
+                    {{ $stats['hadir_percentage'] }}% dari total personel</div>
             </div>
         </div>
 
@@ -136,7 +136,7 @@
                             <tbody>
                                 @forelse($activities as $log)
                                     <tr
-                                        class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
+                                        class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group {{ $log->status === 'LIBUR' ? 'bg-base-200/80 opacity-25 grayscale' : '' }}">
                                         <td>
                                             <div class="flex items-center gap-3">
                                                 <div class="avatar">
@@ -186,6 +186,14 @@
                                         </td>
                                         <td>
                                             <div class="flex flex-col gap-1">
+                                                @if ($log->status === 'ALFA')
+                                                    <span
+                                                        class="badge badge-error badge-xs font-black text-[8px] tracking-widest uppercase">ALFA</span>
+                                                @elseif($log->status === 'LIBUR')
+                                                    <span
+                                                        class="badge badge-neutral badge-xs font-black text-[8px] tracking-widest uppercase">LIBUR</span>
+                                                @endif
+
                                                 @if ($log->status_masuk)
                                                     <span
                                                         class="badge badge-{{ $log->status_masuk === 'HADIR' ? 'success' : 'warning' }} badge-xs font-black text-[8px] tracking-widest">{{ $log->status_masuk }}</span>
@@ -348,7 +356,7 @@
                                 </div>
                                 <div class="flex-none">
                                     <span
-                                        class="badge badge-warning badge-outline text-[8px] font-black uppercase px-2">{{ $absent->shift->name }}</span>
+                                        class="badge badge-warning badge-outline text-[8px] font-black uppercase px-2">{{ $absent->jadwal?->shift?->name ?? 'N/A' }}</span>
                                 </div>
                             </div>
                         @empty
@@ -376,12 +384,17 @@
 
                     <div class="flex flex-wrap items-center gap-6">
                         <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-primary shadow-sm"></span>
+                            <span class="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></span>
                             <span class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Tepat
                                 Waktu</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-error shadow-sm"></span>
+                            <span class="w-3 h-3 rounded-full bg-red-500 shadow-sm"></span>
+                            <span
+                                class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Alfa</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-amber-500 shadow-sm"></span>
                             <span
                                 class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Terlambat</span>
                         </div>
@@ -395,114 +408,120 @@
                         </div>
                     </div>
                 </div>
+                <div class="p-4 sm:p-10 overflow-x-auto">
+                    @php
+                        $maxVal = max(array_column($weeklyStats, 'total')) ?: 10;
+                        $count = count($weeklyStats);
 
-                <div class="p-4 sm:p-12 overflow-x-auto">
-                    <div class="min-w-125 flex items-end justify-between h-72 gap-6 md:gap-10 px-4 pb-4">
-                        @php
-                            $totals = array_column($weeklyStats, 'total');
-                            $maxCount = !empty($totals) && max($totals) > 0 ? max($totals) : 10;
-                        @endphp
-                        @foreach ($weeklyStats as $stat)
-                            <div class="flex-1 flex flex-col items-center gap-6 group relative">
-                                {{-- Bar Container (Full height bg) --}}
-                                <div
-                                    class="w-full max-w-15 bg-base-200/50 rounded-2xl transition-all duration-700 relative group-hover:bg-base-200 h-full overflow-hidden">
+                        $generatePath = function ($key) use ($weeklyStats, $maxVal, $count) {
+                            $pts = [];
+                            foreach ($weeklyStats as $i => $stat) {
+                                $pts[] = [
+                                    'x' => ($i / ($count - 1)) * 100,
+                                    'y' => 100 - ($stat[$key] / $maxVal) * 100,
+                                ];
+                            }
 
-                                    {{-- Stacked Bars --}}
-                                    <div class="absolute bottom-0 left-0 right-0 w-full flex flex-col justify-end transition-all duration-1000 ease-out"
-                                        style="height: {{ ($stat['total'] / $maxCount) * 100 }}%">
+                            $path = 'M ' . $pts[0]['x'] . ',' . $pts[0]['y'];
+                            for ($i = 0; $i < count($pts) - 1; $i++) {
+                                $curr = $pts[$i];
+                                $next = $pts[$i + 1];
+                                $cp1x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
+                                $cp2x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
+                                $path .=
+                                    " C $cp1x," .
+                                    $curr['y'] .
+                                    " $cp2x," .
+                                    $next['y'] .
+                                    ' ' .
+                                    $next['x'] .
+                                    ',' .
+                                    $next['y'];
+                            }
+                            return $path;
+                        };
 
-                                        {{-- Late Segment (Top) --}}
-                                        @if ($stat['late'] > 0)
-                                            <div class="w-full bg-error rounded-t-2xl relative group/late"
-                                                style="height: {{ ($stat['late'] / $stat['total']) * 100 }}%">
-                                                <div
-                                                    class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/late:opacity-100 transition-opacity bg-error text-error-content text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap z-10">
-                                                    {{ $stat['late'] }}
-                                                </div>
-                                            </div>
-                                        @endif
+                        $pathOntime = $generatePath('ontime');
+                        $pathAlfa = $generatePath('alfa');
+                        $pathLate = $generatePath('late');
+                    @endphp
 
-                                        {{-- Ontime Segment (Bottom) --}}
-                                        @if ($stat['ontime'] > 0)
-                                            <div class="w-full bg-primary {{ $stat['late'] == 0 ? 'rounded-t-2xl' : '' }} relative group/ontime"
-                                                style="height: {{ ($stat['ontime'] / $stat['total']) * 100 }}%">
-                                                <div
-                                                    class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/ontime:opacity-100 transition-opacity bg-primary text-primary-content text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap z-10">
-                                                    {{ $stat['ontime'] }}
-                                                </div>
-                                            </div>
-                                        @endif
+                    <div class="min-w-[500px] h-72 relative px-2">
+                        {{-- SVG Chart --}}
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            {{-- Grid Lines --}}
+                            @foreach ([0, 25, 50, 75, 100] as $grid)
+                                <line x1="0" y1="{{ $grid }}" x2="100"
+                                    y2="{{ $grid }}" stroke="currentColor" stroke-width="0.1"
+                                    class="text-base-content/10" />
+                            @endforeach
 
-                                        {{-- Catch-all for others (if any) --}}
-                                        @php $other = $stat['total'] - ($stat['ontime'] + $stat['late']); @endphp
-                                        @if ($other > 0)
-                                            <div class="w-full bg-base-content opacity-20"
-                                                style="height: {{ ($other / $stat['total']) * 100 }}%"></div>
-                                        @endif
-                                    </div>
-                                </div>
+                            {{-- Shaded Areas (Gradients) --}}
+                            <defs>
+                                <linearGradient id="grad-ontime" x1="0" y1="0" x2="0"
+                                    y2="1">
+                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15" />
+                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                                </linearGradient>
+                                <linearGradient id="grad-alfa" x1="0" y1="0" x2="0"
+                                    y2="1">
+                                    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.15" />
+                                    <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
 
-                                {{-- Data Label --}}
+                            {{-- Area Fills --}}
+                            <path d="{{ $pathOntime }} L 100,100 L 0,100 Z" fill="url(#grad-ontime)" />
+                            <path d="{{ $pathAlfa }} L 100,100 L 0,100 Z" fill="url(#grad-alfa)" />
+
+                            {{-- Smooth Lines --}}
+                            <path d="{{ $pathOntime }}" fill="none" stroke="#3b82f6" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="{{ $pathLate }}" fill="none" stroke="#f59e0b" stroke-width="1"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2,2" />
+                            <path d="{{ $pathAlfa }}" fill="none" stroke="#ef4444" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+
+                            {{-- Points --}}
+                            @foreach ($weeklyStats as $i => $stat)
+                                @php $x = ($i / ($count - 1)) * 100; @endphp
+                                <circle cx="{{ $x }}"
+                                    cy="{{ 100 - ($stat['ontime'] / $maxVal) * 100 }}" r="0.8" fill="white"
+                                    stroke="#3b82f6" stroke-width="0.5" />
+                                <circle cx="{{ $x }}" cy="{{ 100 - ($stat['alfa'] / $maxVal) * 100 }}"
+                                    r="0.8" fill="white" stroke="#ef4444" stroke-width="0.5" />
+                            @endforeach
+                        </svg>
+
+                        {{-- X-Axis Labels --}}
+                        <div class="absolute -bottom-6 left-0 right-0 flex justify-between">
+                            @foreach ($weeklyStats as $stat)
                                 <div class="flex flex-col items-center">
                                     <span
-                                        class="text-[10px] font-black {{ $stat['date'] === date('Y-m-d') ? 'text-primary' : 'text-base-content/40' }} uppercase tracking-[0.2em] transition-colors">
+                                        class="text-[9px] font-black {{ $stat['date'] === date('Y-m-d') ? 'text-primary' : 'text-base-content/40' }} uppercase tracking-widest">
                                         {{ $stat['label'] }}
                                     </span>
-                                    @if ($stat['date'] === date('Y-m-d'))
-                                        <div
-                                            class="w-1.5 h-1.5 rounded-full bg-primary mt-1 shadow-[0_0_8px_rgb(var(--p))]">
-                                        </div>
-                                    @endif
                                 </div>
-
-                                {{-- Hover Tooltip --}}
-                                <div
-                                    class="absolute -top-20 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none scale-90 group-hover:scale-100 z-50">
-                                    <div
-                                        class="bg-base-content text-base-100 p-3 rounded-2xl shadow-2xl min-w-30 border border-white/10">
-                                        <div
-                                            class="text-[8px] font-black text-base-100/50 uppercase tracking-widest mb-1">
-                                            {{ Carbon\Carbon::parse($stat['date'])->translatedFormat('d M Y') }}
-                                        </div>
-                                        <div class="space-y-1">
-                                            <div class="flex items-center justify-between gap-4">
-                                                <span class="text-[9px] font-bold text-success uppercase">Tepat</span>
-                                                <span class="text-[10px] font-black">{{ $stat['ontime'] }}</span>
-                                            </div>
-                                            <div class="flex items-center justify-between gap-4">
-                                                <span class="text-[9px] font-bold text-error uppercase">Telat</span>
-                                                <span class="text-[10px] font-black">{{ $stat['late'] }}</span>
-                                            </div>
-                                            <div
-                                                class="pt-1 mt-1 border-t border-white/10 flex items-center justify-between gap-4">
-                                                <span class="text-[9px] font-black uppercase">Total</span>
-                                                <span class="text-[11px] font-black">{{ $stat['total'] }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="w-3 h-3 bg-base-content rotate-45 mx-auto -mt-1.5 border-r border-b border-white/10">
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
 
                     {{-- Scroll Indicator for Mobile --}}
-                    <div class="lg:hidden flex items-center justify-center gap-2 mt-2 opacity-30">
+                    <div class="lg:hidden flex items-center justify-center gap-2 mt-12 opacity-30">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="w-3 h-3 animate-bounce-x">
+                            stroke="currentColor" class="w-3 h-3">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                         </svg>
-                        <span class="text-[8px] font-black uppercase tracking-widest">Geser untuk melihat detail</span>
+                        <span class="text-[8px] font-black uppercase tracking-widest">Geser untuk tren</span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="w-3 h-3 animate-bounce-x-right">
+                            stroke="currentColor" class="w-3 h-3">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                         </svg>
                     </div>
+
+                    <div class="mt-8"></div>
                 </div>
             </div>
         </div>
@@ -596,9 +615,9 @@
                 </h3>
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-base-content/70">Kehadiran Hari Ini</span>
-                    <span class="text-sm font-black text-primary">{{ $stats['hadi_percentage'] }}%</span>
+                    <span class="text-sm font-black text-primary">{{ $stats['hadir_percentage'] }}%</span>
                 </div>
-                <progress class="progress progress-primary w-full h-1.5" value="{{ $stats['hadi_percentage'] }}"
+                <progress class="progress progress-primary w-full h-1.5" value="{{ $stats['hadir_percentage'] }}"
                     max="100"></progress>
 
                 <div class="grid grid-cols-2 gap-4 pt-2">

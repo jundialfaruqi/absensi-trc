@@ -13,7 +13,26 @@
                 Kembali ke Dashboard
             </a>
             <h1 class="text-3xl font-black text-white uppercase italic tracking-tighter">Riwayat Absensi</h1>
-            <p class="text-slate-400 font-medium text-sm">Daftar kehadiran Anda dalam 50 record terakhir.</p>
+            <p class="text-slate-400 font-medium text-sm">Monitoring kehadiran Anda secara berkala.</p>
+        </div>
+
+        {{-- Filters --}}
+        <div class="flex items-center gap-3 bg-white/5 p-2 rounded-2xl border border-white/5 backdrop-blur-sm">
+            <select wire:model.live="month"
+                class="bg-transparent text-xs font-black text-white uppercase tracking-widest border-none focus:ring-0 cursor-pointer p-2 outline-none">
+                @for ($i = 1; $i <= 12; $i++)
+                    <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}" class="bg-[#0a192f] text-white">
+                        {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                    </option>
+                @endfor
+            </select>
+            <div class="w-px h-4 bg-white/10"></div>
+            <select wire:model.live="year"
+                class="bg-transparent text-xs font-black text-white uppercase tracking-widest border-none focus:ring-0 cursor-pointer p-2 outline-none">
+                @for ($y = date('Y') - 1; $y <= date('Y'); $y++)
+                    <option value="{{ $y }}" class="bg-[#0a192f] text-white">{{ $y }}</option>
+                @endfor
+            </select>
         </div>
     </div>
 
@@ -140,5 +159,10 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    {{-- Pagination --}}
+    <div class="mt-6 [&_nav]:flex [&_nav]:flex-col [&_nav]:md:flex-row [&_nav]:items-center [&_nav]:justify-between [&_nav]:gap-6 [&_p]:text-[10px] [&_p]:font-black [&_p]:text-slate-500 [&_p]:uppercase [&_p]:tracking-[0.2em] [&_p]:leading-none">
+        {{ $this->riwayat->links() }}
     </div>
 </div>
