@@ -34,6 +34,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public $nomorSurat;
     public $cutiId;
     public $keterangan;
+    public $editingFotoMasuk;
+    public $editingFotoPulang;
     public bool $isEdited = false;
 
     public function mount(): void
@@ -122,6 +124,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             $this->nomorSurat = $absensi->nomor_surat;
             $this->cutiId = $absensi->cuti_id;
             $this->keterangan = $absensi->keterangan;
+            $this->editingFotoMasuk = $absensi->foto_masuk;
+            $this->editingFotoPulang = $absensi->foto_pulang;
             $this->isEdited = !is_null($absensi->original_status_masuk);
         }
 
@@ -247,6 +251,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         $this->nomorSurat = '';
         $this->cutiId = null;
         $this->keterangan = '';
+        $this->editingFotoMasuk = null;
+        $this->editingFotoPulang = null;
         $this->isEdited = false;
     }
 
