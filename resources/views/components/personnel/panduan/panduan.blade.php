@@ -104,8 +104,9 @@
                                 <ul class="space-y-3">
                                     <li class="flex gap-3 text-sm text-slate-400">
                                         <span class="text-blue-400 font-bold">1.</span>
-                                        Kunjungi halaman <code
-                                            class="bg-white/5 px-2 rounded text-blue-300">/personnel/register</code>.
+                                        Kunjungi halaman <code class="bg-white/5 px-2 rounded text-blue-300 font-bold">
+                                            <a href="{{ route('personnel.register') }}">Register Personel</a>
+                                        </code>.
                                     </li>
                                     <li class="flex gap-3 text-sm text-slate-400">
                                         <span class="text-blue-400 font-bold">2.</span>
@@ -169,7 +170,8 @@
                     <div class="glass-panel p-8 rounded-4xl space-y-6">
                         <p class="text-slate-300 leading-relaxed">Absensi dilakukan setiap hari kerja/shift melalui
                             halaman <a href="{{ route('absensi-web') }}"
-                                class="text-emerald-400 hover:text-emerald-300 underline">Absensi</a> yang telah
+                                class="text-emerald-400 hover:text-emerald-300 underline font-bold">Absensi</a> yang
+                            telah
                             disediakan</p>
                         <div class="grid md:grid-cols-2 gap-6">
                             <div class="space-y-4">
@@ -239,8 +241,9 @@
                                 <ul class="space-y-3">
                                     <li class="flex gap-3 text-sm text-slate-400">
                                         <span class="text-purple-400 font-bold">1.</span>
-                                        Akses <code
-                                            class="bg-white/5 px-2 rounded text-purple-300">/personnel/login</code>.
+                                        Akses <code class="bg-white/5 px-2 rounded text-purple-300 font-bold">
+                                            <a href="{{ route('personnel.login') }}">Login Personel</a>
+                                        </code>.
                                     </li>
                                     <li class="flex gap-3 text-sm text-slate-400">
                                         <span class="text-purple-400 font-bold">2.</span>
