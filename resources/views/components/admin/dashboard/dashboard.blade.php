@@ -446,7 +446,7 @@
                         $pathLate = $generatePath('late');
                     @endphp
 
-                    <div class="min-w-[500px] h-72 relative px-2">
+                    <div class="min-w-125 h-72 relative px-2">
                         {{-- SVG Chart --}}
                         <svg class="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
                             {{-- Grid Lines --}}
@@ -485,9 +485,8 @@
                             {{-- Points --}}
                             @foreach ($weeklyStats as $i => $stat)
                                 @php $x = ($i / ($count - 1)) * 100; @endphp
-                                <circle cx="{{ $x }}"
-                                    cy="{{ 100 - ($stat['ontime'] / $maxVal) * 100 }}" r="0.8" fill="white"
-                                    stroke="#3b82f6" stroke-width="0.5" />
+                                <circle cx="{{ $x }}" cy="{{ 100 - ($stat['ontime'] / $maxVal) * 100 }}"
+                                    r="0.8" fill="white" stroke="#3b82f6" stroke-width="0.5" />
                                 <circle cx="{{ $x }}" cy="{{ 100 - ($stat['alfa'] / $maxVal) * 100 }}"
                                     r="0.8" fill="white" stroke="#ef4444" stroke-width="0.5" />
                             @endforeach

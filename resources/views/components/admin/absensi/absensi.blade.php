@@ -556,7 +556,7 @@
         <div x-show="showPreview" x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-90" class="fixed pointer-events-none z-[9999]"
+            x-transition:leave-end="opacity-0 scale-90" class="fixed pointer-events-none z-9999"
             :style="`left: ${previewX}px; top: ${previewY}px; transform: translate(-50%, -100%) translateY(-20px);`"
             x-cloak>
             <div class="bg-base-100 p-1.5 rounded-2xl shadow-2xl ring-1 ring-base-content/10">
