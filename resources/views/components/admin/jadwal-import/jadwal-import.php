@@ -22,6 +22,15 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
         $this->year = request('year', date('Y'));
     }
 
+    public function rules()
+    {
+        return [
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+            'month' => 'required',
+            'year' => 'required',
+        ];
+    }
+
     public function updatedFile()
     {
         if ($this->file) {
@@ -55,11 +64,7 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
 
     public function import()
     {
-        $this->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:10240', // max 10MB
-            'month' => 'required',
-            'year' => 'required',
-        ]);
+        $this->validate();
 
         $opdId = Auth::user()->hasRole('super-admin') ? null : Auth::user()->opd()?->id;
 
