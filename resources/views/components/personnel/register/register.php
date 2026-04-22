@@ -24,12 +24,11 @@ new #[Layout('layouts::personnel.register.app')] #[Title('Pendaftaran Personnel'
     public $pin;
     public $foto;
 
+    public $registrationEnabled;
+
     public function mount()
     {
-        if (!Setting::get('personnel_registration_enabled', true)) {
-            session()->flash('error', 'Pendaftaran personel saat ini sedang ditutup.');
-            return $this->redirect('/personnel/login', navigate: true);
-        }
+        $this->registrationEnabled = Setting::get('personnel_registration_enabled', true);
     }
 
     protected function rules()

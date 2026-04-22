@@ -116,7 +116,7 @@
                                 class="text-[10px] font-bold text-slate-500 group-hover:text-slate-300 uppercase tracking-widest">Ingat
                                 Sesi Saya</span>
                         </label>
-                        <a href="#"
+                        <a href="{{ route('personnel.panduan') }}"
                             class="text-[10px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest transition-colors">Bantuan?</a>
                     </div>
 
@@ -146,6 +146,15 @@
                 <div class="mt-4">
                     <a href="/"
                         class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest rounded-xl hover:bg-transparent hover:text-white/30 hover:shadow-none hover:border-none">Kembali</a>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-loose">
+                        Belum punya akun? <br>
+                        <a href="{{ route('personnel.register') }}" wire:navigate
+                            class="text-blue-400 font-black hover:text-blue-300 transition-colors underline decoration-blue-500/30 underline-offset-4">Daftar
+                            Sekarang</a>
+                    </p>
                 </div>
 
                 <div class="mt-6 pt-8 border-t border-white/5 text-center">

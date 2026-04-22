@@ -724,9 +724,10 @@
                         ['logo' => 'logo-bpbd.jpg', 'name' => 'BPBD Pekanbaru'],
                         ['logo' => 'logo-damkar.png', 'name' => 'Damkar Pekanbaru'],
                         ['logo' => 'logo-kemenkes.png', 'name' => 'Dinas Kesehatan Pekanbaru'],
-                        ['logo' => 'logo-polresta-pku.jpg', 'name' => 'Polresta Pekanbaru'],
+                        ['logo' => 'logo-pemko.webp', 'name' => 'Dinas Sosial Pekanbaru'],
                         ['logo' => 'logo-satpol-pp.png', 'name' => 'Satpol PP Pekanbaru'],
-                        ['logo' => 'logo-tni.png', 'name' => 'TNI Kodim 0301/PBR'],
+                        ['logo' => 'logo-dishub-pku.png', 'name' => 'Dinas Perhubungan Pekanbaru'],
+                        ['logo' => 'logo-dlhk-pku.png', 'name' => 'DLHK Pekanbaru'],
                     ];
                 @endphp
 
