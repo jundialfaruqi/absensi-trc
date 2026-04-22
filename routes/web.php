@@ -90,6 +90,9 @@ Route::livewire('/personnel/login', 'personnel::login')
 Route::livewire('/personnel/register', 'personnel::register')
     ->name('personnel.register');
 
+Route::livewire('/personnel/panduan', 'personnel::panduan')
+    ->name('personnel.panduan');
+
 Route::group([
     'middleware' => ['auth:personnel'],
     'prefix' => '/personnel',

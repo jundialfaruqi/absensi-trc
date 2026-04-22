@@ -97,7 +97,7 @@ new #[Layout('layouts::personnel.register.app')] #[Title('Pendaftaran Personnel'
                 'opd_id' => $this->opd_id,
                 'penugasan_id' => $this->penugasan_id,
                 'password' => Hash::make($this->password),
-                'pin' => $this->pin,
+                'pin' => Hash::make($this->pin),
                 'foto' => $fotoPath,
                 'wajib_absen_di_lokasi' => true,
             ]);
