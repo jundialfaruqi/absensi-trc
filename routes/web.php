@@ -70,6 +70,10 @@ Route::group([
         ->middleware('permission:manajemen-absensi')
         ->name('absensi');
 
+    Route::livewire('/pengaturan', 'admin::pengaturan')
+        ->middleware('permission:manajemen-pengaturan')
+        ->name('pengaturan');
+
     Route::get('/jadwal/download-template', function () {
         $month = request('month', date('m'));
         $year = request('year', date('Y'));
@@ -82,6 +86,9 @@ Route::group([
 // --- Personnel Portal Routes ---
 Route::livewire('/personnel/login', 'personnel::login')
     ->name('personnel.login');
+
+Route::livewire('/personnel/register', 'personnel::register')
+    ->name('personnel.register');
 
 Route::group([
     'middleware' => ['auth:personnel'],

@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'manajemen-jadwal-import', 'group' => 'Jadwal'],
             ['name' => 'manajemen-user', 'group' => 'Pengguna'],
             ['name' => 'manajemen-role-permission', 'group' => "Role & Permission"],
+            ['name' => 'manajemen-pengaturan', 'group' => 'Pengaturan'],
         ];
 
         foreach ($permissions as $permission) {
@@ -50,5 +51,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $user->assignRole('super-admin');
+
+        // 5. Default Settings
+        \App\Models\Setting::set('personnel_registration_enabled', true, 'boolean');
     }
 }
