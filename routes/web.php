@@ -74,6 +74,10 @@ Route::group([
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');
 
+    Route::get('/absensi/export-pdf', [App\Http\Controllers\Admin\ReportController::class, 'exportAbsensiPdf'])
+        ->middleware('permission:manajemen-absensi')
+        ->name('absensi.export-pdf');
+
     Route::get('/jadwal/download-template', function () {
         $month = request('month', date('m'));
         $year = request('year', date('Y'));
