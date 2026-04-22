@@ -419,7 +419,8 @@
                                 <input type="checkbox" wire:model="face_recognition"
                                     class="checkbox checkbox-md checkbox-secondary">
                                 <div class="flex-1 min-w-0">
-                                    <span class="label-text font-bold block uppercase text-xs whitespace-normal">Aktifkan
+                                    <span
+                                        class="label-text font-bold block uppercase text-xs whitespace-normal">Aktifkan
                                         Face Recognition</span>
                                     <span class="text-[10px] opacity-60 block whitespace-normal wrap-break-word">Jika
                                         aktif, personil wajib scan wajah saat absen. Jika tidak, hanya ambil foto
@@ -451,14 +452,14 @@
                                 @if ($foto && !$errors->has('foto'))
                                     <div
                                         class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-100 shrink-0">
-                                        <div class="w-16 h-16 rounded">
+                                        <div class="w-16 h-20 rounded">
                                             <img src="{{ $foto->temporaryUrl() }}" class="object-cover bg-white">
                                         </div>
                                     </div>
                                 @elseif ($oldFoto)
                                     <div
                                         class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-200/50 shrink-0">
-                                        <div class="w-16 h-16 rounded">
+                                        <div class="w-16 h-20 rounded">
                                             <img src="{{ asset('storage/' . $oldFoto) }}" class="object-cover">
                                         </div>
                                     </div>

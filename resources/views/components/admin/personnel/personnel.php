@@ -116,16 +116,9 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->dispatch('open-modal', id: 'personnel-modal');
     }
 
-    public function save(): void
+    public function rules(): array
     {
-        // Intercept validation if not super admin to ensure opd_id wasn't tampered
-        if (!auth()->user()->hasRole('super-admin')) {
-            if ($this->opd_id != auth()->user()->opd()?->id) {
-                abort(403, 'Unauthorized action.');
-            }
-        }
-
-        $rules = [
+        return [
             'name' => 'required|string|max:255',
             'opd_id' => 'required|exists:opds,id',
             'penugasan_id' => 'required|exists:penugasans,id',
@@ -138,21 +131,21 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'kantor_id' => 'nullable|exists:kantors,id',
             'wajib_absen_di_lokasi' => 'boolean',
             'face_recognition' => 'boolean',
+            'password' => (!$this->personnelId || $this->password) ? 'required|string|min:8|confirmed' : 'nullable|string|min:8|confirmed',
+            'pin' => (!$this->personnelId || $this->pin) ? 'required|numeric|digits:4' : 'nullable|numeric|digits:4',
         ];
+    }
 
-        if (!$this->personnelId || $this->password) {
-            $rules['password'] = 'required|string|min:8|confirmed';
-        } else {
-            $rules['password'] = 'nullable|string|min:8|confirmed';
+    public function save(): void
+    {
+        // Intercept validation if not super admin to ensure opd_id wasn't tampered
+        if (!auth()->user()->hasRole('super-admin')) {
+            if ($this->opd_id != auth()->user()->opd()?->id) {
+                abort(403, 'Unauthorized action.');
+            }
         }
 
-        if (!$this->personnelId || $this->pin) {
-            $rules['pin'] = 'required|numeric|digits:4';
-        } else {
-            $rules['pin'] = 'nullable|numeric|digits:4';
-        }
-
-        $this->validate($rules);
+        $this->validate();
 
         $data = [
             'name' => $this->name,

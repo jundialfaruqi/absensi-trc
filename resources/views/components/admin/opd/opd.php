@@ -76,19 +76,29 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
         $this->dispatch('open-modal', id: 'opd-modal');
     }
 
-    public function save(): void
+    public function rules(): array
     {
-        $this->validate([
+        return [
             'name' => 'required|string|max:255',
             'singkatan' => 'nullable|string|max:50',
             'alamat' => 'nullable|string',
             'logo' => 'nullable|image|max:2048', // max 2MB
-        ], [], [
+        ];
+    }
+
+    public function validationAttributes(): array
+    {
+        return [
             'name' => 'Nama OPD',
             'singkatan' => 'Singkatan OPD',
             'alamat' => 'Alamat',
             'logo' => 'Logo',
-        ]);
+        ];
+    }
+
+    public function save(): void
+    {
+        $this->validate();
 
         $data = [
             'name' => $this->name,

@@ -97,9 +97,9 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
         $this->dispatch('open-modal', id: 'user-modal');
     }
 
-    public function save(): void
+    public function rules(): array
     {
-        $rules = [
+        return [
             'name' => 'required|string|max:255',
             'email' => [
                 'required', 'email', 'max:255',
@@ -109,15 +109,13 @@ new #[Title('Manajemen Pengguna')] #[Layout('layouts::admin.app')] class extends
             'foto' => 'nullable|image|max:2048',
             'role' => 'nullable|string|exists:roles,name',
             'opdId' => 'nullable|integer|exists:opds,id',
+            'password' => (!$this->userId || $this->password) ? 'required|string|min:8|confirmed' : 'nullable|string|min:8|confirmed',
         ];
+    }
 
-        if (!$this->userId || $this->password) {
-            $rules['password'] = 'required|string|min:8|confirmed';
-        } else {
-            $rules['password'] = 'nullable|string|min:8|confirmed';
-        }
-
-        $this->validate($rules);
+    public function save(): void
+    {
+        $this->validate();
 
         $data = [
             'name' => $this->name,
