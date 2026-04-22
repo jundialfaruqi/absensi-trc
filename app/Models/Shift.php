@@ -15,4 +15,9 @@ class Shift extends Model
         'end_time',
         'color',
     ];
+
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
 }

@@ -296,7 +296,7 @@
                                 </div>
                                 <div class="flex-none text-right">
                                     <div class="text-xs font-black text-error italic uppercase">
-                                        {{ $late->jam_masuk->format('H:i') }}</div>
+                                        {{ $late->jam_masuk?->format('H:i') }}</div>
                                     <div class="text-[8px] font-bold text-base-content/30 uppercase tracking-widest">
                                         Jam Masuk</div>
                                 </div>

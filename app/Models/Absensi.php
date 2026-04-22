@@ -42,6 +42,8 @@ class Absensi extends Model
 
     protected $casts = [
         'tanggal' => 'date',
+        'jam_masuk' => 'datetime',
+        'jam_pulang' => 'datetime',
         'edited_at' => 'datetime',
     ];
 
