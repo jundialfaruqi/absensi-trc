@@ -272,6 +272,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
         $now = $this->getCorrectedNow();
         $nowTime = $now->format('H:i:s');
+        $startTime = $this->activeJadwal->shift->start_time->format('H:i:s');
+        $endTime = $this->activeJadwal->shift->end_time->format('H:i:s');
+        $isNightShift = $startTime > $endTime;
 
         try {
             // Process Image Storage
@@ -293,24 +296,23 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 }
 
                 $status_masuk = 'HADIR';
-                $nowTime = $now->format('H:i:s');
-                
-                // Night Shift Logic for status
-                $isNightShift = $this->activeJadwal->shift->start_time > $this->activeJadwal->shift->end_time;
+
+                // Tolerance: Allow 1 minute buffer for being considered "on time"
+                $startTimeWithBuffer = $this->activeJadwal->shift->start_time->copy()->addMinute()->format('H:i:s');
 
                 if ($isNightShift) {
                     // If arrived between 00:00 and EndTime, definitely late relative to the StartTime (Day 1)
-                    if ($nowTime <= $this->activeJadwal->shift->end_time) {
+                    if ($nowTime <= $endTime) {
                         $status_masuk = 'TELAT';
                     } else {
                         // Arrived after StartTime but before Midnight
-                        if ($nowTime > $this->activeJadwal->shift->start_time) {
+                        if ($nowTime > $startTimeWithBuffer) {
                             $status_masuk = 'TELAT';
                         }
                     }
                 } else {
                     // Normal shift
-                    if ($nowTime > $this->activeJadwal->shift->start_time) {
+                    if ($nowTime > $startTimeWithBuffer) {
                         $status_masuk = 'TELAT';
                     }
                 }
@@ -367,7 +369,6 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $status_pulang = 'HADIR';
                 
                 // Check for early departure
-                $isNightShift = $this->activeJadwal->shift->start_time > $this->activeJadwal->shift->end_time;
                 $isNextDay = ($this->activeDate !== $now->format('Y-m-d'));
 
                 if ($isNightShift) {
@@ -375,12 +376,12 @@ new #[Layout('layouts.absensi.app')] class extends Component
                         // Still on day 1 of a night shift, definitely early
                         $status_pulang = 'PC';
                     } else {
-                        if ($nowTime < $this->activeJadwal->shift->end_time) {
+                        if ($nowTime < $endTime) {
                             $status_pulang = 'PC';
                         }
                     }
                 } else {
-                    if ($nowTime < $this->activeJadwal->shift->end_time) {
+                    if ($nowTime < $endTime) {
                         $status_pulang = 'PC';
                     }
                 }
