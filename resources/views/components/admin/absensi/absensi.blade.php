@@ -110,30 +110,33 @@
                             @foreach ($this->dates as $date)
                                 <th colspan="2"
                                     class="text-center border-b border-r border-base-200 min-w-32 p-1 {{ \Carbon\Carbon::parse($date)->isToday() ? 'bg-primary/10' : '' }}">
-                                    <div class="text-[9px] uppercase opacity-50 leading-none mb-1">
+                                    <div class="text-[10px] uppercase opacity-50 leading-none mb-1">
                                         {{ \Carbon\Carbon::parse($date)->translatedFormat('D') }}
                                     </div>
-                                    <div class="text-xs font-black">{{ \Carbon\Carbon::parse($date)->format('d/m') }}
+                                    <div class="text-sm font-bold">{{ \Carbon\Carbon::parse($date)->format('d/m') }}
                                     </div>
                                 </th>
                             @endforeach
                         </tr>
                         <tr>
                             @foreach ($this->dates as $date)
-                                <th class="text-[9px] font-black text-center border-b border-r border-base-200 p-1 bg-base-200/30">M</th>
-                                <th class="text-[9px] font-black text-center border-b border-r border-base-200 p-1 bg-base-200/30">P</th>
+                                <th
+                                    class="text-[9px] font-black text-center border-b border-r border-base-200 p-1 bg-base-200/30">
+                                    M</th>
+                                <th
+                                    class="text-[9px] font-black text-center border-b border-r border-base-200 p-1 bg-base-200/30">
+                                    P</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($this->personnels as $p)
                             <tr class="group">
-                                <td
-                                    class="sticky left-0 z-120 bg-base-100 border-r border-base-200 p-2 group-hover:bg-base-200 transition-colors">
+                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="avatar placeholder">
                                             @if ($p->foto)
-                                                <div class="w-8 rounded-full border border-base-300">
+                                                <div class="w-10 h-10 rounded-full">
                                                     <img src="{{ asset('storage/' . $p->foto) }}"
                                                         alt="{{ $p->name }}" />
                                                 </div>
@@ -145,7 +148,8 @@
                                             @endif
                                         </div>
                                         <div class="truncate">
-                                            <div class="font-bold text-xs truncate max-w-30">{{ $p->name }}</div>
+                                            <div class="font-bold text-xs truncate max-w-30">{{ $p->name }}
+                                            </div>
                                             <div class="flex items-center gap-1">
                                                 <div class="text-[9px] opacity-50 truncate max-w-20">
                                                     {{ $p->penugasan?->name ?? 'N/A' }}</div>
@@ -180,17 +184,24 @@
                                     @endphp
                                     {{-- Kolom Masuk (M) --}}
                                     @php
-                                        $cellClassM = 'border-r border-base-200 cursor-pointer hover:bg-base-200/50 transition-all text-center p-1 min-w-16 h-12 relative';
+                                        $cellClassM =
+                                            'border-r border-base-200 cursor-pointer hover:bg-base-200/50 transition-all text-center p-1 min-w-16 h-12 relative';
                                         if ($a) {
-                                            if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) $cellClassM .= ' bg-neutral/10';
-                                            elseif ($a->status_masuk === 'HADIR') $cellClassM .= ' bg-success/10';
-                                            elseif ($a->status_masuk === 'TELAT') $cellClassM .= ' bg-error/10';
-                                            elseif ($a->status === 'LIBUR') $cellClassM .= ' bg-base-200/50';
+                                            if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) {
+                                                $cellClassM .= ' bg-neutral/10';
+                                            } elseif ($a->status_masuk === 'HADIR') {
+                                                $cellClassM .= ' bg-success/10';
+                                            } elseif ($a->status_masuk === 'TELAT') {
+                                                $cellClassM .= ' bg-error/10';
+                                            } elseif ($a->status === 'LIBUR') {
+                                                $cellClassM .= ' bg-base-200/50';
+                                            }
                                         } elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday) {
                                             $cellClassM .= ' bg-base-300/30';
                                         }
                                     @endphp
-                                    <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')" class="{{ $cellClassM }}">
+                                    <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                        class="{{ $cellClassM }}">
                                         @if ($a && $a->edited_at)
                                             <div class="absolute top-0 right-0 p-0 z-20">
                                                 <div class="w-1.5 h-1.5 bg-primary rounded-bl-full"></div>
@@ -199,35 +210,46 @@
 
                                         @if ($a)
                                             @if ($a->status === 'LIBUR')
-                                                <span class="text-[8px] font-black opacity-30">LIBUR</span>
+                                                <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                             @elseif ($a->jam_masuk)
-                                                <div class="text-[10px] font-black leading-tight {{ $a->status_masuk === 'TELAT' ? 'text-error' : 'text-success' }}">
+                                                <div
+                                                    class="text-[11px] font-black leading-tight {{ $a->status_masuk === 'TELAT' ? 'text-error' : 'text-success' }}">
                                                     {{ \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') }}
                                                 </div>
-                                                <div class="text-[7px] font-black uppercase opacity-60">{{ $a->status_masuk }}</div>
+                                                <div class="text-[8px] font-black uppercase opacity-60">
+                                                    {{ $a->status_masuk }}</div>
                                             @else
-                                                <span class="text-[8px] font-black {{ $a->status_masuk === 'ALFA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_masuk ?: $a->status }}</span>
+                                                <span
+                                                    class="text-[9px] font-black {{ $a->status_masuk === 'ALFA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_masuk ?: $a->status }}</span>
                                             @endif
                                         @elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
-                                            <span class="text-[8px] font-black text-error">ALFA</span>
+                                            <span class="text-[10px] font-black text-error">ALFA</span>
                                         @elseif ($j)
-                                            <div class="opacity-20 text-[7px] font-black">{{ $j->shift?->name ?? $j->status }}</div>
+                                            <div class="opacity-20 text-[8px] font-black">
+                                                {{ $j->shift?->name ?? $j->status }}</div>
                                         @endif
                                     </td>
 
                                     {{-- Kolom Pulang (P) --}}
                                     @php
-                                        $cellClassP = 'border-r border-base-200 cursor-pointer hover:bg-base-200/50 transition-all text-center p-1 min-w-16 h-12 relative';
+                                        $cellClassP =
+                                            'border-r border-base-200 cursor-pointer hover:bg-base-200/50 transition-all text-center p-1 min-w-16 h-12 relative';
                                         if ($a) {
-                                            if (in_array($a->status_pulang, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) $cellClassP .= ' bg-neutral/10';
-                                            elseif ($a->status_pulang === 'HADIR') $cellClassP .= ' bg-success/10';
-                                            elseif ($a->status_pulang === 'PC') $cellClassP .= ' bg-warning/10';
-                                            elseif ($a->status === 'LIBUR') $cellClassP .= ' bg-base-200/50';
+                                            if (in_array($a->status_pulang, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) {
+                                                $cellClassP .= ' bg-neutral/10';
+                                            } elseif ($a->status_pulang === 'HADIR') {
+                                                $cellClassP .= ' bg-success/10';
+                                            } elseif ($a->status_pulang === 'PC') {
+                                                $cellClassP .= ' bg-warning/10';
+                                            } elseif ($a->status === 'LIBUR') {
+                                                $cellClassP .= ' bg-base-200/50';
+                                            }
                                         } elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday) {
                                             $cellClassP .= ' bg-base-300/30';
                                         }
                                     @endphp
-                                    <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')" class="{{ $cellClassP }}">
+                                    <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                        class="{{ $cellClassP }}">
                                         @if ($a && $a->edited_at)
                                             <div class="absolute top-0 right-0 p-0 z-20">
                                                 <div class="w-1.5 h-1.5 bg-primary rounded-bl-full"></div>
@@ -236,27 +258,39 @@
 
                                         @if ($a)
                                             @if ($a->status === 'LIBUR')
-                                                <span class="text-[8px] font-black opacity-30">LIBUR</span>
+                                                <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                             @elseif ($a->jam_pulang)
-                                                <div class="text-[10px] font-black leading-tight {{ $a->status_pulang === 'PC' ? 'text-warning' : 'text-success' }}">
+                                                <div
+                                                    class="text-[11px] font-black leading-tight {{ $a->status_pulang === 'PC' ? 'text-warning' : 'text-success' }}">
                                                     {{ \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') }}
                                                 </div>
-                                                <div class="text-[7px] font-black uppercase opacity-60">{{ $a->status_pulang }}</div>
+                                                <div class="text-[8px] font-black uppercase opacity-60">
+                                                    {{ $a->status_pulang }}</div>
                                             @else
-                                                <span class="text-[8px] font-black {{ $a->status_pulang === 'ALFA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_pulang ?: $a->status }}</span>
+                                                <span
+                                                    class="text-[9px] font-black {{ $a->status_pulang === 'ALFA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_pulang ?: $a->status }}</span>
                                             @endif
                                         @elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
-                                            <span class="text-[8px] font-black text-error">ALFA</span>
+                                            <span class="text-[10px] font-black text-error">ALFA</span>
                                         @elseif ($j)
-                                            <div class="opacity-20 text-[7px] font-black">{{ $j->shift?->name ?? $j->status }}</div>
+                                            <div class="opacity-20 text-[8px] font-black">
+                                                {{ $j->shift?->name ?? $j->status }}</div>
                                         @endif
                                     </td>
                                 @endforeach
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ count($this->dates) * 2 + 1 }}" class="text-center py-10 opacity-50 font-bold uppercase tracking-widest text-xs">
-                                    Tidak ada data personnel
+                                <td colspan="{{ count($this->dates) * 2 + 1 }}"
+                                    class="text-center py-12 text-sm text-base-content/60">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-12 opacity-20 mb-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
+                                        Tidak ada data personnel
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -499,8 +533,8 @@
                                 <label class="label py-1"><span class="label-text text-sm font-medium">
                                         Nomor Surat (Sakit/Izin)
                                     </span></label>
-                                <input type="text" wire:model="nomorSurat" placeholder="Contoh: 123/SKP/IV/2026..."
-                                    class="input w-full" />
+                                <input type="text" wire:model="nomorSurat"
+                                    placeholder="Contoh: 123/SKP/IV/2026..." class="input w-full" />
                             </div>
                         @endif
 

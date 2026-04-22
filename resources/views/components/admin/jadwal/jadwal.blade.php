@@ -67,8 +67,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2 justify-end">
-            <a wire:navigate href="{{ route('jadwal.generate') }}"
-                class="btn btn-primary text-white gap-2">
+            <a wire:navigate href="{{ route('jadwal.generate') }}" class="btn btn-primary text-white gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -112,11 +111,11 @@
                     <tbody>
                         @forelse ($this->personnels as $p)
                             <tr>
-                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-2">
+                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="avatar placeholder">
                                             @if ($p->foto)
-                                                <div class="w-8 rounded-full">
+                                                <div class="w-10 rounded-full">
                                                     <img src="{{ asset('storage/' . $p->foto) }}"
                                                         alt="{{ $p->name }}" />
                                                 </div>
