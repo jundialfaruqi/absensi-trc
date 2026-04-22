@@ -146,7 +146,7 @@
                                 <div class="relative shrink-0">
                                     <div
                                         class="w-20 h-28 rounded-xl overflow-hidden border border-cyan-500/20 shadow-2xl relative transition-transform duration-500 group-hover:scale-105 bg-slate-800">
-                                        @if ($foto)
+                                        @if ($foto && !$errors->has('foto'))
                                             <img src="{{ $foto->temporaryUrl() }}" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-slate-600">
@@ -373,9 +373,13 @@
             const file = input.files[0];
             if (!file) return;
 
-            // Strict MIME check on client side too
-            if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-                alert('Hanya format JPG, JPEG, dan PNG yang diperbolehkan.');
+            // Robust client-side validation
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            const allowedExtensions = ['jpg', 'jpeg', 'png'];
+            const extension = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(extension)) {
+                alert('File tidak valid! Hanya format JPG, JPEG, dan PNG yang diperbolehkan.');
                 input.value = '';
                 return;
             }

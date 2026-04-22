@@ -70,6 +70,26 @@ new #[Layout('layouts::personnel.register.app')] #[Title('Pendaftaran Personnel'
         ];
     }
 
+    public function updatedFoto()
+    {
+        if ($this->foto) {
+            try {
+                $mimeType = $this->foto->getMimeType();
+                if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
+                    $this->reset('foto');
+                    $this->addError('foto', 'File yang diunggah bukan merupakan gambar yang valid.');
+                    return;
+                }
+            } catch (\Exception $e) {
+                $this->reset('foto');
+                $this->addError('foto', 'File yang diunggah tidak dapat dibaca atau rusak.');
+                return;
+            }
+        }
+
+        $this->validateOnly('foto');
+    }
+
     public function register()
     {
         if (!Setting::get('personnel_registration_enabled', true)) {
