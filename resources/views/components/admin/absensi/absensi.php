@@ -73,6 +73,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%');
             })
+            ->orderByRaw('LENGTH(regu) ASC, regu ASC')
             ->orderBy('name')
             ->paginate($this->perPage);
 

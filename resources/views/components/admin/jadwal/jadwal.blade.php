@@ -130,8 +130,16 @@
                                         <div class="truncate">
                                             <div class="font-bold text-xs truncate max-w-30">{{ $p->name }}
                                             </div>
-                                            <div class="text-[10px] opacity-50 truncate max-w-30">
-                                                {{ $p->penugasan?->name ?? 'N/A' }}</div>
+                                            <div class="flex items-center gap-1">
+                                                <div class="text-[9px] opacity-50 truncate max-w-20">
+                                                    {{ $p->penugasan?->name ?? 'N/A' }}</div>
+                                                @if ($p->regu)
+                                                    <span
+                                                        class="px-1 py-0.5 rounded bg-primary/10 text-primary text-[8px] font-bold border border-primary/20 leading-none">
+                                                        {{ $p->regu }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </td>

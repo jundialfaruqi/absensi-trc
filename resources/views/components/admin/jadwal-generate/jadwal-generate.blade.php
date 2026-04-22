@@ -68,47 +68,138 @@
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-3">
                         <span
                             class="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center text-sm shrink-0">2</span>
-                        Pilih Personel
+                        Pilih & Atur Regu Personel
                     </h2>
 
-                    <div class="flex justify-end mb-4">
-                        <label
-                            class="label cursor-pointer gap-2 bg-base-200/50 px-4 py-1.5 rounded-xl border border-base-200">
-                            <span class="text-[10px] font-bold uppercase opacity-60">Pilih Semua</span>
-                            <input type="checkbox" wire:model.live="selectAll" wire:click="toggleSelectAll"
-                                class="checkbox checkbox-primary checkbox-xs">
-                        </label>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
-                        @forelse ($this->personnels as $p)
-                            <label
-                                class="label cursor-pointer flex items-center justify-start gap-4 p-3 border rounded-xl transition-all hover:bg-base-200 {{ in_array($p->id, $selectedPersonnelIds) ? 'border-primary bg-primary/5' : 'border-base-200' }}">
-                                <input type="checkbox" wire:model="selectedPersonnelIds" value="{{ $p->id }}"
-                                    class="checkbox checkbox-primary checkbox-sm">
-                                <div class="avatar placeholder">
-                                    <div class="bg-neutral text-neutral-content rounded-full w-8">
-                                        @if ($p->foto)
-                                            <img src="{{ asset('storage/' . $p->foto) }}" />
-                                        @else
-                                            <span class="text-xs">{{ substr($p->name, 0, 1) }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-xs uppercase">{{ $p->name }}</div>
-                                    <div class="text-[9px] opacity-60 italic">
-                                        {{ $p->penugasan?->name ?? 'Belum ada penugasan' }}</div>
-                                </div>
-                            </label>
-                        @empty
-                            <div class="col-span-2 text-center py-10 opacity-40">
-                                <p>Tidak ada personel ditemukan di OPD ini.</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        {{-- Selection List --}}
+                        <div class="lg:col-span-3">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Daftar Personel
+                                </h3>
+                                <label
+                                    class="label cursor-pointer gap-2 bg-base-200/50 px-4 py-1.5 rounded-xl border border-base-200">
+                                    <span class="text-[10px] font-bold uppercase opacity-60">Pilih Semua</span>
+                                    <input type="checkbox" wire:model.live="selectAll" wire:click="toggleSelectAll"
+                                        class="checkbox checkbox-primary checkbox-xs">
+                                </label>
                             </div>
-                        @endforelse
-                    </div>
-                    <div class="mt-4 text-[10px] font-bold text-primary uppercase">
-                        {{ count($selectedPersonnelIds) }} Personel terpilih
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                                @forelse ($this->personnels as $p)
+                                    <label
+                                        class="label cursor-pointer flex items-center justify-start gap-4 p-3 border rounded-xl transition-all hover:bg-base-200 {{ in_array($p->id, $selectedPersonnelIds) ? 'border-primary bg-primary/5' : 'border-base-200' }}">
+                                        <input type="checkbox" wire:model.live="selectedPersonnelIds"
+                                            value="{{ $p->id }}" class="checkbox checkbox-primary checkbox-sm">
+                                        <div class="avatar placeholder">
+                                            <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                                @if ($p->foto)
+                                                    <img src="{{ asset('storage/' . $p->foto) }}" />
+                                                @else
+                                                    <span class="text-xs">{{ substr($p->name, 0, 1) }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-bold text-xs uppercase truncate">{{ $p->name }}</div>
+                                            <div class="text-[9px] opacity-60 italic truncate">
+                                                {{ $p->penugasan?->name ?? 'Belum ada penugasan' }}</div>
+                                        </div>
+                                    </label>
+                                @empty
+                                    <div class="col-span-2 text-center py-10 opacity-40">
+                                        <p>Tidak ada personel ditemukan di OPD ini.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- Order & Regu --}}
+                        <div class="lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Urutan & Regu
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-[10px] font-bold opacity-40">PERSONEL / REGU:</label>
+                                    <input type="number" wire:model.live="peoplePerRegu" min="1"
+                                        class="input input-bordered input-xs w-12 text-center font-bold">
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-base-200/30 rounded-2xl border border-base-200 p-4 min-h-[100px] max-h-[500px] overflow-y-auto">
+                                @if (empty($selectedPersonnelIds))
+                                    {{-- Empty state --}}
+                                    <div
+                                        class="flex flex-col items-center justify-center h-40 text-center opacity-30 gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.998 5.998 0 00-5.414-5.7 aktywna 5.998 5.998 0 00-5.414 5.7m12 0H6.001V18.72a9.094 9.094 0 00-3.741-.479 3 3 0 014.682-2.72m.94 3.198l.001.031c0 .225.012.447.037.666A11.944 11.944 0 0012 21c2.17 0 4.207-.576 5.963-1.584A6.062 6.062 0 0018 18.72V18.72z" />
+                                        </svg>
+                                        <span class="text-[10px] font-bold uppercase">Pilih personel untuk mengatur
+                                            regu</span>
+                                    </div>
+                                @else
+                                    <div class="space-y-2">
+                                        @foreach ($selectedPersonnelIds as $index => $pId)
+                                            @php
+                                                $person = $this->personnels->find($pId);
+                                                $showLabel = $peoplePerRegu > 0 && $index % $peoplePerRegu == 0;
+                                            @endphp
+                                            @if ($showLabel)
+                                                <div class="text-[9px] font-bold opacity-30 mt-4 mb-1 uppercase">Regu
+                                                    {{ floor($index / max(1, $peoplePerRegu)) + 1 }}</div>
+                                            @endif
+                                            <div
+                                                class="flex items-center gap-3 p-2 bg-base-100 rounded-xl border border-base-200 group">
+                                                <div class="text-[10px] font-bold opacity-30 w-4">{{ $index + 1 }}
+                                                </div>
+                                                <div class="avatar placeholder">
+                                                    <div class="bg-neutral text-neutral-content rounded-full w-6">
+                                                        @if ($person?->foto)
+                                                            <img src="{{ asset('storage/' . $person->foto) }}" />
+                                                        @else
+                                                            <span class="text-[10px]">{{ substr($person?->name, 0, 1) }}</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="text-[10px] font-bold uppercase truncate">
+                                                        {{ $person?->name }}</div>
+                                                </div>
+                                                <div class="flex gap-1">
+                                                    <button type="button" wire:click="movePersonnelUp('{{ $pId }}')"
+                                                        @if ($index === 0) disabled @endif
+                                                        class="btn btn-ghost btn-xs btn-square {{ $index === 0 ? 'opacity-10' : '' }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"
+                                                            class="w-3 h-3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                                        </svg>
+                                                    </button>
+                                                    <button type="button" wire:click="movePersonnelDown('{{ $pId }}')"
+                                                        @if ($index === count($selectedPersonnelIds) - 1) disabled @endif
+                                                        class="btn btn-ghost btn-xs btn-square {{ $index === count($selectedPersonnelIds) - 1 ? 'opacity-10' : '' }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"
+                                                            class="w-3 h-3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                            <p class="text-[9px] opacity-40 mt-3 italic leading-snug text-center">
+                                Gunakan tombol panah untuk menentukan urutan pasangan/regu.
+                                Personel teratas akan menempati shift pertama pada tanggal mulai.
+                            </p>
+                        </div>
                     </div>
                 </div>
             @endif

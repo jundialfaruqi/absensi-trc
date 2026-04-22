@@ -27,6 +27,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     #[Url]
     public array $selectedPersonnelIds = [];
     public bool $selectAll = false;
+    public int $peoplePerRegu = 2;
 
     // Step 3: Shift Sequence
     // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1, 'count' => 1]
@@ -177,29 +178,20 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             return;
         }
 
-        // 2. Map Personnel to Starting Day Offsets
-        // We fill the slots of the cycle day-by-day.
-        // Personnel 0 & 1 take slots for Day 0, Personnel 2 & 3 take Day 1, etc.
-        $personnelDayOffsets = [];
-        $slotCounter = 0;
+        // 2. Map Personnel to Starting Day Offsets (Grouped by 2 as default pair)
         $totalPersonnel = count($this->selectedPersonnelIds);
         
-        // Create a map of "Personnel Index -> Cycle Day Offset"
-        // We iterate through the cycle and assign personnel to each day's slots
-        $pIdx = 0;
-        $tempCycleIndex = 0;
-        while ($pIdx < $totalPersonnel) {
-            $dayConfig = $dailyCycle[$tempCycleIndex % $cycleLength];
-            for ($c = 0; $c < $dayConfig['count'] && $pIdx < $totalPersonnel; $c++) {
-                $personnelDayOffsets[$pIdx] = $tempCycleIndex % $cycleLength;
-                $pIdx++;
-            }
-            $tempCycleIndex++;
-        }
-
-        // 3. Generate Schedule
+        // 3. Generate Schedule & Update Personnel Regu
         foreach ($this->selectedPersonnelIds as $index => $pId) {
-            $startOffset = $personnelDayOffsets[$index] ?? 0;
+            // Determine the group (Regu) for this personnel
+            $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
+            $reguName = 'Regu ' . ($reguIndex + 1);
+            
+            // Update personnel's regu for sorting in matrix
+            Personnel::where('id', $pId)->update(['regu' => $reguName]);
+
+            // Starting Day Offset in the cycle
+            $startOffset = $reguIndex % $cycleLength;
             
             $dayCounter = 0;
             foreach ($period as $date) {

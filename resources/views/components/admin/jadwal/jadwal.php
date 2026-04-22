@@ -165,6 +165,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%');
             })
+            ->orderByRaw('LENGTH(regu) ASC, regu ASC')
             ->orderBy('name')
             ->paginate($this->perPage);
 
