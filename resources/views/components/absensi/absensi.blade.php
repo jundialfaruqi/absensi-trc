@@ -185,13 +185,11 @@
                     this.time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                     this.date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
                 }
-            }" x-init="
-                update();
-                setInterval(() => update(), 1000);
-                $watch('$wire.serverTimestamp', value => {
-                    offset = value - Date.now();
-                });
-            ">
+            }" x-init="update();
+            setInterval(() => update(), 1000);
+            $watch('$wire.serverTimestamp', value => {
+                offset = value - Date.now();
+            });">
                 <div wire:ignore class="flex flex-col items-center">
                     <div class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 opacity-60 mb-1"
                         x-text="date">Memuat
@@ -226,6 +224,29 @@
                 </div>
             </div>
         </div>
+
+        {{-- ─── Step 5: Portal Closed ────────────────────────── --}}
+        @if ($step === 5)
+            <div class="card bg-slate-900/40 backdrop-blur-xl border border-error/20 shadow-2xl animate-in zoom-in-95">
+                <div class="card-body items-center text-center py-12">
+                    <div
+                        class="w-20 h-20 bg-error/20 text-error rounded-full flex items-center justify-center mb-6 border border-error/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="2.5" stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-black text-white uppercase tracking-tighter mb-4">Portal Ditutup</h2>
+                    <p class="text-blue-100/60 font-medium text-sm leading-relaxed mb-8 uppercase tracking-wide">
+                        {{ $message }}
+                    </p>
+                    <a href="/"
+                        class="btn bg-white/10 hover:bg-white/20 border-white/20 text-white btn-block rounded-2xl font-black uppercase tracking-widest">Kembali
+                        ke Beranda</a>
+                </div>
+            </div>
+        @endif
 
         {{-- ─── Step 1: Selection & Time Sync Check ────────────────────────── --}}
         @if (!$isTimeSynced)
@@ -274,7 +295,7 @@
                         Cari Nama Anda</h2>
                     <div class="relative mb-6">
                         <input type="text" wire:model.live.debounce.300ms="search"
-                            placeholder="Ketik nama di sini..."
+                            placeholder="Ketik nama anda..."
                             class="input input-lg w-full pl-12 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-blue-400 focus:bg-white/10 transition-all rounded-2xl"
                             autofocus />
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -286,6 +307,21 @@
                     </div>
 
                     <div class="space-y-2">
+                        @if (strlen($search) < 3)
+                            <div
+                                class="text-center py-10 px-6 border-2 border-dashed border-white/5 rounded-2xl bg-white/2">
+                                <div class="text-blue-300/20 mb-3 flex justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-12">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <p class="text-[10px] font-old uppercase tracking-[0.2em] text-white/30">Ketik
+                                    Nama Anda untuk mencari</p>
+                            </div>
+                        @endif
+
                         @foreach ($this->personnels() as $p)
                             <button wire:click="selectPersonnel({{ $p->id }})"
                                 class="btn btn-ghost btn-lg w-full justify-between h-auto py-4 group hover:bg-white/10 hover:border-white/20 transition-all border-white/5 rounded-2xl bg-white/5">
@@ -316,6 +352,14 @@
                             </button>
                         @endforeach
                     </div>
+
+                    @if (strlen($search) >= 3 && $this->personnels()->isEmpty())
+                        <div
+                            class="text-center py-10 px-6 border-2 border-dashed border-white/5 rounded-2xl bg-white/2">
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-error/60">Personel tidak
+                                ditemukan</p>
+                        </div>
+                    @endif
 
                     <div class="mt-4">
                         <a href="/"
@@ -504,7 +548,8 @@
                             <div>
                                 <div class="text-[8px] font-black uppercase opacity-40 leading-none mb-0.5">Biometrik
                                 </div>
-                                <div class="text-[10px] font-bold" x-text="faceRecognitionActive ? faceMessage : 'Dilewati'">
+                                <div class="text-[10px] font-bold"
+                                    x-text="faceRecognitionActive ? faceMessage : 'Dilewati'">
                                     Memindai...</div>
                             </div>
                         </div>

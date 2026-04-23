@@ -78,6 +78,10 @@ Route::group([
         ->middleware('permission:manajemen-absensi')
         ->name('absensi.log');
 
+    Route::livewire('/absensi/log-pin', 'admin::pin-attempt-log')
+        ->middleware('permission:manajemen-absensi')
+        ->name('absensi.log.pin');
+
     Route::livewire('/pengaturan', 'admin::pengaturan')
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');

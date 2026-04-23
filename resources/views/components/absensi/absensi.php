@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 
 new #[Layout('layouts.absensi.app')] class extends Component
 {
-    // Stepper state: 1: Selection, 2: PIN, 3: Action (In/Out), 4: Result
+    // Stepper state: 1: Selection, 2: PIN, 3: Action (In/Out), 4: Result, 5: Portal Closed
     public int $step = 1;
     
     // Step 1: Selection
@@ -51,6 +51,12 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function mount()
     {
+        if (!\App\Models\Setting::get('web_absensi_active', true)) {
+            $this->step = 5;
+            $this->message = 'Maaf, Portal Absensi Web sedang dinonaktifkan oleh Administrator.';
+            return;
+        }
+
         $this->resetErrorBag();
         $this->fetchServerTime();
     }
@@ -125,6 +131,16 @@ new #[Layout('layouts.absensi.app')] class extends Component
     {
         $this->selectedPersonnelId = $id;
         $this->selectedPersonnel = Personnel::find($id);
+
+        // Pre-check Schedule & Time Window BEFORE PIN Step
+        $this->fetchServerTime(true);
+        $this->prepareActionStep(true); // pass true to just check window
+
+        if ($this->step === 4) {
+            // If prepareActionStep set step to 4, it means it rejected due to window or no schedule
+            return;
+        }
+
         $this->step = 2;
         $this->pin = '';
         $this->resetErrorBag();
@@ -146,21 +162,85 @@ new #[Layout('layouts.absensi.app')] class extends Component
     {
         if (!$this->selectedPersonnel) return;
 
+        $ip = request()->ip();
+        $userAgent = request()->userAgent();
+
+        // 1. Check Rate Limit / Lockout
+        $maxAttempts = (int) \App\Models\Setting::get('pin_max_attempts', 5);
+        $lock5 = (int) \App\Models\Setting::get('pin_lock_duration_5', 5);
+        $lock15 = (int) \App\Models\Setting::get('pin_lock_duration_15', 15);
+
+        // Calculate failures since last success
+        $lastSuccess = \App\Models\PinAttemptLog::where('personnel_id', $this->selectedPersonnel->id)
+            ->where('status', 'success')
+            ->latest()
+            ->first();
+
+        $failureQuery = \App\Models\PinAttemptLog::where('personnel_id', $this->selectedPersonnel->id)
+            ->where('status', 'fail');
+        
+        if ($lastSuccess) {
+            $failureQuery->where('created_at', '>', $lastSuccess->created_at);
+        } else {
+            $failureQuery->where('created_at', '>', now()->subMinutes(60));
+        }
+
+        $recentFailures = $failureQuery->count();
+
+        // Find time of last failure to check if still in lockout
+        $lastFailure = \App\Models\PinAttemptLog::where('personnel_id', $this->selectedPersonnel->id)
+            ->where('status', 'fail')
+            ->latest()
+            ->first();
+
+        if ($recentFailures >= $maxAttempts && $lastFailure) {
+            $lockDuration = $recentFailures >= ($maxAttempts * 2) ? $lock15 : $lock5;
+            $unlockAt = $lastFailure->created_at->addMinutes($lockDuration);
+
+            if (now()->lessThan($unlockAt)) {
+                $remaining = $unlockAt->diffInMinutes(now());
+                $this->addError('pin', "Terlalu banyak percobaan salah. Akun terkunci sementara. Silakan coba lagi dalam $remaining menit.");
+                $this->pin = '';
+                return;
+            }
+        }
+
+        // 2. Verify PIN
         if (Hash::check($this->pin, $this->selectedPersonnel->pin)) {
+            // Log Success
+            \App\Models\PinAttemptLog::create([
+                'personnel_id' => $this->selectedPersonnel->id,
+                'ip_address' => $ip,
+                'user_agent' => $userAgent,
+                'status' => 'success'
+            ]);
+
             $this->fetchServerTime(true);
             $this->prepareActionStep();
         } else {
+            // Log Failure
+            \App\Models\PinAttemptLog::create([
+                'personnel_id' => $this->selectedPersonnel->id,
+                'ip_address' => $ip,
+                'user_agent' => $userAgent,
+                'status' => 'fail'
+            ]);
+
             $this->addError('pin', 'PIN yang Anda masukkan salah.');
             $this->pin = '';
         }
     }
 
-    public function prepareActionStep()
+    public function prepareActionStep($checkWindowOnly = false)
     {
         $now = $this->getCorrectedNow();
         $today = $now->format('Y-m-d');
         $yesterday = $now->copy()->subDay()->format('Y-m-d');
         $nowTime = $now->format('H:i:s');
+
+        // Reset state for calculation
+        $this->activeJadwal = null;
+        $this->activeDate = '';
 
         // Logic: Prioritize Yesterday's Night Shift if we are currently in the "Morning After"
         // Buffer: 00:00 to 09:00 AM
@@ -170,9 +250,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time > $yesterdayJadwal->shift->end_time) {
-                // It was a night shift. Check if we are still within the shift window (End Time + 2 hours buffer)
-                $endTimePlusBuffer = Carbon::parse($yesterdayJadwal->shift->end_time)->addHours(2)->format('H:i:s');
+            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time->format('H:i:s') > $yesterdayJadwal->shift->end_time->format('H:i:s')) {
+                // It was a night shift. Check if we are still within the shift window (End Time + 4 hours buffer for safety)
+                $endTimePlusBuffer = $yesterdayJadwal->shift->end_time->copy()->addHours(4)->format('H:i:s');
                 
                 // If now is before the cutoff, use yesterday's context
                 if ($nowTime < $endTimePlusBuffer) {
@@ -205,20 +285,81 @@ new #[Layout('layouts.absensi.app')] class extends Component
             return;
         }
 
+        // ─── TIME WINDOW VALIDATION (GLOBAL) ───
         $this->activeAbsensi = Absensi::where('personnel_id', $this->selectedPersonnel->id)
             ->where('tanggal', $this->activeDate)
             ->first();
 
-        // Calculate If Too Late to Check-In (4 Hours after shift start)
-        if ($this->activeJadwal && $this->activeJadwal->shift && !$this->activeAbsensi) {
-            $startDateTime = Carbon::parse($this->activeDate . ' ' . $this->activeJadwal->shift->start_time);
-            $cutoff = $startDateTime->copy()->addHours(4);
-            $this->isTooLateToIn = $now->greaterThan($cutoff);
+        $shift = $this->activeJadwal->shift;
+        $isCheckIn = !$this->activeAbsensi || !$this->activeAbsensi->jam_masuk;
+
+        if ($isCheckIn) {
+            // Validation for CLOCK IN
+            $mulaiMins = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
+            $selesaiMins = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
+
+            $startTime = Carbon::parse($this->activeDate)->setTimeFrom($shift->start_time);
+            $windowStart = $startTime->copy()->subMinutes($mulaiMins);
+            $windowEnd = $startTime->copy()->addMinutes($selesaiMins);
+
+            if ($now->lessThan($windowStart)) {
+                $this->isSuccess = false;
+                $diff = $windowStart->diffForHumans($now, true);
+                $this->message = "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.";
+                $this->step = 4;
+                return;
+            }
+
+            if ($now->greaterThan($windowEnd)) {
+                $this->isSuccess = false;
+                $this->message = "Batas waktu Absen Masuk sudah berakhir (Maksimal $selesaiMins menit setelah jadwal).";
+                $this->step = 4;
+                return;
+            }
+        } else {
+            // Validation for CLOCK OUT
+            if (!$this->activeAbsensi->jam_pulang) {
+                $mulaiMins = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
+                $selesaiMins = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+
+                if ($shift->start_time->format('H:i:s') > $shift->end_time->format('H:i:s')) {
+                    // It's a night shift, end time is on the next day
+                    $pulangDate = Carbon::parse($this->activeDate)->addDay()->format('Y-m-d');
+                }
+
+                $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
+                $windowStart = $endTime->copy()->subMinutes($mulaiMins);
+                $windowEnd = $endTime->copy()->addMinutes($selesaiMins);
+
+                if ($now->lessThan($windowStart)) {
+                    $this->isSuccess = false;
+                    $diff = $windowStart->diffForHumans($now, true);
+                    $this->message = "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.";
+                    $this->step = 4;
+                    return;
+                }
+
+                if ($now->greaterThan($windowEnd)) {
+                    $this->isSuccess = false;
+                    $this->message = "Batas waktu Absen Pulang sudah berakhir (Maksimal $selesaiMins menit setelah jadwal).";
+                    $this->step = 4;
+                    return;
+                }
+            }
+        }
+
+        // Calculate If Too Late to Check-In (Existing logic but now window end is already enforced above)
+        // I'll keep it for UI if needed, or just let the window handle it.
+        if ($isCheckIn) {
+            $startDateTime = Carbon::parse($this->activeDate)->setTimeFrom($shift->start_time);
+            $this->isTooLateToIn = $now->greaterThan($startDateTime->copy()->addMinutes(60)); // example 60 mins late warning
         } else {
             $this->isTooLateToIn = false;
         }
 
-        $this->step = 3;
+        if (!$checkWindowOnly) {
+            $this->step = 3;
+        }
     }
 
     public function terimaCoordsLokasi(float $lat, float $lng): void
@@ -417,6 +558,10 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function personnels()
     {
+        if (strlen($this->search) < 3) {
+            return collect();
+        }
+
         return Personnel::query()
             ->when($this->search, function ($q) {
                 // Escape special characters to prevent "Wildcard Injection"
