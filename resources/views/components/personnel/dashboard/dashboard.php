@@ -20,11 +20,23 @@ new #[Layout('layouts::personnel.dashboard.app')] #[Title('Dashboard Personnel')
         $this->personnel->load(['opd', 'penugasan', 'kantor']);
     }
 
+    public function with()
+    {
+        $todayJadwal = \App\Models\Jadwal::where('personnel_id', $this->personnel->id)
+            ->whereDate('tanggal', \Carbon\Carbon::today())
+            ->with('shift')
+            ->first();
+
+        return [
+            'todayJadwal' => $todayJadwal,
+        ];
+    }
+
     public function logout()
     {
         Auth::guard('personnel')->logout();
-        Session::invalidate();
-        Session::regenerateToken();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
         return $this->redirect('/personnel/login', navigate: true);
     }

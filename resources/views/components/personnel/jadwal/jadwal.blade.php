@@ -36,17 +36,68 @@
         </div>
     </div>
 
+    {{-- Today's Focus Card --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 glass-panel p-6 rounded-3xl border border-white/5 relative overflow-hidden group">
+            <div
+                class="absolute -right-20 -top-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-700">
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+                <div class="h-20 w-20 rounded-2xl border-2 border-white/10 overflow-hidden shrink-0 shadow-2xl">
+                    <img src="{{ $personnel->foto ? asset('storage/' . $personnel->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($personnel->name) . '&size=256&background=1e293b&color=38bdf8' }}"
+                        class="h-full w-full object-cover">
+                </div>
+                <div class="flex-1 text-center sm:text-left space-y-1">
+                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] italic">Penugasan Hari Ini
+                    </p>
+                    <h2 class="text-2xl font-black text-white uppercase italic tracking-tighter">{{ $personnel->name }}
+                    </h2>
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
+                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+                            <div
+                                class="h-2 w-2 rounded-full {{ $this->todayJadwal?->status === 'SHIFT' ? 'bg-blue-500 animate-pulse' : 'bg-slate-500' }}">
+                            </div>
+                            <span class="text-[10px] font-black text-white uppercase tracking-widest italic">
+                                {{ $this->todayJadwal?->status === 'SHIFT' ? $this->todayJadwal->shift->name : ($this->todayJadwal?->status ?? 'LIBUR') }}
+                            </span>
+                        </div>
+                        @if ($this->todayJadwal?->shift)
+                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest italic">
+                                    {{ \Carbon\Carbon::parse($this->todayJadwal->shift->start_time)->format('H:i') }} -
+                                    {{ \Carbon\Carbon::parse($this->todayJadwal->shift->end_time)->format('H:i') }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl border border-white/5 flex flex-col justify-center">
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-2 text-center">Unit
+                Penugasan</p>
+            <div class="text-center">
+                <h4 class="text-lg font-black text-white uppercase italic tracking-tight">
+                    {{ $personnel->penugasan?->name ?? 'TRC UNIT' }}</h4>
+                <p class="text-[9px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
+                    {{ $personnel->opd?->name ?? 'SAR TRC' }}</p>
+            </div>
+        </div>
+    </div>
+
     {{-- Schedule Matrix --}}
     <div class="glass-panel rounded-2xl border-white/5 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full border-separate border-spacing-0">
                 <thead>
                     <tr class="bg-white/2">
-                        <th
-                            class="sticky left-0 z-20 bg-[#0d213f] border-b border-r border-white/5 p-6 min-w-40 text-left">
-                            <span
-                                class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Personnel</span>
-                        </th>
                         @foreach ($this->dates as $date)
                             @php
                                 $carbonDate = \Carbon\Carbon::parse($date);
@@ -71,20 +122,6 @@
                 </thead>
                 <tbody>
                     <tr class="group">
-                        <td class="sticky left-0 z-10 bg-[#0d213f] border-r border-white/5 p-6">
-                            <div class="flex items-center gap-4">
-                                <div class="h-10 w-10 rounded-xl border border-white/10 overflow-hidden shrink-0">
-                                    <img src="{{ $personnel->foto ? asset('storage/' . $personnel->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($personnel->name) . '&size=256&background=1e293b&color=38bdf8' }}"
-                                        class="h-full w-full object-cover">
-                                </div>
-                                <div class="flex flex-col truncate">
-                                    <span
-                                        class="text-xs font-black text-white uppercase italic tracking-tight truncate">{{ $personnel->name }}</span>
-                                    <span
-                                        class="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate">{{ $personnel->penugasan?->name ?? 'TRC Unit' }}</span>
-                                </div>
-                            </div>
-                        </td>
                         @foreach ($this->dates as $date)
                             @php
                                 $j = $this->jadwalMap[$date] ?? null;

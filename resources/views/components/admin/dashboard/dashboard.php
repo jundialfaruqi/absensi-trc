@@ -1,5 +1,5 @@
 <?php
- 
+
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -48,11 +48,15 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $totalMasuk = (clone $absensiQuery)->whereNotNull('jam_masuk')->count();
         $totalPulang = (clone $absensiQuery)->whereNotNull('jam_pulang')->count();
         $totalTerlambat = (clone $absensiQuery)->where('status_masuk', 'TELAT')->count();
+        $totalAlfa = (clone $absensiQuery)->where('status', 'ALFA')->count();
+        $totalHadir = (clone $absensiQuery)->where('status', 'HADIR')->count();
+        $totalTelat = (clone $absensiQuery)->where('status_masuk', 'TELAT')->count();
 
         // Activities (latest records) - STICK TO TODAY'S DATE
         $activities = Absensi::query()
             ->whereDate('tanggal', $today)
             ->whereNotNull('jadwal_id')
+            ->where('status', '!=', 'LIBUR')
             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
             })
@@ -60,7 +64,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ->orderByRaw("jam_masuk IS NULL DESC")
             ->latest('updated_at')
             ->get();
-        
+
         // Pending Leave Requests
         $pendingLeaves = $leaveRequestQuery->with(['personnel.opd', 'cuti'])
             ->latest()
@@ -113,7 +117,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $label = Carbon::now()->subDays($i)->isoFormat('ddd');
             $data = $rawWeeklyStats[$date] ?? null;
-            
+
             $weeklyStats[] = [
                 'date' => $date,
                 'label' => $label,
@@ -130,6 +134,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'total_masuk' => $totalMasuk,
                 'total_pulang' => $totalPulang,
                 'total_terlambat' => $totalTerlambat,
+                'total_alfa' => $totalAlfa,
+                'total_hadir' => $totalHadir,
+                'total_telat' => $totalTelat,
                 'pending_leaves_count' => $leaveRequestQuery->count(),
                 'hadir_percentage' => $totalRequired > 0 ? round(($totalMasuk / $totalRequired) * 100) : 0,
             ],
@@ -165,11 +172,11 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $period = CarbonPeriod::create($request->tanggal_mulai, $request->tanggal_selesai);
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
-            
+
             $existing = Absensi::where('personnel_id', $request->personnel_id)
                 ->whereDate('tanggal', $dateStr)
                 ->first();
-            
+
             $originalMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALFA';
             $originalPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALFA';
 

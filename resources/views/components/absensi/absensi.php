@@ -476,7 +476,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     ],
                     [
                         'jadwal_id' => $this->activeJadwal->id,
-                        'status' => $status_masuk,
+                        'status' => 'HADIR',
                         'jam_masuk' => $now->format('H:i:s'),
                         'status_masuk' => $status_masuk,
                         'foto_masuk' => $imagePath,

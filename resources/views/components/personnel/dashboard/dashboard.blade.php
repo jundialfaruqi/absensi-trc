@@ -98,34 +98,68 @@
             </div>
         </div>
 
-        {{-- Contact & Status Card --}}
-        <div
-            class="glass-panel p-8 rounded-[2.5rem] flex flex-col justify-between border-white/5 relative overflow-hidden">
-            <div class="space-y-6 relative z-10">
+        {{-- Today's Assignment Card --}}
+        <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+            <div
+                class="absolute -right-20 -top-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-700">
+            </div>
+
+            <div class="relative z-10 h-full flex flex-col justify-between">
                 <div>
-                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-4 text-center">Status
-                        Keamanan</p>
+                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Penugasan Hari Ini</p>
+                    <h3 class="text-2xl font-black text-white uppercase italic tracking-tighter leading-tight">
+                        {{ $todayJadwal?->status === 'SHIFT' ? $todayJadwal->shift->name : ($todayJadwal?->status ?? 'LIBUR') }}
+                    </h3>
+                </div>
+
+                <div class="space-y-3 my-6">
+                    @if ($todayJadwal?->shift)
+                        <div
+                            class="flex items-center justify-between p-3 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Waktu
+                                    Tugas</span>
+                            </div>
+                            <span class="text-xs font-black text-white italic">
+                                {{ \Carbon\Carbon::parse($todayJadwal->shift->start_time)->format('H:i') }} -
+                                {{ \Carbon\Carbon::parse($todayJadwal->shift->end_time)->format('H:i') }}
+                            </span>
+                        </div>
+                    @endif
+
                     <div
-                        class="p-4 bg-slate-900/50 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-1">
-                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Kode PIN
-                            Aktif</span>
-                        <span class="text-2xl font-black text-white tracking-[0.5em] italic">••••••</span>
+                        class="flex items-center justify-between p-3 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Kode PIN
+                                Aktif</span>
+                        </div>
+                        <span class="text-xs font-black text-white tracking-[0.3em] italic">••••••</span>
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/5">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-wrap">Nomor
-                            HP</span>
-                        <span class="text-xs font-black text-white italic">{{ $personnel->nomor_hp ?? '-' }}</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/5">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-wrap">Terdaftar
-                            Sejak</span>
-                        <span
-                            class="text-xs font-black text-white italic">{{ $personnel->created_at->format('d/m/Y') }}</span>
-                    </div>
-                </div>
+                <a href="{{ route('personnel.jadwal') }}"
+                    class="btn btn-sm btn-block h-10 bg-white/5 hover:bg-blue-500 hover:text-white border-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all group/btn">
+                    Lihat Jadwal Lengkap
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-3 w-3 ml-2 transform group-hover/btn:translate-x-1 transition-transform" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
             </div>
         </div>
     </div>
@@ -139,31 +173,31 @@
             <div class="h-px flex-1 bg-linear-to-r from-transparent via-slate-700 to-transparent"></div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {{-- Navigation Cards --}}
             <a href="{{ url('/personnel/profile') }}"
-                class="group relative p-8 glass-panel rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
+                class="group relative p-5 sm:p-8 glass-panel rounded-3xl sm:rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
                 <div
                     class="absolute -top-12 -right-12 h-32 w-32 bg-blue-600/10 blur-3xl group-hover:bg-blue-600/20 transition-all">
                 </div>
 
                 <div
-                    class="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
 
-                <h4 class="text-lg font-black text-white uppercase italic tracking-wider leading-tight">Ubah
+                <h4 class="text-sm sm:text-lg font-black text-white uppercase italic tracking-wider leading-tight">Ubah
                     Data<br />Akun</h4>
                 <p
-                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
+                    class="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
                     Email, Password & PIN</p>
 
                 <div
-                    class="mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    class="mt-4 sm:mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
                     <span class="text-[9px] font-black uppercase tracking-widest italic">Akses Sekarang</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -175,28 +209,28 @@
 
             {{-- Riwayat Absensi --}}
             <a href="{{ route('personnel.riwayat') }}"
-                class="group relative p-8 glass-panel rounded-[2.5rem] border-white/5 hover:border-emerald-500/40 hover:bg-emerald-600/5 transition-all duration-500 overflow-hidden shadow-xl">
+                class="group relative p-5 sm:p-8 glass-panel rounded-3xl sm:rounded-[2.5rem] border-white/5 hover:border-emerald-500/40 hover:bg-emerald-600/5 transition-all duration-500 overflow-hidden shadow-xl">
                 <div
                     class="absolute -top-12 -right-12 h-32 w-32 bg-emerald-600/10 blur-3xl group-hover:bg-emerald-600/20 transition-all">
                 </div>
 
                 <div
-                    class="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
 
-                <h4 class="text-lg font-black text-white uppercase italic tracking-wider leading-tight">
+                <h4 class="text-sm sm:text-lg font-black text-white uppercase italic tracking-wider leading-tight">
                     Riwayat<br />Absensi</h4>
                 <p
-                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-emerald-300 transition-colors">
+                    class="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-emerald-300 transition-colors">
                     Lihat Record Presensi</p>
 
                 <div
-                    class="mt-6 flex items-center gap-2 text-emerald-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    class="mt-4 sm:mt-6 flex items-center gap-2 text-emerald-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
                     <span class="text-[9px] font-black uppercase tracking-widest italic">Lihat Detail</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -208,28 +242,28 @@
 
             {{-- Lihat Jadwal --}}
             <a href="{{ route('personnel.jadwal') }}"
-                class="group relative p-8 glass-panel rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
+                class="group relative p-5 sm:p-8 glass-panel rounded-3xl sm:rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
                 <div
                     class="absolute -top-12 -right-12 h-32 w-32 bg-blue-600/10 blur-3xl group-hover:bg-blue-600/20 transition-all">
                 </div>
 
                 <div
-                    class="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
 
-                <h4 class="text-lg font-black text-white uppercase italic tracking-wider leading-tight">
+                <h4 class="text-sm sm:text-lg font-black text-white uppercase italic tracking-wider leading-tight">
                     Lihat<br />Jadwal</h4>
                 <p
-                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
+                    class="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
                     Agenda Penugasan Bulan Ini</p>
 
                 <div
-                    class="mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    class="mt-4 sm:mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
                     <span class="text-[9px] font-black uppercase tracking-widest italic">Buka Matriks</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -241,28 +275,28 @@
 
             {{-- Ajukan Cuti --}}
             <a href="{{ route('personnel.ajukan-cuti') }}"
-                class="group relative p-8 glass-panel rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
+                class="group relative p-5 sm:p-8 glass-panel rounded-3xl sm:rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
                 <div
                     class="absolute -top-12 -right-12 h-32 w-32 bg-blue-600/10 blur-3xl group-hover:bg-blue-600/20 transition-all">
                 </div>
 
                 <div
-                    class="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
 
-                <h4 class="text-lg font-black text-white uppercase italic tracking-wider leading-tight">
+                <h4 class="text-sm sm:text-lg font-black text-white uppercase italic tracking-wider leading-tight">
                     Ajukan<br />Cuti</h4>
                 <p
-                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
+                    class="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
                     Permohonan Izin & Cuti</p>
 
                 <div
-                    class="mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    class="mt-4 sm:mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
                     <span class="text-[9px] font-black uppercase tracking-widest italic">Ajukan Sekarang</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">

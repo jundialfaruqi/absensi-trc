@@ -46,6 +46,15 @@ new #[Layout('layouts::personnel.dashboard.app')] #[Title('Jadwal Saya')] class 
             ->keyBy(fn($j) => $j->tanggal->format('Y-m-d'));
     }
 
+    #[Computed]
+    public function todayJadwal()
+    {
+        return Jadwal::where('personnel_id', $this->personnel->id)
+            ->whereDate('tanggal', Carbon::today())
+            ->with('shift')
+            ->first();
+    }
+
     public function updatedMonth()
     {
         // Reset properties if needed
