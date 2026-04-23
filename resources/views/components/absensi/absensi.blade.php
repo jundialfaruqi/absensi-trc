@@ -311,10 +311,15 @@
                             <div
                                 class="text-center py-10 px-6 border-2 border-dashed border-white/5 rounded-2xl bg-white/2">
                                 <div class="text-blue-300/20 mb-3 flex justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="size-12">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round"
+                                        class="icon icon-tabler icons-tabler-outline size-12 icon-tabler-user-search">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                        <path d="M6 21v-2a4 4 0 0 1 4 -4h1.5" />
+                                        <path d="M15 18a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                                        <path d="M20.2 20.2l1.8 1.8" />
                                     </svg>
                                 </div>
                                 <p class="text-[10px] font-old uppercase tracking-[0.2em] text-white/30">Ketik

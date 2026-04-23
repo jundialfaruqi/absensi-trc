@@ -148,7 +148,7 @@
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
 
                                         $cellClass = match ($j->status ?? '') {
-                                            'LIBUR' => 'bg-neutral text-neutral-content',
+                                            'LIBUR' => 'bg-yellow-500 text-white',
                                             default => '',
                                         };
 
