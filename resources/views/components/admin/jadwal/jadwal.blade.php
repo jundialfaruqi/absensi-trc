@@ -50,19 +50,61 @@
                 @endif
             </div>
 
-            <div class="join w-full sm:w-auto">
-                <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
-                    @for ($i = 1; $i <= 12; $i++)
-                        <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
-                            {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
-                        </option>
-                    @endfor
-                </select>
-                <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
-                    @for ($i = date('Y') - 1; $i <= date('Y') + 1; $i++)
-                        <option value="{{ $i }}">{{ $i }}</option>
-                    @endfor
-                </select>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="join w-full sm:w-auto">
+                    <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
+                        @for ($i = 1; $i <= 12; $i++)
+                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
+                                {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                            </option>
+                        @endfor
+                    </select>
+                    <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
+                        @for ($i = date('Y') - 1; $i <= date('Y') + 1; $i++)
+                            <option value="{{ $i }}">{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <style>
+                    input[type="date"]::-webkit-calendar-picker-indicator {
+                        display: block !important;
+                        cursor: pointer;
+                        opacity: 0.5;
+                        filter: invert(1);
+                    }
+
+                    .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                        filter: invert(0);
+                    }
+
+                    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+                        opacity: 1;
+                    }
+                </style>
+
+                <div class="join w-full sm:w-auto">
+                    <div
+                        class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                        Dari</div>
+                    <input type="date" id="startDate" wire:model.live="startDate"
+                        class="input input-bordered join-item w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]" />
+                    <div
+                        class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                        S/D</div>
+                    <input type="date" id="endDate" wire:model.live="endDate"
+                        class="input input-bordered join-item w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]" />
+
+                    @if ($startDate || $endDate)
+                        <button type="button" wire:click="resetFilters"
+                            class="btn join-item px-3 text-error btn-bordered">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2.5" stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -111,7 +153,7 @@
                     <tbody>
                         @forelse ($this->personnels as $p)
                             <tr>
-                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3">
+                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="avatar placeholder">
                                             @if ($p->foto)

@@ -628,10 +628,10 @@
                                 </button>
                             @else
                                 {{-- Mode: Pulang --}}
-                                @if (!$activeAbsensi && $isTooLateToIn)
+                                @if ((!$activeAbsensi || !$activeAbsensi->jam_masuk) && $isTooLateToIn)
                                     <div
-                                        class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight text-center backdrop-blur-md border border-red-500/20">
-                                        ⚠️ Terlambat > 4 jam. Absen masuk ditutup.
+                                        class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest text-center backdrop-blur-md border border-red-500/20">
+                                        ⚠️ Batas waktu Masuk berakhir. Silakan Absen Pulang.
                                     </div>
                                 @endif
 

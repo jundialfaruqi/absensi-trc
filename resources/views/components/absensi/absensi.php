@@ -291,70 +291,80 @@ new #[Layout('layouts.absensi.app')] class extends Component
             ->first();
 
         $shift = $this->activeJadwal->shift;
-        $isCheckIn = !$this->activeAbsensi || !$this->activeAbsensi->jam_masuk;
 
-        if ($isCheckIn) {
-            // Validation for CLOCK IN
-            $mulaiMins = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
-            $selesaiMins = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
+        // Configuration
+        $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
+        $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
+        $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
+        $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
 
-            $startTime = Carbon::parse($this->activeDate)->setTimeFrom($shift->start_time);
-            $windowStart = $startTime->copy()->subMinutes($mulaiMins);
-            $windowEnd = $startTime->copy()->addMinutes($selesaiMins);
+        // Windows Calculation
+        $startTime = Carbon::parse($this->activeDate)->setTimeFrom($shift->start_time);
+        $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
+        $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
-            if ($now->lessThan($windowStart)) {
+        $pulangDate = $this->activeDate;
+        if ($shift->start_time->format('H:i:s') > $shift->end_time->format('H:i:s')) {
+            $pulangDate = Carbon::parse($this->activeDate)->addDay()->format('Y-m-d');
+        }
+        $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
+        $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
+        $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
+
+        // Check already completed both
+        if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk && $this->activeAbsensi->jam_pulang) {
+            $this->isSuccess = false;
+            $this->message = "Anda sudah melakukan absen masuk dan pulang hari ini.";
+            $this->step = 4;
+            return;
+        }
+
+        // Determine Mode & Validate
+        if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk) {
+            // MODE: CLOCK OUT (Normal)
+            if ($now->lessThan($windowOutStart)) {
                 $this->isSuccess = false;
-                $diff = $windowStart->diffForHumans($now, true);
+                $diff = $windowOutStart->diffForHumans($now, true);
+                $this->message = "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.";
+                $this->step = 4;
+                return;
+            }
+            if ($now->greaterThan($windowOutEnd)) {
+                $this->isSuccess = false;
+                $this->message = "Batas waktu Absen Pulang sudah berakhir (Maksimal $selesaiOut menit setelah jadwal).";
+                $this->step = 4;
+                return;
+            }
+            $this->isTooLateToIn = true; // In case they want to check out, this flag ensures blade shows OUT button
+        } else {
+            // MODE: NO CLOCK IN RECORD
+            if ($now->lessThan($windowInStart)) {
+                // Too early for anything
+                $this->isSuccess = false;
+                $diff = $windowInStart->diffForHumans($now, true);
                 $this->message = "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.";
                 $this->step = 4;
                 return;
-            }
-
-            if ($now->greaterThan($windowEnd)) {
+            } elseif ($now->between($windowInStart, $windowInEnd)) {
+                // WITHIN IN WINDOW
+                $this->isTooLateToIn = false;
+            } elseif ($now->between($windowInEnd, $windowOutStart)) {
+                // GAP BETWEEN IN AND OUT
                 $this->isSuccess = false;
-                $this->message = "Batas waktu Absen Masuk sudah berakhir (Maksimal $selesaiMins menit setelah jadwal).";
+                $diff = $windowOutStart->diffForHumans($now, true);
+                $this->message = "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.";
+                $this->step = 4;
+                return;
+            } elseif ($now->between($windowOutStart, $windowOutEnd)) {
+                // WITHIN OUT WINDOW (MISSING IN)
+                $this->isTooLateToIn = true;
+            } else {
+                // PAST OUT WINDOW
+                $this->isSuccess = false;
+                $this->message = "Batas waktu Absen hari ini sudah berakhir.";
                 $this->step = 4;
                 return;
             }
-        } else {
-            // Validation for CLOCK OUT
-            if (!$this->activeAbsensi->jam_pulang) {
-                $mulaiMins = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
-                $selesaiMins = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
-
-                if ($shift->start_time->format('H:i:s') > $shift->end_time->format('H:i:s')) {
-                    // It's a night shift, end time is on the next day
-                    $pulangDate = Carbon::parse($this->activeDate)->addDay()->format('Y-m-d');
-                }
-
-                $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
-                $windowStart = $endTime->copy()->subMinutes($mulaiMins);
-                $windowEnd = $endTime->copy()->addMinutes($selesaiMins);
-
-                if ($now->lessThan($windowStart)) {
-                    $this->isSuccess = false;
-                    $diff = $windowStart->diffForHumans($now, true);
-                    $this->message = "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.";
-                    $this->step = 4;
-                    return;
-                }
-
-                if ($now->greaterThan($windowEnd)) {
-                    $this->isSuccess = false;
-                    $this->message = "Batas waktu Absen Pulang sudah berakhir (Maksimal $selesaiMins menit setelah jadwal).";
-                    $this->step = 4;
-                    return;
-                }
-            }
-        }
-
-        // Calculate If Too Late to Check-In (Existing logic but now window end is already enforced above)
-        // I'll keep it for UI if needed, or just let the window handle it.
-        if ($isCheckIn) {
-            $startDateTime = Carbon::parse($this->activeDate)->setTimeFrom($shift->start_time);
-            $this->isTooLateToIn = $now->greaterThan($startDateTime->copy()->addMinutes(60)); // example 60 mins late warning
-        } else {
-            $this->isTooLateToIn = false;
         }
 
         if (!$checkWindowOnly) {
