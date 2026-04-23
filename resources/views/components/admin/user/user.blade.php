@@ -2,8 +2,8 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Manajemen Pengguna</h1>
-            <p class="text-sm text-base-content/60 mt-1">Kelola akun dan role pengguna</p>
+            <h1 class="text-xl font-bold">Manajemen Admin</h1>
+            <p class="text-sm text-base-content/60 mt-1">Kelola akun dan role Admin</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
@@ -11,7 +11,7 @@
                 <li>Settings</li>
                 <li>
                     <a href="{{ route('user') }}">
-                        <span class="text-base-content font-bold">Pengguna</span>
+                        <span class="text-base-content font-bold">Manajemen Admin</span>
                     </a>
                 </li>
             </ul>
@@ -23,13 +23,13 @@
         <div class="card bg-linear-to-r from-secondary to-neutral text-base-100 p-5">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <div class="text-lg text-white font-bold">Manajemen Pengguna</div>
-                    <div class="text-sm text-white opacity-80">List Akun Pengguna</div>
+                    <div class="text-lg text-white font-bold">Manajemen Admin</div>
+                    <div class="text-sm text-white opacity-80">List Akun Admin</div>
                 </div>
                 <div class="flex flex-wrap gap-4 md:gap-8 mt-1 md:mt-0">
                     <div class="text-center">
                         <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Pengguna</div>
+                        <div class="text-xs text-white opacity-80">Total Admin</div>
                     </div>
                     <div class="text-center">
                         <div class="text-2xl text-white font-bold">{{ $this->stats['with_role'] ?? 0 }}</div>
@@ -81,7 +81,7 @@
                     stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Tambah Pengguna
+                Tambah Admin
             </button>
         </div>
     </div>
@@ -94,7 +94,7 @@
                     <thead>
                         <tr>
                             <th class="text-center w-16">#</th>
-                            <th>Info Pengguna</th>
+                            <th>Info Admin</th>
                             <th>Kontak</th>
                             <th>OPD & Role</th>
                             <th class="text-center w-24">Action</th>
@@ -172,7 +172,7 @@
                         @empty
                             <tr>
                                 <td colspan="4" class="text-center text-sm text-base-content/60 py-8">Tidak ada
-                                    data Pengguna</td>
+                                    data Admin</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -190,7 +190,7 @@
         x-on:close-modal.window="$event.detail.id === 'user-modal' && $el.close()">
         <div class="modal-box shadow w-11/12 max-w-2xl">
             <h3 class="font-bold text-lg mb-4">
-                {{ $userId ? 'Edit Pengguna' : 'Tambah Pengguna' }}
+                {{ $userId ? 'Edit Admin' : 'Tambah Admin' }}
             </h3>
             <form wire:submit="save">
                 <div class="space-y-4">
@@ -395,7 +395,7 @@
         <div class="modal-box">
             <h3 class="font-bold text-lg mb-2 text-error">Konfirmasi Hapus</h3>
             <p class="text-sm text-base-content/70">
-                Apakah Anda yakin ingin menghapus Pengguna
+                Apakah Anda yakin ingin menghapus Admin
                 <span class="font-semibold">{{ $deleteName }}</span>?
             </p>
             <div class="modal-action">
@@ -423,7 +423,7 @@
             <span class="btn btn-circle btn-lg btn-error">✕</span>
         </div>
         <button type="button" class="tooltip btn btn-circle btn-neutral" wire:click="openAddModal"
-            data-tip="Tambah Pengguna">
+            data-tip="Tambah Admin">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
