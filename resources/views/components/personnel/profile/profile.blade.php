@@ -114,9 +114,9 @@
             {{-- Submit --}}
             <div class="pt-4">
                 <button type="submit" wire:loading.attr="disabled"
-                    class="w-full h-15 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-600/20 transition-all grid place-items-center group relative overflow-hidden">
+                    class="w-full h-15 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/20 transition-all grid place-items-center group relative overflow-hidden">
                     <div
-                        class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
+                        class="absolute inset-0 bg-linear-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                     </div>
 
                     <span wire:loading.remove class="col-start-1 row-start-1">Simpan Perubahan Data</span>

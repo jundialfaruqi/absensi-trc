@@ -1,6 +1,6 @@
 <div class="space-y-8 animate-in fade-in duration-700">
     {{-- Header --}}
-    <div class="flex items-center justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="space-y-1">
             <a href="{{ url('/personnel/dashboard') }}"
                 class="group inline-flex items-center gap-2 text-slate-500 hover:text-blue-400 text-[10px] font-black uppercase tracking-widest transition-colors mb-2">
@@ -13,13 +13,13 @@
                 Kembali ke Dashboard
             </a>
             <h1 class="text-3xl font-black text-white uppercase italic tracking-tighter">Riwayat Absensi</h1>
-            <p class="text-slate-400 font-medium text-sm">Monitoring kehadiran Anda secara berkala.</p>
+            <p class="text-slate-400 font-medium text-sm">MMonitoring kehadiran Anda secara berkala.</p>
         </div>
 
         {{-- Filters --}}
         <div class="flex items-center gap-3 bg-white/5 p-2 rounded-2xl border border-white/5 backdrop-blur-sm">
             <select wire:model.live="month"
-                class="bg-transparent text-xs font-black text-white uppercase tracking-widest border-none focus:ring-0 cursor-pointer p-2 outline-none">
+                class="bg-transparent text-xs font-black text-white uppercase tracking-widest border-none focus:ring-0 cursor-pointer p-2">
                 @for ($i = 1; $i <= 12; $i++)
                     <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}" class="bg-[#0a192f] text-white">
                         {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
@@ -28,9 +28,9 @@
             </select>
             <div class="w-px h-4 bg-white/10"></div>
             <select wire:model.live="year"
-                class="bg-transparent text-xs font-black text-white uppercase tracking-widest border-none focus:ring-0 cursor-pointer p-2 outline-none">
-                @for ($y = date('Y') - 1; $y <= date('Y'); $y++)
-                    <option value="{{ $y }}" class="bg-[#0a192f] text-white">{{ $y }}</option>
+                class="bg-transparent text-xs font-black text-white uppercase tracking-widest border-none focus:ring-0 cursor-pointer p-2">
+                @for ($i = date('Y') - 1; $i <= date('Y') + 1; $i++)
+                    <option value="{{ $i }}" class="bg-[#0a192f] text-white">{{ $i }}</option>
                 @endfor
             </select>
         </div>

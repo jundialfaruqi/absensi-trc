@@ -19,8 +19,7 @@
     </div>
 
     {{-- Settings Content --}}
-    {{-- Settings Content --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Pendaftaran Personnel --}}
         <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
             <div class="card-body p-6">
@@ -34,7 +33,7 @@
                             <line x1="22" y1="11" x2="16" y2="11" />
                         </svg>
                     </div>
-                    <h2 class="text-sm font-black uppercase tracking-widest italic">Pendaftaran Personnel</h2>
+                    <h2 class="text-sm font-black uppercase">Pendaftaran Personnel</h2>
                 </div>
 
                 <div class="space-y-4">
@@ -76,7 +75,7 @@
                                 d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                         </svg>
                     </div>
-                    <h2 class="text-sm font-black uppercase tracking-widest italic">Akses Portal Web Absensi</h2>
+                    <h2 class="text-sm font-black uppercase">Akses Portal Web Absensi</h2>
                 </div>
 
                 <div class="space-y-4">
@@ -106,7 +105,7 @@
         </div>
 
         {{-- Batasan Waktu Absensi --}}
-        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
             <div class="card-body p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-accent/10 rounded-lg text-accent">
@@ -116,7 +115,7 @@
                             <polyline points="12 6 12 12 16 14" />
                         </svg>
                     </div>
-                    <h2 class="text-sm font-black uppercase tracking-widest italic">Batasan Waktu Absensi (Global)</h2>
+                    <h2 class="text-sm font-black uppercase">Batasan Waktu Absensi (Global)</h2>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -192,7 +191,7 @@
         </div>
 
         {{-- Keamanan & Rate Limit --}}
-        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
             <div class="card-body p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-error/10 rounded-lg text-error">
@@ -202,7 +201,7 @@
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
                     </div>
-                    <h2 class="text-sm font-black uppercase tracking-widest italic">Keamanan & Rate Limit PIN</h2>
+                    <h2 class="text-sm font-black uppercase">Keamanan & Rate Limit PIN</h2>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -235,7 +234,7 @@
                     </div>
                 </div>
 
-                <div class="card-actions justify-end mt-6 pt-6 border-t border-base-200">
+                <div class="card-actions justify-end mt-auto pt-6 border-t border-base-200">
                     <button wire:click="saveSecuritySettings" wire:loading.attr="disabled" class="btn btn-secondary">
                         <span wire:loading.remove>Simpan Keamanan</span>
                         <span wire:loading>Menyimpan...</span>
