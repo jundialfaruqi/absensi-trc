@@ -81,6 +81,11 @@
                     input[type="date"]::-webkit-calendar-picker-indicator:hover {
                         opacity: 1;
                     }
+
+                    .bg-pattern-manual {
+                        background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent) !important;
+                        background-size: 8px 8px !important;
+                    }
                 </style>
 
                 <div class="join w-full sm:w-auto">
@@ -153,7 +158,7 @@
                     <tbody>
                         @forelse ($this->personnels as $p)
                             <tr>
-                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
+                                <td class="sticky left-0 z-40 bg-base-100 border-r border-base-200 p-3 w-50">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="avatar placeholder">
                                             @if ($p->foto)
@@ -201,7 +206,7 @@
                                                     '; color: white;'
                                                 : '';
                                     @endphp
-                                    <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }}"
+                                    <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
                                         style="{{ $style }}"
                                         wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
                                         @if ($j)
@@ -221,6 +226,19 @@
                                                         class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
                                                 @endif
 
+                                                @if ($j->is_manual)
+                                                    <div class="absolute top-0 right-0 z-30">
+                                                        <div
+                                                            class="bg-yellow-400 text-black p-0.5 rounded-bl-md shadow-md border-l border-b border-black/20">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 24 24" stroke-width="3"
+                                                                stroke="currentColor" class="w-3.5 h-3.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             </div>
                                         @else
                                             <div class="w-full h-full flex items-center justify-center opacity-10">
@@ -263,91 +281,179 @@
         x-on:open-modal.window="$event.detail.id === 'quick-add-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'quick-add-modal' && $el.close()">
         <div class="modal-box max-w-md">
-            <h3 class="font-bold text-lg mb-1">Set Jadwal / Status</h3>
-            <p class="text-xs text-base-content/60 mb-6">
-                {{ $quickDate ? \Carbon\Carbon::parse($quickDate)->translatedFormat('l, d M Y') : '' }}
-            </p>
+            {{-- Tabs --}}
+            <div class="tabs tabs-boxed mb-6 bg-base-200/50 p-1">
+                <button type="button" wire:click="$set('activeTab', 'quick')"
+                    class="tab tab-sm flex-1 {{ $activeTab === 'quick' ? 'tab-active !bg-base-100 shadow-sm' : '' }}">
+                    Quick Edit
+                </button>
+                <button type="button" wire:click="$set('activeTab', 'swap')"
+                    class="tab tab-sm flex-1 {{ $activeTab === 'swap' ? 'tab-active !bg-base-100 shadow-sm' : '' }}">
+                    Tukar Shift
+                </button>
+            </div>
 
-            <form wire:submit="saveQuickJadwal">
-                <div class="space-y-6">
-                    {{-- Status Selection --}}
-                    <div class="form-control">
-                        <label class="label mb-1 px-1">
-                            <span class="label-text font-medium text-xs">Pilih Status Kehadiran</span>
-                        </label>
-                        <div class="grid grid-cols-2 gap-2">
-                            @foreach (['SHIFT', 'LIBUR'] as $status)
-                                <label
-                                    class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
-                                    <input type="radio" wire:model.live="quickStatus" value="{{ $status }}"
-                                        class="radio radio-primary radio-xs">
-                                    <span class="text-xs font-bold">{{ $status }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="font-bold text-lg">
+                        {{ $activeTab === 'quick' ? 'Set Jadwal / Status' : 'Tukar Shift (2 Arah)' }}
+                    </h3>
+                    <p class="text-xs text-base-content/60">
+                        {{ $quickDate ? \Carbon\Carbon::parse($quickDate)->translatedFormat('l, d M Y') : '' }}
+                    </p>
+                </div>
+            </div>
 
-                    {{-- Shift Selection (Only if status is SHIFT) --}}
-                    @if ($quickStatus === 'SHIFT')
-                        <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
+            @if ($activeTab === 'quick')
+                <form wire:submit="saveQuickJadwal">
+                    <div class="space-y-6">
+                        {{-- Status Selection --}}
+                        <div class="form-control">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium text-xs">Pilih Shift</span>
+                                <span class="label-text font-medium text-xs">Pilih Status Kehadiran</span>
                             </label>
-                            <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
-                                @foreach ($this->shifts as $s)
+                            <div class="grid grid-cols-2 gap-2">
+                                @foreach (['SHIFT', 'LIBUR'] as $status)
                                     <label
-                                        class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-xl hover:bg-base-200 transition-all {{ $quickShiftId == $s->id ? 'bg-primary/10 border-primary' : '' }}">
-                                        <input type="radio" wire:model="quickShiftId" value="{{ $s->id }}"
-                                            class="radio radio-primary radio-sm">
-                                        <div class="flex flex-col">
-                                            <span class="font-bold text-xs">{{ $s->name }}</span>
-                                            <span class="text-[10px] opacity-60">{{ $s->keterangan }}</span>
-                                            <span
-                                                class="text-[10px] opacity-60">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
-                                                - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>
-                                        </div>
+                                        class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
+                                        <input type="radio" wire:model.live="quickStatus"
+                                            value="{{ $status }}" class="radio radio-primary radio-xs">
+                                        <span class="text-xs font-bold">{{ $status }}</span>
                                     </label>
                                 @endforeach
                             </div>
-                            @error('quickShiftId')
-                                <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
-                            @enderror
                         </div>
-                    @endif
 
-                    {{-- Keterangan (Only for non-SHIFT) --}}
-                    @if ($quickStatus !== 'SHIFT')
-                        <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text font-medium text-xs">Keterangan Status</span>
-                            </label>
-                            <textarea wire:model="quickKeterangan" class="textarea textarea-bordered w-full h-24 text-sm focus:textarea-primary"
-                                placeholder="Tulis catatan alasan di sini..."></textarea>
-                            @error('quickKeterangan')
-                                <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    @endif
-                </div>
+                        {{-- Shift Selection (Only if status is SHIFT) --}}
+                        @if ($quickStatus === 'SHIFT')
+                            <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text font-medium text-xs">Pilih Shift</span>
+                                </label>
+                                <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
+                                    @foreach ($this->shifts as $s)
+                                        <label
+                                            class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-xl hover:bg-base-200 transition-all {{ $quickShiftId == $s->id ? 'bg-primary/10 border-primary' : '' }}">
+                                            <input type="radio" wire:model="quickShiftId"
+                                                value="{{ $s->id }}" class="radio radio-primary radio-sm">
+                                            <div class="flex flex-col">
+                                                <span class="font-bold text-xs">{{ $s->name }}</span>
+                                                <span class="text-[10px] opacity-60">{{ $s->keterangan }}</span>
+                                                <span
+                                                    class="text-[10px] opacity-60">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
+                                                    - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                @error('quickShiftId')
+                                    <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        @endif
 
-                <div class="modal-action flex justify-between gap-2 mt-8">
-                    @if (\App\Models\Jadwal::where('personnel_id', $quickPersonnelId)->where('tanggal', $quickDate)->exists())
-                        <button type="button" class="btn btn-error btn-outline btn-sm"
-                            wire:click="deleteQuickJadwal">
-                            Hapus
-                        </button>
-                    @else
-                        <div></div>
-                    @endif
-                    <div class="flex gap-2">
-                        <button type="button" class="btn btn-ghost btn-sm"
-                            x-on:click="document.getElementById('quick-add-modal').close()">Batal</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-6" wire:loading.attr="disabled">
-                            Simpan
-                        </button>
+                        {{-- Keterangan (Only for non-SHIFT) --}}
+                        @if ($quickStatus !== 'SHIFT')
+                            <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text font-medium text-xs">Keterangan Status</span>
+                                </label>
+                                <textarea wire:model="quickKeterangan" class="textarea textarea-bordered w-full h-24 text-sm focus:textarea-primary"
+                                    placeholder="Tulis catatan alasan di sini..."></textarea>
+                                @error('quickKeterangan')
+                                    <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        @endif
                     </div>
+
+                    <div class="modal-action flex justify-between gap-2 mt-8">
+                        @if (\App\Models\Jadwal::where('personnel_id', $quickPersonnelId)->where('tanggal', $quickDate)->exists())
+                            <button type="button" class="btn btn-error btn-outline btn-sm"
+                                wire:click="deleteQuickJadwal">
+                                Hapus
+                            </button>
+                        @else
+                            <div></div>
+                        @endif
+                        <div class="flex gap-2">
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                x-on:click="document.getElementById('quick-add-modal').close()">Batal</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-6" wire:loading.attr="disabled">
+                                Simpan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            @else
+                <div class="space-y-6">
+                    {{-- Select Target Personnel --}}
+                    <div class="form-control">
+                        <label class="label mb-1 px-1">
+                            <span class="label-text font-medium text-xs text-base-content/70">Pilih Pengganti (Hanya
+                                Personel Libur Hari-1)</span>
+                        </label>
+                        <select wire:model.live="swapTargetPersonnelId"
+                            class="select select-bordered w-full select-sm focus:select-primary">
+                            <option value="">-- Pilih Personel --</option>
+                            @foreach ($this->availableSubstitutes as $sub)
+                                <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-[10px] text-base-content/50 mt-2 italic">* Personel yang sudah "dipesan" di
+                            tanggal ini tidak akan muncul.</p>
+                    </div>
+
+                    @if ($swapTargetPersonnelId)
+                        <div class="form-control animate-in fade-in zoom-in duration-300">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text font-medium text-xs text-base-content/70">Pilih Tanggal
+                                    Pembayaran (Payback):</span>
+                            </label>
+
+                            @if (empty($paybackOptions))
+                                <div
+                                    class="bg-warning/10 text-warning text-[10px] p-3 rounded-lg border border-warning/20">
+                                    Tidak ditemukan tanggal payback yang tersedia dalam 30 hari ke depan.
+                                </div>
+                            @else
+                                <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
+                                    @foreach ($paybackOptions as $option)
+                                        <label
+                                            class="flex items-center justify-between p-3 border border-base-200 rounded-xl cursor-pointer hover:bg-base-200 transition-all {{ $selectedPaybackDate === $option['date'] ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/30' : '' }}">
+                                            <div class="flex items-center gap-3">
+                                                <input type="radio" wire:model="selectedPaybackDate"
+                                                    value="{{ $option['date'] }}"
+                                                    class="radio radio-primary radio-xs">
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs font-bold">{{ $option['label'] }}</span>
+                                                    <span class="text-[9px] opacity-60">Jadwal Asli:
+                                                        {{ $option['shift_name'] }}</span>
+                                                </div>
+                                            </div>
+                                            @if ($loop->first)
+                                                <div class="badge badge-primary badge-outline text-[8px] h-4">Terdekat
+                                                </div>
+                                            @endif
+                                        </label>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
-            </form>
+
+                <div class="modal-action flex justify-end gap-2 mt-8 pt-4 border-t border-base-200">
+                    <button type="button" class="btn btn-ghost btn-sm"
+                        x-on:click="document.getElementById('quick-add-modal').close()">Batal</button>
+                    <button type="button" class="btn btn-primary btn-sm px-6" wire:click="executeSwapGuling"
+                        wire:loading.attr="disabled" @if (!$swapTargetPersonnelId || !$selectedPaybackDate) disabled @endif>
+                        <span wire:loading wire:target="executeSwapGuling"
+                            class="loading loading-spinner loading-xs"></span>
+                        Proses Tukar Shift
+                    </button>
+                </div>
+            @endif
         </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>

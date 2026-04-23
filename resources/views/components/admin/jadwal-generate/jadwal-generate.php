@@ -208,10 +208,15 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
                 $config = $dailyCycle[$cycleIndex];
 
-                // Create/Update Jadwal
+                // Create/Update Jadwal (Always overwrite and reset manual flag)
                 $jadwal = Jadwal::updateOrCreate(
                     ['personnel_id' => $pId, 'tanggal' => $dateStr],
-                    ['status' => $config['status'], 'shift_id' => $config['shift_id']]
+                    [
+                        'status' => $config['status'], 
+                        'shift_id' => $config['shift_id'],
+                        'is_manual' => false,
+                        'keterangan' => null
+                    ]
                 );
 
                 // Create/Update Absensi Placeholder

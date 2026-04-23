@@ -15,10 +15,12 @@ class Jadwal extends Model
         'tanggal',
         'status',
         'keterangan',
+        'is_manual',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
+        'is_manual' => 'boolean',
     ];
 
     public function personnel()

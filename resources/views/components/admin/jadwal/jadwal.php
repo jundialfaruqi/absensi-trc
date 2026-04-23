@@ -39,6 +39,12 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     public $quickShiftId;
     public $quickStatus = 'SHIFT';
     public $quickKeterangan = '';
+    
+    // Swap Properties
+    public $swapTargetPersonnelId = '';
+    public $paybackOptions = [];
+    public $selectedPaybackDate = '';
+    public $activeTab = 'quick'; // 'quick' or 'swap'
 
     public function mount(): void
     {
@@ -65,6 +71,12 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         $this->quickShiftId = $jadwal ? $jadwal->shift_id : '';
         $this->quickStatus = $jadwal ? $jadwal->status : 'SHIFT';
         $this->quickKeterangan = $jadwal ? $jadwal->keterangan : '';
+
+        // Reset Swap
+        $this->swapTargetPersonnelId = '';
+        $this->paybackOptions = [];
+        $this->selectedPaybackDate = '';
+        $this->activeTab = 'quick';
 
         $this->dispatch('open-modal', id: 'quick-add-modal');
     }
@@ -151,6 +163,162 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
             $this->dispatch('close-modal', id: 'quick-add-modal');
             $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil dihapus.');
         }
+    }
+
+    #[Computed]
+    public function availableSubstitutes()
+    {
+        if (!$this->quickPersonnelId || !$this->quickDate) return collect();
+
+        $user = Auth::user();
+        $originPersonnel = \App\Models\Personnel::find($this->quickPersonnelId);
+        $today = \Carbon\Carbon::parse($this->quickDate);
+        $yesterday = $today->copy()->subDay()->format('Y-m-d');
+        $todayStr = $today->format('Y-m-d');
+
+        $query = \App\Models\Personnel::where('id', '!=', $this->quickPersonnelId)
+            ->where('regu', '!=', $originPersonnel->regu);
+
+        if (!$user->hasRole('super-admin')) {
+            $opdId = $user->opd()?->id;
+            $query->where('opd_id', $opdId);
+        }
+
+        return $query->whereHas('jadwals', function($q) use ($todayStr) {
+                $q->whereDate('tanggal', $todayStr)
+                  ->where('status', 'LIBUR');
+            })
+            ->whereHas('jadwals', function($q) use ($yesterday) {
+                $q->whereDate('tanggal', $yesterday)
+                  ->where('status', 'SHIFT');
+            })
+            ->whereDoesntHave('jadwals', function($q) use ($todayStr) {
+                $q->whereDate('tanggal', $todayStr)
+                  ->where('is_manual', true);
+            })
+            ->get();
+    }
+
+    public function updatedSwapTargetPersonnelId($value)
+    {
+        if (!$value) {
+            $this->paybackOptions = [];
+            return;
+        }
+
+        $options = [];
+        $startDate = Carbon::parse($this->quickDate)->addDay();
+        $endDate = Carbon::parse($this->quickDate)->addDays(30);
+
+        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+            
+            // Syarat Payback: 
+            // 1. Personel A (peminta) LIBUR di tanggal ini
+            // 2. Personel C (target) MASUK (SHIFT) di tanggal ini
+            
+            $jadwalA = Jadwal::where('personnel_id', $this->quickPersonnelId)
+                ->whereDate('tanggal', $dateStr)
+                ->first();
+            
+            $jadwalC = Jadwal::where('personnel_id', $value)
+                ->whereDate('tanggal', $dateStr)
+                ->first();
+
+            if ($jadwalA && $jadwalA->status === 'LIBUR' && $jadwalC && $jadwalC->status === 'SHIFT') {
+                $options[] = [
+                    'date' => $dateStr,
+                    'label' => $date->translatedFormat('l, d M Y'),
+                    'shift_name' => $jadwalC->shift?->name ?? 'SHIFT'
+                ];
+            }
+            
+            if (count($options) >= 5) break; // Limit 5 options
+        }
+
+        $this->paybackOptions = $options;
+        $this->selectedPaybackDate = !empty($options) ? $options[0]['date'] : '';
+    }
+
+    public function executeSwapGuling()
+    {
+        if (!$this->swapTargetPersonnelId || !$this->selectedPaybackDate) {
+            $this->dispatch('toast', type: 'error', message: 'Silakan pilih pengganti dan tanggal bayar.');
+            return;
+        }
+
+        $targetPersonnel = \App\Models\Personnel::find($this->swapTargetPersonnelId);
+        $originPersonnel = \App\Models\Personnel::find($this->quickPersonnelId);
+
+        // 1. Data Hari Ini (Tanggal Tukar)
+        $jadwalA_Today = Jadwal::where('personnel_id', $this->quickPersonnelId)->where('tanggal', $this->quickDate)->first();
+        $jadwalC_Today = Jadwal::where('personnel_id', $this->swapTargetPersonnelId)->where('tanggal', $this->quickDate)->first();
+
+        // 2. Data Hari Esok (Tanggal Bayar)
+        $jadwalA_Payback = Jadwal::where('personnel_id', $this->quickPersonnelId)->where('tanggal', $this->selectedPaybackDate)->first();
+        $jadwalC_Payback = Jadwal::where('personnel_id', $this->swapTargetPersonnelId)->where('tanggal', $this->selectedPaybackDate)->first();
+
+        if (!$jadwalA_Today || !$jadwalC_Payback) {
+             $this->dispatch('toast', type: 'error', message: 'Data jadwal tidak lengkap untuk pertukaran.');
+             return;
+        }
+
+        // Simpan state asli
+        $stateA_Today = ['shift_id' => $jadwalA_Today->shift_id, 'status' => $jadwalA_Today->status];
+        $stateC_Payback = ['shift_id' => $jadwalC_Payback->shift_id, 'status' => $jadwalC_Payback->status];
+
+        // --- PROSES TUKAR ---
+        
+        // A. Hari Ini: A Libur, C Masuk (Gantikan A)
+        $jadwalA_Today->update([
+            'status' => 'LIBUR', 
+            'shift_id' => null, 
+            'is_manual' => true,
+            'keterangan' => 'Tukar Shift dengan ' . $targetPersonnel->name
+        ]);
+        $jadwalC_Today->update([
+            'status' => $stateA_Today['status'], 
+            'shift_id' => $stateA_Today['shift_id'], 
+            'is_manual' => true,
+            'keterangan' => 'Gantikan ' . $originPersonnel->name
+        ]);
+
+        // B. Hari Bayar: C Libur, A Masuk (Bayar Hutang)
+        $jadwalC_Payback->update([
+            'status' => 'LIBUR', 
+            'shift_id' => null, 
+            'is_manual' => true,
+            'keterangan' => 'Libur (Bayar Hutang ke ' . $originPersonnel->name . ')'
+        ]);
+        $jadwalA_Payback->update([
+            'status' => $stateC_Payback['status'], 
+            'shift_id' => $stateC_Payback['shift_id'], 
+            'is_manual' => true,
+            'keterangan' => 'Masuk (Bayar Hutang ke ' . $targetPersonnel->name . ')'
+        ]);
+
+        // Sync Absensi records
+        foreach ([$this->quickDate, $this->selectedPaybackDate] as $date) {
+            foreach ([$this->quickPersonnelId, $this->swapTargetPersonnelId] as $pId) {
+                $j = Jadwal::where('personnel_id', $pId)->where('tanggal', $date)->first();
+                if ($j) {
+                    \App\Models\Absensi::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $date],
+                        [
+                            'jadwal_id' => $j->id,
+                            'status' => $j->status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_masuk' => $j->status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_pulang' => $j->status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                        ]
+                    );
+                }
+            }
+        }
+
+        $this->dispatch('close-modal', id: 'quick-add-modal');
+        $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Tukar Shift berhasil diproses.');
     }
 
     #[Computed]
