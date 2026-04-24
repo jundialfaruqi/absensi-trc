@@ -17,6 +17,7 @@ new #[Title('Log Percobaan PIN')] #[Layout('layouts::admin.app')] class extends 
     public string $search = '';
     public ?int $selectedOpdId = null;
     public ?string $selectedStatus = null;
+    public bool $showConfirmModal = false;
 
     public function mount()
     {
@@ -51,6 +52,32 @@ new #[Title('Log Percobaan PIN')] #[Layout('layouts::admin.app')] class extends 
     public function opds()
     {
         return Opd::orderBy('name')->get();
+    }
+
+    public function clearOldLogs()
+    {
+        if (!Auth::user()->hasRole('super-admin')) {
+            $this->dispatch('toast', message: 'Anda tidak memiliki izin!', type: 'error');
+            return;
+        }
+        $this->showConfirmModal = true;
+    }
+
+    public function confirmClearOldLogs()
+    {
+        if (!Auth::user()->hasRole('super-admin')) {
+            $this->showConfirmModal = false;
+            return;
+        }
+
+        $count = PinAttemptLog::where('attempted_at', '<', now()->subDays(30))->delete();
+        $this->showConfirmModal = false;
+
+        if ($count > 0) {
+            $this->dispatch('toast', message: "Berhasil membersihkan {$count} log lama.", type: 'success');
+        } else {
+            $this->dispatch('toast', message: "Tidak ada log yang berumur lebih dari 30 hari.", type: 'info');
+        }
     }
 
     public function updatedSearch() { $this->resetPage(); }

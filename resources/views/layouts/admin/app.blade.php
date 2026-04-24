@@ -135,7 +135,7 @@
                                 ];
                             });
                     @endphp
-                    <div class="dropdown dropdown-end">
+                    <div class="dropdown dropdown-center">
                         <button tabindex="0" class="btn btn-secondary btn-circle">
                             <div class="indicator">
                                 @if ($dashboardNotifications->count() > 0)

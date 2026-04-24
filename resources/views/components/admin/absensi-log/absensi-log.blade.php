@@ -8,7 +8,7 @@
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Overview</li>
+                <li>Settings</li>
                 <li>
                     <a href="{{ route('absensi.log') }}">
                         <span class="text-base-content font-bold">Log Absensi</span>

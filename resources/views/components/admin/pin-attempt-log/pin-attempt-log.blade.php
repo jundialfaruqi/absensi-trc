@@ -8,7 +8,7 @@
         <div class="text-sm breadcrumbs text-base-content/60">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
-                <li>Overview</li>
+                <li>Settings</li>
                 <li>
                     <a href="{{ route('absensi.log.pin') }}">
                         <span class="text-base-content font-bold">Log PIN</span>
@@ -44,6 +44,17 @@
                 <option value="success">BERHASIL</option>
                 <option value="fail">GAGAL</option>
             </select>
+
+            @if (Auth::user()->hasRole('super-admin'))
+                <button wire:click="clearOldLogs" class="btn btn-error btn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                    <span class="hidden sm:inline">Bersihkan Log Lama</span>
+                </button>
+            @endif
         </div>
 
         <div class="relative w-full sm:w-64">
@@ -108,9 +119,11 @@
                                 </td>
                                 <td>
                                     @if ($log->status === 'success')
-                                        <span class="badge badge-success badge-sm text-[9px] font-black text-white">SUCCESS</span>
+                                        <span
+                                            class="badge badge-success badge-sm text-[9px] font-black text-white">SUCCESS</span>
                                     @else
-                                        <span class="badge badge-error badge-sm text-[9px] font-black text-white">FAILED</span>
+                                        <span
+                                            class="badge badge-error badge-sm text-[9px] font-black text-white">FAILED</span>
                                     @endif
                                 </td>
                                 <td>
@@ -129,7 +142,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                                         </svg>
-                                        <span class="text-sm font-bold uppercase tracking-widest">Belum ada log percobaan PIN</span>
+                                        <span class="text-sm font-bold uppercase tracking-widest">Belum ada log
+                                            percobaan PIN</span>
                                     </div>
                                 </td>
                             </tr>
@@ -142,4 +156,56 @@
             </div>
         </div>
     </div>
+
+    @if ($showConfirmModal)
+        <div class="modal modal-open backdrop-blur-sm">
+            <div class="modal-box shadow-2xl border border-error/20 max-w-md p-0 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center gap-4 text-error mb-4">
+                        <div class="p-3 bg-error/10 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" class="size-8">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-xl leading-tight">Bersihkan Log!</h3>
+                            <p class="text-[10px] uppercase font-black opacity-40 tracking-widest">Konfirmasi
+                                Penghapusan
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="py-4 space-y-4">
+                        <p class="text-sm leading-relaxed text-base-content/80">
+                            Anda akan menghapus data <span class="font-bold text-error">Log Percobaan PIN</span> yang
+                            berumur lebih dari <span class="badge badge-error badge-outline font-bold">30 Hari</span>
+                            secara
+                            massal.
+                        </p>
+                        <div class="alert alert-error bg-error/5 text-[11px] py-3 rounded-xl border-error/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                class="stroke-error shrink-0 w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span class="font-medium italic">Tindakan ini permanen dan data yang dihapus tidak dapat
+                                dikembalikan lagi.</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-action grid grid-cols-2 gap-3 mt-2">
+                        <button type="button" wire:click="$set('showConfirmModal', false)"
+                            class="btn btn-ghost border-base-300">Batal</button>
+                        <button type="button" wire:click="confirmClearOldLogs()" class="btn btn-error text-white">
+                            <span wire:loading wire:target="confirmClearOldLogs"
+                                class="loading loading-spinner loading-xs"></span>
+                            <span wire:loading.remove wire:target="confirmClearOldLogs">Ya, Bersihkan Log</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
