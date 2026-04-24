@@ -97,7 +97,7 @@
             </svg>
 
             {{-- Mid Right Cluster (New) --}}
-            <svg class="absolute top-[30%] right-[-5%] w-100 h-100 text-blue-400 opacity-60 animate-pulse"
+            <svg class="absolute top-[30%] right-[-5%] w-100 h-100 text-blue-400 opacity-60"
                 viewBox="0 0 100 100">
                 <circle cx="90" cy="10" r="1" fill="currentColor" />
                 <circle cx="70" cy="30" r="1.2" fill="currentColor" />
@@ -140,11 +140,11 @@
             }
 
             .animate-float {
-                animation: float 15s ease-in-out infinite;
+                /* Animation Disabled */
             }
 
             .animate-float-slow {
-                animation: float-slow 20s ease-in-out infinite;
+                /* Animation Disabled */
             }
         </style>
 
@@ -157,8 +157,8 @@
         </div>
 
         {{-- Pulse Glow for Red Lines --}}
-        <div class="absolute top-1/4 right-10 w-2 h-2 bg-red-500 rounded-full blur-xs animate-pulse"></div>
-        <div class="absolute bottom-1/3 left-10 w-1.5 h-1.5 bg-red-400 rounded-full blur-xs animate-pulse delay-700">
+        <div class="absolute top-1/4 right-10 w-2 h-2 bg-red-500 rounded-full blur-xs"></div>
+        <div class="absolute bottom-1/3 left-10 w-1.5 h-1.5 bg-red-400 rounded-full blur-xs">
         </div>
 
         {{-- Light Streaks --}}
@@ -227,7 +227,7 @@
 
         {{-- ─── Step 5: Portal Closed ────────────────────────── --}}
         @if ($step === 5)
-            <div class="card bg-slate-900/40 backdrop-blur-xl border border-error/20 shadow-2xl animate-in zoom-in-95">
+            <div class="card bg-slate-900 border border-error/20 shadow-2xl animate-in zoom-in-95">
                 <div class="card-body items-center text-center py-12">
                     <div
                         class="w-20 h-20 bg-error/20 text-error rounded-full flex items-center justify-center mb-6 border border-error/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
@@ -288,7 +288,7 @@
             </div>
         @elseif ($step === 1)
             <div
-                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in-95">
+                class="card bg-slate-900 border border-white/10 shadow-2xl animate-in fade-in zoom-in-95">
                 <div class="card-body">
                     <h2
                         class="card-title justify-center mb-4 text-white uppercase tracking-widest text-sm font-bold opacity-80">
@@ -308,10 +308,12 @@
 
                     <div class="space-y-2 relative">
                         {{-- Loading State --}}
-                        <div wire:loading wire:target="search" class="absolute inset-0 z-20 flex items-center justify-center bg-[#0a192f]/50 backdrop-blur-[2px] rounded-2xl">
+                        <div wire:loading wire:target="search"
+                            class="absolute inset-0 z-20 flex items-center justify-center bg-[#0a192f] rounded-2xl">
                             <div class="flex flex-col items-center gap-3">
                                 <span class="loading loading-spinner loading-lg text-blue-400"></span>
-                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">Mencari Data...</span>
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">Mencari
+                                    Data...</span>
                             </div>
                         </div>
 
@@ -374,7 +376,7 @@
                         </div>
                     @endif
 
-                    <div class="mt-4">
+                    <div class="mt-4" wire:loading.remove wire:target="search">
                         <a href="/"
                             class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest rounded-xl hover:bg-transparent hover:text-white/30 hover:shadow-none hover:border-none">Kembali</a>
                     </div>
@@ -385,7 +387,7 @@
         {{-- ─── Step 2: PIN Input ─────────────────────────────────────────── --}}
         @if ($step === 2)
             <div
-                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+                class="card bg-slate-900/40 border border-white/10 shadow-2xl animate-in fade-in slide-in-from-bottom-4">
                 <div class="card-body">
                     <div class="text-center mb-6">
                         <div class="avatar mb-4 {{ !$selectedPersonnel->foto ? 'placeholder' : '' }}">
@@ -465,7 +467,7 @@
         @if ($step === 3)
             <div wire:key="step-3-verification-{{ $selectedPersonnel->id }}" x-data="absensiVerification()"
                 x-init="initVerification('{{ $selectedPersonnel->foto ? asset('storage/' . $selectedPersonnel->foto) : '' }}', {{ $selectedPersonnel->face_recognition ? 'true' : 'false' }})"
-                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in zoom-in-95">
+                class="card bg-slate-900 border border-white/10 shadow-2xl animate-in zoom-in-95">
                 <div class="card-body p-4 sm:p-6 text-white">
                     <div class="text-center mb-4">
                         <h2 class="text-lg font-bold uppercase">{{ $selectedPersonnel->name }}</h2>
@@ -575,7 +577,7 @@
                                 {{-- Tidak ada kantor terhubung --}}
                             @elseif($infoLokasi['boleh'] && $infoLokasi['is_within_radius'])
                                 <div
-                                    class="alert py-2 px-3 border-none bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-tight backdrop-blur-md border border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.1)]">
+                                    class="alert py-2 px-3 border-none bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-tight border border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.1)]">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -586,7 +588,7 @@
                                 </div>
                             @elseif($infoLokasi['boleh'] && !$infoLokasi['is_within_radius'])
                                 <div
-                                    class="alert py-2 px-3 border-none bg-amber-500/10 text-amber-400 text-[10px] font-bold uppercase tracking-tight backdrop-blur-md border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                                    class="alert py-2 px-3 border-none bg-amber-500/10 text-amber-400 text-[10px] font-bold uppercase tracking-tight border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -597,7 +599,7 @@
                                 </div>
                             @else
                                 <div
-                                    class="alert py-2 px-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight leading-tight backdrop-blur-md border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]">
+                                    class="alert py-2 px-3 border-none bg-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-tight leading-tight border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -638,7 +640,7 @@
                                 {{-- Mode: Pulang --}}
                                 @if ((!$activeAbsensi || !$activeAbsensi->jam_masuk) && $isTooLateToIn)
                                     <div
-                                        class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest text-center backdrop-blur-md border border-red-500/20">
+                                        class="alert py-2 px-3 mb-3 border-none bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest text-center border border-red-500/20">
                                         ⚠️ Batas waktu Masuk berakhir. Silakan Absen Pulang.
                                     </div>
                                 @endif
@@ -668,7 +670,7 @@
                         </div>
                     @else
                         <div
-                            class="p-6 rounded-2xl bg-white/5 border border-white/10 text-center mt-6 backdrop-blur-md">
+                            class="p-6 rounded-2xl bg-white/5 border border-white/10 text-center mt-6">
                             <h3 class="font-black text-rose-400 uppercase text-[10px] mb-1 tracking-widest">Akses
                                 Ditutup</h3>
                             <p class="text-[10px] text-white/40 uppercase font-medium tracking-widest">Status:
@@ -702,7 +704,7 @@
         {{-- ─── Step 4: Result ─────────────────────────────────────────── --}}
         @if ($step === 4)
             <div
-                class="card bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+                class="card bg-slate-900 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
                 <div class="card-body items-center text-center py-10 text-white">
                     @if ($isSuccess)
                         <div
@@ -729,7 +731,7 @@
 
                     @if ($isSuccess && $lastAbsensi)
                         <div
-                            class="grid grid-cols-2 gap-4 w-full bg-white/5 p-4 rounded-2xl mb-8 border border-white/10 shadow-inner backdrop-blur-sm">
+                            class="grid grid-cols-2 gap-4 w-full bg-white/5 p-4 rounded-2xl mb-8 border border-white/10 shadow-inner">
                             <div class="text-left">
                                 <div class="text-[10px] uppercase text-white/40 font-black tracking-widest">Waktu</div>
                                 <div class="font-black text-white text-lg">
