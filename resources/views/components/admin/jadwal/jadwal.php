@@ -44,6 +44,8 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     // Substitution Properties (Simplified)
     public string $swapTargetPersonnelId = '';
     public string $swapWarning = '';
+    public array $paybackOptions = [];
+    public string $selectedPaybackDate = '';
     public $activeTab = 'quick'; // 'quick' or 'swap'
 
     public function mount(): void

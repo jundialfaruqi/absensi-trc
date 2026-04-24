@@ -29,26 +29,55 @@
             }
         }
 
-        function init() {
-            var body = document.body;
-            var saved = localStorage.getItem('adminTheme');
-            var current = saved || body.getAttribute('data-theme') || 'winter';
-            body.setAttribute('data-theme', current);
-            setIcons(current);
+        function initTheme() {
+            var saved = localStorage.getItem('adminTheme') || 'winter';
+            // Apply to HTML tag to prevent flash/glitch during wire:navigate
+            document.documentElement.setAttribute('data-theme', saved);
+            setIcons(saved);
+
             var btn = document.getElementById('theme-toggle');
             if (btn && !btn.__bound) {
                 btn.addEventListener('click', function() {
-                    var now = body.getAttribute('data-theme') || 'winter';
+                    var now = document.documentElement.getAttribute('data-theme') || 'winter';
                     var next = now === 'winter' ? 'dracula' : 'winter';
-                    body.setAttribute('data-theme', next);
+                    document.documentElement.setAttribute('data-theme', next);
                     localStorage.setItem('adminTheme', next);
                     setIcons(next);
                 });
                 btn.__bound = true;
             }
         }
-        document.addEventListener('DOMContentLoaded', init);
-        document.addEventListener('livewire:navigated', init);
+
+        function restoreSidebarScroll() {
+            // Target the specific scrollable container in sidebar
+            var sidebar = document.querySelector('.drawer-side aside .overflow-y-auto');
+            if (!sidebar) return;
+
+            // Restore from session
+            var savedPos = sessionStorage.getItem('sidebar-scroll-pos');
+            if (savedPos) {
+                sidebar.scrollTop = savedPos;
+            }
+
+            // Save on scroll
+            sidebar.addEventListener('scroll', function() {
+                sessionStorage.setItem('sidebar-scroll-pos', sidebar.scrollTop);
+            }, {
+                passive: true
+            });
+        }
+
+        function initAll() {
+            initTheme();
+            restoreSidebarScroll();
+        }
+
+        // Run immediately
+        initAll();
+
+        // Run on every Livewire navigation
+        document.addEventListener('livewire:navigated', initAll);
+        document.addEventListener('DOMContentLoaded', initAll);
     })();
 </script>
 
