@@ -157,25 +157,6 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         $this->swapWarning = '';
     }
 
-    public function deleteQuickJadwal(): void
-    {
-        // Authorization Check
-        $personnel = \App\Models\Personnel::findOrFail($this->quickPersonnelId);
-        if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
-            $this->dispatch('toast', type: 'error', title: 'Error', message: 'Anda tidak memiliki hak akses untuk personnel ini.');
-            return;
-        }
-
-        $jadwal = Jadwal::where('personnel_id', $this->quickPersonnelId)
-            ->where('tanggal', $this->quickDate)
-            ->first();
-
-        if ($jadwal) {
-            $jadwal->delete();
-            $this->dispatch('close-modal', id: 'quick-add-modal');
-            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil dihapus.');
-        }
-    }
 
     #[Computed]
     public function originPersonnel()

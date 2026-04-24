@@ -53,6 +53,8 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     #[Url]
     public string $generateMode = 'cycle';
 
+    public bool $showConfirmModal = false;
+
     // Step 3 Weekly: [dayIndex => ['type' => 'SHIFT|LIBUR', 'shift_id' => '']]
     public array $weeklyConfig = [];
 
@@ -255,6 +257,21 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             'endDate' => 'required|date|after_or_equal:startDate',
         ]);
 
+        // Check if data already exists for selected personnel and date range
+        $exists = Jadwal::whereIn('personnel_id', $this->selectedPersonnelIds)
+            ->whereBetween('tanggal', [$this->startDate, $this->endDate])
+            ->exists();
+
+        if ($exists) {
+            $this->showConfirmModal = true;
+            return;
+        }
+
+        $this->confirmGenerate();
+    }
+
+    public function confirmGenerate()
+    {
         $period = CarbonPeriod::create($this->startDate, $this->endDate);
 
         // ─── Reset Data ───

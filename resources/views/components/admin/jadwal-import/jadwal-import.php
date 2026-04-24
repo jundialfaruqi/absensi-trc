@@ -15,6 +15,7 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
     public $file;
     public $month;
     public $year;
+    public $showConfirmModal = false;
 
     public function mount()
     {
@@ -68,12 +69,40 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
 
         $opdId = Auth::user()->hasRole('super-admin') ? null : Auth::user()->opd()?->id;
 
+        // Check if data already exists
+        $exists = \App\Models\Jadwal::whereYear('tanggal', $this->year)
+            ->whereMonth('tanggal', $this->month)
+            ->whereHas('personnel', function($q) use ($opdId) {
+                if ($opdId) {
+                    $q->where('opd_id', $opdId);
+                }
+            })
+            ->exists();
+
+        if ($exists) {
+            $this->showConfirmModal = true;
+            return;
+        }
+
+        $this->executeImport(false);
+    }
+
+    public function confirmImport()
+    {
+        $this->executeImport(true);
+    }
+
+    protected function executeImport($shouldReset)
+    {
+        $opdId = Auth::user()->hasRole('super-admin') ? null : Auth::user()->opd()?->id;
+
         try {
-            Excel::import(new JadwalImport($this->month, $this->year, $opdId), $this->file);
+            Excel::import(new JadwalImport($this->month, $this->year, $opdId, $shouldReset), $this->file);
             
-            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Data Jadwal berhasil diimpor.');
+            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: $shouldReset ? 'Data lama dibersihkan dan Jadwal baru berhasil diimpor.' : 'Data Jadwal berhasil diimpor.');
             return $this->redirectRoute('jadwal', navigate: true);
         } catch (\Exception $e) {
+            $this->showConfirmModal = false;
             $this->addError('file', 'Terjadi kesalahan saat mengimpor file: ' . $e->getMessage());
         }
     }

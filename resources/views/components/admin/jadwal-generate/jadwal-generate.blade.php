@@ -755,6 +755,58 @@
                 </div>
             </div>
 
+    {{-- Modal Konfirmasi Reset --}}
+    @if ($showConfirmModal)
+        <div class="modal modal-open backdrop-blur-sm">
+            <div class="modal-box shadow-2xl border border-error/20 max-w-md">
+                <div class="flex items-center gap-4 text-error mb-4">
+                    <div class="p-3 bg-error/10 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="size-8">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xl leading-tight">Jadwal Sudah Ada!</h3>
+                        <p class="text-[10px] uppercase font-black opacity-40 tracking-widest">Konfirmasi Generate Ulang
+                        </p>
+                    </div>
+                </div>
+
+                <div class="py-4 space-y-4">
+                    <p class="text-sm leading-relaxed">
+                        Sistem mendeteksi bahwa sudah ada data <span class="font-bold">Jadwal</span> untuk personel yang
+                        dipilih pada rentang <span
+                            class="badge badge-neutral font-bold">{{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }}
+                            - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}</span>.
+                    </p>
+                    <div class="alert alert-error bg-error/5 text-[11px] py-3 rounded-xl border-error/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            class="stroke-error shrink-0 w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span class="font-medium">Melanjutkan proses ini akan <span class="underline font-bold">MENGHAPUS
+                                PERMANEN</span> seluruh Jadwal, Absensi, dan <span class="font-bold uppercase">FILE FOTO
+                                ABSENSI</span> pada personel dan rentang tanggal tersebut.</span>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[11px] text-base-content/50 italic">Tindakan ini tidak dapat dibatalkan.</p>
+                    </div>
+                </div>
+
+                <div class="modal-action grid grid-cols-2 gap-3 mt-2">
+                    <button type="button" wire:click="$set('showConfirmModal', false)"
+                        class="btn btn-ghost border-base-300">Batal</button>
+                    <button type="button" wire:click="confirmGenerate" class="btn btn-error text-white">
+                        <span wire:loading wire:target="confirmGenerate" class="loading loading-spinner loading-xs"></span>
+                        <span wire:loading.remove wire:target="confirmGenerate">Ya, Generate Ulang</span>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
+    @endif
+</div>
+</div>
 </div>

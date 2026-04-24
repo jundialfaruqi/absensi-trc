@@ -415,14 +415,7 @@
                     </div>
 
                     <div class="modal-action flex justify-between gap-2 mt-8">
-                        @if (\App\Models\Jadwal::where('personnel_id', $quickPersonnelId)->where('tanggal', $quickDate)->exists())
-                            <button type="button" class="btn btn-error btn-outline btn-sm"
-                                wire:click="deleteQuickJadwal">
-                                Hapus
-                            </button>
-                        @else
-                            <div></div>
-                        @endif
+                        <div></div>
                         <div class="flex gap-2">
                             <button type="button" class="btn btn-ghost btn-sm"
                                 x-on:click="document.getElementById('quick-add-modal').close()">Batal</button>
