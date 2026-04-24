@@ -237,10 +237,15 @@
                     </h2>
 
                     {{-- Template Selector --}}
-                    <div class="bg-base-200/50 p-4 rounded-2xl border border-base-200 mb-8 flex flex-col sm:flex-row items-center gap-4">
+                    <div
+                        class="bg-base-200/50 p-4 rounded-2xl border border-base-200 mb-8 flex flex-col sm:flex-row items-center gap-4">
                         <div class="flex items-center gap-3 shrink-0">
-                            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-grid-add">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-layout-grid-add">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M4 8a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
                                     <path d="M4 16a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
@@ -254,126 +259,339 @@
                             </div>
                         </div>
                         <div class="flex-1 w-full">
-                            <select wire:model.live="selectedTemplateId" class="select select-bordered select-sm w-full font-bold rounded-lg">
+                            <select wire:model.live="selectedTemplateId"
+                                class="select select-bordered select-sm w-full font-bold rounded-lg">
                                 <option value="">-- Pilih Template Konfigurasi --</option>
-                                @foreach($this->templates as $template)
+                                @foreach ($this->templates as $template)
                                     <option value="{{ $template->id }}">{{ $template->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
 
-                    <div class="space-y-3 mb-6">
-                        @foreach ($shiftSequence as $index => $seq)
-                            <div
-                                class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 p-4 bg-base-200/40 rounded-2xl border border-base-200 relative animate-in zoom-in-95">
-                                <div class="form-control flex flex-col w-full sm:w-36">
-                                    <label class="label pt-0"><span
-                                            class="label-text text-[10px] font-bold uppercase opacity-60">Tipe</span></label>
-                                    <select wire:model.live="shiftSequence.{{ $index }}.type"
-                                        class="select select-bordered select-sm font-bold rounded-lg h-9 min-h-0">
-                                        <option value="SHIFT">KERJA (SHIFT)</option>
-                                        <option value="LIBUR">LIBUR</option>
-                                    </select>
-                                </div>
+                    {{-- Mode Selector Tabs --}}
+                    <div class="flex items-center justify-center mb-8">
+                        <div
+                            class="tabs tabs-boxed bg-base-200/50 p-1 rounded-2xl border border-base-200 w-full max-w-sm flex flex-nowrap">
+                            <button type="button" wire:click="$set('generateMode', 'cycle')"
+                                class="tab tab-sm flex-1 h-9 px-2 rounded-xl font-bold uppercase text-[9px] tracking-widest transition-all {{ $generateMode === 'cycle' ? 'tab-active bg-primary text-primary-content shadow-lg shadow-primary/20' : 'opacity-50 hover:opacity-100' }}">
+                                Siklus Berputar
+                            </button>
+                            <button type="button" wire:click="$set('generateMode', 'weekly')"
+                                class="tab tab-sm flex-1 h-9 px-2 rounded-xl font-bold uppercase text-[9px] tracking-widest transition-all {{ $generateMode === 'weekly' ? 'tab-active bg-primary text-primary-content shadow-lg shadow-primary/20' : 'opacity-50 hover:opacity-100' }}">
+                                Jadwal Mingguan
+                            </button>
+                            <button type="button" wire:click="$set('generateMode', 'quota')"
+                                class="tab tab-sm flex-1 h-9 px-2 rounded-xl font-bold uppercase text-[9px] tracking-widest transition-all {{ $generateMode === 'quota' ? 'tab-active bg-primary text-primary-content shadow-lg shadow-primary/20' : 'opacity-50 hover:opacity-100' }}">
+                                Quota
+                            </button>
+                        </div>
+                    </div>
 
-                                @if ($seq['type'] === 'SHIFT')
-                                    <div class="form-control flex flex-col flex-1">
+                    @if ($generateMode === 'cycle')
+                        {{-- Mode Cycle: Current UI --}}
+                        <div class="space-y-3 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            @foreach ($shiftSequence as $index => $seq)
+                                <div
+                                    class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 p-4 bg-base-200/40 rounded-2xl border border-base-200 relative animate-in zoom-in-95">
+                                    <div class="form-control flex flex-col w-full sm:w-36">
                                         <label class="label pt-0"><span
-                                                class="label-text text-[10px] font-bold uppercase opacity-60">Jam
-                                                Kerja</span></label>
-                                        <select wire:model="shiftSequence.{{ $index }}.shift_id"
-                                            class="select select-bordered select-sm font-bold text-xs rounded-lg h-9 min-h-0">
-                                            <option value="">-- Pilih Shift --</option>
-                                            @foreach ($this->shifts as $s)
-                                                <option value="{{ $s->id }}">{{ $s->name }}
-                                                    ({{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }})
-                                                </option>
-                                            @endforeach
+                                                class="label-text text-[10px] font-bold uppercase opacity-60">Tipe</span></label>
+                                        <select wire:model.live="shiftSequence.{{ $index }}.type"
+                                            class="select select-bordered select-sm font-bold rounded-lg h-9 min-h-0">
+                                            <option value="SHIFT">KERJA (SHIFT)</option>
+                                            <option value="LIBUR">LIBUR</option>
                                         </select>
                                     </div>
-                                @else
-                                    <div class="form-control flex flex-col flex-1">
-                                        <label class="label pt-0"><span
-                                                class="label-text text-[10px] font-bold uppercase opacity-60">Status</span></label>
+
+                                    @if ($seq['type'] === 'SHIFT')
+                                        <div class="form-control flex flex-col flex-1">
+                                            <label class="label pt-0"><span
+                                                    class="label-text text-[10px] font-bold uppercase opacity-60">Jam
+                                                    Kerja</span></label>
+                                            <select wire:model="shiftSequence.{{ $index }}.shift_id"
+                                                class="select select-bordered select-sm font-bold text-xs rounded-lg h-9 min-h-0">
+                                                <option value="">-- Pilih Shift --</option>
+                                                @foreach ($this->shifts as $s)
+                                                    <option value="{{ $s->id }}">{{ $s->name }}
+                                                        ({{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }} -
+                                                        {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @else
+                                        <div class="form-control flex flex-col flex-1">
+                                            <label class="label pt-0"><span
+                                                    class="label-text text-[10px] font-bold uppercase opacity-60">Status</span></label>
+                                            <div
+                                                class="flex items-center h-9 text-[10px] font-bold uppercase tracking-widest text-base-content/30 px-3 bg-base-100/50 rounded-lg border border-dashed border-base-300">
+                                                Hari Libur
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="flex flex-wrap sm:flex-nowrap gap-3 items-end">
+                                        <div class="form-control flex flex-col w-24 sm:w-28">
+                                            <label class="label pt-0"><span
+                                                    class="label-text text-[10px] font-bold uppercase opacity-60">Jumlah
+                                                    Personel</span></label>
+                                            <div class="join">
+                                                <input type="number"
+                                                    wire:model="shiftSequence.{{ $index }}.count"
+                                                    class="input input-bordered input-sm font-bold text-center w-full join-item h-9 min-h-0"
+                                                    min="1">
+                                                <span
+                                                    class="join-item bg-base-300 flex items-center px-2 text-[10px] font-bold uppercase opacity-60">P</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-control flex flex-col w-24 sm:w-28">
+                                            <label class="label pt-0"><span
+                                                    class="label-text text-[10px] font-bold uppercase opacity-60">Durasi</span></label>
+                                            <div class="join">
+                                                <input type="number"
+                                                    wire:model="shiftSequence.{{ $index }}.duration"
+                                                    class="input input-bordered input-sm font-bold text-center w-full join-item h-9 min-h-0"
+                                                    min="1">
+                                                <span
+                                                    class="join-item bg-base-300 flex items-center px-2 text-[10px] font-bold uppercase opacity-60">Hari</span>
+                                            </div>
+                                        </div>
+
+                                        @if (count($shiftSequence) > 1)
+                                            <button type="button" wire:click="removeSequence({{ $index }})"
+                                                class="btn btn-error btn-square btn-sm h-9 w-9 min-h-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+                                                    class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="flex justify-center">
+                            <button type="button" wire:click="addSequence"
+                                class="btn btn-ghost btn-sm gap-2 text-primary hover:bg-primary/5 rounded-lg border-2 border-dashed border-primary/20 px-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Tambah Urutan
+                            </button>
+                        </div>
+                    @elseif($generateMode === 'weekly')
+                        {{-- Mode Weekly: New UI --}}
+                        <div
+                            class="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            @php
+                                $days = [
+                                    1 => ['name' => 'Senin', 'icon' => 'calendar'],
+                                    2 => ['name' => 'Selasa', 'icon' => 'calendar'],
+                                    3 => ['name' => 'Rabu', 'icon' => 'calendar'],
+                                    4 => ['name' => 'Kamis', 'icon' => 'calendar'],
+                                    5 => ['name' => 'Jumat', 'icon' => 'calendar'],
+                                    6 => ['name' => 'Sabtu', 'icon' => 'calendar-star'],
+                                    0 => ['name' => 'Minggu', 'icon' => 'calendar-event'],
+                                ];
+                            @endphp
+
+                            @foreach ($days as $index => $day)
+                                <div
+                                    class="flex items-center gap-3 p-3 bg-base-200/40 rounded-2xl border border-base-200">
+                                    <div class="w-10 flex flex-col items-center shrink-0">
+                                        <span
+                                            class="text-[10px] font-bold uppercase {{ in_array($index, [0, 6]) ? 'text-error' : 'opacity-40' }}">{{ $day['name'] }}</span>
+                                    </div>
+                                    <div class="flex-1 flex gap-2">
+                                        <select wire:model.live="weeklyConfig.{{ $index }}.type"
+                                            class="select select-bordered select-xs font-bold rounded-lg h-8 flex-1">
+                                            <option value="SHIFT">MASUK</option>
+                                            <option value="LIBUR">LIBUR</option>
+                                        </select>
+
+                                        @if ($weeklyConfig[$index]['type'] === 'SHIFT')
+                                            <select wire:model="weeklyConfig.{{ $index }}.shift_id"
+                                                class="select select-bordered select-xs font-bold text-[10px] rounded-lg h-8 flex-[2]">
+                                                <option value="">-- Pilih Shift --</option>
+                                                @foreach ($this->shifts as $s)
+                                                    <option value="{{ $s->id }}">{{ $s->name }}
+                                                        ({{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }} -
+                                                        {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            <div
+                                                class="flex-1 bg-base-100/50 rounded-lg border border-dashed border-base-300 flex items-center justify-center">
+                                                <span
+                                                    class="text-[9px] font-bold opacity-20 uppercase tracking-tighter">Libur</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @elseif($generateMode === 'quota')
+                        {{-- Mode Quota: Smart Distribution UI --}}
+                        <div class="max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div class="bg-base-200/30 rounded-3xl border border-base-200 p-6">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div
+                                        class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="icon icon-tabler icons-tabler-outline icon-tabler-scale">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M7 20l10 0" />
+                                            <path d="M6 6l6 -1l6 1" />
+                                            <path d="M12 3l0 17" />
+                                            <path d="M9 12l-3 -6l-3 6a3 3 0 0 0 6 0" />
+                                            <path d="M21 12l-3 -6l-3 6a3 3 0 0 0 6 0" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-sm uppercase">Kebutuhan Personel Harian</h3>
+                                        <p class="text-[10px] opacity-60">Sistem akan membagi jatah kerja secara adil</p>
+                                    </div>
+                                </div>
+
+                                {{-- Smart Rules Info --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
+                                    <div class="p-3 rounded-xl bg-base-100 border border-base-200 flex flex-col gap-1">
+                                        <div class="flex items-center gap-2 text-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg>
+                                            <span class="text-[9px] font-bold uppercase tracking-tight">Pasca Malam</span>
+                                        </div>
+                                        <p class="text-[8px] opacity-50 leading-tight">Personel wajib libur 1 hari setelah shift malam.</p>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-base-100 border border-base-200 flex flex-col gap-1">
+                                        <div class="flex items-center gap-2 text-success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 12a8 8 0 1 0 16 0a8 8 0 0 0 -16 0" /><path d="M12 12l3 -3" /><path d="M9 15l3 -3" /><path d="M12 12l3 3" /><path d="M9 9l3 3" /></svg>
+                                            <span class="text-[9px] font-bold uppercase tracking-tight">Keadilan Akhir Pekan</span>
+                                        </div>
+                                        <p class="text-[8px] opacity-50 leading-tight">Jatah libur Sabtu-Minggu dibagi rata sebulan.</p>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-base-100 border border-base-200 flex flex-col gap-1">
+                                        <div class="flex items-center gap-2 text-warning">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9l0 3" /><path d="M12 15l.01 0" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /></svg>
+                                            <span class="text-[9px] font-bold uppercase tracking-tight">Maks 6 Hari</span>
+                                        </div>
+                                        <p class="text-[8px] opacity-50 leading-tight">Dilarang masuk lebih dari 6 hari tanpa libur.</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    @foreach ($this->shifts as $s)
                                         <div
-                                            class="flex items-center h-9 text-[10px] font-bold uppercase tracking-widest text-base-content/30 px-3 bg-base-100/50 rounded-lg border border-dashed border-base-300">
-                                            Hari Libur
+                                            class="flex items-center justify-between p-4 bg-base-100 rounded-2xl border border-base-200 shadow-sm">
+                                            <div>
+                                                <span
+                                                    class="block font-bold text-xs uppercase">{{ $s->name }}</span>
+                                                <span
+                                                    class="text-[9px] opacity-40 font-bold tracking-tight">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
+                                                    - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="join border border-base-300 rounded-xl overflow-hidden h-9">
+                                                    <button type="button"
+                                                        wire:click="$set('quotaConfig.{{ $s->id }}', {{ max(0, $quotaConfig[$s->id] - 1) }})"
+                                                        class="btn btn-ghost join-item w-8">-</button>
+                                                    <input type="number"
+                                                        wire:model.live="quotaConfig.{{ $s->id }}"
+                                                        class="input input-ghost join-item w-12 text-center font-bold text-xs focus:bg-transparent"
+                                                        min="0">
+                                                    <button type="button"
+                                                        wire:click="$set('quotaConfig.{{ $s->id }}', {{ $quotaConfig[$s->id] + 1 }})"
+                                                        class="btn btn-ghost join-item w-8">+</button>
+                                                </div>
+                                                <span class="text-[10px] font-bold opacity-40 uppercase">Orang</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
+                                    @endforeach
+                                </div>
 
-                                <div class="flex flex-wrap sm:flex-nowrap gap-3 items-end">
-                                    <div class="form-control flex flex-col w-24 sm:w-28">
-                                        <label class="label pt-0"><span
-                                                class="label-text text-[10px] font-bold uppercase opacity-60">Jumlah
-                                                Personel</span></label>
-                                        <div class="join">
-                                            <input type="number"
-                                                wire:model="shiftSequence.{{ $index }}.count"
-                                                class="input input-bordered input-sm font-bold text-center w-full join-item h-9 min-h-0"
-                                                min="1">
-                                            <span
-                                                class="join-item bg-base-300 flex items-center px-2 text-[10px] font-bold uppercase opacity-60">P</span>
+                                <div class="mt-6 pt-6 border-t border-dashed border-base-300">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-bold opacity-60">Total Kebutuhan:</span>
+                                        <span class="font-black text-primary">{{ array_sum($quotaConfig) }} Orang /
+                                            Hari</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs mt-2">
+                                        <span class="font-bold opacity-60">Personel Tersedia:</span>
+                                        <span class="font-black">{{ count($selectedPersonnelIds) }} Orang</span>
+                                    </div>
+
+                                    @php 
+                                        $totalNeeded = array_sum($quotaConfig);
+                                        $nightQuota = 0;
+                                        foreach($this->shifts as $s) {
+                                            if (stripos($s->name, 'malam') !== false || (\Carbon\Carbon::parse($s->start_time)->hour >= 18 || \Carbon\Carbon::parse($s->start_time)->hour < 4)) {
+                                                $nightQuota += $quotaConfig[$s->id] ?? 0;
+                                            }
+                                        }
+                                        $minPersonilNeeded = $totalNeeded + $nightQuota;
+                                        $personilAvailable = count($selectedPersonnelIds);
+                                        $isInsufficient = $personilAvailable < $minPersonilNeeded;
+                                    @endphp
+
+                                    @if($isInsufficient)
+                                        <div class="mt-4 p-4 rounded-2xl bg-error/10 border border-error/20 flex flex-col gap-2 animate-pulse">
+                                            <div class="flex items-center gap-2 text-error">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 9v4" /><path d="M12 16v.01" /></svg>
+                                                <span class="text-xs font-black uppercase">Personel Tidak Cukup!</span>
+                                            </div>
+                                            <p class="text-[10px] font-bold leading-tight opacity-80">
+                                                Dibutuhkan minimal <span class="underline">{{ $minPersonilNeeded }} orang</span> agar aturan "Libur Pasca Malam" bisa berjalan. Saat ini Anda hanya memilih {{ $personilAvailable }} orang.
+                                            </p>
+                                            <p class="text-[9px] italic opacity-60 mt-1">*Sistem akan tetap mencoba mengisi shift, namun beberapa shift mungkin akan kosong karena aturan istirahat.</p>
                                         </div>
-                                    </div>
-
-                                    <div class="form-control flex flex-col w-24 sm:w-28">
-                                        <label class="label pt-0"><span
-                                                class="label-text text-[10px] font-bold uppercase opacity-60">Durasi</span></label>
-                                        <div class="join">
-                                            <input type="number"
-                                                wire:model="shiftSequence.{{ $index }}.duration"
-                                                class="input input-bordered input-sm font-bold text-center w-full join-item h-9 min-h-0"
-                                                min="1">
-                                            <span
-                                                class="join-item bg-base-300 flex items-center px-2 text-[10px] font-bold uppercase opacity-60">Hari</span>
+                                    @else
+                                        <div class="mt-4 p-3 rounded-xl bg-info/5 border border-info/10 flex items-center gap-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-info shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+                                            <p class="text-[10px] font-bold leading-tight opacity-70">
+                                                Setiap hari akan ada <span class="text-info underline">{{ max(0, $personilAvailable - $totalNeeded) }} orang</span> yang Libur secara bergantian untuk menjaga keadilan.
+                                            </p>
                                         </div>
-                                    </div>
-
-                                    @if (count($shiftSequence) > 1)
-                                        <button type="button" wire:click="removeSequence({{ $index }})"
-                                            class="btn btn-error btn-square btn-sm h-9 w-9 min-h-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-                                                class="w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
                                     @endif
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-
-                    <div class="flex justify-center">
-                        <button type="button" wire:click="addSequence"
-                            class="btn btn-ghost btn-sm gap-2 text-primary hover:bg-primary/5 rounded-lg border-2 border-dashed border-primary/20 px-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Tambah Urutan
-                        </button>
-                    </div>
+                        </div>
+                    @endif
 
                     {{-- Save as Template Option --}}
                     <div class="mt-8 pt-6 border-t border-base-200">
                         <label class="flex items-center gap-3 cursor-pointer group w-fit">
-                            <input type="checkbox" wire:model.live="saveAsTemplate" class="checkbox checkbox-primary checkbox-sm">
-                            <span class="text-xs font-bold uppercase opacity-60 group-hover:opacity-100 transition-opacity">Simpan konfigurasi ini sebagai template</span>
+                            <input type="checkbox" wire:model.live="saveAsTemplate"
+                                class="checkbox checkbox-primary checkbox-sm">
+                            <span
+                                class="text-xs font-bold uppercase opacity-60 group-hover:opacity-100 transition-opacity">Simpan
+                                konfigurasi ini sebagai template</span>
                         </label>
 
-                        @if($saveAsTemplate)
-                            <div class="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 flex flex-col sm:flex-row items-end gap-3 animate-in zoom-in-95">
+                        @if ($saveAsTemplate)
+                            <div
+                                class="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 flex flex-col sm:flex-row items-end gap-3 animate-in zoom-in-95">
                                 <div class="form-control flex-1">
-                                    <label class="label pt-0"><span class="label-text text-[10px] font-bold uppercase opacity-60">Nama Konfigurasi Template</span></label>
-                                    <input type="text" wire:model="templateName" placeholder="Misal: Pola 2-2-2 atau Siklus 6 Hari" 
+                                    <label class="label pt-0"><span
+                                            class="label-text text-[10px] font-bold uppercase opacity-60">Nama
+                                            Konfigurasi Template</span></label>
+                                    <input type="text" wire:model="templateName"
+                                        placeholder="Misal: Pola 2-2-2 atau Siklus 6 Hari"
                                         class="input input-bordered input-sm font-bold w-full rounded-lg">
-                                    @error('templateName') <span class="text-[10px] text-error mt-1">{{ $message }}</span> @enderror
+                                    @error('templateName')
+                                        <span class="text-[10px] text-error mt-1">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                                <button type="button" wire:click="saveCurrentAsTemplate" class="btn btn-primary btn-sm rounded-lg px-6">
+                                <button type="button" wire:click="saveCurrentAsTemplate"
+                                    class="btn btn-primary btn-sm rounded-lg px-6">
                                     Simpan Template
                                 </button>
                             </div>
@@ -381,23 +599,62 @@
                     </div>
 
                     <div class="mt-8 p-5 bg-primary/5 rounded-2xl border border-primary/10">
-                        <div class="text-[10px] font-bold uppercase tracking-widest mb-3 opacity-40">Ringkasan Siklus:
+                        <div class="text-[10px] font-bold uppercase tracking-widest mb-3 opacity-40">
+                            Ringkasan {{ $generateMode === 'cycle' ? 'Siklus' : 'Mingguan' }}:
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            @foreach ($shiftSequence as $seq)
+                            @if ($generateMode === 'cycle')
+                                @foreach ($shiftSequence as $seq)
+                                    <div
+                                        class="px-3 py-1.5 rounded-lg {{ $seq['type'] == 'SHIFT' ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content' }} text-[10px] font-bold flex items-center gap-2 shadow-sm">
+                                        <span class="opacity-70">{{ $seq['count'] }}p</span>
+                                        <span>{{ $seq['duration'] }}D {{ $seq['type'] }}</span>
+                                    </div>
+                                    @if (!$loop->last)
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="3" stroke="currentColor" class="w-3 h-3 opacity-20">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    @endif
+                                @endforeach
+                            @elseif ($generateMode === 'weekly')
+                                @php
+                                    $dayNames = [
+                                        1 => 'Sen',
+                                        2 => 'Sel',
+                                        3 => 'Rab',
+                                        4 => 'Kam',
+                                        5 => 'Jum',
+                                        6 => 'Sab',
+                                        0 => 'Min',
+                                    ];
+                                @endphp
+                                @foreach ($dayNames as $index => $name)
+                                    @php $conf = $weeklyConfig[$index]; @endphp
+                                    <div
+                                        class="px-3 py-1.5 rounded-lg {{ $conf['type'] == 'SHIFT' ? 'bg-primary/20 text-primary border border-primary/20' : 'bg-base-300 text-base-content/40' }} text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
+                                        <span class="opacity-50">{{ $name }}:</span>
+                                        <span>{{ $conf['type'] === 'SHIFT' ? $this->shifts->find($conf['shift_id'])?->name ?? '---' : 'LIBUR' }}</span>
+                                    </div>
+                                @endforeach
+                            @elseif($generateMode === 'quota')
+                                @foreach ($quotaConfig as $shiftId => $count)
+                                    @php $s = $this->shifts->find($shiftId); @endphp
+                                    @if ($s && $count > 0)
+                                        <div
+                                            class="px-3 py-1.5 rounded-lg bg-primary/20 text-primary border border-primary/20 text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
+                                            <span class="opacity-50">{{ $s->name }}:</span>
+                                            <span>{{ $count }}p</span>
+                                        </div>
+                                    @endif
+                                @endforeach
                                 <div
-                                    class="px-3 py-1.5 rounded-lg {{ $seq['type'] == 'SHIFT' ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content' }} text-[10px] font-bold flex items-center gap-2 shadow-sm">
-                                    <span class="opacity-70">{{ $seq['count'] }}p</span>
-                                    <span>{{ $seq['duration'] }}D {{ $seq['type'] }}</span>
+                                    class="px-3 py-1.5 rounded-lg bg-base-300 text-base-content/40 text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
+                                    <span class="opacity-50">LIBUR:</span>
+                                    <span>{{ max(0, count($selectedPersonnelIds) - array_sum($quotaConfig)) }}p</span>
                                 </div>
-                                @if (!$loop->last)
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="3" stroke="currentColor" class="w-3 h-3 opacity-20">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                                    </svg>
-                                @endif
-                            @endforeach
+                            @endif
                         </div>
                     </div>
                 </div>

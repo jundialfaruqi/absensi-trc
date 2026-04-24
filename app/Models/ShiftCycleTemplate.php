@@ -9,7 +9,7 @@ class ShiftCycleTemplate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'opd_id', 'sequence'];
+    protected $fillable = ['name', 'opd_id', 'mode', 'sequence'];
 
     protected $casts = [
         'sequence' => 'array',

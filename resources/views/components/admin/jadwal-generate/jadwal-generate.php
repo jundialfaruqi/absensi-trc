@@ -28,7 +28,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public array $selectedPersonnelIds = [];
     public bool $selectAll = false;
     public int $peoplePerRegu = 2;
-    public bool $useRegu = true;
+    public bool $useRegu = false;
 
     // Step 3: Shift Sequence
     // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1, 'count' => 1]
@@ -48,6 +48,16 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public bool $saveAsTemplate = false;
     public string $templateName = '';
 
+    // Generate Mode: 'cycle' (Rolling), 'weekly' (Fixed), or 'quota' (Smart)
+    #[Url]
+    public string $generateMode = 'cycle';
+
+    // Step 3 Weekly: [dayIndex => ['type' => 'SHIFT|LIBUR', 'shift_id' => '']]
+    public array $weeklyConfig = [];
+
+    // Step 3 Quota: [shift_id => headcount]
+    public array $quotaConfig = [];
+
     public function mount()
     {
         $user = Auth::user();
@@ -65,6 +75,20 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         }
         if (empty($this->endDate)) {
             $this->endDate = date('Y-m-t');
+        }
+
+        // Initialize Weekly Config if empty
+        if (empty($this->weeklyConfig)) {
+            for ($i = 0; $i < 7; $i++) {
+                $this->weeklyConfig[$i] = ['type' => 'SHIFT', 'shift_id' => ''];
+            }
+        }
+
+        // Initialize Quota Config
+        if (empty($this->quotaConfig)) {
+            foreach ($this->shifts as $s) {
+                $this->quotaConfig[$s->id] = 1; // Default 1 person per shift
+            }
         }
     }
 
@@ -103,7 +127,14 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         if ($value) {
             $template = \App\Models\ShiftCycleTemplate::find($value);
             if ($template) {
-                $this->shiftSequence = $template->sequence;
+                $this->generateMode = $template->mode ?? 'cycle';
+                if ($this->generateMode === 'cycle') {
+                    $this->shiftSequence = $template->sequence;
+                } elseif ($this->generateMode === 'weekly') {
+                    $this->weeklyConfig = $template->sequence;
+                } else {
+                    $this->quotaConfig = $template->sequence;
+                }
                 $this->dispatch('toast', type: 'success', message: 'Template "' . $template->name . '" berhasil dimuat.');
             }
         }
@@ -115,10 +146,15 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             'templateName' => 'required|min:3|max:50',
         ]);
 
+        $sequence = $this->shiftSequence;
+        if ($this->generateMode === 'weekly') $sequence = $this->weeklyConfig;
+        if ($this->generateMode === 'quota') $sequence = $this->quotaConfig;
+
         \App\Models\ShiftCycleTemplate::create([
             'name' => $this->templateName,
             'opd_id' => $this->selectedOpdId,
-            'sequence' => $this->shiftSequence
+            'mode' => $this->generateMode,
+            'sequence' => $sequence
         ]);
 
         $this->templateName = '';
@@ -143,19 +179,37 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         }
 
         if ($this->step == 3) {
-            foreach ($this->shiftSequence as $seq) {
-                if ($seq['type'] === 'SHIFT' && empty($seq['shift_id'])) {
-                    $this->dispatch('toast', type: 'error', message: 'Silakan pilih shift untuk semua entri SHIFT.');
-                    return;
+            if ($this->generateMode === 'cycle') {
+                foreach ($this->shiftSequence as $seq) {
+                    if ($seq['type'] === 'SHIFT' && empty($seq['shift_id'])) {
+                        $this->dispatch('toast', type: 'error', message: 'Silakan pilih shift untuk semua entri SHIFT.');
+                        return;
+                    }
+                    if ($seq['duration'] < 1) {
+                        $this->dispatch('toast', type: 'error', message: 'Durasi minimal adalah 1 hari.');
+                        return;
+                    }
+                    if (($seq['count'] ?? 1) < 1) {
+                        $this->dispatch('toast', type: 'error', message: 'Jumlah personel minimal adalah 1.');
+                        return;
+                    }
                 }
-                if ($seq['duration'] < 1) {
-                    $this->dispatch('toast', type: 'error', message: 'Durasi minimal adalah 1 hari.');
-                    return;
+            } elseif ($this->generateMode === 'weekly') {
+                foreach ($this->weeklyConfig as $day => $config) {
+                    if ($config['type'] === 'SHIFT' && empty($config['shift_id'])) {
+                        $dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][$day];
+                        $this->dispatch('toast', type: 'error', message: "Silakan pilih shift untuk hari $dayName.");
+                        return;
+                    }
                 }
-                if (($seq['count'] ?? 1) < 1) {
-                    $this->dispatch('toast', type: 'error', message: 'Jumlah personel minimal adalah 1.');
-                    return;
-                }
+            }
+        }
+
+        if ($this->step == 3 && $this->generateMode === 'quota') {
+            $totalNeeded = array_sum($this->quotaConfig);
+            if ($totalNeeded > count($this->selectedPersonnelIds)) {
+                $this->dispatch('toast', type: 'error', message: "Kebutuhan personel ($totalNeeded) melebihi jumlah personel yang dipilih (" . count($this->selectedPersonnelIds) . ").");
+                return;
             }
         }
 
@@ -202,78 +256,208 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
         $period = CarbonPeriod::create($this->startDate, $this->endDate);
 
-        // 1. Construct the Daily Cycle Configuration
-        // A cycle is a list of days, where each day has a specific shift type.
-        $dailyCycle = [];
-        foreach ($this->shiftSequence as $seq) {
-            for ($d = 0; $d < ($seq['duration'] ?? 1); $d++) {
-                $dailyCycle[] = [
-                    'status' => $seq['type'],
-                    'shift_id' => $seq['type'] === 'SHIFT' ? $seq['shift_id'] : null,
-                    'count' => $seq['count'] ?? 1
+        // Logic for Rolling Cycle
+        if ($this->generateMode === 'cycle') {
+            $dailyCycle = [];
+            foreach ($this->shiftSequence as $seq) {
+                for ($d = 0; $d < ($seq['duration'] ?? 1); $d++) {
+                    $dailyCycle[] = [
+                        'status' => $seq['type'],
+                        'shift_id' => $seq['type'] === 'SHIFT' ? $seq['shift_id'] : null,
+                        'count' => $seq['count'] ?? 1
+                    ];
+                }
+            }
+
+            $cycleLength = count($dailyCycle);
+            if ($cycleLength === 0) {
+                $this->dispatch('toast', type: 'error', message: 'Siklus shift tidak valid.');
+                return;
+            }
+
+            // Map Personnel to Starting Day Offsets
+            foreach ($this->selectedPersonnelIds as $index => $pId) {
+                if ($this->useRegu) {
+                    $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
+                    $reguName = 'Regu ' . ($reguIndex + 1);
+                    Personnel::where('id', $pId)->update(['regu' => $reguName]);
+                    $startOffset = $reguIndex % $cycleLength;
+                } else {
+                    Personnel::where('id', $pId)->update(['regu' => null]);
+                    $startOffset = $index % $cycleLength;
+                }
+
+                $dayCounter = 0;
+                foreach ($period as $date) {
+                    $dateStr = $date->format('Y-m-d');
+                    $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
+                    $config = $dailyCycle[$cycleIndex];
+
+                    $jadwal = Jadwal::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $dateStr],
+                        [
+                            'status' => $config['status'], 
+                            'shift_id' => $config['shift_id'],
+                            'is_manual' => false,
+                            'keterangan' => null
+                        ]
+                    );
+
+                    Absensi::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $dateStr],
+                        [
+                            'jadwal_id' => $jadwal->id,
+                            'status' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_masuk' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_pulang' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                        ]
+                    );
+
+                    $dayCounter++;
+                }
+            }
+        } 
+        // Logic for Fixed Weekly
+        elseif ($this->generateMode === 'weekly') {
+            foreach ($this->selectedPersonnelIds as $pId) {
+                // In Weekly mode, we clear regu by default as they all follow the same pattern
+                Personnel::where('id', $pId)->update(['regu' => null]);
+
+                foreach ($period as $date) {
+                    $dateStr = $date->format('Y-m-d');
+                    $dayOfWeek = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
+                    $config = $this->weeklyConfig[$dayOfWeek];
+
+                    $jadwal = Jadwal::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $dateStr],
+                        [
+                            'status' => $config['type'], 
+                            'shift_id' => $config['type'] === 'SHIFT' ? $config['shift_id'] : null,
+                            'is_manual' => false,
+                            'keterangan' => null
+                        ]
+                    );
+
+                    Absensi::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $dateStr],
+                        [
+                            'jadwal_id' => $jadwal->id,
+                            'status' => $config['type'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_masuk' => $config['type'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_pulang' => $config['type'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                        ]
+                    );
+                }
+            }
+        } 
+        // Logic for Smart Quota (Fairness + Weekend Balance)
+        else {
+            $pIds = $this->selectedPersonnelIds;
+            $stats = [];
+            foreach ($pIds as $pId) {
+                $stats[$pId] = [
+                    'work_days' => 0,
+                    'weekend_offs' => 0,
+                    'consecutive_work' => 0,
+                    'last_shift_id' => null,
+                    'last_status' => null
                 ];
             }
-        }
 
-        $cycleLength = count($dailyCycle);
-        if ($cycleLength === 0) {
-            $this->dispatch('toast', type: 'error', message: 'Siklus shift tidak valid.');
-            return;
-        }
+            // Get Night Shift IDs for recovery rule
+            $nightShiftIds = $this->shifts->filter(fn($s) => 
+                stripos($s->name, 'malam') !== false || 
+                (Carbon::parse($s->start_time)->hour >= 18 || Carbon::parse($s->start_time)->hour < 4)
+            )->pluck('id')->toArray();
 
-        // 2. Map Personnel to Starting Day Offsets (Grouped by 2 as default pair)
-        $totalPersonnel = count($this->selectedPersonnelIds);
-
-        // 3. Generate Schedule & Update Personnel Regu
-        foreach ($this->selectedPersonnelIds as $index => $pId) {
-            if ($this->useRegu) {
-                // Determine the group (Regu) for this personnel
-                $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
-                $reguName = 'Regu ' . ($reguIndex + 1);
-
-                // Update personnel's regu for sorting in matrix
-                Personnel::where('id', $pId)->update(['regu' => $reguName]);
-
-                // Starting Day Offset in the cycle
-                $startOffset = $reguIndex % $cycleLength;
-            } else {
-                // No Regu: individual rotation, no regu name
-                Personnel::where('id', $pId)->update(['regu' => null]);
-                $startOffset = $index % $cycleLength;
-            }
-
-            $dayCounter = 0;
             foreach ($period as $date) {
                 $dateStr = $date->format('Y-m-d');
+                $isWeekend = in_array($date->dayOfWeek, [0, 6]); // 0=Sun, 6=Sat
 
-                // The current position in the cycle for this person
-                $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
-                $config = $dailyCycle[$cycleIndex];
+                // 1. Calculate Eligibility & Scores
+                $pool = [];
+                foreach ($pIds as $pId) {
+                    $s = &$stats[$pId];
+                    $eligible = true;
+                    $score = $s['work_days'] * 10; // Primary score: total work days
 
-                // Create/Update Jadwal (Always overwrite and reset manual flag)
-                $jadwal = Jadwal::updateOrCreate(
-                    ['personnel_id' => $pId, 'tanggal' => $dateStr],
-                    [
-                        'status' => $config['status'], 
-                        'shift_id' => $config['shift_id'],
-                        'is_manual' => false,
-                        'keterangan' => null
-                    ]
-                );
+                    // Rule: Recovery from Night Shift (No work today if last shift was night)
+                    if (in_array($s['last_shift_id'], $nightShiftIds) && $s['last_status'] === 'SHIFT') {
+                        $eligible = false;
+                    }
 
-                // Create/Update Absensi Placeholder
-                Absensi::updateOrCreate(
-                    ['personnel_id' => $pId, 'tanggal' => $dateStr],
-                    [
-                        'jadwal_id' => $jadwal->id,
-                        'status' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                        'status_masuk' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                        'status_pulang' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                    ]
-                );
+                    // Rule: Max 6 days consecutive work
+                    if ($s['consecutive_work'] >= 6) {
+                        $eligible = false;
+                    }
 
-                $dayCounter++;
+                    // Weekend Fairness adjustment
+                    if ($isWeekend) {
+                        // People with FEWER weekend offs so far get a HUGE penalty to their work score
+                        // effectively pushing them to the bottom of the "work" list so they are chosen for LIBUR
+                        $score += (10 - $s['weekend_offs']) * 100;
+                    }
+
+                    $pool[] = [
+                        'id' => $pId,
+                        'eligible' => $eligible,
+                        'score' => $score + (rand(0, 9) / 10) // Small random for tie-breaking
+                    ];
+                }
+
+                // 2. Sort pool by score (Ascending: low score = prioritize for WORK)
+                // Filter eligible first
+                $eligiblePool = array_filter($pool, fn($p) => $p['eligible']);
+                usort($eligiblePool, fn($a, $b) => $a['score'] <=> $b['score']);
+                $eligiblePids = array_column($eligiblePool, 'id');
+
+                // 3. Fill Shifts
+                $assignedToday = [];
+                foreach ($this->quotaConfig as $shiftId => $count) {
+                    for ($i = 0; $i < $count; $i++) {
+                        if (!empty($eligiblePids)) {
+                            $pId = array_shift($eligiblePids);
+                            $assignedToday[$pId] = $shiftId;
+                        }
+                    }
+                }
+
+                // 4. Update Database & Stats
+                foreach ($pIds as $pId) {
+                    $s = &$stats[$pId];
+                    $status = isset($assignedToday[$pId]) ? 'SHIFT' : 'LIBUR';
+                    $shiftId = $assignedToday[$pId] ?? null;
+
+                    $jadwal = Jadwal::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $dateStr],
+                        ['status' => $status, 'shift_id' => $shiftId, 'is_manual' => false, 'keterangan' => null]
+                    );
+
+                    Absensi::updateOrCreate(
+                        ['personnel_id' => $pId, 'tanggal' => $dateStr],
+                        [
+                            'jadwal_id' => $jadwal->id,
+                            'status' => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_masuk' => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status_pulang' => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                        ]
+                    );
+
+                    // Update local stats for next day
+                    if ($status === 'SHIFT') {
+                        $s['work_days']++;
+                        $s['consecutive_work']++;
+                    } else {
+                        $s['consecutive_work'] = 0;
+                        if ($isWeekend) $s['weekend_offs']++;
+                    }
+                    $s['last_shift_id'] = $shiftId;
+                    $s['last_status'] = $status;
+                }
             }
+            
+            // Clear regu in Quota mode
+            Personnel::whereIn('id', $pIds)->update(['regu' => null]);
         }
 
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal otomatis berhasil digenerate.');

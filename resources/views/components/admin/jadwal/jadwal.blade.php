@@ -428,8 +428,7 @@
                     {{-- Select Target Personnel --}}
                     <div class="form-control">
                         <label class="label mb-1 px-1">
-                            <span class="label-text font-medium text-xs text-base-content/70">Pilih Pengganti (Hanya
-                                Personel Libur Hari-1)</span>
+                            <span class="label-text font-medium text-xs text-base-content/70">Pilih Personel Pengganti (Sedang Libur)</span>
                         </label>
                         <select wire:model.live="swapTargetPersonnelId"
                             class="select select-bordered w-full select-sm focus:select-primary">
@@ -438,45 +437,16 @@
                                 <option value="{{ $sub->id }}">{{ $sub->name }}</option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-base-content/50 mt-2 italic">* Personel yang sudah "dipesan" di
-                            tanggal ini tidak akan muncul.</p>
+                        <p class="text-[10px] text-base-content/50 mt-2 italic">* Hanya menampilkan personel yang libur dan tidak memiliki tabrakan jadwal Malam-Siang.</p>
                     </div>
 
-                    @if ($swapTargetPersonnelId)
-                        <div class="form-control animate-in fade-in zoom-in duration-300">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text font-medium text-xs text-base-content/70">Pilih Tanggal
-                                    Pembayaran (Payback):</span>
-                            </label>
-
-                            @if (empty($paybackOptions))
-                                <div
-                                    class="bg-warning/10 text-warning text-[10px] p-3 rounded-lg border border-warning/20">
-                                    Tidak ditemukan tanggal payback yang tersedia dalam 30 hari ke depan.
-                                </div>
-                            @else
-                                <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
-                                    @foreach ($paybackOptions as $option)
-                                        <label
-                                            class="flex items-center justify-between p-3 border border-base-200 rounded-xl cursor-pointer hover:bg-base-200 transition-all {{ $selectedPaybackDate === $option['date'] ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/30' : '' }}">
-                                            <div class="flex items-center gap-3">
-                                                <input type="radio" wire:model="selectedPaybackDate"
-                                                    value="{{ $option['date'] }}"
-                                                    class="radio radio-primary radio-xs">
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs font-bold">{{ $option['label'] }}</span>
-                                                    <span class="text-[9px] opacity-60">Jadwal Asli:
-                                                        {{ $option['shift_name'] }}</span>
-                                                </div>
-                                            </div>
-                                            @if ($loop->first)
-                                                <div class="badge badge-primary badge-outline text-[8px] h-4">Terdekat
-                                                </div>
-                                            @endif
-                                        </label>
-                                    @endforeach
-                                </div>
-                            @endif
+                    @if ($swapWarning)
+                        <div class="p-4 bg-warning/10 border border-warning/20 rounded-2xl flex items-start gap-3 animate-in shake duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-warning shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
+                            <div>
+                                <h4 class="text-xs font-black uppercase text-warning mb-1">Peringatan Istirahat</h4>
+                                <p class="text-[10px] leading-tight opacity-80">{!! $swapWarning !!}</p>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -485,10 +455,10 @@
                     <button type="button" class="btn btn-ghost btn-sm"
                         x-on:click="document.getElementById('quick-add-modal').close()">Batal</button>
                     <button type="button" class="btn btn-primary btn-sm px-6" wire:click="executeSwapGuling"
-                        wire:loading.attr="disabled" @if (!$swapTargetPersonnelId || !$selectedPaybackDate) disabled @endif>
+                        wire:loading.attr="disabled" @if (!$swapTargetPersonnelId) disabled @endif>
                         <span wire:loading wire:target="executeSwapGuling"
                             class="loading loading-spinner loading-xs"></span>
-                        Proses Tukar Shift
+                        Proses Substitusi
                     </button>
                 </div>
             @endif
