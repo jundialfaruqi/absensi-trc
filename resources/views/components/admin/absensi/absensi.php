@@ -34,6 +34,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     #[Url]
     public string $endDate = '';
 
+    public string $paperSize = 'a4';
+
     // Form Edit properties
     public $editingPersonnelId;
     public $editingTanggal;

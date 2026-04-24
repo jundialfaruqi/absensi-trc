@@ -2,7 +2,7 @@
     {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-base-content tracking-tight uppercase italic">Dashboard TRC</h1>
+            <h1 class="text-2xl font-black text-base-content tracking-tight uppercase">Dashboard TRC</h1>
             <p class="text-xs font-bold text-base-content/50 uppercase tracking-[0.3em]">
                 {{ $opdName }} • {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
             </p>
@@ -26,9 +26,15 @@
                         <div class="stat-figure text-base-content/10">
                             <div class="skeleton w-10 h-10 rounded-full"></div>
                         </div>
-                        <div class="stat-title"><div class="skeleton h-3 w-20"></div></div>
-                        <div class="stat-value"><div class="skeleton h-10 w-16 mt-2"></div></div>
-                        <div class="stat-desc mt-2"><div class="skeleton h-2 w-24"></div></div>
+                        <div class="stat-title">
+                            <div class="skeleton h-3 w-20"></div>
+                        </div>
+                        <div class="stat-value">
+                            <div class="skeleton h-10 w-16 mt-2"></div>
+                        </div>
+                        <div class="stat-desc mt-2">
+                            <div class="skeleton h-2 w-24"></div>
+                        </div>
                     </div>
                 </div>
             @endfor
@@ -84,10 +90,12 @@
                                 d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                         </svg>
                     </div>
-                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Selesai
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
+                        Selesai
                         Tugas</div>
                     <div class="stat-value text-secondary">{{ number_format($stats['total_pulang']) }}</div>
-                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Absen pulang tercatat</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Absen pulang tercatat
+                    </div>
                 </div>
             </div>
 
@@ -103,7 +111,8 @@
                                 d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Terlambat
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
+                        Terlambat
                     </div>
                     <div class="stat-value text-error">{{ number_format($stats['total_terlambat']) }}</div>
                     <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-error">Memerlukan
@@ -124,7 +133,7 @@
                 <div class="flex items-center justify-between px-2">
                     <div class="flex items-center gap-2">
                         <div class="h-8 w-1 bg-primary rounded-full"></div>
-                        <h2 class="text-lg font-black text-base-content uppercase italic">Log Aktifitas Hari Ini</h2>
+                        <h2 class="text-lg font-black text-base-content uppercase">Log Aktifitas Hari Ini</h2>
                     </div>
                     <button wire:click="$refresh" wire:loading.attr="disabled"
                         class="btn btn-ghost btn-xs gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent">
@@ -138,15 +147,16 @@
                     </button>
                 </div>
 
-                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                <div class="card bg-base-100 border border-base-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="table table-md">
                             <thead>
                                 <tr class="bg-base-200/50">
                                     <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
-                                    <th class="text-[10px] font-black uppercase tracking-widest">Waktu</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
-                                    <th class="text-[10px] font-black uppercase tracking-widest">Detail</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -162,9 +172,15 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><div class="skeleton h-4 w-16"></div></td>
-                                            <td><div class="skeleton h-5 w-12 rounded-full"></div></td>
-                                            <td><div class="skeleton h-3 w-24"></div></td>
+                                            <td>
+                                                <div class="skeleton h-5 w-12 rounded-full"></div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                            </td>
                                         </tr>
                                     @endfor
                                 @else
@@ -181,9 +197,10 @@
                                                             @else
                                                                 <div
                                                                     class="flex items-center justify-center h-full text-base-content/20">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                        viewBox="0 0 24 24" stroke-width="1.5"
-                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke-width="1.5" stroke="currentColor"
+                                                                        class="w-6 h-6">
                                                                         <path stroke-linecap="round"
                                                                             stroke-linejoin="round"
                                                                             d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -202,71 +219,77 @@
                                             </td>
                                             <td>
                                                 <div class="flex flex-col gap-1">
-                                                    @if ($log->jam_masuk)
-                                                        <div class="flex items-center gap-1.5">
-                                                            <div class="h-1.5 w-1.5 rounded-full bg-success"></div>
-                                                            <span class="text-[11px] font-bold text-base-content/70">In:
-                                                                {{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
-                                                        </div>
-                                                    @endif
-                                                    @if ($log->jam_pulang)
-                                                        <div class="flex items-center gap-1.5">
-                                                            <div class="h-1.5 w-1.5 rounded-full bg-secondary"></div>
-                                                            <span class="text-[11px] font-bold text-base-content/70">Out:
-                                                                {{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
-                                                        </div>
+                                                    @php
+                                                        $badgeColor = match ($log->status) {
+                                                            'HADIR' => 'success',
+                                                            'ALFA' => 'error',
+                                                            'LIBUR' => 'neutral',
+                                                            'CUTI', 'IZIN', 'SAKIT' => 'primary',
+                                                            default => 'ghost',
+                                                        };
+                                                    @endphp
+                                                    <span
+                                                        class="badge badge-{{ $badgeColor }} badge-sm font-black text-[9px] tracking-widest uppercase">{{ $log->status }}</span>
+
+                                                    @if ($log->is_within_radius === false)
+                                                        <span
+                                                            class="text-[8px] font-black text-error uppercase tracking-tighter">LUAR
+                                                            RADIUS</span>
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div class="flex flex-col gap-1">
-                                                    @if ($log->status === 'ALFA')
+                                            <td class="text-center">
+                                                <div class="flex flex-col items-center gap-1">
+                                                    @if ($log->status_masuk)
+                                                        @php
+                                                            $masukColor = match ($log->status_masuk) {
+                                                                'HADIR', 'TEPAT WAKTU' => 'success',
+                                                                'TELAT' => 'warning',
+                                                                'ALFA' => 'error',
+                                                                default => 'ghost',
+                                                            };
+                                                        @endphp
                                                         <span
-                                                            class="badge badge-error badge-xs font-black text-[8px] tracking-widest uppercase">ALFA</span>
-                                                    @elseif($log->status === 'LIBUR')
+                                                            class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
+                                                    @else
                                                         <span
-                                                            class="badge badge-neutral badge-xs font-black text-[8px] tracking-widest uppercase">LIBUR</span>
+                                                            class="text-[9px] font-bold text-base-content/20">-</span>
                                                     @endif
 
-                                                    @if ($log->status_masuk)
+                                                    @if ($log->jam_masuk)
                                                         <span
-                                                            class="badge badge-{{ $log->status_masuk === 'HADIR' ? 'success' : 'warning' }} badge-xs font-black text-[8px] tracking-widest">{{ $log->status_masuk }}</span>
-                                                    @endif
-                                                    @if ($log->status_pulang)
+                                                            class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
+                                                    @else
                                                         <span
-                                                            class="badge badge-secondary badge-xs font-black text-[8px] tracking-widest uppercase">{{ $log->status_pulang }}</span>
+                                                            class="text-[10px] font-black text-base-content/20">--:--</span>
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div class="flex flex-col gap-1">
-                                                    @if ($log->is_within_radius === true)
+                                            <td class="text-center">
+                                                <div class="flex flex-col items-center gap-1">
+                                                    @if ($log->status_pulang)
+                                                        @php
+                                                            $pulangColor = match ($log->status_pulang) {
+                                                                'HADIR' => 'success',
+                                                                'PC' => 'warning',
+                                                                'ALFA' => 'error',
+                                                                default => 'ghost',
+                                                            };
+                                                        @endphp
                                                         <span
-                                                            class="text-[9px] font-bold text-success/70 flex items-center gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                                fill="currentColor" class="w-3 h-3">
-                                                                <path fill-rule="evenodd"
-                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                                                    clip-rule="evenodd" />
-                                                            </svg>
-                                                            Radius OK
-                                                        </span>
-                                                    @elseif($log->is_within_radius === false)
+                                                            class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
+                                                    @else
                                                         <span
-                                                            class="text-[9px] font-bold text-error/70 flex items-center gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                                fill="currentColor" class="w-3 h-3">
-                                                                <path fill-rule="evenodd"
-                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                                                                    clip-rule="evenodd" />
-                                                            </svg>
-                                                            Luar Radius
-                                                        </span>
+                                                            class="text-[9px] font-bold text-base-content/20">-</span>
                                                     @endif
-                                                    <span
-                                                        class="text-[9px] text-base-content/40 font-medium italic truncate max-w-25">
-                                                        {{ $log->keterangan ?: '-' }}
-                                                    </span>
+
+                                                    @if ($log->jam_pulang)
+                                                        <span
+                                                            class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
+                                                    @else
+                                                        <span
+                                                            class="text-[10px] font-black text-base-content/20">--:--</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -293,6 +316,13 @@
                     @if ($activities->count() > 0)
                         <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4">
                             <div class="flex items-center justify-center gap-6">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                                    <span
+                                        class="text-[10px] font-black uppercase tracking-widest opacity-60">PERSONEL:</span>
+                                    <span
+                                        class="text-xs font-black text-primary">{{ $stats['total_required'] }}</span>
+                                </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-success"></div>
                                     <span
@@ -331,7 +361,7 @@
             {{-- Monitoring Hub: Late & Absent --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {{-- Pegawai Terlambat --}}
-                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                <div class="card bg-base-100 border border-base-200 overflow-hidden">
                     <div class="p-4 bg-error/5 border-b border-base-200 flex items-center justify-between">
                         <div class="flex items-center gap-2 text-error">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -339,7 +369,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h3 class="text-xs font-black uppercase tracking-widest italic">Terlambat Hari Ini</h3>
+                            <h3 class="text-xs font-black uppercase tracking-widest">Terlambat Hari Ini</h3>
                         </div>
                         <span
                             class="badge badge-error badge-sm font-black text-[10px]">{{ $latePersonnel->count() }}</span>
@@ -365,7 +395,7 @@
                                         {{ $late->personnel->opd->name }}</div>
                                 </div>
                                 <div class="flex-none text-right">
-                                    <div class="text-xs font-black text-error italic uppercase">
+                                    <div class="text-xs font-black text-error uppercase">
                                         {{ $late->jam_masuk?->format('H:i') }}</div>
                                     <div class="text-[8px] font-bold text-base-content/30 uppercase tracking-widest">
                                         Jam Masuk</div>
@@ -373,7 +403,7 @@
                             </div>
                         @empty
                             <div class="p-12 text-center">
-                                <div class="opacity-20 italic text-xs uppercase font-black tracking-widest mb-1">Tidak
+                                <div class="opacity-20 text-xs uppercase font-black tracking-widest mb-1">Tidak
                                     Ada Keterlambatan</div>
                                 <div class="text-[9px] font-bold text-base-content/30 uppercase">Semua staff hadir
                                     tepat waktu</div>
@@ -383,7 +413,7 @@
                 </div>
 
                 {{-- Belum Absen --}}
-                <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                <div class="card bg-base-100 border border-base-200 overflow-hidden">
                     <div class="p-4 bg-warning/5 border-b border-base-200 flex items-center justify-between">
                         <div class="flex items-center gap-2 text-warning">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -391,7 +421,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
-                            <h3 class="text-xs font-black uppercase tracking-widest italic">Belum Absen Masuk</h3>
+                            <h3 class="text-xs font-black uppercase tracking-widest">Belum Absen Masuk</h3>
                         </div>
                         <span
                             class="badge badge-warning badge-sm font-black text-[10px]">{{ $absentPersonnel->count() }}</span>
@@ -423,7 +453,7 @@
                             </div>
                         @empty
                             <div class="p-12 text-center">
-                                <div class="opacity-20 italic text-xs uppercase font-black tracking-widest mb-1">Semua
+                                <div class="opacity-20 text-xs uppercase font-black tracking-widest mb-1">Semua
                                     Telah Absen</div>
                                 <div class="text-[9px] font-bold text-base-content/30 uppercase">Monitoring kehadiran
                                     lengkap</div>
@@ -433,171 +463,14 @@
                 </div>
             </div>
 
-            {{-- Statistik: Weekly Chart --}}
-            <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
-                <div
-                    class="p-6 border-b border-base-200 bg-base-200/30 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-                    <div>
-                        <h3 class="text-sm font-black uppercase tracking-widest italic leading-none">Statistik
-                            Kedisiplinan</h3>
-                        <p class="text-[10px] font-bold text-base-content/40 uppercase mt-1 tracking-widest">Aktivitas
-                            7 Hari Terakhir</p>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-6">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></span>
-                            <span class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Tepat
-                                Waktu</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-red-500 shadow-sm"></span>
-                            <span
-                                class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Alfa</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-amber-500 shadow-sm"></span>
-                            <span
-                                class="text-[9px] font-black uppercase text-base-content/60 tracking-widest">Terlambat</span>
-                        </div>
-                        <div class="h-4 w-px bg-base-300 hidden sm:block"></div>
-                        <div class="flex items-center gap-3">
-                            <div class="text-right">
-                                <div class="text-[10px] font-black text-base-content leading-none">
-                                    {{ collect($weeklyStats)->sum('total') }}</div>
-                                <div class="text-[7px] font-bold text-base-content/30 uppercase">Total Absen</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 sm:p-10 overflow-x-auto min-h-[350px]">
-                    @if (!$readyToLoad)
-                        <div class="flex flex-col items-center justify-center h-64 gap-4 opacity-20">
-                            <div class="loading loading-spinner loading-lg text-primary"></div>
-                            <span class="text-[10px] font-black uppercase tracking-[0.3em]">Mengkalkulasi Tren...</span>
-                        </div>
-                    @else
-                        @php
-                            $totalValues = array_column($weeklyStats, 'total');
-                            $maxVal = !empty($totalValues) ? max($totalValues) : 10;
-                            if ($maxVal <= 0)
-                                $maxVal = 10;
-                            $count = count($weeklyStats);
-
-                            $generatePath = function ($key) use ($weeklyStats, $maxVal, $count) {
-                                if ($count < 2)
-                                    return 'M 0,100 L 100,100';
-                                $pts = [];
-                                foreach ($weeklyStats as $i => $stat) {
-                                    $pts[] = [
-                                        'x' => ($i / ($count - 1)) * 100,
-                                        'y' => 100 - ($stat[$key] / $maxVal) * 100,
-                                    ];
-                                }
-
-                                $path = 'M ' . $pts[0]['x'] . ',' . $pts[0]['y'];
-                                for ($i = 0; $i < count($pts) - 1; $i++) {
-                                    $curr = $pts[$i];
-                                    $next = $pts[$i + 1];
-                                    $cp1x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
-                                    $cp2x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
-                                    $path .= " C $cp1x," . $curr['y'] . " $cp2x," . $next['y'] . ' ' . $next['x'] . ',' . $next['y'];
-                                }
-                                return $path;
-                            };
-
-                            $pathOntime = $generatePath('ontime');
-                            $pathAlfa = $generatePath('alfa');
-                            $pathLate = $generatePath('late');
-                        @endphp
-
-                        <div class="min-w-125 h-72 relative px-2">
-                            {{-- SVG Chart --}}
-                            <svg class="w-full h-full overflow-visible" viewBox="0 0 100 100"
-                                preserveAspectRatio="none">
-                                {{-- Grid Lines --}}
-                                @foreach ([0, 25, 50, 75, 100] as $grid)
-                                    <line x1="0" y1="{{ $grid }}" x2="100"
-                                        y2="{{ $grid }}" stroke="currentColor" stroke-width="0.1"
-                                        class="text-base-content/10" />
-                                @endforeach
-
-                                {{-- Shaded Areas (Gradients) --}}
-                                <defs>
-                                    <linearGradient id="grad-ontime" x1="0" y1="0" x2="0"
-                                        y2="1">
-                                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15" />
-                                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
-                                    </linearGradient>
-                                    <linearGradient id="grad-alfa" x1="0" y1="0" x2="0"
-                                        y2="1">
-                                        <stop offset="0%" stop-color="#ef4444" stop-opacity="0.15" />
-                                        <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
-                                    </linearGradient>
-                                </defs>
-
-                                {{-- Area Fills --}}
-                                <path d="{{ $pathOntime }} L 100,100 L 0,100 Z" fill="url(#grad-ontime)" />
-                                <path d="{{ $pathAlfa }} L 100,100 L 0,100 Z" fill="url(#grad-alfa)" />
-
-                                {{-- Smooth Lines --}}
-                                <path d="{{ $pathOntime }}" fill="none" stroke="#3b82f6" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="{{ $pathLate }}" fill="none" stroke="#f59e0b" stroke-width="1"
-                                    stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2,2" />
-                                <path d="{{ $pathAlfa }}" fill="none" stroke="#ef4444" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-
-                                {{-- Points --}}
-                                @foreach ($weeklyStats as $i => $stat)
-                                    @php $x = ($i / ($count - 1)) * 100; @endphp
-                                    <circle cx="{{ $x }}" cy="{{ 100 - ($stat['ontime'] / $maxVal) * 100 }}"
-                                        r="0.8" fill="white" stroke="#3b82f6" stroke-width="0.5" />
-                                    <circle cx="{{ $x }}" cy="{{ 100 - ($stat['alfa'] / $maxVal) * 100 }}"
-                                        r="0.8" fill="white" stroke="#ef4444" stroke-width="0.5" />
-                                @endforeach
-                            </svg>
-
-                            {{-- X-Axis Labels --}}
-                            <div class="absolute -bottom-6 left-0 right-0 flex justify-between">
-                                @foreach ($weeklyStats as $stat)
-                                    <div class="flex flex-col items-center">
-                                        <span
-                                            class="text-[9px] font-black {{ $stat['date'] === date('Y-m-d') ? 'text-primary' : 'text-base-content/40' }} uppercase tracking-widest">
-                                            {{ $stat['label'] }}
-                                        </span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Scroll Indicator for Mobile --}}
-                        <div class="lg:hidden flex items-center justify-center gap-2 mt-12 opacity-30">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor" class="w-3 h-3">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                            </svg>
-                            <span class="text-[8px] font-black uppercase tracking-widest">Geser untuk tren</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor" class="w-3 h-3">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                            </svg>
-                        </div>
-                    @endif
-
-                    <div class="mt-8"></div>
-                </div>
-            </div>
         </div>
 
         {{-- Side Column (Right) --}}
         <div class="space-y-8">
             {{-- Quick Actions: Leave Approval --}}
-            <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+            <div class="card bg-base-100 border border-base-200 overflow-hidden">
                 <div class="p-4 bg-base-200/50 border-b border-base-200 flex items-center justify-between">
-                    <h3 class="text-xs font-black text-base-content/70 uppercase tracking-widest italic">Aksi Cepat:
+                    <h3 class="text-xs font-black text-base-content/70 uppercase tracking-widest">Aksi Cepat:
                         Cuti</h3>
                     @if ($stats['pending_leaves_count'] > 0)
                         <span
@@ -676,8 +549,8 @@
             </div>
 
             {{-- Kinerja Analytics --}}
-            <div class="card bg-base-100 shadow-xl border border-base-200 p-6 space-y-4">
-                <h3 class="text-xs font-black text-base-content/50 uppercase tracking-widest italic">Kinerja Attendance
+            <div class="card bg-base-100 border border-base-200 p-6 space-y-4">
+                <h3 class="text-xs font-black text-base-content/50 uppercase tracking-widest">Kinerja Attendance
                 </h3>
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-base-content/70">Kehadiran Hari Ini</span>
@@ -701,7 +574,7 @@
             </div>
 
             {{-- Help Card --}}
-            <div class="card bg-primary text-primary-content shadow-xl p-6 relative overflow-hidden group">
+            <div class="card bg-primary text-primary-content p-6 relative overflow-hidden group">
                 <div
                     class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -711,7 +584,7 @@
                     </svg>
                 </div>
                 <div class="relative z-10 space-y-3">
-                    <h3 class="text-lg font-black uppercase italic tracking-tighter leading-none">Bantuan &
+                    <h3 class="text-lg font-black uppercase tracking-tighter leading-none">Bantuan &
                         <br>Informasi
                     </h3>
                     <p class="text-xs font-medium opacity-80 leading-relaxed uppercase tracking-tighter">

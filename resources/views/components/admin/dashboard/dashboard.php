@@ -37,13 +37,13 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                     'total_hadir' => 0,
                     'total_telat' => 0,
                     'pending_leaves_count' => 0,
+                    'total_required' => 0,
                     'hadir_percentage' => 0,
                 ],
                 'activities' => collect(),
                 'pendingLeaves' => collect(),
                 'latePersonnel' => collect(),
                 'absentPersonnel' => collect(),
-                'weeklyStats' => [],
                 'isSuperAdmin' => $isSuperAdmin,
                 'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
             ];
@@ -121,42 +121,6 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ->with(['personnel.opd', 'jadwal.shift'])
             ->get();
 
-        // --- Statistics: Weekly Chart ---
-        $startDay = Carbon::now()->subDays(6)->startOfDay();
-        $endDay = Carbon::now()->endOfDay();
-
-        $rawWeeklyStats = Absensi::whereBetween('tanggal', [$startDay, $endDay])
-            ->when(!$isSuperAdmin, function($q) use ($opdId) {
-                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
-            })
-            ->select(
-                DB::raw('DATE(tanggal) as date'),
-                DB::raw("SUM(CASE WHEN status_masuk = 'HADIR' THEN 1 ELSE 0 END) as ontime_count"),
-                DB::raw("SUM(CASE WHEN status_masuk = 'TELAT' THEN 1 ELSE 0 END) as late_count"),
-                DB::raw("SUM(CASE WHEN status = 'ALFA' THEN 1 ELSE 0 END) as alfa_count"),
-                DB::raw('count(*) as total_count')
-            )
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date')
-            ->toArray();
-
-        $weeklyStats = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $label = Carbon::now()->subDays($i)->isoFormat('ddd');
-            $data = $rawWeeklyStats[$date] ?? null;
-
-            $weeklyStats[] = [
-                'date' => $date,
-                'label' => $label,
-                'total' => $data['total_count'] ?? 0,
-                'ontime' => $data['ontime_count'] ?? 0,
-                'late' => $data['late_count'] ?? 0,
-                'alfa' => $data['alfa_count'] ?? 0,
-            ];
-        }
 
         return [
             'stats' => [
@@ -168,13 +132,13 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'total_hadir' => $totalHadir,
                 'total_telat' => $totalTelat,
                 'pending_leaves_count' => $leaveRequestQuery->count(),
+                'total_required' => $totalRequired,
                 'hadir_percentage' => $totalRequired > 0 ? round(($totalMasuk / $totalRequired) * 100) : 0,
             ],
             'activities' => $activities,
             'pendingLeaves' => $pendingLeaves,
             'latePersonnel' => $latePersonnel,
             'absentPersonnel' => $absentPersonnel,
-            'weeklyStats' => $weeklyStats,
             'isSuperAdmin' => $isSuperAdmin,
             'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
         ];

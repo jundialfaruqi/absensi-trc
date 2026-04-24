@@ -40,7 +40,8 @@
         <!-- Drawer Content (Main Page) -->
         <div class="drawer-content flex flex-col h-screen overflow-hidden">
             <!-- Top Header -->
-            <header wire:persist="admin-header" class="h-16 bg-base-100 flex items-center justify-between px-6 border-b border-base-200 shrink-0">
+            <header wire:persist="admin-header"
+                class="h-16 bg-base-100 flex items-center justify-between px-6 border-b border-base-200 shrink-0">
                 <style>
                     @keyframes bell-ring {
 
@@ -270,7 +271,8 @@
         <!-- Sidebar (Drawer Side) -->
         <div class="drawer-side z-130">
             <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-            <aside wire:persist="admin-sidebar" class="menu p-0 w-64 h-full bg-base-100 border-r border-base-300 flex flex-col overflow-hidden">
+            <aside wire:persist="admin-sidebar"
+                class="menu p-0 w-64 h-full bg-base-100 border-r border-base-300 flex flex-col overflow-hidden">
                 <!-- Logo -->
                 <div class="h-16 flex items-center px-2 border-b border-base-200 shrink-0">
                     <div class="flex items-center gap-0 text-secondary font-bold text-2xl group">
@@ -310,6 +312,25 @@
                             </a>
                         </li>
 
+                        @can('manajemen-jadwal')
+                            <li>
+                                <a wire:navigate href="{{ route('jadwal') }}"
+                                    class="{{ request()->routeIs('jadwal*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-18 0h18" />
+                                        </svg>
+                                        <span>Jadwal</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Penjadwalan Personnel
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+
                         @can('manajemen-absensi')
                             <li>
                                 <a wire:navigate href="{{ route('absensi') }}"
@@ -330,6 +351,25 @@
                                     </div>
                                     <span class="text-[8px] text-base-content opacity-50 ml-7">
                                         Monitoring Kehadiran
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('manajemen-shift')
+                            <li>
+                                <a wire:navigate href="{{ route('shift') }}"
+                                    class="{{ request()->routeIs('shift*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span>Shift</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Data Jam Kerja
                                     </span>
                                 </a>
                             </li>
@@ -445,44 +485,6 @@
                             </li>
                         @endcan
 
-                        @can('manajemen-shift')
-                            <li>
-                                <a wire:navigate href="{{ route('shift') }}"
-                                    class="{{ request()->routeIs('shift*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                    <div class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="size-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                        </svg>
-                                        <span>Shift</span>
-                                    </div>
-                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                        Data Jam Kerja
-                                    </span>
-                                </a>
-                            </li>
-                        @endcan
-
-                        @can('manajemen-jadwal')
-                            <li>
-                                <a wire:navigate href="{{ route('jadwal') }}"
-                                    class="{{ request()->routeIs('jadwal*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                    <div class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="size-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-18 0h18" />
-                                        </svg>
-                                        <span>Jadwal</span>
-                                    </div>
-                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                        Penjadwalan Personnel
-                                    </span>
-                                </a>
-                            </li>
-                        @endcan
-
                         @can('manajemen-master-cuti')
                             <li>
                                 <a wire:navigate href="{{ route('cuti') }}"
@@ -553,7 +555,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
                                         </svg>
-                                        <span>Log Absensi</span>
+                                        <span>Log Edit Absensi</span>
                                     </div>
                                     <span class="text-[8px] text-base-content opacity-50 ml-7">
                                         Riwayat Edit Admin

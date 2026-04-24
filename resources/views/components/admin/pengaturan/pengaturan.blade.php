@@ -21,7 +21,7 @@
     {{-- Settings Content --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Pendaftaran Personnel --}}
-        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-primary/10 rounded-lg text-primary">
@@ -48,22 +48,12 @@
                         </div>
                         <input type="checkbox" wire:model.live="registrationEnabled" class="toggle toggle-primary" />
                     </div>
-
-                    <div class="alert alert-info/10 shadow-sm border border-info/20 py-2 rounded-lg">
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[8px] font-black uppercase opacity-40">Link Registrasi Personnel</span>
-                            <div
-                                class="text-[10px] font-bold uppercase tracking-tight truncate select-all underline decoration-dotted">
-                                {{ route('personnel.register') }}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Web Absensi Status --}}
-        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-secondary/10 rounded-lg text-secondary">
@@ -90,22 +80,12 @@
                         </div>
                         <input type="checkbox" wire:model.live="webAbsensiActive" class="toggle toggle-secondary" />
                     </div>
-
-                    <div class="alert alert-secondary/10 shadow-sm border border-secondary/20 py-2 rounded-lg">
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[8px] font-black uppercase opacity-40">Link Absensi Web</span>
-                            <div
-                                class="text-[10px] font-bold uppercase tracking-tight truncate select-all underline decoration-dotted">
-                                {{ route('absensi-web') }}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Batasan Waktu Absensi --}}
-        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-accent/10 rounded-lg text-accent">
@@ -191,7 +171,7 @@
         </div>
 
         {{-- Keamanan & Rate Limit --}}
-        <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-error/10 rounded-lg text-error">

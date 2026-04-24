@@ -14,26 +14,37 @@ class ReportController extends Controller
 {
     public function exportAbsensiPdf(Request $request)
     {
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
         $month = (int) $request->get('month', date('m'));
         $year = (int) $request->get('year', date('Y'));
         $search = $request->get('search');
-        
+        $paperSize = $request->get('paperSize', 'a4');
+
         $opdId = Auth::user()->hasRole('super-admin') ? null : Auth::user()->opd()?->id;
 
-        // Get Days in Month
-        $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
         $dates = [];
-        for ($i = 1; $i <= $daysInMonth; $i++) {
-            $dates[] = Carbon::create($year, $month, $i)->format('Y-m-d');
+        if ($startDate && $endDate) {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+
+            while ($start <= $end) {
+                $dates[] = $start->format('Y-m-d');
+                $start->addDay();
+            }
+        } else {
+            // Fallback to month/year logic
+            $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+            for ($i = 1; $i <= $daysInMonth; $i++) {
+                $dates[] = Carbon::create($year, $month, $i)->format('Y-m-d');
+            }
         }
 
         // Get Personnel Data with their Attendance and Schedule
-        $personnels = Personnel::with(['absensis' => function ($query) use ($year, $month) {
-                $query->whereYear('tanggal', $year)
-                      ->whereMonth('tanggal', $month);
-            }, 'jadwals' => function ($query) use ($year, $month) {
-                $query->whereYear('tanggal', $year)
-                      ->whereMonth('tanggal', $month)
+        $personnels = Personnel::with(['absensis' => function ($query) use ($dates) {
+                $query->whereIn('tanggal', $dates);
+            }, 'jadwals' => function ($query) use ($dates) {
+                $query->whereIn('tanggal', $dates)
                       ->with('shift');
             }, 'penugasan', 'opd'])
             ->when($opdId, function ($q) use ($opdId) {
@@ -63,9 +74,17 @@ class ReportController extends Controller
             'opdName' => $opdName,
         ];
 
+        // Define paper dimensions (landscape)
+        $paperFormat = $paperSize;
+        if ($paperSize === 'f4') {
+            // F4 size in points (72 points per inch)
+            // 215mm x 330mm -> ~609pt x 935pt
+            $paperFormat = [0, 0, 609, 935];
+        }
+
         // Load PDF view
         $pdf = Pdf::loadView('reports.absensi-pdf', $data)
-                  ->setPaper('a4', 'landscape');
+                  ->setPaper($paperFormat, 'landscape');
 
         return $pdf->download("rekap_absensi_{$month}_{$year}.pdf");
     }

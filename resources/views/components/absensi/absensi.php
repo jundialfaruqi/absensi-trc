@@ -538,6 +538,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 }
 
                 $this->activeAbsensi->update([
+                    'status' => 'HADIR',
                     'jam_pulang' => $now->format('H:i:s'),
                     'status_pulang' => $status_pulang,
                     'foto_pulang' => $imagePath,

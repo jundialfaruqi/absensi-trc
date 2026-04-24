@@ -75,12 +75,12 @@
                         class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
                         Dari</div>
                     <input type="date" id="startDate" wire:model.live="startDate"
-                        class="input input-bordered join-item w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]" />
+                        class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark" />
                     <div
                         class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
                         S/D</div>
                     <input type="date" id="endDate" wire:model.live="endDate"
-                        class="input input-bordered join-item w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]" />
+                        class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark" />
 
                     @if ($startDate || $endDate)
                         <button type="button" wire:click="resetFilters"

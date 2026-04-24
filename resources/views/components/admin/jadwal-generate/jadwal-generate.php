@@ -11,6 +11,7 @@ use App\Models\Shift;
 use App\Models\Jadwal;
 use App\Models\Absensi;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -255,6 +256,27 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         ]);
 
         $period = CarbonPeriod::create($this->startDate, $this->endDate);
+
+        // ─── Reset Data ───
+        // Identify and delete existing Absensi and Photos for the selected personnel and range
+        $existingAbsensi = Absensi::whereIn('personnel_id', $this->selectedPersonnelIds)
+            ->whereBetween('tanggal', [$this->startDate, $this->endDate])
+            ->get();
+
+        foreach ($existingAbsensi as $abs) {
+            if ($abs->foto_masuk) {
+                Storage::disk('public')->delete($abs->foto_masuk);
+            }
+            if ($abs->foto_pulang) {
+                Storage::disk('public')->delete($abs->foto_pulang);
+            }
+            $abs->delete();
+        }
+
+        // Delete existing Jadwal for the same range to ensure clean slate
+        Jadwal::whereIn('personnel_id', $this->selectedPersonnelIds)
+            ->whereBetween('tanggal', [$this->startDate, $this->endDate])
+            ->delete();
 
         // Logic for Rolling Cycle
         if ($this->generateMode === 'cycle') {
