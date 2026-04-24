@@ -114,6 +114,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                 'shift_id'   => $this->quickStatus === 'SHIFT' ? $this->quickShiftId : null,
                 'status'     => $this->quickStatus,
                 'keterangan' => $this->quickKeterangan,
+                'is_manual'  => false,
             ]
         );
 

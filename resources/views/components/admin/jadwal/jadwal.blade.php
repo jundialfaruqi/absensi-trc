@@ -226,15 +226,28 @@
                                                         class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
                                                 @endif
 
-                                                @if ($j->is_manual)
-                                                    <div class="absolute top-0 right-0 z-30">
+                                                {{-- Manual Change Badge --}}
+                                                @if ($j && $j->is_manual)
+                                                    @php
+                                                        $isShift = $j->status === 'SHIFT';
+                                                        $iconBg = $isShift ? 'bg-blue-500' : 'bg-yellow-400';
+                                                        $iconColor = $isShift ? 'text-white' : 'text-yellow-900';
+                                                    @endphp
+                                                    <div class="absolute top-0.5 right-0.5 z-10">
                                                         <div
-                                                            class="bg-yellow-400 text-black p-0.5 rounded-bl-md shadow-md border-l border-b border-black/20">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                viewBox="0 0 24 24" stroke-width="3"
-                                                                stroke="currentColor" class="w-3.5 h-3.5">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                                                            class="{{ $iconBg }} {{ $iconColor }} rounded-full p-0.5 shadow-sm border border-white/50">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                class="icon icon-tabler icons-tabler-outline icon-tabler-switch-2 size-2.5">
+                                                                <path stroke="none" d="M0 0h24v24H0z"
+                                                                    fill="none" />
+                                                                <path
+                                                                    d="M3 17h5l1.67 -2.386m3.66 -5.227l1.67 -2.387h6" />
+                                                                <path d="M18 4l3 3l-3 3" />
+                                                                <path d="M3 7h5l7 10h6" />
+                                                                <path d="M18 20l3 -3l-3 -3" />
                                                             </svg>
                                                         </div>
                                                     </div>
