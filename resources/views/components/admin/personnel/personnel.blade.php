@@ -1,4 +1,4 @@
-<div>
+<div wire:init="load">
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -67,123 +67,188 @@
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm mb-6">
         <div class="card-body p-0">
-            <div class="overflow-x-auto">
-                <table class="table table-zebra w-full">
-                    <thead>
-                        <tr>
-                            <th class="text-center w-16">#</th>
-                            <th>Personnel</th>
-                            <th>Kontak</th>
-                            <th>Penugasan</th>
-                            <th>Kantor / Lokasi</th>
-                            <th>OPD Induk</th>
-                            <th class="text-center">Face</th>
-                            <th class="text-center w-24">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($this->personnels as $r)
-                            <tr class="hover:bg-base-200/50">
-                                <td class="text-center font-bold">{{ $this->personnels->firstItem() + $loop->index }}
-                                </td>
-                                <td>
-                                    <div class="flex items-center gap-3">
-                                        <div class="avatar placeholder">
-                                            @if ($r->foto)
-                                                <div class="w-10 rounded-full">
-                                                    <img src="{{ asset('storage/' . $r->foto) }}"
-                                                        alt="{{ $r->name }}" />
-                                                </div>
+            {{-- ─── Skeleton Loading (While Not Ready) ────────────────────────── --}}
+            @if (!$readyToLoad)
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-center w-16">#</th>
+                                <th>Personnel</th>
+                                <th>Kontak</th>
+                                <th>Penugasan</th>
+                                <th>Kantor / Lokasi</th>
+                                <th>OPD Induk</th>
+                                <th class="text-center">Face</th>
+                                <th class="text-center w-24">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for ($i = 0; $i < $perPage; $i++)
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="skeleton h-4 w-4 mx-auto"></div>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
+                                            <div class="flex flex-col gap-2">
+                                                <div class="skeleton h-4 w-32"></div>
+                                                <div class="skeleton h-3 w-24"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton h-4 w-24"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton h-5 w-20 rounded-full"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton h-4 w-32 mb-1"></div>
+                                        <div class="skeleton h-3 w-16"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton h-4 w-28"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton h-4 w-12 mx-auto rounded-full"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton h-6 w-6 mx-auto rounded-full"></div>
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            {{-- ─── Real Table Data ────────────────────────────────────────── --}}
+            @if ($readyToLoad)
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-center w-16">#</th>
+                                <th>Personnel</th>
+                                <th>Kontak</th>
+                                <th>Penugasan</th>
+                                <th>Kantor / Lokasi</th>
+                                <th>OPD Induk</th>
+                                <th class="text-center">Face</th>
+                                <th class="text-center w-24">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($this->personnels as $r)
+                                <tr class="hover:bg-base-200/50">
+                                    <td class="text-center font-bold">{{ $this->personnels->firstItem() + $loop->index }}
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <div class="avatar placeholder">
+                                                @if ($r->foto)
+                                                    <div class="w-10 rounded-full">
+                                                        <img src="{{ asset('storage/' . $r->foto) }}"
+                                                            alt="{{ $r->name }}" />
+                                                    </div>
+                                                @else
+                                                    <div class="bg-neutral text-neutral-content w-10 rounded-full">
+                                                        <span
+                                                            class="text-lg">{{ strtoupper(substr($r->name, 0, 1)) }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <div class="font-bold">{{ $r->name }}</div>
+                                                <div class="text-xs opacity-70">{{ $r->email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{ $r->nomor_hp ?: '-' }}</div>
+                                    </td>
+                                    <td>
+                                        @if ($r->penugasan)
+                                            <div class="badge badge-secondary badge-sm font-medium text-nowrap">
+                                                {{ $r->penugasan->name }}</div>
+                                        @else
+                                            <div class="text-xs italic text-base-content/50">-</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($r->kantor)
+                                            <div class="text-sm font-bold">{{ $r->kantor->name }}</div>
+                                            @if ($r->wajib_absen_di_lokasi)
+                                                <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">Wajib
+                                                    Lokasi</div>
                                             @else
-                                                <div class="bg-neutral text-neutral-content w-10 rounded-full">
-                                                    <span
-                                                        class="text-lg">{{ strtoupper(substr($r->name, 0, 1)) }}</span>
-                                                </div>
+                                                <div
+                                                    class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
+                                                    Luar Lokasi OK</div>
                                             @endif
-                                        </div>
-                                        <div>
-                                            <div class="font-bold">{{ $r->name }}</div>
-                                            <div class="text-xs opacity-70">{{ $r->email }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="text-sm">{{ $r->nomor_hp ?: '-' }}</div>
-                                </td>
-                                <td>
-                                    @if ($r->penugasan)
-                                        <div class="badge badge-secondary badge-sm font-medium text-nowrap">
-                                            {{ $r->penugasan->name }}</div>
-                                    @else
-                                        <div class="text-xs italic text-base-content/50">-</div>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($r->kantor)
-                                        <div class="text-sm font-bold">{{ $r->kantor->name }}</div>
-                                        @if ($r->wajib_absen_di_lokasi)
-                                            <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">Wajib
-                                                Lokasi</div>
+                                        @else
+                                            <div class="text-xs italic text-base-content/50">Belum diatur</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($r->opd)
+                                            <div class="text-sm font-semibold mb-1">{{ $r->opd->name }}</div>
+                                        @else
+                                            <div class="text-sm text-base-content/50 italic mb-1">Tanpa OPD</div>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($r->face_recognition)
+                                            <div class="badge badge-success badge-xs font-bold text-[8px] uppercase">Aktif
+                                            </div>
                                         @else
                                             <div
                                                 class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
-                                                Luar Lokasi OK</div>
+                                                Non-Aktif</div>
                                         @endif
-                                    @else
-                                        <div class="text-xs italic text-base-content/50">Belum diatur</div>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($r->opd)
-                                        <div class="text-sm font-semibold mb-1">{{ $r->opd->name }}</div>
-                                    @else
-                                        <div class="text-sm text-base-content/50 italic mb-1">Tanpa OPD</div>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    @if ($r->face_recognition)
-                                        <div class="badge badge-success badge-xs font-bold text-[8px] uppercase">Aktif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="dropdown dropdown-left dropdown-end">
+                                            <button tabindex="0" class="btn btn-ghost btn-xs btn-square rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                    class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                                                </svg>
+                                            </button>
+                                            <ul tabindex="0"
+                                                class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
+                                                <li>
+                                                    <button type="button"
+                                                        wire:click="openEditModal({{ $r->id }})">Edit</button>
+                                                </li>
+                                                <li>
+                                                    <button type="button" class="text-error"
+                                                        wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">Delete</button>
+                                                </li>
+                                            </ul>
                                         </div>
-                                    @else
-                                        <div
-                                            class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
-                                            Non-Aktif</div>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    <div class="dropdown dropdown-left dropdown-end">
-                                        <button tabindex="0" class="btn btn-ghost btn-xs btn-square rounded-full">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                                            </svg>
-                                        </button>
-                                        <ul tabindex="0"
-                                            class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
-                                            <li>
-                                                <button type="button"
-                                                    wire:click="openEditModal({{ $r->id }})">Edit</button>
-                                            </li>
-                                            <li>
-                                                <button type="button" class="text-error"
-                                                    wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">Delete</button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-sm text-base-content/60 py-8">Tidak ada
-                                    data Personnel</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center text-sm text-base-content/60 py-8">Tidak ada
+                                        data Personnel</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            @endif
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
-                <div class="w-full">{{ $this->personnels->links() }}</div>
+                <div class="w-full">
+                    @if ($readyToLoad)
+                        {{ $this->personnels->links() }}
+                    @endif
+                </div>
             </div>
         </div>
     </div>

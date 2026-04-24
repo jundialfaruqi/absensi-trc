@@ -306,9 +306,17 @@
                         </svg>
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="space-y-2 relative">
+                        {{-- Loading State --}}
+                        <div wire:loading wire:target="search" class="absolute inset-0 z-20 flex items-center justify-center bg-[#0a192f]/50 backdrop-blur-[2px] rounded-2xl">
+                            <div class="flex flex-col items-center gap-3">
+                                <span class="loading loading-spinner loading-lg text-blue-400"></span>
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">Mencari Data...</span>
+                            </div>
+                        </div>
+
                         @if (strlen($search) < 3)
-                            <div
+                            <div wire:loading.remove wire:target="search"
                                 class="text-center py-10 px-6 border-2 border-dashed border-white/5 rounded-2xl bg-white/2">
                                 <div class="text-blue-300/20 mb-3 flex justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"

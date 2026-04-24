@@ -1,4 +1,8 @@
-<div>
+<div class="animate-in fade-in duration-500" wire:init="load">
+    @push('styles')
+        @vite(['resources/views/components/admin/jadwal/jadwal.css'])
+    @endpush
+
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -66,28 +70,6 @@
                     </select>
                 </div>
 
-                <style>
-                    input[type="date"]::-webkit-calendar-picker-indicator {
-                        display: block !important;
-                        cursor: pointer;
-                        opacity: 0.5;
-                        filter: invert(1);
-                    }
-
-                    .dark input[type="date"]::-webkit-calendar-picker-indicator {
-                        filter: invert(0);
-                    }
-
-                    input[type="date"]::-webkit-calendar-picker-indicator:hover {
-                        opacity: 1;
-                    }
-
-                    .bg-pattern-manual {
-                        background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent) !important;
-                        background-size: 8px 8px !important;
-                    }
-                </style>
-
                 <div class="join w-full sm:w-auto">
                     <div
                         class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
@@ -135,156 +117,208 @@
     </div>
 
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm mb-6 overflow-hidden">
+    <div class="card bg-base-100 shadow-sm mb-6 overflow-hidden min-h-[600px]" wire:key="jadwal-main-container">
         <div class="card-body p-0">
-            <div class="overflow-x-auto max-h-150 overflow-y-auto">
-                <table class="table table-sm table-zebra w-full border-separate border-spacing-0">
-                    <thead class="sticky top-0 z-20 bg-base-100">
-                        <tr>
-                            <th
-                                class="sticky left-0 z-30 bg-base-100 border-b border-r border-base-200 min-w-50 text-center">
-                                Personnel</th>
-                            @foreach ($this->dates as $date)
-                                <th
-                                    class="text-center border-b border-r border-base-200 min-w-15 p-2 {{ \Carbon\Carbon::parse($date)->isToday() ? 'bg-primary/10' : '' }}">
-                                    <div class="text-[10px] uppercase opacity-50">
-                                        {{ \Carbon\Carbon::parse($date)->translatedFormat('D') }}</div>
-                                    <div class="text-sm font-bold">{{ \Carbon\Carbon::parse($date)->format('d') }}
-                                    </div>
-                                </th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($this->personnels as $p)
+            {{-- ─── Loading State (Skeleton) ────────────────────────────────── --}}
+            <div @if ($readyToLoad) wire:loading wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage" @endif
+                class="w-full {{ !$readyToLoad ? '' : 'hidden' }}">
+                <div class="overflow-x-auto">
+                    <table class="table table-sm w-full border-separate border-spacing-0">
+                        <thead>
                             <tr>
-                                <td class="sticky left-0 z-40 bg-base-100 border-r border-base-200 p-3 w-50">
-                                    <div class="flex items-center gap-2 ps-4">
-                                        <div class="avatar placeholder">
-                                            @if ($p->foto)
-                                                <div class="w-10 rounded-full">
-                                                    <img src="{{ asset('storage/' . $p->foto) }}"
-                                                        alt="{{ $p->name }}" />
-                                                </div>
-                                            @else
-                                                <div class="bg-neutral text-neutral-content w-8 rounded-full">
-                                                    <span
-                                                        class="text-xs">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div class="truncate">
-                                            <div class="font-bold text-xs truncate max-w-30">{{ $p->name }}
-                                            </div>
-                                            <div class="flex items-center gap-1">
-                                                <div class="text-[9px] opacity-50 truncate max-w-20">
-                                                    {{ $p->penugasan?->name ?? 'N/A' }}</div>
-                                                @if ($p->regu)
-                                                    <span
-                                                        class="px-1 py-0.5 rounded bg-primary/10 text-primary text-[8px] font-bold border border-primary/20 leading-none">
-                                                        {{ $p->regu }}
-                                                    </span>
-                                                @endif
+                                <th class="bg-base-100 border-b border-r border-base-200 min-w-50 p-4">
+                                    <div class="skeleton h-4 w-32 mx-auto"></div>
+                                </th>
+                                @for ($i = 0; $i < 15; $i++)
+                                    <th class="border-b border-r border-base-200 min-w-15 p-2 text-center">
+                                        <div class="skeleton h-3 w-8 mx-auto mb-1"></div>
+                                        <div class="skeleton h-5 w-5 mx-auto"></div>
+                                    </th>
+                                @endfor
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for ($r = 0; $r < 10; $r++)
+                                <tr>
+                                    <td class="border-r border-base-200 p-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
+                                            <div class="flex flex-col gap-2 w-full">
+                                                <div class="skeleton h-3 w-24"></div>
+                                                <div class="skeleton h-2 w-16"></div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
+                                    @for ($c = 0; $c < 15; $c++)
+                                        <td class="border-r border-base-200 p-1">
+                                            <div class="skeleton h-12 w-full rounded-lg"></div>
+                                        </td>
+                                    @endfor
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- ─── Real Table Data ────────────────────────────────────────── --}}
+            @if ($readyToLoad)
+                <div wire:loading.remove
+                    wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage"
+                    class="overflow-x-auto max-h-150 overflow-y-auto">
+                    <table class="table table-sm table-zebra w-full border-separate border-spacing-0">
+                        <thead class="sticky top-0 z-20 bg-base-100">
+                            <tr>
+                                <th
+                                    class="sticky left-0 z-30 bg-base-100 border-b border-r border-base-200 min-w-50 text-center">
+                                    Personnel</th>
                                 @foreach ($this->dates as $date)
-                                    @php
-                                        $j = $p->jadwal_map[$date] ?? null;
-                                        $isToday = \Carbon\Carbon::parse($date)->isToday();
-
-                                        $cellClass = match ($j->status ?? '') {
-                                            'LIBUR' => 'bg-yellow-500 text-white',
-                                            default => '',
-                                        };
-
-                                        $style =
-                                            $j && $j->status === 'SHIFT'
-                                                ? 'background-color: ' .
-                                                    ($j->shift->color ?? '#64748b') .
-                                                    '; color: white;'
-                                                : '';
-                                    @endphp
-                                    <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
-                                        style="{{ $style }}"
-                                        wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
-                                        @if ($j)
-                                            <div
-                                                class="flex flex-col items-center justify-center w-full h-full relative font-bold">
-                                                @if ($j->status === 'SHIFT')
-                                                    <span
-                                                        class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
-                                                    <span class="text-[8px] opacity-80 mt-0.5">
-                                                        {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
-                                                    </span>
-                                                    <span class="text-[8px] opacity-80 mt-0.1">
-                                                        {{ $j->shift ? \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') : '' }}
-                                                    </span>
+                                    <th
+                                        class="text-center border-b border-r border-base-200 min-w-15 p-2 {{ \Carbon\Carbon::parse($date)->isToday() ? 'bg-primary/10' : '' }}">
+                                        <div class="text-[10px] uppercase opacity-50">
+                                            {{ \Carbon\Carbon::parse($date)->translatedFormat('D') }}</div>
+                                        <div class="text-sm font-bold">{{ \Carbon\Carbon::parse($date)->format('d') }}
+                                        </div>
+                                    </th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($this->personnels as $p)
+                                <tr>
+                                    <td class="sticky left-0 z-40 bg-base-100 border-r border-base-200 p-3 w-50">
+                                        <div class="flex items-center gap-2 ps-4">
+                                            <div class="avatar placeholder">
+                                                @if ($p->foto)
+                                                    <div class="w-10 rounded-full">
+                                                        <img src="{{ asset('storage/' . $p->foto) }}"
+                                                            alt="{{ $p->name }}" />
+                                                    </div>
                                                 @else
-                                                    <span
-                                                        class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
-                                                @endif
-
-                                                {{-- Manual Change Badge --}}
-                                                @if ($j && $j->is_manual)
-                                                    @php
-                                                        $isShift = $j->status === 'SHIFT';
-                                                        $iconBg = $isShift ? 'bg-blue-500' : 'bg-yellow-400';
-                                                        $iconColor = $isShift ? 'text-white' : 'text-yellow-900';
-                                                    @endphp
-                                                    <div class="absolute top-0.5 right-0.5 z-10">
-                                                        <div
-                                                            class="{{ $iconBg }} {{ $iconColor }} rounded-full p-0.5 shadow-sm border border-white/50">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round"
-                                                                class="icon icon-tabler icons-tabler-outline icon-tabler-switch-2 size-2.5">
-                                                                <path stroke="none" d="M0 0h24v24H0z"
-                                                                    fill="none" />
-                                                                <path
-                                                                    d="M3 17h5l1.67 -2.386m3.66 -5.227l1.67 -2.387h6" />
-                                                                <path d="M18 4l3 3l-3 3" />
-                                                                <path d="M3 7h5l7 10h6" />
-                                                                <path d="M18 20l3 -3l-3 -3" />
-                                                            </svg>
-                                                        </div>
+                                                    <div class="bg-neutral text-neutral-content w-8 rounded-full">
+                                                        <span
+                                                            class="text-xs">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
                                                     </div>
                                                 @endif
                                             </div>
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center opacity-10">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="size-3">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 4.5v15m7.5-7.5h-15" />
-                                                </svg>
+                                            <div class="truncate">
+                                                <div class="font-bold text-xs truncate max-w-30">{{ $p->name }}
+                                                </div>
+                                                <div class="flex items-center gap-1">
+                                                    <div class="text-[9px] opacity-50 truncate max-w-20">
+                                                        {{ $p->penugasan?->name ?? 'N/A' }}</div>
+                                                    @if ($p->regu)
+                                                        <span
+                                                            class="px-1 py-0.5 rounded bg-primary/10 text-primary text-[8px] font-bold border border-primary/20 leading-none">
+                                                            {{ $p->regu }}
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        @endif
+                                        </div>
                                     </td>
-                                @endforeach
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="32" class="text-center text-sm text-base-content/60 py-12">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="size-12 opacity-20 mb-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                        </svg>
-                                        Tidak ada data personnel atau jadwal ditemukan.
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    @foreach ($this->dates as $date)
+                                        @php
+                                            $j = $p->jadwal_map[$date] ?? null;
+                                            $isToday = \Carbon\Carbon::parse($date)->isToday();
+
+                                            $cellClass = match ($j->status ?? '') {
+                                                'LIBUR' => 'bg-yellow-500 text-white',
+                                                default => '',
+                                            };
+
+                                            $style =
+                                                $j && $j->status === 'SHIFT'
+                                                    ? 'background-color: ' .
+                                                        ($j->shift->color ?? '#64748b') .
+                                                        '; color: white;'
+                                                    : '';
+                                        @endphp
+                                        <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
+                                            style="{{ $style }}"
+                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
+                                            @if ($j)
+                                                <div
+                                                    class="flex flex-col items-center justify-center w-full h-full relative font-bold">
+                                                    @if ($j->status === 'SHIFT')
+                                                        <span
+                                                            class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
+                                                        <span class="text-[8px] opacity-80 mt-0.5">
+                                                            {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
+                                                        </span>
+                                                        <span class="text-[8px] opacity-80 mt-0.1">
+                                                            {{ $j->shift ? \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') : '' }}
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
+                                                    @endif
+
+                                                    {{-- Manual Change Badge --}}
+                                                    @if ($j && $j->is_manual)
+                                                        @php
+                                                            $isShift = $j->status === 'SHIFT';
+                                                            $iconBg = $isShift ? 'bg-blue-500' : 'bg-yellow-400';
+                                                            $iconColor = $isShift ? 'text-white' : 'text-yellow-900';
+                                                        @endphp
+                                                        <div class="absolute top-0.5 right-0.5 z-10">
+                                                            <div
+                                                                class="{{ $iconBg }} {{ $iconColor }} rounded-full p-0.5 shadow-sm border border-white/50">
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-switch-2 size-2.5">
+                                                                    <path stroke="none" d="M0 0h24v24H0z"
+                                                                        fill="none" />
+                                                                    <path
+                                                                        d="M3 17h5l1.67 -2.386m3.66 -5.227l1.67 -2.387h6" />
+                                                                    <path d="M18 4l3 3l-3 3" />
+                                                                    <path d="M3 7h5l7 10h6" />
+                                                                    <path d="M18 20l3 -3l-3 -3" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div class="w-full h-full flex items-center justify-center opacity-10">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="size-3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                </div>
+                                            @endif
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="32" class="text-center text-sm text-base-content/60 py-12">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                class="size-12 opacity-20 mb-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                            </svg>
+                                            Tidak ada data personnel atau jadwal ditemukan.
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            @endif
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
-                <div class="w-full">{{ $this->personnels->links() }}</div>
+                <div class="w-full">
+                    @if ($readyToLoad)
+                        {{ $this->personnels->links() }}
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -428,7 +462,8 @@
                     {{-- Select Target Personnel --}}
                     <div class="form-control">
                         <label class="label mb-1 px-1">
-                            <span class="label-text font-medium text-xs text-base-content/70">Pilih Personel Pengganti (Sedang Libur)</span>
+                            <span class="label-text font-medium text-xs text-base-content/70">Pilih Personel Pengganti
+                                (Sedang Libur)</span>
                         </label>
                         <select wire:model.live="swapTargetPersonnelId"
                             class="select select-bordered w-full select-sm focus:select-primary">
@@ -437,12 +472,22 @@
                                 <option value="{{ $sub->id }}">{{ $sub->name }}</option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-base-content/50 mt-2 italic">* Hanya menampilkan personel yang libur dan tidak memiliki tabrakan jadwal Malam-Siang.</p>
+                        <p class="text-[10px] text-base-content/50 mt-2 italic">* Hanya menampilkan personel yang libur
+                            dan tidak memiliki tabrakan jadwal Malam-Siang.</p>
                     </div>
 
                     @if ($swapWarning)
-                        <div class="p-4 bg-warning/10 border border-warning/20 rounded-2xl flex items-start gap-3 animate-in shake duration-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-warning shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
+                        <div
+                            class="p-4 bg-warning/10 border border-warning/20 rounded-2xl flex items-start gap-3 animate-in shake duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round" class="text-warning shrink-0 mt-0.5">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 9v4" />
+                                <path
+                                    d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+                                <path d="M12 16h.01" />
+                            </svg>
                             <div>
                                 <h4 class="text-xs font-black uppercase text-warning mb-1">Peringatan Istirahat</h4>
                                 <p class="text-[10px] leading-tight opacity-80">{!! $swapWarning !!}</p>

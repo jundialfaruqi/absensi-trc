@@ -106,9 +106,10 @@
 
             <div class="relative z-10 h-full flex flex-col justify-between">
                 <div>
-                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Penugasan Hari Ini</p>
+                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Penugasan Hari Ini
+                    </p>
                     <h3 class="text-2xl font-black text-white uppercase italic tracking-tighter leading-tight">
-                        {{ $todayJadwal?->status === 'SHIFT' ? $todayJadwal->shift->name : ($todayJadwal?->status ?? 'LIBUR') }}
+                        {{ $todayJadwal?->status === 'SHIFT' ? $todayJadwal->shift->name : $todayJadwal?->status ?? 'LIBUR' }}
                     </h3>
                 </div>
 
@@ -117,7 +118,8 @@
                         <div
                             class="flex items-center justify-between p-3 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors">
                             <div class="flex items-center gap-3">
-                                <div class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                <div
+                                    class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -137,7 +139,8 @@
                     <div
                         class="flex items-center justify-between p-3 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="h-8 w-8 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-500">
+                            <div
+                                class="h-8 w-8 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -157,7 +160,8 @@
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-3 w-3 ml-2 transform group-hover/btn:translate-x-1 transition-transform" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </a>
             </div>
@@ -183,8 +187,8 @@
 
                 <div
                     class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -216,8 +220,8 @@
 
                 <div
                     class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -249,8 +253,8 @@
 
                 <div
                     class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -282,8 +286,8 @@
 
                 <div
                     class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -298,6 +302,46 @@
                 <div
                     class="mt-4 sm:mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
                     <span class="text-[9px] font-black uppercase tracking-widest italic">Ajukan Sekarang</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </a>
+
+            {{-- Ambil Absen --}}
+            <a href="{{ route('absensi-web') }}"
+                class="group relative p-5 sm:p-8 glass-panel rounded-3xl sm:rounded-[2.5rem] border-white/5 hover:border-blue-500/40 hover:bg-blue-600/5 transition-all duration-500 overflow-hidden shadow-xl">
+                <div
+                    class="absolute -top-12 -right-12 h-32 w-32 bg-blue-600/10 blur-3xl group-hover:bg-blue-600/20 transition-all">
+                </div>
+
+                <div
+                    class="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-face-id h-6 w-6 sm:h-8 sm:w-8">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
+                        <path d="M4 16v2a2 2 0 0 0 2 2h2" />
+                        <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+                        <path d="M16 20h2a2 2 0 0 0 2 -2v-2" />
+                        <path d="M9 10l.01 0" />
+                        <path d="M15 10l.01 0" />
+                        <path d="M9.5 15a3.5 3.5 0 0 0 5 0" />
+                    </svg>
+                </div>
+
+                <h4 class="text-sm sm:text-lg font-black text-white uppercase italic tracking-wider leading-tight">
+                    Ambil<br />Absen</h4>
+                <p
+                    class="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 group-hover:text-blue-300 transition-colors">
+                    Ambil Absen Hari Ini</p>
+
+                <div
+                    class="mt-4 sm:mt-6 flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    <span class="text-[9px] font-black uppercase tracking-widest italic">Absen Sekarang</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"

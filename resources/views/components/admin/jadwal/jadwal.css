@@ -1,1 +1,64 @@
-/* Add your CSS here */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: block !important;
+    cursor: pointer;
+    opacity: 0.5;
+    filter: invert(1);
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+.bg-pattern-manual {
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent) !important;
+    background-size: 8px 8px !important;
+}
+
+@keyframes scan-line {
+    0% {
+        top: 0;
+    }
+
+    100% {
+        top: 100%;
+    }
+}
+
+.animate-scan-line {
+    animation: scan-line 2s linear infinite;
+}
+
+/* Transisi Halaman */
+.animate-in {
+    animation-duration: 500ms;
+    animation-fill-mode: both;
+}
+
+.fade-in {
+    animation-name: fadeIn;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Stabilitas Tabel */
+.table-separate {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Mencegah pergeseran konten saat elemen sticky dihapus */
+[wire\:key="jadwal-main-container"] {
+    contain: layout style;
+    backface-visibility: hidden;
+}

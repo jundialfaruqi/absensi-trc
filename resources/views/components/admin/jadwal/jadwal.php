@@ -14,6 +14,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
 {
     use WithPagination;
 
+    public bool $readyToLoad = false;
     public int $perPage = 10;
     
     #[Url]
@@ -49,6 +50,11 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     {
         if (!$this->month) $this->month = Carbon::now()->format('m');
         if (!$this->year) $this->year = Carbon::now()->format('Y');
+    }
+
+    public function load()
+    {
+        $this->readyToLoad = true;
     }
 
     #[Computed]
@@ -394,6 +400,10 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function personnels()
     {
+        if (!$this->readyToLoad) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        }
+
         $opdId = Auth::user()->opd()?->id;
 
         $paginator = \App\Models\Personnel::with(['jadwals' => function ($query) {

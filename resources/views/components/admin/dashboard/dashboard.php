@@ -13,11 +13,41 @@ use Illuminate\Support\Facades\DB;
 
 new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Component
 {
+    public bool $readyToLoad = false;
+
+    public function load()
+    {
+        $this->readyToLoad = true;
+    }
+
     public function with()
     {
         $user = Auth::user();
         $isSuperAdmin = $user->hasRole('super-admin');
         $opdId = $user->opd()?->id;
+
+        if (!$this->readyToLoad) {
+            return [
+                'stats' => [
+                    'total_personnel' => 0,
+                    'total_masuk' => 0,
+                    'total_pulang' => 0,
+                    'total_terlambat' => 0,
+                    'total_alfa' => 0,
+                    'total_hadir' => 0,
+                    'total_telat' => 0,
+                    'pending_leaves_count' => 0,
+                    'hadir_percentage' => 0,
+                ],
+                'activities' => collect(),
+                'pendingLeaves' => collect(),
+                'latePersonnel' => collect(),
+                'absentPersonnel' => collect(),
+                'weeklyStats' => [],
+                'isSuperAdmin' => $isSuperAdmin,
+                'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+            ];
+        }
 
         $today = Carbon::today();
 

@@ -1,4 +1,4 @@
-<div class="space-y-8">
+<div class="space-y-8" wire:init="load">
     {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -19,83 +19,98 @@
 
     {{-- Stats Grid --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {{-- Total Personnel --}}
-        <div
-            class="stats shadow bg-base-100 border border-base-200 group hover:border-primary/30 transition-all duration-300">
-            <div class="stat">
-                <div
-                    class="stat-figure text-primary opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-10 h-10">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                    </svg>
+        @if (!$readyToLoad)
+            @for ($i = 0; $i < 4; $i++)
+                <div class="stats shadow bg-base-100 border border-base-200">
+                    <div class="stat">
+                        <div class="stat-figure text-base-content/10">
+                            <div class="skeleton w-10 h-10 rounded-full"></div>
+                        </div>
+                        <div class="stat-title"><div class="skeleton h-3 w-20"></div></div>
+                        <div class="stat-value"><div class="skeleton h-10 w-16 mt-2"></div></div>
+                        <div class="stat-desc mt-2"><div class="skeleton h-2 w-24"></div></div>
+                    </div>
                 </div>
-                <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Total
-                    Personel</div>
-                <div class="stat-value text-primary">{{ number_format($stats['total_personnel']) }}</div>
-                <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Aktif dalam sistem</div>
+            @endfor
+        @else
+            {{-- Total Personnel --}}
+            <div
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-primary/30 transition-all duration-300">
+                <div class="stat">
+                    <div
+                        class="stat-figure text-primary opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Total
+                        Personel</div>
+                    <div class="stat-value text-primary">{{ number_format($stats['total_personnel']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Aktif dalam sistem</div>
+                </div>
             </div>
-        </div>
 
-        {{-- Absen Masuk --}}
-        <div
-            class="stats shadow bg-base-100 border border-base-200 group hover:border-success/30 transition-all duration-300">
-            <div class="stat">
-                <div
-                    class="stat-figure text-success opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-10 h-10">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M11.5 21l-5.5-2V7l5.5 2V21zM11.5 21l5.5-2V7l-5.5 2V21zM9.5 13H13.5M11.5 11V15" />
-                    </svg>
+            {{-- Absen Masuk --}}
+            <div
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-success/30 transition-all duration-300">
+                <div class="stat">
+                    <div
+                        class="stat-figure text-success opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M11.5 21l-5.5-2V7l5.5 2V21zM11.5 21l5.5-2V7l-5.5 2V21zM9.5 13H13.5M11.5 11V15" />
+                        </svg>
+                    </div>
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Absen
+                        Masuk</div>
+                    <div class="stat-value text-success">{{ number_format($stats['total_masuk']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">
+                        {{ $stats['hadir_percentage'] }}% dari total personel</div>
                 </div>
-                <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Absen
-                    Masuk</div>
-                <div class="stat-value text-success">{{ number_format($stats['total_masuk']) }}</div>
-                <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">
-                    {{ $stats['hadir_percentage'] }}% dari total personel</div>
             </div>
-        </div>
 
-        {{-- Absen Pulang --}}
-        <div
-            class="stats shadow bg-base-100 border border-base-200 group hover:border-secondary/30 transition-all duration-300">
-            <div class="stat">
-                <div
-                    class="stat-figure text-secondary opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-10 h-10">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                    </svg>
+            {{-- Absen Pulang --}}
+            <div
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-secondary/30 transition-all duration-300">
+                <div class="stat">
+                    <div
+                        class="stat-figure text-secondary opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                        </svg>
+                    </div>
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Selesai
+                        Tugas</div>
+                    <div class="stat-value text-secondary">{{ number_format($stats['total_pulang']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Absen pulang tercatat</div>
                 </div>
-                <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Selesai
-                    Tugas</div>
-                <div class="stat-value text-secondary">{{ number_format($stats['total_pulang']) }}</div>
-                <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Absen pulang tercatat</div>
             </div>
-        </div>
 
-        {{-- Terlambat --}}
-        <div
-            class="stats shadow bg-base-100 border border-base-200 group hover:border-error/30 transition-all duration-300">
-            <div class="stat">
-                <div
-                    class="stat-figure text-error opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-10 h-10">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            {{-- Terlambat --}}
+            <div
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-error/30 transition-all duration-300">
+                <div class="stat">
+                    <div
+                        class="stat-figure text-error opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Terlambat
+                    </div>
+                    <div class="stat-value text-error">{{ number_format($stats['total_terlambat']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-error">Memerlukan
+                        perhatian</div>
                 </div>
-                <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Terlambat
-                </div>
-                <div class="stat-value text-error">{{ number_format($stats['total_terlambat']) }}</div>
-                <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-error">Memerlukan
-                    perhatian</div>
             </div>
-        </div>
+        @endif
     </div>
 
     {{-- Main Dashboard Grid --}}
@@ -135,124 +150,143 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($activities as $log)
-                                    <tr
-                                        class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group {{ $log->status === 'LIBUR' ? 'bg-base-200/80 opacity-25 grayscale' : '' }}">
-                                        <td>
-                                            <div class="flex items-center gap-3">
-                                                <div class="avatar">
-                                                    <div class="mask mask-squircle w-10 h-10 bg-base-200">
-                                                        @if ($log->personnel->foto)
-                                                            <img src="{{ asset('storage/' . $log->personnel->foto) }}"
-                                                                alt="Avatar" />
-                                                        @else
-                                                            <div
-                                                                class="flex items-center justify-center h-full text-base-content/20">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                    viewBox="0 0 24 24" stroke-width="1.5"
-                                                                    stroke="currentColor" class="w-6 h-6">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round"
-                                                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                                                </svg>
-                                                            </div>
-                                                        @endif
+                                @if (!$readyToLoad)
+                                    @for ($i = 0; $i < 5; $i++)
+                                        <tr>
+                                            <td>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="skeleton w-10 h-10 mask mask-squircle"></div>
+                                                    <div class="flex flex-col gap-2">
+                                                        <div class="skeleton h-3 w-28"></div>
+                                                        <div class="skeleton h-2 w-20"></div>
                                                     </div>
                                                 </div>
-                                                <div class="flex flex-col">
-                                                    <span
-                                                        class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
-                                                    <span
-                                                        class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->name }}</span>
+                                            </td>
+                                            <td><div class="skeleton h-4 w-16"></div></td>
+                                            <td><div class="skeleton h-5 w-12 rounded-full"></div></td>
+                                            <td><div class="skeleton h-3 w-24"></div></td>
+                                        </tr>
+                                    @endfor
+                                @else
+                                    @forelse($activities as $log)
+                                        <tr
+                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group {{ $log->status === 'LIBUR' ? 'bg-base-200/80 opacity-25 grayscale' : '' }}">
+                                            <td>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="avatar">
+                                                        <div class="mask mask-squircle w-10 h-10 bg-base-200">
+                                                            @if ($log->personnel->foto)
+                                                                <img src="{{ asset('storage/' . $log->personnel->foto) }}"
+                                                                    alt="Avatar" />
+                                                            @else
+                                                                <div
+                                                                    class="flex items-center justify-center h-full text-base-content/20">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                        viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                                    </svg>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span
+                                                            class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
+                                                        <span
+                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->name }}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="flex flex-col gap-1">
-                                                @if ($log->jam_masuk)
-                                                    <div class="flex items-center gap-1.5">
-                                                        <div class="h-1.5 w-1.5 rounded-full bg-success"></div>
-                                                        <span class="text-[11px] font-bold text-base-content/70">In:
-                                                            {{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
-                                                    </div>
-                                                @endif
-                                                @if ($log->jam_pulang)
-                                                    <div class="flex items-center gap-1.5">
-                                                        <div class="h-1.5 w-1.5 rounded-full bg-secondary"></div>
-                                                        <span class="text-[11px] font-bold text-base-content/70">Out:
-                                                            {{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="flex flex-col gap-1">
-                                                @if ($log->status === 'ALFA')
-                                                    <span
-                                                        class="badge badge-error badge-xs font-black text-[8px] tracking-widest uppercase">ALFA</span>
-                                                @elseif($log->status === 'LIBUR')
-                                                    <span
-                                                        class="badge badge-neutral badge-xs font-black text-[8px] tracking-widest uppercase">LIBUR</span>
-                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="flex flex-col gap-1">
+                                                    @if ($log->jam_masuk)
+                                                        <div class="flex items-center gap-1.5">
+                                                            <div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+                                                            <span class="text-[11px] font-bold text-base-content/70">In:
+                                                                {{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
+                                                        </div>
+                                                    @endif
+                                                    @if ($log->jam_pulang)
+                                                        <div class="flex items-center gap-1.5">
+                                                            <div class="h-1.5 w-1.5 rounded-full bg-secondary"></div>
+                                                            <span class="text-[11px] font-bold text-base-content/70">Out:
+                                                                {{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="flex flex-col gap-1">
+                                                    @if ($log->status === 'ALFA')
+                                                        <span
+                                                            class="badge badge-error badge-xs font-black text-[8px] tracking-widest uppercase">ALFA</span>
+                                                    @elseif($log->status === 'LIBUR')
+                                                        <span
+                                                            class="badge badge-neutral badge-xs font-black text-[8px] tracking-widest uppercase">LIBUR</span>
+                                                    @endif
 
-                                                @if ($log->status_masuk)
+                                                    @if ($log->status_masuk)
+                                                        <span
+                                                            class="badge badge-{{ $log->status_masuk === 'HADIR' ? 'success' : 'warning' }} badge-xs font-black text-[8px] tracking-widest">{{ $log->status_masuk }}</span>
+                                                    @endif
+                                                    @if ($log->status_pulang)
+                                                        <span
+                                                            class="badge badge-secondary badge-xs font-black text-[8px] tracking-widest uppercase">{{ $log->status_pulang }}</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="flex flex-col gap-1">
+                                                    @if ($log->is_within_radius === true)
+                                                        <span
+                                                            class="text-[9px] font-bold text-success/70 flex items-center gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" class="w-3 h-3">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            Radius OK
+                                                        </span>
+                                                    @elseif($log->is_within_radius === false)
+                                                        <span
+                                                            class="text-[9px] font-bold text-error/70 flex items-center gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor" class="w-3 h-3">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            Luar Radius
+                                                        </span>
+                                                    @endif
                                                     <span
-                                                        class="badge badge-{{ $log->status_masuk === 'HADIR' ? 'success' : 'warning' }} badge-xs font-black text-[8px] tracking-widest">{{ $log->status_masuk }}</span>
-                                                @endif
-                                                @if ($log->status_pulang)
-                                                    <span
-                                                        class="badge badge-secondary badge-xs font-black text-[8px] tracking-widest uppercase">{{ $log->status_pulang }}</span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="flex flex-col gap-1">
-                                                @if ($log->is_within_radius === true)
-                                                    <span
-                                                        class="text-[9px] font-bold text-success/70 flex items-center gap-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" class="w-3 h-3">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                        Radius OK
+                                                        class="text-[9px] text-base-content/40 font-medium italic truncate max-w-25">
+                                                        {{ $log->keterangan ?: '-' }}
                                                     </span>
-                                                @elseif($log->is_within_radius === false)
-                                                    <span
-                                                        class="text-[9px] font-bold text-error/70 flex items-center gap-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" class="w-3 h-3">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                        Luar Radius
-                                                    </span>
-                                                @endif
-                                                <span
-                                                    class="text-[9px] text-base-content/40 font-medium italic truncate max-w-25">
-                                                    {{ $log->keterangan ?: '-' }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="py-12 text-center">
-                                            <div class="flex flex-col items-center opacity-20">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"
-                                                    class="w-16 h-16 mb-2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                                                </svg>
-                                                <p class="text-sm font-black uppercase tracking-widest">Belum ada
-                                                    aktifitas hari ini</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="py-12 text-center">
+                                                <div class="flex flex-col items-center opacity-20">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"
+                                                        class="w-16 h-16 mb-2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                                    </svg>
+                                                    <p class="text-sm font-black uppercase tracking-widest">Belum ada
+                                                        aktifitas hari ini</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -436,117 +470,122 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-4 sm:p-10 overflow-x-auto">
-                    @php
-                        $maxVal = max(array_column($weeklyStats, 'total')) ?: 10;
-                        $count = count($weeklyStats);
-
-                        $generatePath = function ($key) use ($weeklyStats, $maxVal, $count) {
-                            $pts = [];
-                            foreach ($weeklyStats as $i => $stat) {
-                                $pts[] = [
-                                    'x' => ($i / ($count - 1)) * 100,
-                                    'y' => 100 - ($stat[$key] / $maxVal) * 100,
-                                ];
-                            }
-
-                            $path = 'M ' . $pts[0]['x'] . ',' . $pts[0]['y'];
-                            for ($i = 0; $i < count($pts) - 1; $i++) {
-                                $curr = $pts[$i];
-                                $next = $pts[$i + 1];
-                                $cp1x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
-                                $cp2x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
-                                $path .=
-                                    " C $cp1x," .
-                                    $curr['y'] .
-                                    " $cp2x," .
-                                    $next['y'] .
-                                    ' ' .
-                                    $next['x'] .
-                                    ',' .
-                                    $next['y'];
-                            }
-                            return $path;
-                        };
-
-                        $pathOntime = $generatePath('ontime');
-                        $pathAlfa = $generatePath('alfa');
-                        $pathLate = $generatePath('late');
-                    @endphp
-
-                    <div class="min-w-125 h-72 relative px-2">
-                        {{-- SVG Chart --}}
-                        <svg class="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            {{-- Grid Lines --}}
-                            @foreach ([0, 25, 50, 75, 100] as $grid)
-                                <line x1="0" y1="{{ $grid }}" x2="100"
-                                    y2="{{ $grid }}" stroke="currentColor" stroke-width="0.1"
-                                    class="text-base-content/10" />
-                            @endforeach
-
-                            {{-- Shaded Areas (Gradients) --}}
-                            <defs>
-                                <linearGradient id="grad-ontime" x1="0" y1="0" x2="0"
-                                    y2="1">
-                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15" />
-                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
-                                </linearGradient>
-                                <linearGradient id="grad-alfa" x1="0" y1="0" x2="0"
-                                    y2="1">
-                                    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.15" />
-                                    <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
-                                </linearGradient>
-                            </defs>
-
-                            {{-- Area Fills --}}
-                            <path d="{{ $pathOntime }} L 100,100 L 0,100 Z" fill="url(#grad-ontime)" />
-                            <path d="{{ $pathAlfa }} L 100,100 L 0,100 Z" fill="url(#grad-alfa)" />
-
-                            {{-- Smooth Lines --}}
-                            <path d="{{ $pathOntime }}" fill="none" stroke="#3b82f6" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="{{ $pathLate }}" fill="none" stroke="#f59e0b" stroke-width="1"
-                                stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2,2" />
-                            <path d="{{ $pathAlfa }}" fill="none" stroke="#ef4444" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-
-                            {{-- Points --}}
-                            @foreach ($weeklyStats as $i => $stat)
-                                @php $x = ($i / ($count - 1)) * 100; @endphp
-                                <circle cx="{{ $x }}" cy="{{ 100 - ($stat['ontime'] / $maxVal) * 100 }}"
-                                    r="0.8" fill="white" stroke="#3b82f6" stroke-width="0.5" />
-                                <circle cx="{{ $x }}" cy="{{ 100 - ($stat['alfa'] / $maxVal) * 100 }}"
-                                    r="0.8" fill="white" stroke="#ef4444" stroke-width="0.5" />
-                            @endforeach
-                        </svg>
-
-                        {{-- X-Axis Labels --}}
-                        <div class="absolute -bottom-6 left-0 right-0 flex justify-between">
-                            @foreach ($weeklyStats as $stat)
-                                <div class="flex flex-col items-center">
-                                    <span
-                                        class="text-[9px] font-black {{ $stat['date'] === date('Y-m-d') ? 'text-primary' : 'text-base-content/40' }} uppercase tracking-widest">
-                                        {{ $stat['label'] }}
-                                    </span>
-                                </div>
-                            @endforeach
+                <div class="p-4 sm:p-10 overflow-x-auto min-h-[350px]">
+                    @if (!$readyToLoad)
+                        <div class="flex flex-col items-center justify-center h-64 gap-4 opacity-20">
+                            <div class="loading loading-spinner loading-lg text-primary"></div>
+                            <span class="text-[10px] font-black uppercase tracking-[0.3em]">Mengkalkulasi Tren...</span>
                         </div>
-                    </div>
+                    @else
+                        @php
+                            $totalValues = array_column($weeklyStats, 'total');
+                            $maxVal = !empty($totalValues) ? max($totalValues) : 10;
+                            if ($maxVal <= 0)
+                                $maxVal = 10;
+                            $count = count($weeklyStats);
 
-                    {{-- Scroll Indicator for Mobile --}}
-                    <div class="lg:hidden flex items-center justify-center gap-2 mt-12 opacity-30">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="w-3 h-3">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                        </svg>
-                        <span class="text-[8px] font-black uppercase tracking-widest">Geser untuk tren</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="w-3 h-3">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                        </svg>
-                    </div>
+                            $generatePath = function ($key) use ($weeklyStats, $maxVal, $count) {
+                                if ($count < 2)
+                                    return 'M 0,100 L 100,100';
+                                $pts = [];
+                                foreach ($weeklyStats as $i => $stat) {
+                                    $pts[] = [
+                                        'x' => ($i / ($count - 1)) * 100,
+                                        'y' => 100 - ($stat[$key] / $maxVal) * 100,
+                                    ];
+                                }
+
+                                $path = 'M ' . $pts[0]['x'] . ',' . $pts[0]['y'];
+                                for ($i = 0; $i < count($pts) - 1; $i++) {
+                                    $curr = $pts[$i];
+                                    $next = $pts[$i + 1];
+                                    $cp1x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
+                                    $cp2x = $curr['x'] + ($next['x'] - $curr['x']) / 2;
+                                    $path .= " C $cp1x," . $curr['y'] . " $cp2x," . $next['y'] . ' ' . $next['x'] . ',' . $next['y'];
+                                }
+                                return $path;
+                            };
+
+                            $pathOntime = $generatePath('ontime');
+                            $pathAlfa = $generatePath('alfa');
+                            $pathLate = $generatePath('late');
+                        @endphp
+
+                        <div class="min-w-125 h-72 relative px-2">
+                            {{-- SVG Chart --}}
+                            <svg class="w-full h-full overflow-visible" viewBox="0 0 100 100"
+                                preserveAspectRatio="none">
+                                {{-- Grid Lines --}}
+                                @foreach ([0, 25, 50, 75, 100] as $grid)
+                                    <line x1="0" y1="{{ $grid }}" x2="100"
+                                        y2="{{ $grid }}" stroke="currentColor" stroke-width="0.1"
+                                        class="text-base-content/10" />
+                                @endforeach
+
+                                {{-- Shaded Areas (Gradients) --}}
+                                <defs>
+                                    <linearGradient id="grad-ontime" x1="0" y1="0" x2="0"
+                                        y2="1">
+                                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15" />
+                                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                                    </linearGradient>
+                                    <linearGradient id="grad-alfa" x1="0" y1="0" x2="0"
+                                        y2="1">
+                                        <stop offset="0%" stop-color="#ef4444" stop-opacity="0.15" />
+                                        <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+
+                                {{-- Area Fills --}}
+                                <path d="{{ $pathOntime }} L 100,100 L 0,100 Z" fill="url(#grad-ontime)" />
+                                <path d="{{ $pathAlfa }} L 100,100 L 0,100 Z" fill="url(#grad-alfa)" />
+
+                                {{-- Smooth Lines --}}
+                                <path d="{{ $pathOntime }}" fill="none" stroke="#3b82f6" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="{{ $pathLate }}" fill="none" stroke="#f59e0b" stroke-width="1"
+                                    stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2,2" />
+                                <path d="{{ $pathAlfa }}" fill="none" stroke="#ef4444" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+
+                                {{-- Points --}}
+                                @foreach ($weeklyStats as $i => $stat)
+                                    @php $x = ($i / ($count - 1)) * 100; @endphp
+                                    <circle cx="{{ $x }}" cy="{{ 100 - ($stat['ontime'] / $maxVal) * 100 }}"
+                                        r="0.8" fill="white" stroke="#3b82f6" stroke-width="0.5" />
+                                    <circle cx="{{ $x }}" cy="{{ 100 - ($stat['alfa'] / $maxVal) * 100 }}"
+                                        r="0.8" fill="white" stroke="#ef4444" stroke-width="0.5" />
+                                @endforeach
+                            </svg>
+
+                            {{-- X-Axis Labels --}}
+                            <div class="absolute -bottom-6 left-0 right-0 flex justify-between">
+                                @foreach ($weeklyStats as $stat)
+                                    <div class="flex flex-col items-center">
+                                        <span
+                                            class="text-[9px] font-black {{ $stat['date'] === date('Y-m-d') ? 'text-primary' : 'text-base-content/40' }} uppercase tracking-widest">
+                                            {{ $stat['label'] }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Scroll Indicator for Mobile --}}
+                        <div class="lg:hidden flex items-center justify-center gap-2 mt-12 opacity-30">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                            </svg>
+                            <span class="text-[8px] font-black uppercase tracking-widest">Geser untuk tren</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </div>
+                    @endif
 
                     <div class="mt-8"></div>
                 </div>

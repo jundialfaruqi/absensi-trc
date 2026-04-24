@@ -40,7 +40,7 @@
         <!-- Drawer Content (Main Page) -->
         <div class="drawer-content flex flex-col h-screen overflow-hidden">
             <!-- Top Header -->
-            <header class="h-16 bg-base-100 flex items-center justify-between px-6 border-b border-base-200 shrink-0">
+            <header wire:persist="admin-header" class="h-16 bg-base-100 flex items-center justify-between px-6 border-b border-base-200 shrink-0">
                 <style>
                     @keyframes bell-ring {
 
@@ -270,7 +270,7 @@
         <!-- Sidebar (Drawer Side) -->
         <div class="drawer-side z-130">
             <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-            <aside class="menu p-0 w-64 h-full bg-base-100 border-r border-base-300 flex flex-col overflow-hidden">
+            <aside wire:persist="admin-sidebar" class="menu p-0 w-64 h-full bg-base-100 border-r border-base-300 flex flex-col overflow-hidden">
                 <!-- Logo -->
                 <div class="h-16 flex items-center px-2 border-b border-base-200 shrink-0">
                     <div class="flex items-center gap-0 text-secondary font-bold text-2xl group">

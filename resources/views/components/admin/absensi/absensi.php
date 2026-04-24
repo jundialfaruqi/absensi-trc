@@ -16,6 +16,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 {
     use WithPagination;
 
+    public bool $readyToLoad = false;
     public int $perPage = 10;
     
     #[Url]
@@ -56,6 +57,11 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         if (!$this->year) $this->year = Carbon::now()->format('Y');
     }
 
+    public function load()
+    {
+        $this->readyToLoad = true;
+    }
+
     #[Computed]
     public function dates(): array
     {
@@ -91,6 +97,10 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     #[Computed]
     public function personnels()
     {
+        if (!$this->readyToLoad) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        }
+
         $opdId = Auth::user()->opd()?->id;
 
         $paginator = Personnel::with(['absensis' => function ($query) {

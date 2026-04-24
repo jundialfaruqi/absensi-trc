@@ -17,6 +17,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
 {
     use WithPagination, WithFileUploads;
 
+    public bool $readyToLoad = false;
     public int $perPage = 10;
     public string $search = '';
 
@@ -40,9 +41,18 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public ?int $deleteId = null;
     public string $deleteName = '';
 
+    public function load()
+    {
+        $this->readyToLoad = true;
+    }
+
     #[Computed]
     public function personnels()
     {
+        if (!$this->readyToLoad) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        }
+
         $query = Personnel::with(['opd', 'penugasan', 'kantor'])
             ->when($this->search, fn($q) => $q->where(function ($sub) {
                 $sub->where('name', 'like', '%' . $this->search . '%')
