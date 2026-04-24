@@ -387,6 +387,31 @@
                 </form>
             @else
                 <div class="space-y-6">
+                    {{-- Origin Personnel Info --}}
+                    <div class="bg-base-200/50 rounded-xl p-3 border border-base-200">
+                        <div class="flex items-center gap-3">
+                            <div class="avatar placeholder">
+                                <div
+                                    class="bg-primary text-primary-content rounded-full w-8 flex items-center justify-center">
+                                    <span
+                                        class="text-xs">{{ substr($this->originPersonnel->name ?? 'P', 0, 1) }}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] uppercase tracking-wider opacity-60 font-bold">Pemohon
+                                    Tukar:</span>
+                                <span
+                                    class="text-sm font-bold text-primary">{{ $this->originPersonnel->name ?? '-' }}</span>
+                                <span class="text-[10px] font-medium opacity-70">
+                                    Jadwal Asli:
+                                    <span class="font-bold text-primary italic">
+                                        {{ ($this->originJadwal->status ?? '') === 'SHIFT' ? $this->originJadwal->shift->name ?? 'SHIFT' : $this->originJadwal->status ?? '-' }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Select Target Personnel --}}
                     <div class="form-control">
                         <label class="label mb-1 px-1">

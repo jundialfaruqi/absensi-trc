@@ -236,6 +236,33 @@
                         Konfigurasi Siklus Shift
                     </h2>
 
+                    {{-- Template Selector --}}
+                    <div class="bg-base-200/50 p-4 rounded-2xl border border-base-200 mb-8 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-grid-add">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 8a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                    <path d="M4 16a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                    <path d="M16 12h6" />
+                                    <path d="M19 9v6" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider">Gunakan Template</h3>
+                                <p class="text-[9px] opacity-60">Pilih konfigurasi yang sudah tersimpan</p>
+                            </div>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <select wire:model.live="selectedTemplateId" class="select select-bordered select-sm w-full font-bold rounded-lg">
+                                <option value="">-- Pilih Template Konfigurasi --</option>
+                                @foreach($this->templates as $template)
+                                    <option value="{{ $template->id }}">{{ $template->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="space-y-3 mb-6">
                         @foreach ($shiftSequence as $index => $seq)
                             <div
@@ -329,6 +356,28 @@
                             </svg>
                             Tambah Urutan
                         </button>
+                    </div>
+
+                    {{-- Save as Template Option --}}
+                    <div class="mt-8 pt-6 border-t border-base-200">
+                        <label class="flex items-center gap-3 cursor-pointer group w-fit">
+                            <input type="checkbox" wire:model.live="saveAsTemplate" class="checkbox checkbox-primary checkbox-sm">
+                            <span class="text-xs font-bold uppercase opacity-60 group-hover:opacity-100 transition-opacity">Simpan konfigurasi ini sebagai template</span>
+                        </label>
+
+                        @if($saveAsTemplate)
+                            <div class="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 flex flex-col sm:flex-row items-end gap-3 animate-in zoom-in-95">
+                                <div class="form-control flex-1">
+                                    <label class="label pt-0"><span class="label-text text-[10px] font-bold uppercase opacity-60">Nama Konfigurasi Template</span></label>
+                                    <input type="text" wire:model="templateName" placeholder="Misal: Pola 2-2-2 atau Siklus 6 Hari" 
+                                        class="input input-bordered input-sm font-bold w-full rounded-lg">
+                                    @error('templateName') <span class="text-[10px] text-error mt-1">{{ $message }}</span> @enderror
+                                </div>
+                                <button type="button" wire:click="saveCurrentAsTemplate" class="btn btn-primary btn-sm rounded-lg px-6">
+                                    Simpan Template
+                                </button>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mt-8 p-5 bg-primary/5 rounded-2xl border border-primary/10">

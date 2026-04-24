@@ -166,6 +166,23 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     }
 
     #[Computed]
+    public function originPersonnel()
+    {
+        if (!$this->quickPersonnelId) return null;
+        return \App\Models\Personnel::find($this->quickPersonnelId);
+    }
+
+    #[Computed]
+    public function originJadwal()
+    {
+        if (!$this->quickPersonnelId || !$this->quickDate) return null;
+        return \App\Models\Jadwal::with('shift')
+            ->where('personnel_id', $this->quickPersonnelId)
+            ->whereDate('tanggal', $this->quickDate)
+            ->first();
+    }
+
+    #[Computed]
     public function availableSubstitutes()
     {
         if (!$this->quickPersonnelId || !$this->quickDate) return collect();
@@ -175,6 +192,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         $today = \Carbon\Carbon::parse($this->quickDate);
         $yesterday = $today->copy()->subDay()->format('Y-m-d');
         $todayStr = $today->format('Y-m-d');
+        $tomorrow = $today->copy()->addDay()->format('Y-m-d');
 
         $query = \App\Models\Personnel::where('id', '!=', $this->quickPersonnelId)
             ->where('regu', '!=', $originPersonnel->regu);
@@ -188,9 +206,16 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                 $q->whereDate('tanggal', $todayStr)
                   ->where('status', 'LIBUR');
             })
-            ->whereHas('jadwals', function($q) use ($yesterday) {
-                $q->whereDate('tanggal', $yesterday)
-                  ->where('status', 'SHIFT');
+            ->where(function($q) use ($yesterday) {
+                // A. Kemarin Masuk (Normal Day 1)
+                $q->whereHas('jadwals', function($sq) use ($yesterday) {
+                    $sq->whereDate('tanggal', $yesterday)
+                       ->where('status', 'SHIFT');
+                })
+                // B. Jika kemarin kosong (awal periode), tampilkan saja agar mendukung pola libur 1-hari
+                ->orWhereDoesntHave('jadwals', function($sq) use ($yesterday) {
+                    $sq->whereDate('tanggal', $yesterday);
+                });
             })
             ->whereDoesntHave('jadwals', function($q) use ($todayStr) {
                 $q->whereDate('tanggal', $todayStr)

@@ -43,6 +43,11 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     #[Url]
     public string $endDate;
 
+    // Template Management
+    public ?int $selectedTemplateId = null;
+    public bool $saveAsTemplate = false;
+    public string $templateName = '';
+
     public function mount()
     {
         $user = Auth::user();
@@ -82,6 +87,43 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public function shifts()
     {
         return Shift::orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function templates()
+    {
+        return \App\Models\ShiftCycleTemplate::where('opd_id', $this->selectedOpdId)
+            ->orWhereNull('opd_id')
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function updatedSelectedTemplateId($value)
+    {
+        if ($value) {
+            $template = \App\Models\ShiftCycleTemplate::find($value);
+            if ($template) {
+                $this->shiftSequence = $template->sequence;
+                $this->dispatch('toast', type: 'success', message: 'Template "' . $template->name . '" berhasil dimuat.');
+            }
+        }
+    }
+
+    public function saveCurrentAsTemplate()
+    {
+        $this->validate([
+            'templateName' => 'required|min:3|max:50',
+        ]);
+
+        \App\Models\ShiftCycleTemplate::create([
+            'name' => $this->templateName,
+            'opd_id' => $this->selectedOpdId,
+            'sequence' => $this->shiftSequence
+        ]);
+
+        $this->templateName = '';
+        $this->saveAsTemplate = false;
+        $this->dispatch('toast', type: 'success', message: 'Template berhasil disimpan.');
     }
 
     public function nextStep()
