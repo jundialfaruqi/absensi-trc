@@ -1,7 +1,7 @@
 <div class="animate-in fade-in duration-500" wire:init="load">
-    @push('styles')
+    {{-- @push('styles')
         @vite(['resources/views/components/admin/jadwal/jadwal.css'])
-    @endpush
+    @endpush --}}
 
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
