@@ -177,6 +177,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             Absensi::updateOrCreate(
                 ['personnel_id' => $request->personnel_id, 'tanggal' => $dateStr],
                 [
+                    'status' => 'CUTI',
                     'status_masuk' => 'CUTI',
                     'status_pulang' => 'CUTI',
                     'cuti_id' => $request->cuti_id,
