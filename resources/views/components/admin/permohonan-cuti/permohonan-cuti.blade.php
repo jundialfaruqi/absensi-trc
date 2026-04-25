@@ -5,7 +5,7 @@
             <h1 class="text-xl font-bold">Permohonan Cuti</h1>
             <p class="text-sm text-base-content/60 mt-1">Manajemen pengajuan cuti dan izin personil.</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Data</li>
@@ -66,12 +66,12 @@
     </div>
 
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm mb-6">
+    <div class="card bg-transparent md:bg-base-100 shadow-none md:shadow-sm mb-6">
         <div class="card-body p-0">
-            <div class="overflow-x-auto">
-                <table class="table table-zebra w-full">
-                    <thead>
-                        <tr>
+            <div class="overflow-x-auto md:overflow-visible">
+                <table class="table table-zebra w-full border-separate border-spacing-y-2 md:border-spacing-y-0">
+                    <thead class="hidden md:table-header-group">
+                        <tr class="bg-base-200/50">
                             <th class="text-center w-16">#</th>
                             <th>Personil</th>
                             <th>Jenis Cuti</th>
@@ -81,75 +81,124 @@
                             <th class="text-center w-24">Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="block md:table-row-group">
                         @forelse($this->requests as $req)
-                            <tr class="hover:bg-base-200/50">
-                                <td class="text-center font-bold">{{ $this->requests->firstItem() + $loop->index }}</td>
-                                <td>
+                            <tr
+                                class="flex flex-col md:table-row bg-base-100 md:bg-transparent border border-base-200 md:border-0 rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0 shadow-sm md:shadow-none hover:bg-base-200/50 transition-colors">
+                                {{-- Nomor - Hidden on mobile, or styled as badge --}}
+                                <td class="hidden md:table-cell text-center font-bold">
+                                    {{ $this->requests->firstItem() + $loop->index }}</td>
+
+                                {{-- Personil --}}
+                                <td class="block md:table-cell p-0 md:p-4">
                                     <div class="flex items-center gap-3">
                                         <div class="avatar">
-                                            <div class="mask mask-squircle w-10 h-10">
+                                            <div class="mask mask-squircle w-12 h-12 md:w-10 md:h-10">
                                                 <img
                                                     src="{{ $req->personnel->foto ? asset('storage/' . $req->personnel->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($req->personnel->name) . '&background=random&color=fff' }}" />
                                             </div>
                                         </div>
-                                        <div>
-                                            <div class="font-semibold">{{ $req->personnel->name }}</div>
-                                            <div class="text-xs opacity-60">{{ $req->personnel->opd->name }}</div>
+                                        <div class="flex-1">
+                                            <div class="font-bold text-sm md:font-semibold">{{ $req->personnel->name }}
+                                            </div>
+                                            <div class="text-[10px] md:text-xs opacity-60">
+                                                {{ $req->personnel->opd->name }}</div>
+                                        </div>
+                                        <div class="md:hidden">
+                                            @php
+                                                $statusClass = match ($req->status) {
+                                                    'PENDING' => 'badge-warning',
+                                                    'APPROVED' => 'badge-success',
+                                                    'REJECTED' => 'badge-error',
+                                                    default => 'badge-neutral',
+                                                };
+                                            @endphp
+                                            <span
+                                                class="badge {{ $statusClass }} badge-xs font-black">{{ $req->status }}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <span class="badge badge-neutral badge-sm">{{ $req->cuti->name }}</span>
+
+                                {{-- Jenis Cuti --}}
+                                <td
+                                    class="flex justify-between items-center md:table-cell py-3 border-b border-base-200 border-dashed md:border-0">
+                                    <span
+                                        class="text-[10px] font-black uppercase opacity-40 tracking-widest md:hidden">Jenis
+                                        Cuti</span>
+                                    <span
+                                        class="text-sm font-medium bg-base-200 md:bg-transparent px-2 py-1 rounded-lg md:p-0">{{ $req->cuti->name }}</span>
                                 </td>
-                                <td>
-                                    <div class="font-medium text-sm">{{ $req->tanggal_mulai->format('d/m/Y') }}</div>
-                                    <div class="text-[10px] opacity-60 uppercase font-bold">s/d
-                                        {{ $req->tanggal_selesai->format('d/m/Y') }}</div>
-                                </td>
-                                <td>
-                                    <div class="max-w-xs text-xs opacity-70 line-clamp-2 italic">"{{ $req->alasan }}"
+
+                                {{-- Periode --}}
+                                <td
+                                    class="flex justify-between items-center md:table-cell py-3 border-b border-base-200 border-dashed md:border-0">
+                                    <span
+                                        class="text-[10px] font-black uppercase opacity-40 tracking-widest md:hidden">Periode</span>
+                                    <div class="text-right md:text-left">
+                                        <div class="font-bold md:font-medium text-xs md:text-sm">
+                                            {{ $req->tanggal_mulai->format('d/m/Y') }}</div>
+                                        <div class="text-[9px] md:text-[10px] opacity-60 uppercase font-bold">s/d
+                                            {{ $req->tanggal_selesai->format('d/m/Y') }}</div>
                                     </div>
                                 </td>
-                                <td class="text-center">
-                                    @php
-                                        $statusClass = match ($req->status) {
-                                            'PENDING' => 'badge-warning',
-                                            'APPROVED' => 'badge-success',
-                                            'REJECTED' => 'badge-error',
-                                            default => 'badge-neutral',
-                                        };
-                                    @endphp
+
+                                {{-- Alasan --}}
+                                <td
+                                    class="flex flex-col md:table-cell py-3 border-b border-base-200 border-dashed md:border-0">
+                                    <span
+                                        class="text-[10px] font-black uppercase opacity-40 tracking-widest md:hidden mb-1 text-left">Alasan</span>
+                                    <div class="max-w-xs text-xs opacity-70 line-clamp-2 italic text-left">
+                                        "{{ $req->alasan }}"</div>
+                                </td>
+
+                                {{-- Status (Desktop Only in original position) --}}
+                                <td class="hidden md:table-cell text-center">
                                     <span
                                         class="badge {{ $statusClass }} badge-sm font-bold">{{ $req->status }}</span>
                                 </td>
-                                <td class="text-center">
-                                    @if ($req->status === 'PENDING')
-                                        <div class="dropdown dropdown-left dropdown-end">
-                                            <button tabindex="0" class="btn btn-ghost btn-xs btn-square rounded-full">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="w-5 h-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                                                </svg>
-                                            </button>
-                                            <ul tabindex="0"
-                                                class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
-                                                <li>
-                                                    <button type="button" class="text-success"
-                                                        wire:click="openProcessModal({{ $req->id }}, 'APPROVE')">Setujui</button>
-                                                </li>
-                                                <li>
-                                                    <button type="button" class="text-error"
-                                                        wire:click="openProcessModal({{ $req->id }}, 'REJECT')">Tolak</button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    @else
-                                        <div class="text-[10px] opacity-40 italic">
-                                            {{ $req->processed_at->diffForHumans() }}</div>
-                                    @endif
+
+                                {{-- Action --}}
+                                <td class="block md:table-cell pt-4 md:pt-0">
+                                    <div class="flex items-center justify-between md:justify-center">
+                                        <span
+                                            class="text-[10px] font-black uppercase opacity-40 tracking-widest md:hidden"></span>
+                                        @if ($req->status === 'PENDING')
+                                            <div class="flex gap-2 md:hidden w-full max-w-[200px]">
+                                                <button type="button"
+                                                    class="btn btn-success btn-sm flex-1 text-white text-[10px] font-black"
+                                                    wire:click="openProcessModal({{ $req->id }}, 'APPROVE')">SETUJUI</button>
+                                                <button type="button"
+                                                    class="btn btn-error btn-sm flex-1 text-white text-[10px] font-black"
+                                                    wire:click="openProcessModal({{ $req->id }}, 'REJECT')">TOLAK</button>
+                                            </div>
+
+                                            <div class="hidden md:inline-block dropdown dropdown-left dropdown-end">
+                                                <button tabindex="0"
+                                                    class="btn btn-ghost btn-xs btn-square rounded-full">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                                                    </svg>
+                                                </button>
+                                                <ul tabindex="0"
+                                                    class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
+                                                    <li>
+                                                        <button type="button" class="text-success font-bold"
+                                                            wire:click="openProcessModal({{ $req->id }}, 'APPROVE')">Setujui</button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="text-error font-bold"
+                                                            wire:click="openProcessModal({{ $req->id }}, 'REJECT')">Tolak</button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        @else
+                                            <div class="text-[10px] opacity-40 italic">
+                                                {{ $req->processed_at->diffForHumans() }}</div>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty

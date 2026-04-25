@@ -20,7 +20,7 @@
             <h1 class="text-xl font-bold">Monitoring Absensi</h1>
             <p class="text-sm text-base-content/60 mt-1">Pantau kehadiran personel</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Overview</li>

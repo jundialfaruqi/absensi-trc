@@ -5,7 +5,7 @@
             <h1 class="text-xl font-bold">Manajemen Admin</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola akun dan role Admin</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Settings</li>
@@ -185,20 +185,24 @@
     </div>
 
     {{-- ─── Modal: Modal Form ─────────────────────────────────────────────────────── --}}
-    <dialog id="user-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="user-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'user-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'user-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-2xl">
-            <h3 class="font-bold text-lg mb-4">
-                {{ $userId ? 'Edit Admin' : 'Tambah Admin' }}
-            </h3>
+        <div class="modal-box shadow max-h-[80vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">
+                    {{ $userId ? 'Edit Admin' : 'Tambah Admin' }}
+                </h3>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('user-modal').close()">✕</button>
+            </div>
             <form wire:submit="save">
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Nama --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Nama Lengkap <span
+                                <span class="label-text text-sm font-medium text-base-content">Nama Lengkap <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
@@ -212,7 +216,7 @@
                         {{-- Email --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Alamat Email <span
+                                <span class="label-text text-sm font-medium text-base-content">Alamat Email <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="email" wire:model="email"
@@ -226,7 +230,7 @@
                         {{-- Nomor HP --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Nomor HP</span>
+                                <span class="label-text text-sm font-medium text-base-content">Nomor HP</span>
                             </label>
                             <input type="tel" wire:model="nomor_hp"
                                 class="input input-bordered focus:input-primary w-full transition-all @error('nomor_hp') input-error @enderror"
@@ -239,7 +243,7 @@
                         {{-- Role --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Pilih Role</span>
+                                <span class="label-text text-sm font-medium text-base-content">Pilih Role</span>
                             </label>
                             <select wire:model="role"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('role') select-error @enderror">
@@ -256,7 +260,7 @@
                         {{-- Password --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Password @if (!$userId)
+                                <span class="label-text text-sm font-medium text-base-content">Password @if (!$userId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
@@ -291,7 +295,8 @@
                         {{-- Password Confirmation --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Ketik Ulang Password @if (!$userId)
+                                <span class="label-text text-sm font-medium text-base-content">Ketik Ulang Password
+                                    @if (!$userId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
@@ -323,7 +328,7 @@
                         {{-- OPD --}}
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Pilih OPD</span>
+                                <span class="label-text text-sm font-medium text-base-content">Pilih OPD</span>
                             </label>
                             <select wire:model="opdId"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('opdId') select-error @enderror">
@@ -340,7 +345,7 @@
                         {{-- Foto Profil --}}
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Foto Profil</span>
+                                <span class="label-text text-sm font-medium text-base-content">Foto Profil</span>
                             </label>
                             <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                                 <div class="w-full sm:flex-1">

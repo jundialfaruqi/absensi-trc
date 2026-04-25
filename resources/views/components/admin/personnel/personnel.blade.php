@@ -5,7 +5,7 @@
             <h1 class="text-xl font-bold">Personnel</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola data dan akun personnel</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Overview</li>
@@ -143,7 +143,8 @@
                         <tbody>
                             @forelse ($this->personnels as $r)
                                 <tr class="hover:bg-base-200/50">
-                                    <td class="text-center font-bold">{{ $this->personnels->firstItem() + $loop->index }}
+                                    <td class="text-center font-bold">
+                                        {{ $this->personnels->firstItem() + $loop->index }}
                                     </td>
                                     <td>
                                         <div class="flex items-center gap-3">
@@ -181,7 +182,8 @@
                                         @if ($r->kantor)
                                             <div class="text-sm font-bold">{{ $r->kantor->name }}</div>
                                             @if ($r->wajib_absen_di_lokasi)
-                                                <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">Wajib
+                                                <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">
+                                                    Wajib
                                                     Lokasi</div>
                                             @else
                                                 <div
@@ -201,7 +203,8 @@
                                     </td>
                                     <td class="text-center">
                                         @if ($r->face_recognition)
-                                            <div class="badge badge-success badge-xs font-bold text-[8px] uppercase">Aktif
+                                            <div class="badge badge-success badge-xs font-bold text-[8px] uppercase">
+                                                Aktif
                                             </div>
                                         @else
                                             <div
@@ -211,7 +214,8 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="dropdown dropdown-left dropdown-end">
-                                            <button tabindex="0" class="btn btn-ghost btn-xs btn-square rounded-full">
+                                            <button tabindex="0"
+                                                class="btn btn-ghost btn-xs btn-square rounded-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                     class="w-5 h-5">

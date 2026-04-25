@@ -5,7 +5,7 @@
             <h1 class="text-xl font-bold">Manajemen Master Cuti</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola jenis-jenis cuti yang tersedia bagi personel</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Data</li>
@@ -65,7 +65,6 @@
     </div>
 
     {{-- ─── Data Table ────────────────────────────────────────────────────── --}}
-    {{-- ─── Table ─────────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm mb-6">
         <div class="card-body p-0">
             <div class="overflow-x-auto">
@@ -84,40 +83,22 @@
                                 <td class="text-center font-bold">
                                     {{ $this->cutis->firstItem() + $index }}
                                 </td>
-                                <td class="border-b border-base-100">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
-                                            {{ strtoupper(substr($r->name, 0, 2)) }}
-                                        </div>
-                                        <div class="font-bold text-base-content">{{ $r->name }}</div>
-                                    </div>
+                                <td>
+                                    <div class="font-bold text-base-content">{{ $r->name }}</div>
                                 </td>
-                                <td class="border-b border-base-100">
+                                <td>
                                     <div class="text-xs opacity-60 line-clamp-1 max-w-lg">
                                         {{ $r->keterangan ?? '-' }}
                                     </div>
                                 </td>
-                                <td class="text-center">
-                                    <div class="dropdown dropdown-left dropdown-end">
-                                        <button tabindex="0" class="btn btn-ghost btn-xs btn-square rounded-full">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                                            </svg>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <button type="button" class="btn btn-sm"
+                                            wire:click="openEditModal({{ $r->id }})">Edit</button>
+                                        <button type="button" class="btn btn-sm text-error"
+                                            wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">
+                                            Delete
                                         </button>
-                                        <ul tabindex="0"
-                                            class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
-                                            <li>
-                                                <button type="button"
-                                                    wire:click="openEditModal({{ $r->id }})">Edit</button>
-                                            </li>
-                                            <li>
-                                                <button type="button" class="text-error"
-                                                    wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">Delete</button>
-                                            </li>
-                                        </ul>
                                     </div>
                                 </td>
 

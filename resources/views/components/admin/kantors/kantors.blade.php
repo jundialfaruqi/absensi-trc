@@ -5,7 +5,7 @@
             <h1 class="text-xl font-bold">Manajemen Kantor</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola lokasi kantor dan radius absensi</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Data</li>
@@ -152,17 +152,19 @@
         x-on:open-modal.window="$event.detail.id === 'kantor-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'kantor-modal' && $el.close()">
         <div class="modal-box shadow w-11/12 max-w-5xl p-0 overflow-y-auto md:overflow-hidden">
-            <div class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+            <div
+                class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
                 <h3 class="font-bold text-lg">
                     {{ $kantorId ? 'Edit Kantor' : 'Tambah Kantor Baru' }}
                 </h3>
                 <button type="button" class="btn btn-ghost btn-sm btn-circle"
                     onclick="document.getElementById('kantor-modal').close()">✕</button>
             </div>
- 
+
             <form wire:submit="save" class="flex flex-col md:flex-row h-auto md:h-150">
                 {{-- Left Side: Form --}}
-                <div class="w-full md:w-1/3 p-6 space-y-4 md:overflow-y-auto border-b md:border-b-0 md:border-r border-base-200">
+                <div
+                    class="w-full md:w-1/3 p-6 space-y-4 md:overflow-y-auto border-b md:border-b-0 md:border-r border-base-200">
                     <div class="form-control">
                         <label class="label"><span class="label-text text-sm font-medium">Nama Kantor</span></label>
                         <input type="text" wire:model="name" class="input input-bordered w-full"
@@ -218,7 +220,8 @@
                     <div class="form-control">
                         <label class="label flex justify-between">
                             <span class="label-text text-sm font-medium">Radius Absensi</span>
-                            <span class="text-xs font-black text-primary" id="radius-label">{{ $radius_meter }} Meter</span>
+                            <span class="text-xs font-black text-primary" id="radius-label">{{ $radius_meter }}
+                                Meter</span>
                         </label>
                         <input type="range" id="radius-slider" min="50" max="1000" step="10"
                             wire:model.live="radius_meter" class="range range-primary range-xs"
@@ -290,11 +293,15 @@
             const initMapHandler = () => {
                 // Prevent multiple listeners if navigated back/forth
                 if (window.kantorMapInitialized) return;
-                
+
                 let map, marker, circle;
 
                 Livewire.on('init-map', (data) => {
-                    const { lat, lng, radius } = data;
+                    const {
+                        lat,
+                        lng,
+                        radius
+                    } = data;
 
                     setTimeout(() => {
                         // Cleanup existing map if any to prevent "already initialized" errors
@@ -311,7 +318,9 @@
                             attribution: '&copy; OpenStreetMap contributors'
                         }).addTo(map);
 
-                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        marker = L.marker([lat, lng], {
+                            draggable: true
+                        }).addTo(map);
                         circle = L.circle([lat, lng], {
                             radius: radius,
                             color: '#1d4ed8',
@@ -334,7 +343,10 @@
                         // Add Search Control
                         const searchControl = new GeoSearch.GeoSearchControl({
                             provider: new GeoSearch.OpenStreetMapProvider({
-                                params: { 'accept-language': 'id', countrycodes: 'id' }
+                                params: {
+                                    'accept-language': 'id',
+                                    countrycodes: 'id'
+                                }
                             }),
                             style: 'bar',
                             showMarker: false,
@@ -348,7 +360,10 @@
                         map.addControl(searchControl);
 
                         map.on('geosearch/showlocation', (result) => {
-                            const { x, y } = result.location;
+                            const {
+                                x,
+                                y
+                            } = result.location;
                             updateCoords(y, x);
                             marker.setLatLng([y, x]);
                             circle.setLatLng([y, x]);
@@ -371,8 +386,12 @@
                     @this.set('longitude', lng);
                 }
 
-                Livewire.hook('commit', ({ succeed }) => {
-                    succeed(({ snapshot }) => {
+                Livewire.hook('commit', ({
+                    succeed
+                }) => {
+                    succeed(({
+                        snapshot
+                    }) => {
                         const snap = snapshot.memo.data;
                         if (map && marker && circle) {
                             const newLat = parseFloat(snap.latitude);
@@ -381,7 +400,8 @@
 
                             if (!isNaN(newLat) && !isNaN(newLng)) {
                                 const newPos = [newLat, newLng];
-                                if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !== newLng) {
+                                if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !==
+                                    newLng) {
                                     marker.setLatLng(newPos);
                                     circle.setLatLng(newPos);
                                     map.panTo(newPos);
@@ -401,12 +421,14 @@
             if (window.Livewire) {
                 initMapHandler();
             }
-            
+
             // On navigation
             document.addEventListener('livewire:navigated', () => {
                 window.kantorMapInitialized = false; // Allow re-init for new DOM
                 initMapHandler();
-            }, { once: true });
+            }, {
+                once: true
+            });
         })();
     </script>
 </div>

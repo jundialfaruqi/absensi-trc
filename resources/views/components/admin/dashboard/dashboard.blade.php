@@ -18,7 +18,7 @@
     </div>
 
     {{-- Stats Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         @if (!$readyToLoad)
             @for ($i = 0; $i < 4; $i++)
                 <div class="stats shadow bg-base-100 border border-base-200">
@@ -213,7 +213,7 @@
                                                         <span
                                                             class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
                                                         <span
-                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->name }}</span>
+                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->singkatan }}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -315,31 +315,34 @@
                     </div>
                     @if ($activities->count() > 0)
                         <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4">
-                            <div class="flex items-center justify-center gap-6">
-                                <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-center gap-4 md:gap-6">
+                                <div class="flex items-center gap-1 md:gap-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
                                     <span
-                                        class="text-[10px] font-black uppercase tracking-widest opacity-60">PERSONEL:</span>
+                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">PERSONEL:</span>
                                     <span
-                                        class="text-xs font-black text-primary">{{ $stats['total_required'] }}</span>
+                                        class="text-[8px] md:text-[10px] font-black text-primary">{{ $stats['total_required'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1 md:gap-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-success"></div>
                                     <span
-                                        class="text-[10px] font-black uppercase tracking-widest opacity-60">HADIR:</span>
-                                    <span class="text-xs font-black text-success">{{ $stats['total_hadir'] }}</span>
+                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">HADIR:</span>
+                                    <span
+                                        class="text-[8px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1 md:gap-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-error"></div>
                                     <span
-                                        class="text-[10px] font-black uppercase tracking-widest opacity-60">ALFA:</span>
-                                    <span class="text-xs font-black text-error">{{ $stats['total_alfa'] }}</span>
+                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">ALFA:</span>
+                                    <span
+                                        class="text-[8px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1 md:gap-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-error"></div>
                                     <span
-                                        class="text-[10px] font-black uppercase tracking-widest opacity-60">TELAT:</span>
-                                    <span class="text-xs font-black text-error">{{ $stats['total_telat'] }}</span>
+                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">TELAT:</span>
+                                    <span
+                                        class="text-[8px] md:text-[10px] font-black text-error">{{ $stats['total_telat'] }}</span>
                                 </div>
                             </div>
                             <a href="{{ route('absensi') }}"

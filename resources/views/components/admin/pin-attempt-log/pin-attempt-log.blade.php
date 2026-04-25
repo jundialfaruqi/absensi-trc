@@ -5,7 +5,7 @@
             <h1 class="text-xl font-bold">Log Percobaan PIN</h1>
             <p class="text-sm text-base-content/60 mt-1">Riwayat upaya memasukkan PIN pada Portal Absensi Web</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Settings</li>

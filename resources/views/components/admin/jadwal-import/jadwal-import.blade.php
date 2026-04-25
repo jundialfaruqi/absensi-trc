@@ -4,7 +4,7 @@
             <h1 class="text-xl font-bold">Import Jadwal</h1>
             <p class="text-sm text-base-content/60 mt-1">Unggah jadwal shift secara massal</p>
         </div>
-        <div class="text-sm breadcrumbs text-base-content/60">
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
             <ul>
                 <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
                 <li>Data</li>
@@ -87,8 +87,7 @@
                         </label>
                         <input type="file" wire:model="file"
                             class="file-input file-input-bordered focus:file-input-primary w-full @error('file') file-input-error @enderror"
-                            accept=".xlsx,.xls,.csv"
-                            onchange="validateImportFile(this)" />
+                            accept=".xlsx,.xls,.csv" onchange="validateImportFile(this)" />
                         @error('file')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
@@ -159,7 +158,7 @@
                     <p class="text-sm leading-relaxed">
                         Sistem mendeteksi bahwa sudah ada data <span class="font-bold">Jadwal</span> dan <span
                             class="font-bold">Absensi</span> untuk periode <span
-                            class="badge badge-neutral font-bold">{{ \Carbon\Carbon::create()->month((int)$month)->translatedFormat('F') }}
+                            class="badge badge-neutral font-bold">{{ \Carbon\Carbon::create()->month((int) $month)->translatedFormat('F') }}
                             {{ $year }}</span>.
                     </p>
                     <div class="alert alert-error bg-error/5 text-[11px] py-3 rounded-xl border-error/20">
@@ -168,8 +167,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        <span class="font-medium">Melanjutkan proses ini akan <span class="underline font-bold">MENGHAPUS
-                                PERMANEN</span> seluruh data Jadwal, Absensi, dan <span class="font-bold uppercase">FILE
+                        <span class="font-medium">Melanjutkan proses ini akan <span
+                                class="underline font-bold">MENGHAPUS
+                                PERMANEN</span> seluruh data Jadwal, Absensi, dan <span
+                                class="font-bold uppercase">FILE
                                 FOTO ABSENSI</span> pada periode tersebut.</span>
                     </div>
                     <div class="text-center">
@@ -181,7 +182,8 @@
                     <button type="button" wire:click="$set('showConfirmModal', false)"
                         class="btn btn-ghost border-base-300">Batal</button>
                     <button type="button" wire:click="confirmImport" class="btn btn-error text-white">
-                        <span wire:loading wire:target="confirmImport" class="loading loading-spinner loading-xs"></span>
+                        <span wire:loading wire:target="confirmImport"
+                            class="loading loading-spinner loading-xs"></span>
                         <span wire:loading.remove wire:target="confirmImport">Ya, Bersihkan & Import</span>
                     </button>
                 </div>
