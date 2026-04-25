@@ -151,7 +151,7 @@
                             <span class="text-error">*</span></span></label>
                     <div class="relative">
                         <input type="text" wire:model="name" placeholder="Contoh: Cuti Tahunan, Cuti Sakit, dll"
-                            class="input w-full text-base-content/60" />
+                            class="input w-full text-base-content/60 placeholder:text-base-content/40" />
                     </div>
                     @error('name')
                         <span class="text-xs text-error">{{ $message }}</span>
@@ -161,7 +161,7 @@
                 <div class="form-control w-full">
                     <label class="label py-1"><span
                             class="label-text text-sm font-medium text-base-content">Keterangan</span></label>
-                    <textarea wire:model="keterangan" class="textarea w-full h-32 text-base-content/60"
+                    <textarea wire:model="keterangan" class="textarea w-full h-32 text-base-content/60 placeholder:text-base-content/40"
                         placeholder="Jelaskan detail mengenai syarat atau ketentuan jenis cuti ini..."></textarea>
                     @error('keterangan')
                         <span
