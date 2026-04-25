@@ -206,7 +206,7 @@
                                         class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"
+                                class="input input-bordered placeholder:text-base-content/40 focus:input-primary w-full transition-all @error('name') input-error @enderror"
                                 placeholder="Cth: John Doe">
                             @error('name')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -220,7 +220,7 @@
                                         class="text-error">*</span></span>
                             </label>
                             <input type="email" wire:model="email"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('email') input-error @enderror"
+                                class="input input-bordered placeholder:text-base-content/40 focus:input-primary w-full transition-all @error('email') input-error @enderror"
                                 placeholder="Cth: john@example.com">
                             @error('email')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -233,7 +233,7 @@
                                 <span class="label-text text-sm font-medium text-base-content">Nomor HP</span>
                             </label>
                             <input type="tel" wire:model="nomor_hp"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('nomor_hp') input-error @enderror"
+                                class="input input-bordered placeholder:text-base-content/40 focus:input-primary w-full transition-all @error('nomor_hp') input-error @enderror"
                                 placeholder="Cth: 08123456789">
                             @error('nomor_hp')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
