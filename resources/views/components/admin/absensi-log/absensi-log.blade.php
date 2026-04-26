@@ -42,7 +42,7 @@
 
         <div class="relative w-full sm:w-64">
             <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
-                class="input input-bordered w-full pl-10 pr-10 bg-base-100" />
+                class="input placeholder:text-base-content/60 input-bordered w-full pl-10 pr-10 bg-base-100" />
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg class="w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

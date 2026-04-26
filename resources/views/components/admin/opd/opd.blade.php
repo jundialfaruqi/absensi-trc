@@ -32,8 +32,8 @@
                     </select>
                 </div>
                 <div class="relative w-full sm:w-auto">
-                    <input type="text" placeholder="Search..." wire:model.live.debounce.400ms="search"
-                        class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100" />
+                    <input type="text" placeholder="Cari nama OPD..." wire:model.live.debounce.400ms="search"
+                        class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/60" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -176,8 +176,9 @@
     <dialog id="opd-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'opd-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'opd-modal' && $el.close()">
-        <div class="modal-box shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
-            <div class="flex justify-between items-center mb-4">
+        <div class="modal-box shadow p-0 max-h-[80vh] max-w-2xl overflow-y-auto relative">
+            <div
+                class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
                 <h3 class="font-bold text-lg">
                     {{ $opdId ? 'Edit OPD' : 'Tambah OPD' }}
                 </h3>
@@ -185,7 +186,7 @@
                     onclick="document.getElementById('opd-modal').close()">✕</button>
             </div>
             <form wire:submit="save">
-                <div class="space-y-4">
+                <div class="p-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Nama --}}
                         <div class="form-control w-full">
@@ -322,7 +323,7 @@
                     </div>
                 </div>
 
-                <div class="modal-action mt-6">
+                <div class="modal-action mt-6 px-6 pb-6">
                     <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('opd-modal').close()">Batal</button>
                     <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">

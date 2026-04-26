@@ -33,7 +33,7 @@
 
             <div class="relative w-full sm:w-64">
                 <input type="text" placeholder="Cari nama kantor..." wire:model.live.debounce.400ms="search"
-                    class="input input-bordered w-full pl-10 pr-10 bg-base-100" />
+                    class="input input-bordered w-full pl-10 pr-10 bg-base-100 placeholder:text-base-content/60" />
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -148,10 +148,10 @@
     </div>
 
     {{-- ─── Modal: Form Kantor ────────────────────────────────────────────────── --}}
-    <dialog id="kantor-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="kantor-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'kantor-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'kantor-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-5xl p-0 overflow-y-auto md:overflow-hidden">
+        <div class="modal-box shadow max-w-5xl p-0 overflow-y-auto md:overflow-hidden">
             <div
                 class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
                 <h3 class="font-bold text-lg">
@@ -166,8 +166,10 @@
                 <div
                     class="w-full md:w-1/3 p-6 space-y-4 md:overflow-y-auto border-b md:border-b-0 md:border-r border-base-200">
                     <div class="form-control">
-                        <label class="label"><span class="label-text text-sm font-medium">Nama Kantor</span></label>
-                        <input type="text" wire:model="name" class="input input-bordered w-full"
+                        <label class="label"><span class="label-text text-sm font-medium text-base-content">Nama
+                                Kantor</span></label>
+                        <input type="text" wire:model="name"
+                            class="input input-bordered w-full placeholder:text-base-content/60"
                             placeholder="Cth: Kantor Pusat TRC">
                         @error('name')
                             <span class="text-error text-xs mt-1">{{ $message }}</span>
@@ -175,7 +177,8 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label"><span class="label-text text-sm font-medium">OPD Induk</span></label>
+                        <label class="label"><span class="label-text text-sm font-medium text-base-content">OPD
+                                Induk</span></label>
                         <select wire:model="opd_id" class="select select-bordered w-full"
                             @disabled(!auth()->user()->hasRole('super-admin'))>
                             <option value="">-- Pilih OPD --</option>
@@ -189,8 +192,10 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label"><span class="label-text text-sm font-medium">Alamat</span></label>
-                        <textarea wire:model="alamat" class="textarea textarea-bordered h-20" placeholder="Masukkan alamat lengkap..."></textarea>
+                        <label class="label"><span
+                                class="label-text text-sm font-medium text-base-content">Alamat</span></label>
+                        <textarea wire:model="alamat" class="textarea textarea-bordered h-20 placeholder:text-base-content/60"
+                            placeholder="Masukkan alamat lengkap..."></textarea>
                         @error('alamat')
                             <span class="text-error text-xs mt-1">{{ $message }}</span>
                         @enderror
@@ -199,7 +204,7 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div class="form-control">
                             <label class="label"><span
-                                    class="label-text font-bold text-[10px] uppercase">Latitude</span></label>
+                                    class="label-text font-bold text-[10px] uppercase text-base-content">Latitude</span></label>
                             <input type="number" step="any" wire:model.live.debounce.500ms="latitude"
                                 class="input input-bordered input-sm font-mono">
                             @error('latitude')
@@ -208,7 +213,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label"><span
-                                    class="label-text font-bold text-[10px] uppercase">Longitude</span></label>
+                                    class="label-text font-bold text-[10px] uppercase text-base-content">Longitude</span></label>
                             <input type="number" step="any" wire:model.live.debounce.500ms="longitude"
                                 class="input input-bordered input-sm font-mono">
                             @error('longitude')
@@ -219,7 +224,7 @@
 
                     <div class="form-control">
                         <label class="label flex justify-between">
-                            <span class="label-text text-sm font-medium">Radius Absensi</span>
+                            <span class="label-text text-sm font-medium text-base-content">Radius Absensi</span>
                             <span class="text-xs font-black text-primary" id="radius-label">{{ $radius_meter }}
                                 Meter</span>
                         </label>
@@ -239,7 +244,7 @@
                         <label class="label cursor-pointer justify-start gap-1">
                             <input type="checkbox" wire:model="is_active"
                                 class="checkbox checkbox-primary checkbox-sm">
-                            <span class="label-text text-sm font-medium">Kantor Aktif</span>
+                            <span class="label-text text-sm font-medium text-base-content/60">Kantor Aktif</span>
                         </label>
                     </div>
 

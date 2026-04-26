@@ -162,7 +162,7 @@
                 <div class="relative w-full sm:w-auto">
                     <input id="rp-search-input" type="text" placeholder="Search..."
                         wire:model.live.debounce.400ms="search"
-                        class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100" />
+                        class="input input-bordered placeholder:text-base-content/60 w-full sm:max-w-xs pl-10 pr-10 bg-base-100" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -419,10 +419,11 @@
                     {{-- Name --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text text-sm font-medium">Nama Permission</span>
+                            <span class="label-text text-sm font-medium text-base-content">Nama Permission</span>
                         </label>
                         <input type="text" wire:model="permissionName" id="permission-name"
-                            class="input input-bordered w-full @error('permissionName') input-error @enderror">
+                            class="input input-bordered placeholder:text-base-content/60 w-full @error('permissionName') input-error @enderror"
+                            placeholder="Masukkan nama permission">
                         @error('permissionName')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
@@ -430,10 +431,11 @@
                     {{-- Group --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text text-sm font-medium">Nama Group Permission</span>
+                            <span class="label-text text-sm font-medium text-base-content">Nama Group Permission</span>
                         </label>
                         <input type="text" wire:model="permissionGroup" id="permission-group"
-                            class="input input-bordered w-full @error('permissionGroup') input-error @enderror">
+                            class="input input-bordered placeholder:text-base-content/60 w-full @error('permissionGroup') input-error @enderror"
+                            placeholder="Masukkan nama group permission">
                         @error('permissionGroup')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
@@ -441,7 +443,7 @@
                     {{-- Guard --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text text-sm font-medium">Guard Name</span>
+                            <span class="label-text text-sm font-medium text-base-content">Guard Name</span>
                         </label>
                         <select wire:model="permissionGuard" id="permission-guard"
                             class="select select-bordered w-full @error('permissionGuard') select-error @enderror">
@@ -467,28 +469,37 @@
     </dialog>
 
     {{-- ─── Modal: Role ─────────────────────────────────────────────────────── --}}
-    <dialog id="role-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="role-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'role-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'role-modal' && $el.close()">
-        <div class="modal-box shadow">
-            <h3 class="font-bold text-lg mb-4">
-                {{ $roleId ? 'Edit Role' : 'Tambah Role' }}
-            </h3>
+        <div class="modal-box shadow p-0 max-h-[80vh] overflow-y-auto relative">
+            <div
+                class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+                <h3 class="font-bold text-lg">
+                    {{ $roleId ? 'Edit Role' : 'Tambah Role' }}
+                </h3>
+
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('role-modal').close()">✕</button>
+
+            </div>
+
             <form wire:submit="saveRole">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-6">
                     {{-- Name --}}
                     <div class="form-control mb-2">
-                        <label class="label mb-2"><span class="label-text text-sm font-medium">Nama
+                        <label class="label mb-2"><span class="label-text text-sm font-medium text-base-content">Nama
                                 Role</span></label>
                         <input type="text" wire:model="roleName" id="role-name"
-                            class="input input-bordered @error('roleName') input-error @enderror">
+                            class="input input-bordered placeholder:text-base-content/60 @error('roleName') input-error @enderror"
+                            placeholder="Masukkan nama role">
                         @error('roleName')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
                     </div>
                     {{-- Guard --}}
                     <div class="form-control mb-2">
-                        <label class="label mb-2"><span class="label-text text-sm font-medium">Pilih
+                        <label class="label mb-2"><span class="label-text text-sm font-medium text-base-content">Pilih
                                 Guard</span></label>
                         <select wire:model="roleGuard" id="role-guard"
                             class="select select-bordered w-full @error('roleGuard') select-error @enderror">
@@ -519,7 +530,7 @@
                         }
                     }"
                         x-on:click.outside="open = false">
-                        <label class="label mb-2"><span class="label-text text-sm font-medium">Pilih
+                        <label class="label mb-2"><span class="label-text text-sm font-medium text-base-content">Pilih
                                 Warna Badge</span></label>
                         <div class="flex gap-2 items-center">
                             {{-- Preview button: klik buka/tutup swatch grid --}}
@@ -575,7 +586,7 @@
                     <div class="form-control md:col-span-2">
                         <label class="label mb-2"><span
                                 class="label-text text-sm font-medium">Permissions</span></label>
-                        <p class="text-xs text-base-content/60">Pilih semua permission/izin yang diperlukan</p>
+                        <p class="text-xs text-base-content/60 pb-2">Pilih semua permission/izin yang diperlukan</p>
                         <div class="max-h-85 overflow-auto py-3 px-1">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 @foreach ($this->allPermissions->groupBy('group') as $groupName => $groupList)
@@ -600,7 +611,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-action">
+                <div class="modal-action px-6 pb-6">
                     <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('role-modal').close()">Batal</button>
                     <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">

@@ -186,30 +186,34 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="form-control w-full">
-                        <label class="label pt-0"><span class="text-[9px] font-bold uppercase opacity-50">Maksimal
+                        <label class="label pt-0"><span
+                                class="text-[9px] font-bold uppercase text-base-content opacity-50">Maksimal
                                 Percobaan</span></label>
                         <input type="number" wire:model.live="pinMaxAttempts"
                             class="input input-sm input-bordered focus:input-error font-bold text-xs" />
                         <label class="label"><span
-                                class="text-[8px] uppercase opacity-40 font-bold tracking-tighter">Batas percobaan
+                                class="text-[8px] uppercase opacity-40 font-bold text-base-content tracking-tighter">Batas
+                                percobaan
                                 salah per sesi</span></label>
                     </div>
                     <div class="form-control w-full">
-                        <label class="label pt-0"><span class="text-[9px] font-bold uppercase opacity-50">Lock 5
+                        <label class="label pt-0"><span
+                                class="text-[9px] font-bold text-base-content uppercase opacity-50">Lock 5
                                 Menit</span></label>
                         <input type="number" wire:model="pinLock5"
                             class="input input-sm input-bordered focus:input-error font-bold text-xs" />
                         <label class="label"><span
-                                class="text-[8px] uppercase opacity-40 font-bold tracking-tighter">Setelah
+                                class="text-[8px] uppercase opacity-40 font-bold text-base-content tracking-tighter">Setelah
                                 {{ $pinMaxAttempts }} kali salah</span></label>
                     </div>
                     <div class="form-control w-full">
-                        <label class="label pt-0"><span class="text-[9px] font-bold uppercase opacity-50">Lock 15
+                        <label class="label pt-0"><span
+                                class="text-[9px] font-bold text-base-content uppercase opacity-50">Lock 15
                                 Menit</span></label>
                         <input type="number" wire:model="pinLock10"
                             class="input input-sm input-bordered focus:input-error font-bold text-xs" />
                         <label class="label"><span
-                                class="text-[8px] uppercase opacity-40 font-bold tracking-tighter">Setelah
+                                class="text-[8px] uppercase opacity-40 font-bold text-base-content tracking-tighter">Setelah
                                 {{ $pinMaxAttempts * 2 }} kali salah</span></label>
                     </div>
                 </div>

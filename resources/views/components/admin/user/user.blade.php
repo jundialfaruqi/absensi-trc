@@ -55,7 +55,7 @@
                 </div>
                 <div class="relative w-full sm:w-auto">
                     <input type="text" placeholder="Cari nama/email..." wire:model.live.debounce.400ms="search"
-                        class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100" />
+                        class="input input-bordered w-full placeholder:text-base-content/60 sm:max-w-xs pl-10 pr-10 bg-base-100" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
