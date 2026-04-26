@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AttendanceController;
 
 Route::get('/personnels', [AttendanceController::class, 'personnels']);
+Route::get('/personnels/check-status/{id}', [AttendanceController::class, 'checkStatus']);
 Route::post('/login/pin', [AttendanceController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
