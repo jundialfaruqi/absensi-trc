@@ -1,0 +1,7 @@
+selalu perhatikan aturan berikut sebelum mengedit
+1. Saya pakai livewire 4 berbasis MFC atau multiple file components
+2. Setiap saya buat komponen livewire dengan perintah php artisan make:livewire admin.jadwal.jadwal maka akan otomatis terbuat file
+    - admin/jadwal/jadwal.blade.php
+    - admin/jadwal/jadwal.php
+    - admin/jadwal/jadwal.css
+    - admin/jadwal/jadwal.js

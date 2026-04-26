@@ -432,10 +432,10 @@
     </div>
 
     {{-- ─── Edit Absensi Modal ────────────────────────────────────────────── --}}
-    <dialog id="edit-absensi-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="edit-absensi-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'edit-absensi-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'edit-absensi-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-2xl p-0 bg-base-100 overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="modal-box p-0 shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
             {{-- Modal Header - Sticky --}}
             <div class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center shrink-0">
                 <h3 class="font-bold text-lg">
@@ -471,7 +471,8 @@
                     @if ($editingFotoMasuk || $editingFotoPulang)
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2">
-                                <label class="text-[10px] uppercase font-black opacity-40 tracking-widest">Foto
+                                <label
+                                    class="text-[10px] uppercase font-black opacity-40 tracking-widest text-base-content">Foto
                                     Masuk</label>
                                 @if ($editingFotoMasuk)
                                     <div
@@ -494,13 +495,14 @@
                                     </div>
                                 @else
                                     <div
-                                        class="aspect-square rounded-2xl border-2 border-dashed border-base-200 flex items-center justify-center opacity-30 text-[10px] font-bold uppercase">
+                                        class="aspect-square rounded-2xl border-2 border-dashed border-base-200 flex items-center justify-center opacity-30 text-[10px] font-bold uppercase text-base-content">
                                         Tidak ada foto
                                     </div>
                                 @endif
                             </div>
                             <div class="space-y-2">
-                                <label class="text-[10px] uppercase font-black opacity-40 tracking-widest">Foto
+                                <label
+                                    class="text-[10px] uppercase font-black opacity-40 tracking-widest text-base-content">Foto
                                     Pulang</label>
                                 @if ($editingFotoPulang)
                                     <div
@@ -523,7 +525,7 @@
                                     </div>
                                 @else
                                     <div
-                                        class="aspect-square rounded-2xl border-2 border-dashed border-base-200 flex items-center justify-center opacity-30 text-[10px] font-bold uppercase">
+                                        class="aspect-square rounded-2xl border-2 border-dashed border-base-200 flex items-center justify-center opacity-30 text-[10px] font-bold uppercase text-base-content">
                                         Tidak ada foto
                                     </div>
                                 @endif
@@ -534,7 +536,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {{-- Status Masuk --}}
                         <div class="form-control">
-                            <label class="label py-1"><span class="label-text text-sm font-medium">Status
+                            <label class="label py-1"><span
+                                    class="label-text text-sm font-medium text-base-content">Status
                                     Masuk</span></label>
                             <select wire:model.live="statusMasuk"
                                 class="select select-bordered w-full bg-base-50 focus:border-primary">
@@ -554,7 +557,8 @@
 
                         {{-- Status Pulang --}}
                         <div class="form-control">
-                            <label class="label py-1"><span class="label-text text-sm font-medium">Status
+                            <label class="label py-1"><span
+                                    class="label-text text-sm font-medium text-base-content">Status
                                     Pulang</span></label>
                             <select wire:model.live="statusPulang"
                                 class="select select-bordered w-full bg-base-50 focus:border-primary">
@@ -575,7 +579,7 @@
                                     Masuk</span></label>
                             <div class="relative">
                                 <input type="time" wire:model="jamMasuk" step="60"
-                                    class="input input-bordered w-full pl-10 bg-base-50 focus:border-primary" />
+                                    class="input input-bordered w-full text-base-content/70 pl-10 bg-base-50 focus:border-primary" />
                                 <div
                                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -593,7 +597,7 @@
                                     Pulang</span></label>
                             <div class="relative">
                                 <input type="time" wire:model="jamPulang" step="60"
-                                    class="input input-bordered w-full pl-10 bg-base-50 focus:border-primary" />
+                                    class="input input-bordered w-full text-base-content/70 pl-10 bg-base-50 focus:border-primary" />
                                 <div
                                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -610,17 +614,20 @@
                     <div class="grid grid-cols-1 gap-4">
                         @if (in_array($statusMasuk, ['SAKIT', 'IZIN']) || in_array($statusPulang, ['SAKIT', 'IZIN']))
                             <div class="form-control">
-                                <label class="label py-1"><span class="label-text text-sm font-medium">
+                                <label class="label py-1"><span
+                                        class="label-text text-sm font-medium text-base-content">
                                         Nomor Surat (Sakit/Izin)
                                     </span></label>
                                 <input type="text" wire:model="nomorSurat"
-                                    placeholder="Contoh: 123/SKP/IV/2026..." class="input w-full" />
+                                    placeholder="Contoh: 123/SKP/IV/2026..."
+                                    class="input w-full placeholder:text-base-content/70" />
                             </div>
                         @endif
 
                         @if ($statusMasuk === 'CUTI' || $statusPulang === 'CUTI')
                             <div class="form-control">
-                                <label class="label py-1"><span class="label-text text-sm font-medium">Jenis
+                                <label class="label py-1"><span
+                                        class="label-text text-sm font-medium text-base-content">Jenis
                                         Cuti</span></label>
                                 <select wire:model="cutiId"
                                     class="select select-bordered w-full bg-base-50 focus:border-primary">
@@ -635,11 +642,11 @@
 
                     {{-- Alasan Edit --}}
                     <div class="form-control w-full">
-                        <label class="label py-1.5"><span class="label-text text-sm font-medium">
+                        <label class="label py-1.5"><span class="label-text text-sm font-medium text-base-content">
                                 Alasan Perubahan / Keterangan
                             </span></label>
                         <textarea wire:model="alasanEdit"
-                            class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 transition-all"
+                            class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 transition-all placeholder:text-base-content/70"
                             placeholder="Jelaskan alasan pengeditan data secara detail untuk justifikasi perubahan data"></textarea>
                         @error('alasanEdit')
                             <span class="text-error text-[10px] mt-1">{{ $message }}</span>
