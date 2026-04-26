@@ -204,7 +204,7 @@
                 <div class="space-y-4 p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- OPD --}}
-                        <div class="form-control w-full md:col-span-2">
+                        <div class="form-control w-full md:col-span-2" wire:key="field-opd">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">OPD / Instansi <span class="text-error">*</span></span>
                             </label>
@@ -218,7 +218,7 @@
                         </div>
 
                         {{-- Tipe Pemegang --}}
-                        <div class="form-control w-full md:col-span-2 pt-2 border-t border-base-200">
+                        <div class="form-control w-full md:col-span-2 pt-2 border-t border-base-200" wire:key="field-holder-type">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content uppercase tracking-wider opacity-50">Konfigurasi Pemegang</span>
                             </label>
@@ -235,7 +235,7 @@
                         </div>
 
                         @if($holder_type === 'existing')
-                            <div class="form-control w-full md:col-span-2">
+                            <div class="form-control w-full md:col-span-2" wire:key="field-user-id">
                                 <label class="label mb-1 px-1">
                                     <span class="label-text text-sm font-medium text-base-content">Pilih User <span class="text-error">*</span></span>
                                 </label>
@@ -248,7 +248,7 @@
                                 @error('user_id') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
                             </div>
                         @else
-                            <div class="form-control w-full md:col-span-2">
+                            <div class="form-control w-full md:col-span-2" wire:key="field-holder-name">
                                 <label class="label mb-1 px-1">
                                     <span class="label-text text-sm font-medium text-base-content">Nama Pemegang <span class="text-error">*</span></span>
                                 </label>
@@ -258,7 +258,7 @@
                             </div>
                         @endif
 
-                        <div class="form-control w-full md:col-span-2">
+                        <div class="form-control w-full md:col-span-2" wire:key="field-device-name">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">Nama Perangkat <span class="text-error">*</span></span>
                             </label>
@@ -267,7 +267,7 @@
                             @error('name') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="form-control w-full md:col-span-2">
+                        <div class="form-control w-full md:col-span-2" wire:key="field-license-key">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">License Key <span class="text-error">*</span></span>
                             </label>
@@ -283,7 +283,7 @@
                             @error('license_key') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="form-control w-full md:col-span-2">
+                        <div class="form-control w-full md:col-span-2" wire:key="field-status">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">Status Awal</span>
                             </label>
@@ -294,7 +294,7 @@
                             </select>
                         </div>
 
-                        <div class="form-control w-full md:col-span-2">
+                        <div class="form-control w-full md:col-span-2" wire:key="field-notes">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">Keterangan Tambahan</span>
                             </label>
