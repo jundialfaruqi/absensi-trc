@@ -427,9 +427,9 @@
                             </li>
                         @endcan
 
-                        <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
-
                         @can('manajemen-opd')
+                            <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
+
                             <li>
                                 <a wire:navigate href="{{ route('opd') }}"
                                     class="{{ request()->routeIs('opd*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
