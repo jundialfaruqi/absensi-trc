@@ -53,12 +53,13 @@
         </div>
 
         <div class="flex gap-2">
-            <button type="button" wire:click="openAddModal" class="btn btn-neutral gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
+            <button type="button" wire:click="openAddModal" wire:loading.attr="disabled" class="btn btn-neutral gap-2">
+                <span wire:loading wire:target="openAddModal" class="loading loading-spinner loading-xs"></span>
+                <svg wire:loading.remove wire:target="openAddModal" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Tambah Kantor
+                <span wire:loading.remove wire:target="openAddModal">Tambah Kantor</span>
             </button>
         </div>
     </div>
@@ -152,8 +153,7 @@
         x-on:open-modal.window="$event.detail.id === 'kantor-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'kantor-modal' && $el.close()">
         <div class="modal-box shadow max-w-5xl p-0 overflow-y-auto md:overflow-hidden">
-            <div
-                class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+            <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
                 <h3 class="font-bold text-lg">
                     {{ $kantorId ? 'Edit Kantor' : 'Tambah Kantor Baru' }}
                 </h3>

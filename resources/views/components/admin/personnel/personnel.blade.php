@@ -54,12 +54,13 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button type="button" wire:click="openAddModal" class="btn btn-neutral gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
+            <button type="button" wire:click="openAddModal" wire:loading.attr="disabled" class="btn btn-neutral gap-2">
+                <span wire:loading wire:target="openAddModal" class="loading loading-spinner loading-xs"></span>
+                <svg wire:loading.remove wire:target="openAddModal" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Tambah Personnel
+                <span wire:loading.remove wire:target="openAddModal">Tambah Personnel</span>
             </button>
         </div>
     </div>
@@ -261,7 +262,7 @@
     <dialog id="personnel-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'personnel-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'personnel-modal' && $el.close()">
-        <div class="modal-box shadow max-h-[80vh] overflow-y-auto relative">
+        <div class="modal-box shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg">
                     {{ $personnelId ? 'Edit Personnel' : 'Tambah Personnel' }}

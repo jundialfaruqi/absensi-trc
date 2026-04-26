@@ -192,9 +192,11 @@
                                                 <div class="flex gap-1">
                                                     <button type="button"
                                                         wire:click="movePersonnelUp('{{ $pId }}')"
+                                                        wire:loading.attr="disabled"
                                                         @if ($index === 0) disabled @endif
                                                         class="btn btn-ghost btn-xs btn-square {{ $index === 0 ? 'opacity-10' : '' }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        <span wire:loading wire:target="movePersonnelUp('{{ $pId }}')" class="loading loading-spinner loading-[10px]"></span>
+                                                        <svg wire:loading.remove wire:target="movePersonnelUp('{{ $pId }}')" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="3"
                                                             stroke="currentColor" class="w-3 h-3">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -203,9 +205,11 @@
                                                     </button>
                                                     <button type="button"
                                                         wire:click="movePersonnelDown('{{ $pId }}')"
+                                                        wire:loading.attr="disabled"
                                                         @if ($index === count($selectedPersonnelIds) - 1) disabled @endif
                                                         class="btn btn-ghost btn-xs btn-square {{ $index === count($selectedPersonnelIds) - 1 ? 'opacity-10' : '' }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        <span wire:loading wire:target="movePersonnelDown('{{ $pId }}')" class="loading loading-spinner loading-[10px]"></span>
+                                                        <svg wire:loading.remove wire:target="movePersonnelDown('{{ $pId }}')" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="3"
                                                             stroke="currentColor" class="w-3 h-3">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -309,7 +313,7 @@
                                             <label class="label pt-0"><span
                                                     class="label-text text-[10px] font-bold uppercase opacity-60">Jam
                                                     Kerja</span></label>
-                                            <select wire:model="shiftSequence.{{ $index }}.shift_id"
+                                            <select wire:model.live="shiftSequence.{{ $index }}.shift_id"
                                                 class="select select-bordered select-sm font-bold text-xs rounded-lg h-9 min-h-0">
                                                 <option value="">-- Pilih Shift --</option>
                                                 @foreach ($this->shifts as $s)
@@ -361,8 +365,10 @@
 
                                         @if (count($shiftSequence) > 1)
                                             <button type="button" wire:click="removeSequence({{ $index }})"
+                                                wire:loading.attr="disabled"
                                                 class="btn btn-error btn-square btn-sm h-9 w-9 min-h-0">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                <span wire:loading wire:target="removeSequence({{ $index }})" class="loading loading-spinner loading-xs"></span>
+                                                <svg wire:loading.remove wire:target="removeSequence({{ $index }})" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
                                                     class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -376,13 +382,14 @@
                         </div>
 
                         <div class="flex justify-center">
-                            <button type="button" wire:click="addSequence"
+                            <button type="button" wire:click="addSequence" wire:loading.attr="disabled"
                                 class="btn btn-ghost btn-sm gap-2 text-primary hover:bg-primary/5 rounded-lg border-2 border-dashed border-primary/20 px-10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                <span wire:loading wire:target="addSequence" class="loading loading-spinner loading-xs"></span>
+                                <svg wire:loading.remove wire:target="addSequence" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
-                                Tambah Urutan
+                                <span wire:loading.remove wire:target="addSequence">Tambah Urutan</span>
                             </button>
                         </div>
                     @elseif($generateMode === 'weekly')
@@ -416,7 +423,7 @@
                                         </select>
 
                                         @if ($weeklyConfig[$index]['type'] === 'SHIFT')
-                                            <select wire:model="weeklyConfig.{{ $index }}.shift_id"
+                                            <select wire:model.live="weeklyConfig.{{ $index }}.shift_id"
                                                 class="select select-bordered select-xs font-bold text-[10px] rounded-lg h-8 flex-2">
                                                 <option value="">-- Pilih Shift --</option>
                                                 @foreach ($this->shifts as $s)
@@ -439,7 +446,7 @@
                         </div>
                     @elseif($generateMode === 'quota')
                         {{-- Mode Quota: Smart Distribution UI --}}
-                        <div class="max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div class="animate-in fade-in slide-in-from-bottom-4 duration-300">
                             <div class="bg-base-200/30 rounded-3xl border border-base-200 p-6">
                                 <div class="flex items-center gap-4 mb-6">
                                     <div
@@ -516,7 +523,7 @@
                                     </div>
                                 </div>
 
-                                <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @foreach ($this->shifts as $s)
                                         <div
                                             class="flex items-center justify-between p-4 bg-base-100 rounded-2xl border border-base-200 shadow-sm">
@@ -647,9 +654,10 @@
                                         <span class="text-[10px] text-error mt-1">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <button type="button" wire:click="saveCurrentAsTemplate"
+                                <button type="button" wire:click="saveCurrentAsTemplate" wire:loading.attr="disabled"
                                     class="btn btn-primary btn-sm rounded-lg px-6">
-                                    Simpan Template
+                                    <span wire:loading wire:target="saveCurrentAsTemplate" class="loading loading-spinner loading-xs"></span>
+                                    <span wire:loading.remove wire:target="saveCurrentAsTemplate">Simpan Template</span>
                                 </button>
                             </div>
                         @endif
@@ -783,14 +791,15 @@
             <div class="card-actions justify-between items-center mt-12 pt-8 border-t border-base-200">
                 <div>
                     @if ($step > 1 && (Auth::user()->hasRole('super-admin') || $step > 2))
-                        <button type="button" wire:click="prevStep"
+                        <button type="button" wire:click="prevStep" wire:loading.attr="disabled"
                             class="btn btn-ghost gap-2 font-bold uppercase text-[10px]">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            <span wire:loading wire:target="prevStep" class="loading loading-spinner loading-xs"></span>
+                            <svg wire:loading.remove wire:target="prevStep" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="3" stroke="currentColor" class="w-3 h-3">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                             </svg>
-                            Sebelumnya
+                            <span wire:loading.remove wire:target="prevStep">Sebelumnya</span>
                         </button>
                     @endif
                 </div>
@@ -799,10 +808,11 @@
                     <a href="{{ route('jadwal') }}"
                         class="btn btn-ghost font-bold uppercase text-[10px] hidden sm:inline-flex">Batal</a>
                     @if ($step < 4)
-                        <button type="button" wire:click="nextStep"
+                        <button type="button" wire:click="nextStep" wire:loading.attr="disabled"
                             class="btn btn-primary px-6 font-bold uppercase text-[10px] tracking-widest gap-2">
-                            Lanjut
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            <span wire:loading wire:target="nextStep" class="loading loading-spinner loading-xs"></span>
+                            <span wire:loading.remove wire:target="nextStep">Lanjut</span>
+                            <svg wire:loading.remove wire:target="nextStep" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="3" stroke="currentColor" class="w-3 h-3">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

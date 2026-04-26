@@ -183,20 +183,23 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button type="button" id="btn-add-permission" wire:click="openAddPermission"
+            <button type="button" id="btn-add-permission" wire:click="openAddPermission" wire:loading.attr="disabled"
                 class="btn btn-base-300 gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
+                <span wire:loading wire:target="openAddPermission" class="loading loading-spinner loading-xs"></span>
+                <svg wire:loading.remove wire:target="openAddPermission" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Add Permission
+                <span wire:loading.remove wire:target="openAddPermission">Add Permission</span>
             </button>
-            <button type="button" id="btn-add-role" wire:click="openAddRole" class="btn btn-neutral gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
+            <button type="button" id="btn-add-role" wire:click="openAddRole" wire:loading.attr="disabled"
+                class="btn btn-neutral gap-2">
+                <span wire:loading wire:target="openAddRole" class="loading loading-spinner loading-xs"></span>
+                <svg wire:loading.remove wire:target="openAddRole" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Add Role
+                <span wire:loading.remove wire:target="openAddRole">Add Role</span>
             </button>
         </div>
     </div>
@@ -473,8 +476,7 @@
         x-on:open-modal.window="$event.detail.id === 'role-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'role-modal' && $el.close()">
         <div class="modal-box shadow p-0 max-h-[80vh] overflow-y-auto relative">
-            <div
-                class="p-6 border-b border-base-200 bg-base-200/30 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+            <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
                 <h3 class="font-bold text-lg">
                     {{ $roleId ? 'Edit Role' : 'Tambah Role' }}
                 </h3>

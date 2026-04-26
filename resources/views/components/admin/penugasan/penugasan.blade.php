@@ -144,7 +144,7 @@
     <dialog id="penugasan-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'penugasan-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'penugasan-modal' && $el.close()">
-        <div class="modal-box shadow max-h-[80vh] w-11/12 max-w-md overflow-y-auto relative">
+        <div class="modal-box shadow max-h-[80vh] overflow-y-auto relative">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg">
                     {{ $penugasanId ? 'Edit Penugasan' : 'Tambah Penugasan' }}
