@@ -496,25 +496,6 @@
                             </li>
                         @endcan
 
-                        @can('manajemen-perangkat')
-                            <li>
-                                <a wire:navigate href="{{ route('perangkat') }}"
-                                    class="{{ request()->routeIs('perangkat*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                    <div class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="size-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                                        </svg>
-                                        <span>Perangkat</span>
-                                    </div>
-                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                        Lisensi & Perangkat Mobile
-                                    </span>
-                                </a>
-                            </li>
-                        @endcan
-
                         @can('manajemen-master-cuti')
                             <li>
                                 <a wire:navigate href="{{ route('cuti') }}"
@@ -605,6 +586,25 @@
                                     </div>
                                     <span class="text-[8px] text-base-content opacity-50 ml-7">
                                         Monitoring Percobaan PIN
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('manajemen-perangkat')
+                            <li>
+                                <a wire:navigate href="{{ route('perangkat') }}"
+                                    class="{{ request()->routeIs('perangkat*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                                        </svg>
+                                        <span>Perangkat</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Lisensi & Perangkat Mobile
                                     </span>
                                 </a>
                             </li>
