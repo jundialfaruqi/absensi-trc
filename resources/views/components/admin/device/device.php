@@ -35,6 +35,10 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     public $status = 'inactive';
     public $notes;
 
+    // Delete Properties
+    public $deleteId;
+    public $deleteName;
+
     public function load()
     {
         $this->readyToLoad = true;
@@ -148,10 +152,22 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
         $this->resetForm();
     }
 
-    public function delete($id)
+    public function confirmDelete($id, $name)
     {
-        Device::find($id)->delete();
-        $this->dispatch('toast', message: 'Perangkat berhasil dihapus', type: 'success');
+        $this->deleteId = $id;
+        $this->deleteName = $name;
+        $this->dispatch('open-modal', id: 'device-delete-modal');
+    }
+
+    public function executeDelete()
+    {
+        if ($this->deleteId) {
+            Device::find($this->deleteId)->delete();
+            $this->dispatch('close-modal', id: 'device-delete-modal');
+            $this->dispatch('toast', message: 'Perangkat berhasil dihapus', type: 'success');
+            $this->deleteId = null;
+            $this->deleteName = null;
+        }
     }
 
     public function toggleStatus($id)
