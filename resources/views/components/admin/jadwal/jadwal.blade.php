@@ -360,7 +360,17 @@
                 </button>
             </div>
 
-            <div class="flex items-center justify-between mb-6">
+            <div class="relative min-h-[300px]">
+                {{-- Modal Content Loading Overlay --}}
+                <div wire:loading wire:target="activeTab"
+                    class="absolute inset-0 z-50 flex items-center justify-center rounded-xl bg-base-100/50 backdrop-blur-[1px]">
+                    <div class="flex flex-col items-center gap-3">
+                        <span class="loading loading-spinner loading-md text-primary"></span>
+                        <span class="text-xs font-medium opacity-60">Memuat data...</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-6">
                 <div>
                     <h3 class="font-bold text-lg">
                         {{ $activeTab === 'quick' ? 'Set Jadwal / Status' : 'Tukar Shift (2 Arah)' }}
@@ -524,6 +534,7 @@
                 </div>
             @endif
         </div>
+    </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>
         </form>
