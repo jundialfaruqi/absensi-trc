@@ -173,24 +173,28 @@
     </div>
 
     {{-- ─── Modal: OPD ─────────────────────────────────────────────────────── --}}
-    <dialog id="opd-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="opd-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'opd-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'opd-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-3xl">
-            <h3 class="font-bold text-lg mb-4">
-                {{ $opdId ? 'Edit OPD' : 'Tambah OPD' }}
-            </h3>
+        <div class="modal-box shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">
+                    {{ $opdId ? 'Edit OPD' : 'Tambah OPD' }}
+                </h3>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('opd-modal').close()">✕</button>
+            </div>
             <form wire:submit="save">
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Nama --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Nama OPD <span
+                                <span class="label-text text-sm font-medium text-base-content">Nama OPD <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('name') input-error @enderror"
                                 placeholder="Cth: Dinas Komunikasi dan Informatika">
                             @error('name')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -200,10 +204,10 @@
                         {{-- Singkatan --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Singkatan</span>
+                                <span class="label-text text-sm font-medium text-base-content">Singkatan</span>
                             </label>
                             <input type="text" wire:model="singkatan"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('singkatan') input-error @enderror"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('singkatan') input-error @enderror"
                                 placeholder="Cth: Diskominfo">
                             @error('singkatan')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -214,10 +218,10 @@
                     {{-- Alamat --}}
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium">Alamat Lengkap</span>
+                            <span class="label-text text-sm font-medium text-base-content">Alamat Lengkap</span>
                         </label>
                         <textarea wire:model="alamat"
-                            class="textarea textarea-bordered focus:textarea-primary w-full transition-all h-20 @error('alamat') textarea-error @enderror"
+                            class="textarea textarea-bordered focus:textarea-primary placeholder:text-base-content/60 w-full transition-all h-20 @error('alamat') textarea-error @enderror"
                             placeholder="Masukkan alamat lengkap instansi..."></textarea>
                         @error('alamat')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -227,7 +231,7 @@
                     {{-- Logo --}}
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium">Logo Instansi</span>
+                            <span class="label-text text-sm font-medium text-base-content">Logo Instansi</span>
                         </label>
                         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                             <div class="w-full sm:flex-1">
@@ -274,7 +278,7 @@
                             <div class="relative w-full sm:w-64">
                                 <input type="text" wire:model.live.debounce.300ms="userSearch"
                                     placeholder="Cari nama pengguna..."
-                                    class="input input-sm input-bordered w-full pl-8 focus:input-primary transition-all">
+                                    class="input input-sm input-bordered placeholder:text-base-content/60 w-full pl-8 focus:input-primary transition-all">
                                 <span
                                     class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-base-content/50">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
@@ -297,7 +301,7 @@
                                                 value="{{ $u->id }}"
                                                 class="checkbox checkbox-sm checkbox-primary" />
                                             <span
-                                                class="label-text truncate font-medium text-sm">{{ $u->name }}</span>
+                                                class="label-text truncate font-medium text-sm text-base-content/60">{{ $u->name }}</span>
                                         </label>
                                     @empty
                                         <div
@@ -309,7 +313,7 @@
                                                     d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                             </svg>
                                             <span
-                                                class="text-sm">{{ $userSearch ? 'Tidak ada pengguna yang dicari.' : 'Belum ada pengguna.' }}</span>
+                                                class="text-sm text-base-content/60">{{ $userSearch ? 'Tidak ada pengguna yang dicari.' : 'Belum ada pengguna.' }}</span>
                                         </div>
                                     @endforelse
                                 </div>
