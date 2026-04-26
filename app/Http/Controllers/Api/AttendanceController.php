@@ -56,8 +56,88 @@ class AttendanceController extends Controller
         if (!$jadwal) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Maaf, Anda tidak memiliki jadwal shift hari ini (Libur).'
+                'message' => 'Maaf, Anda tidak memiliki jadwal shift hari ini.'
             ], 404);
+        }
+
+        if ($jadwal->status === 'LIBUR') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Maaf, Anda sedang LIBUR hari ini.'
+            ], 403);
+        }
+
+        $existing = Absensi::where('personnel_id', $id)
+            ->where('tanggal', $activeDate)
+            ->first();
+
+        if ($existing) {
+            // Rule: If status is not ALFA and not HADIR (e.g. CUTI, IZIN, SAKIT), REJECT
+            if ($existing->status !== 'ALFA' && $existing->status !== 'HADIR') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Maaf, status absensi Anda hari ini adalah {$existing->status}. Anda tidak dapat melakukan absensi."
+                ], 403);
+            }
+
+            // Rule: If status is HADIR and already has jam_pulang, REJECT
+            if ($existing->status === 'HADIR' && $existing->jam_pulang) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Anda sudah melakukan absen masuk dan pulang hari ini."
+                ], 403);
+            }
+        }
+
+        // Logic check: Are we in ANY valid window?
+        $shift = $jadwal->shift;
+        $activeDate = ($jadwal->tanggal instanceof \DateTime) ? $jadwal->tanggal->format('Y-m-d') : $jadwal->tanggal;
+        
+        $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
+        $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
+        $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
+        $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+
+        $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
+        $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
+        $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
+
+        $pulangDate = $activeDate;
+        if ($shift->start_time > $shift->end_time) {
+            $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+        }
+        $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
+        $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
+        $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
+
+        // Logic check: Are we in ANY valid window?
+        $isInWindow = $now->between($windowInStart, $windowInEnd);
+        $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
+
+        if (!$isInWindow && !$isOutWindow) {
+            // Check if too early for everything
+            if ($now->lessThan($windowInStart)) {
+                $diff = $windowInStart->diffForHumans($now, true);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
+                ], 403);
+            }
+            
+            // Check if in gap between IN and OUT
+            if ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
+                $diff = $windowOutStart->diffForHumans($now, true);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang."
+                ], 403);
+            }
+
+            // Default: past everything
+            return response()->json([
+                'status' => 'error',
+                'message' => "Batas waktu Absen hari ini sudah berakhir."
+            ], 403);
         }
 
         return response()->json([
@@ -143,6 +223,76 @@ class AttendanceController extends Controller
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki jadwal shift hari ini.'
             ], 404);
+        }
+
+        if ($jadwal->status === 'LIBUR') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda sedang LIBUR hari ini.'
+            ], 403);
+        }
+
+        // ─── TIME WINDOW VALIDATION (SYCHRONIZED WITH WEB) ───
+        $shift = $jadwal->shift;
+        $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
+        $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
+        $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
+        $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+
+        // Windows Calculation
+        $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
+        $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
+        $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
+
+        $pulangDate = $activeDate;
+        if ($shift->start_time > $shift->end_time) {
+            $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+        }
+        $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
+        $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
+        $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
+
+        $existing = Absensi::where('personnel_id', $personnel->id)
+            ->where('tanggal', $activeDate)
+            ->first();
+
+        // VALIDATION LOGIC
+        if (!$existing || !$existing->jam_masuk) {
+            // MODE: ATTEMPT CHECK IN
+            if ($now->lessThan($windowInStart)) {
+                $diff = $windowInStart->diffForHumans($now, true);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
+                ], 403);
+            }
+            if ($now->greaterThan($windowInEnd)) {
+                // If it's too late to check in, check if it's already time for check out (missing IN)
+                if ($now->between($windowOutStart, $windowOutEnd)) {
+                    // Allowed to proceed but will be treated as check-in later? 
+                    // Actually web allows OUT if missing IN during OUT window.
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu Absen Masuk sudah berakhir."
+                    ], 403);
+                }
+            }
+        } else {
+            // MODE: ATTEMPT CHECK OUT
+            if ($now->lessThan($windowOutStart)) {
+                $diff = $windowOutStart->diffForHumans($now, true);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi."
+                ], 403);
+            }
+            if ($now->greaterThan($windowOutEnd)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Batas waktu Absen Pulang sudah berakhir."
+                ], 403);
+            }
         }
 
         // 1. Validasi Lokasi (Geofencing)
