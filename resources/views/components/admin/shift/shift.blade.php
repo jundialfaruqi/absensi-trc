@@ -51,7 +51,7 @@
                 </div>
                 <div class="relative w-full sm:w-auto">
                     <input type="text" placeholder="Cari nama shift..." wire:model.live.debounce.400ms="search"
-                        class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100" />
+                        class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -158,22 +158,26 @@
     </div>
 
     {{-- ─── Modal Form ─────────────────────────────────────────────────────── --}}
-    <dialog id="shift-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="shift-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'shift-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'shift-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-2xl">
-            <h3 class="font-bold text-lg mb-4">
-                {{ $shiftId ? 'Edit Shift' : 'Tambah Shift' }}
-            </h3>
+        <div class="modal-box shadow max-h-[80vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">
+                    {{ $shiftId ? 'Edit Shift' : 'Tambah Shift' }}
+                </h3>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('shift-modal').close()">✕</button>
+            </div>
             <form wire:submit="save">
                 <div class="space-y-4">
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium">Nama Shift <span
+                            <span class="label-text text-sm font-medium text-base-content">Nama Shift <span
                                     class="text-error">*</span></span>
                         </label>
                         <input type="text" wire:model="name"
-                            class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"
+                            class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('name') input-error @enderror"
                             placeholder="Cth: Shift Pagi">
                         @error('name')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -182,11 +186,11 @@
 
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium">Keterangan <span
+                            <span class="label-text text-sm font-medium text-base-content">Keterangan <span
                                     class="text-error">*</span></span>
                         </label>
                         <input type="text" wire:model="keterangan"
-                            class="input input-bordered focus:input-primary w-full transition-all @error('keterangan') input-error @enderror"
+                            class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('keterangan') input-error @enderror"
                             placeholder="Cth: Shift Pagi">
                         @error('keterangan')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -196,11 +200,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Jam Masuk <span
+                                <span class="label-text text-sm font-medium text-base-content">Jam Masuk <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="time" wire:model="start_time"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('start_time') input-error @enderror">
+                                class="input input-bordered focus:input-primary w-full text-base-content/60 transition-all @error('start_time') input-error @enderror">
                             @error('start_time')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                             @enderror
@@ -208,11 +212,11 @@
 
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Jam Pulang <span
+                                <span class="label-text text-sm font-medium text-base-content">Jam Pulang <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="time" wire:model="end_time"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('end_time') input-error @enderror">
+                                class="input input-bordered focus:input-primary w-full text-base-content/60 transition-all @error('end_time') input-error @enderror">
                             @error('end_time')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                             @enderror
@@ -238,7 +242,7 @@
                         }
                     }" x-on:click.outside="open = false">
                         <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium">Warna Identitas <span
+                            <span class="label-text text-sm font-medium text-base-content">Warna Identitas <span
                                     class="text-error">*</span></span>
                         </label>
                         <div class="flex gap-2 items-center">

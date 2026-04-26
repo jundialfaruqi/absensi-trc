@@ -258,27 +258,29 @@
     </div>
 
     {{-- ─── Modal: Modal Form ─────────────────────────────────────────────────────── --}}
-    <dialog id="personnel-modal" class="modal backdrop-blur-xs" wire:ignore.self
+    <dialog id="personnel-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'personnel-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'personnel-modal' && $el.close()">
-        <div class="modal-box shadow w-11/12 max-w-4xl p-0 flex flex-col max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-base-200">
+        <div class="modal-box shadow max-h-[80vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg">
                     {{ $personnelId ? 'Edit Personnel' : 'Tambah Personnel' }}
                 </h3>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('personnel-modal').close()">✕</button>
             </div>
-            <form wire:submit="save" class="p-4 sm:p-6 overflow-y-auto flex-1">
+            <form wire:submit="save">
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-6 md:gap-y-4">
 
                         {{-- Nama --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Nama Lengkap <span
+                                <span class="label-text text-sm font-medium text-base-content">Nama Lengkap <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="name"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('name') input-error @enderror"
                                 placeholder="Cth: John Doe">
                             @error('name')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -288,11 +290,11 @@
                         {{-- Email --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Alamat Email <span
+                                <span class="label-text text-sm font-medium text-base-content">Alamat Email <span
                                         class="text-error">*</span></span>
                             </label>
                             <input type="email" wire:model="email"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('email') input-error @enderror"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('email') input-error @enderror"
                                 placeholder="Cth: john@example.com">
                             @error('email')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -302,14 +304,14 @@
                         {{-- Password --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Password @if (!$personnelId)
+                                <span class="label-text text-sm font-medium text-base-content">Password @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
                             </label>
                             <div class="relative flex items-center">
                                 <input x-bind:type="show ? 'text' : 'password'" wire:model="password"
-                                    class="input input-bordered focus:input-primary w-full pr-10 transition-all @error('password') input-error @enderror"
+                                    class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all @error('password') input-error @enderror"
                                     placeholder="{{ $personnelId ? '(Kosongkan jika tidak diubah)' : 'Masukkan password...' }}">
                                 <button type="button" @click="show = !show"
                                     class="absolute inset-y-0 right-0 px-3 flex items-center text-base-content/50 hover:text-base-content focus:outline-none">
@@ -337,14 +339,15 @@
                         {{-- Password Confirmation --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Ketik Ulang Password @if (!$personnelId)
+                                <span class="label-text text-sm font-medium text-base-content">Ketik Ulang Password
+                                    @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
                             </label>
                             <div class="relative flex items-center">
                                 <input x-bind:type="show ? 'text' : 'password'" wire:model="password_confirmation"
-                                    class="input input-bordered focus:input-primary w-full pr-10 transition-all"
+                                    class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all"
                                     placeholder="{{ $personnelId ? '(Kosongkan jika tidak diubah)' : 'Masukkan ulang password...' }}">
                                 <button type="button" @click="show = !show"
                                     class="absolute inset-y-0 right-0 px-3 flex items-center text-base-content/50 hover:text-base-content focus:outline-none">
@@ -369,7 +372,8 @@
                         {{-- PIN --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">PIN (4 Digit) @if (!$personnelId)
+                                <span class="label-text text-sm font-medium text-base-content">PIN (4 Digit)
+                                    @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>
@@ -377,7 +381,7 @@
                             <div class="relative flex items-center">
                                 <input x-bind:type="show ? 'text' : 'password'" wire:model="pin" maxlength="4"
                                     pattern="[0-9]*" inputmode="numeric"
-                                    class="input input-bordered focus:input-primary w-full pr-10 transition-all @error('pin') input-error @enderror"
+                                    class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all @error('pin') input-error @enderror"
                                     placeholder="{{ $personnelId ? '(Kosongkan jika tidak diubah)' : 'Masukkan 4 digit PIN absen...' }}">
                                 <button type="button" @click="show = !show"
                                     class="absolute inset-y-0 right-0 px-3 flex items-center text-base-content/50 hover:text-base-content focus:outline-none">
@@ -405,10 +409,10 @@
                         {{-- Nomor HP --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Nomor HP</span>
+                                <span class="label-text text-sm font-medium text-base-content">Nomor HP</span>
                             </label>
                             <input type="tel" wire:model="nomor_hp"
-                                class="input input-bordered focus:input-primary w-full transition-all @error('nomor_hp') input-error @enderror"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('nomor_hp') input-error @enderror"
                                 placeholder="Cth: 08123456789">
                             @error('nomor_hp')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
@@ -417,7 +421,7 @@
 
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Pilih OPD Induk <span
+                                <span class="label-text text-sm font-medium text-base-content">Pilih OPD Induk <span
                                         class="text-error">*</span></span>
                             </label>
                             <select wire:model="opd_id"
@@ -435,7 +439,7 @@
 
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Penugasan <span
+                                <span class="label-text text-sm font-medium text-base-content">Penugasan <span
                                         class="text-error">*</span></span>
                             </label>
                             <select wire:model="penugasan_id"
@@ -452,7 +456,7 @@
 
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Pilih Kantor</span>
+                                <span class="label-text text-sm font-medium text-base-content">Pilih Kantor</span>
                             </label>
                             <select wire:model="kantor_id"
                                 class="select select-bordered focus:select-primary w-full transition-all @error('kantor_id') select-error @enderror">
@@ -472,10 +476,12 @@
                                 <input type="checkbox" wire:model="wajib_absen_di_lokasi"
                                     class="checkbox checkbox-md checkbox-primary">
                                 <div class="flex-1 min-w-0">
-                                    <span class="label-text font-bold block uppercase text-xs whitespace-normal">Wajib
+                                    <span
+                                        class="label-text font-bold block uppercase text-xs whitespace-normal text-base-content/70">Wajib
                                         Absen di Lokasi
                                         Kantor</span>
-                                    <span class="text-[10px] opacity-60 block whitespace-normal wrap-break-word">Jika
+                                    <span
+                                        class="text-[10px] text-base-content opacity-60 block whitespace-normal wrap-break-word">Jika
                                         dicentang, personil tidak bisa absen jika
                                         berada di luar radius kantor.</span>
                                 </div>
@@ -489,9 +495,10 @@
                                     class="checkbox checkbox-md checkbox-secondary">
                                 <div class="flex-1 min-w-0">
                                     <span
-                                        class="label-text font-bold block uppercase text-xs whitespace-normal">Aktifkan
+                                        class="label-text font-bold block uppercase text-xs whitespace-normal text-base-content/70">Aktifkan
                                         Face Recognition</span>
-                                    <span class="text-[10px] opacity-60 block whitespace-normal wrap-break-word">Jika
+                                    <span
+                                        class="text-[10px] text-base-content opacity-60 block whitespace-normal wrap-break-word">Jika
                                         aktif, personil wajib scan wajah saat absen. Jika tidak, hanya ambil foto
                                         biasa.</span>
                                 </div>
@@ -501,7 +508,8 @@
                         {{-- Foto --}}
                         <div class="form-control w-full md:col-span-2">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium">Foto Personnel @if (!$personnelId)
+                                <span class="label-text text-sm font-medium text-base-content">Foto Personnel
+                                    @if (!$personnelId)
                                         <span class="text-error">*</span>
                                     @endif
                                 </span>

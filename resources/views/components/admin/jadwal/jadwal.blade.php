@@ -36,7 +36,7 @@
             </div>
             <div class="relative w-full sm:w-auto">
                 <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
-                    class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100" />
+                    class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -75,12 +75,12 @@
                         class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
                         Dari</div>
                     <input type="date" id="startDate" wire:model.live="startDate"
-                        class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark" />
+                        class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/60" />
                     <div
                         class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
                         S/D</div>
                     <input type="date" id="endDate" wire:model.live="endDate"
-                        class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark" />
+                        class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/60" />
 
                     @if ($startDate || $endDate)
                         <button type="button" wire:click="resetFilters"
