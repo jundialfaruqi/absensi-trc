@@ -117,7 +117,7 @@
     </div>
 
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm mb-6 overflow-hidden min-h-[600px]" wire:key="jadwal-main-container">
+    <div class="card bg-base-100 shadow-sm mb-6 overflow-hidden min-h-150" wire:key="jadwal-main-container">
         <div class="card-body p-0">
             {{-- ─── Loading State (Skeleton) ────────────────────────────────── --}}
             <div @if ($readyToLoad) wire:loading wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage" @endif
@@ -236,61 +236,77 @@
                                         @endphp
                                         <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
                                             style="{{ $style }}"
-                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
-                                            @if ($j)
-                                                <div
-                                                    class="flex flex-col items-center justify-center w-full h-full relative font-bold">
-                                                    @if ($j->status === 'SHIFT')
-                                                        <span
-                                                            class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
-                                                        <span class="text-[8px] opacity-80 mt-0.5">
-                                                            {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
-                                                        </span>
-                                                        <span class="text-[8px] opacity-80 mt-0.1">
-                                                            {{ $j->shift ? \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') : '' }}
-                                                        </span>
-                                                    @else
-                                                        <span
-                                                            class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
-                                                    @endif
+                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')"
+                                            wire:loading.class="opacity-40 pointer-events-none"
+                                            wire:target="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
 
-                                                    {{-- Manual Change Badge --}}
-                                                    @if ($j && $j->is_manual)
-                                                        @php
-                                                            $isShift = $j->status === 'SHIFT';
-                                                            $iconBg = $isShift ? 'bg-blue-500' : 'bg-yellow-400';
-                                                            $iconColor = $isShift ? 'text-white' : 'text-yellow-900';
-                                                        @endphp
-                                                        <div class="absolute top-0.5 right-0.5 z-10">
-                                                            <div
-                                                                class="{{ $iconBg }} {{ $iconColor }} rounded-full p-0.5 shadow-sm border border-white/50">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-switch-2 size-2.5">
-                                                                    <path stroke="none" d="M0 0h24v24H0z"
-                                                                        fill="none" />
-                                                                    <path
-                                                                        d="M3 17h5l1.67 -2.386m3.66 -5.227l1.67 -2.387h6" />
-                                                                    <path d="M18 4l3 3l-3 3" />
-                                                                    <path d="M3 7h5l7 10h6" />
-                                                                    <path d="M18 20l3 -3l-3 -3" />
-                                                                </svg>
+                                            <div class="relative w-full h-full flex items-center justify-center">
+                                                {{-- Specific Cell Loader --}}
+                                                <div wire:loading
+                                                    wire:target="openQuickAdd('{{ $p->id }}', '{{ $date }}')"
+                                                    class="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
+                                                    <span
+                                                        class="loading loading-spinner loading-xs text-primary"></span>
+                                                </div>
+
+                                                @if ($j)
+                                                    <div
+                                                        class="flex flex-col items-center justify-center w-full h-full relative font-bold">
+                                                        @if ($j->status === 'SHIFT')
+                                                            <span
+                                                                class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
+                                                            <span class="text-[8px] opacity-80 mt-0.5">
+                                                                {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
+                                                            </span>
+                                                            <span class="text-[8px] opacity-80 mt-0.1">
+                                                                {{ $j->shift ? \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') : '' }}
+                                                            </span>
+                                                        @else
+                                                            <span
+                                                                class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>
+                                                        @endif
+
+                                                        {{-- Manual Change Badge --}}
+                                                        @if ($j && $j->is_manual)
+                                                            @php
+                                                                $isShift = $j->status === 'SHIFT';
+                                                                $iconBg = $isShift ? 'bg-blue-500' : 'bg-yellow-400';
+                                                                $iconColor = $isShift
+                                                                    ? 'text-white'
+                                                                    : 'text-yellow-900';
+                                                            @endphp
+                                                            <div class="absolute top-0.5 right-0.5 z-10">
+                                                                <div
+                                                                    class="{{ $iconBg }} {{ $iconColor }} rounded-full p-0.5 shadow-sm border border-white/50">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2"
+                                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                                        class="icon icon-tabler icons-tabler-outline icon-tabler-switch-2 size-2.5">
+                                                                        <path stroke="none" d="M0 0h24v24H0z"
+                                                                            fill="none" />
+                                                                        <path
+                                                                            d="M3 17h5l1.67 -2.386m3.66 -5.227l1.67 -2.387h6" />
+                                                                        <path d="M18 4l3 3l-3 3" />
+                                                                        <path d="M3 7h5l7 10h6" />
+                                                                        <path d="M18 20l3 -3l-3 -3" />
+                                                                    </svg>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <div class="w-full h-full flex items-center justify-center opacity-10">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="size-3">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M12 4.5v15m7.5-7.5h-15" />
-                                                    </svg>
-                                                </div>
-                                            @endif
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <div
+                                                        class="w-full h-full flex items-center justify-center opacity-10">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke-width="1.5"
+                                                            stroke="currentColor" class="size-3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M12 4.5v15m7.5-7.5h-15" />
+                                                        </svg>
+                                                    </div>
+                                                @endif
+                                            </div>
                                         </td>
                                     @endforeach
                                 </tr>
@@ -331,11 +347,15 @@
             {{-- Tabs --}}
             <div class="tabs tabs-boxed mb-6 bg-base-200/50 p-1">
                 <button type="button" wire:click="$set('activeTab', 'quick')"
-                    class="tab tab-sm flex-1 {{ $activeTab === 'quick' ? 'tab-active !bg-base-100 shadow-sm' : '' }}">
+                    class="tab tab-sm flex-1 {{ $activeTab === 'quick' ? 'tab-active bg-base-100! shadow-sm' : '' }}">
+                    <span wire:loading wire:target="$set('activeTab', 'quick')"
+                        class="loading loading-spinner loading-xs mr-2"></span>
                     Quick Edit
                 </button>
                 <button type="button" wire:click="$set('activeTab', 'swap')"
-                    class="tab tab-sm flex-1 {{ $activeTab === 'swap' ? 'tab-active !bg-base-100 shadow-sm' : '' }}">
+                    class="tab tab-sm flex-1 {{ $activeTab === 'swap' ? 'tab-active bg-base-100! shadow-sm' : '' }}">
+                    <span wire:loading wire:target="$set('activeTab', 'swap')"
+                        class="loading loading-spinner loading-xs mr-2"></span>
                     Tukar Shift
                 </button>
             </div>
@@ -357,7 +377,8 @@
                         {{-- Status Selection --}}
                         <div class="form-control">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium text-xs">Pilih Status Kehadiran</span>
+                                <span class="label-text font-medium text-xs text-base-content">Pilih Status
+                                    Kehadiran</span>
                             </label>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach (['SHIFT', 'LIBUR'] as $status)
@@ -365,7 +386,7 @@
                                         class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
                                         <input type="radio" wire:model.live="quickStatus"
                                             value="{{ $status }}" class="radio radio-primary radio-xs">
-                                        <span class="text-xs font-bold">{{ $status }}</span>
+                                        <span class="text-xs font-bold text-base-content">{{ $status }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -375,19 +396,21 @@
                         @if ($quickStatus === 'SHIFT')
                             <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
                                 <label class="label mb-1 px-1">
-                                    <span class="label-text font-medium text-xs">Pilih Shift</span>
+                                    <span class="label-text font-medium text-xs text-base-content">Pilih Shift</span>
                                 </label>
                                 <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
                                     @foreach ($this->shifts as $s)
-                                        <label
-                                            class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-xl hover:bg-base-200 transition-all {{ $quickShiftId == $s->id ? 'bg-primary/10 border-primary' : '' }}">
-                                            <input type="radio" wire:model="quickShiftId"
+                                        <label wire:key="shift-{{ $s->id }}"
+                                            class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-xl hover:bg-base-200 transition-all {{ (int) $quickShiftId === (int) $s->id ? 'bg-primary/10 border-primary' : '' }}">
+                                            <input type="radio" wire:model.live="quickShiftId"
                                                 value="{{ $s->id }}" class="radio radio-primary radio-sm">
                                             <div class="flex flex-col">
-                                                <span class="font-bold text-xs">{{ $s->name }}</span>
-                                                <span class="text-[10px] opacity-60">{{ $s->keterangan }}</span>
                                                 <span
-                                                    class="text-[10px] opacity-60">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
+                                                    class="font-bold text-xs text-base-content">{{ $s->name }}</span>
+                                                <span
+                                                    class="text-[10px] opacity-60 text-base-content">{{ $s->keterangan }}</span>
+                                                <span
+                                                    class="text-[10px] opacity-60 text-base-content">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
                                                     - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>
                                             </div>
                                         </label>
