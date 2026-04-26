@@ -164,7 +164,7 @@ class AttendanceController extends Controller
             ->where('tanggal', $activeDate)
             ->first();
 
-        if (!$existing) {
+        if (!$existing || !$existing->jam_masuk) {
             // CHECK IN LOGIC
             $status_masuk = 'HADIR';
             
@@ -195,20 +195,36 @@ class AttendanceController extends Controller
             $fileName = 'absensi/in_' . $personnel->id . '_' . time() . '.jpg';
             Storage::disk('public')->put($fileName, $imageData);
 
-            $absensi = Absensi::create([
-                'personnel_id' => $personnel->id,
-                'jadwal_id' => $jadwal->id,
-                'kantor_id' => $lokasiResult['kantor_id'],
-                'tanggal' => $activeDate,
-                'status' => 'HADIR',
-                'jam_masuk' => $now->format('H:i:s'),
-                'status_masuk' => $status_masuk,
-                'foto_masuk' => $fileName,
-                'lat_masuk' => $request->lat,
-                'lng_masuk' => $request->lng,
-                'is_within_radius' => $lokasiResult['is_within_radius'],
-                'jarak_meter' => $lokasiResult['jarak_meter'],
-            ]);
+            if (!$existing) {
+                $absensi = Absensi::create([
+                    'personnel_id' => $personnel->id,
+                    'jadwal_id' => $jadwal->id,
+                    'kantor_id' => $lokasiResult['kantor_id'],
+                    'tanggal' => $activeDate,
+                    'status' => 'HADIR',
+                    'jam_masuk' => $now->format('H:i:s'),
+                    'status_masuk' => $status_masuk,
+                    'foto_masuk' => $fileName,
+                    'lat_masuk' => $request->lat,
+                    'lng_masuk' => $request->lng,
+                    'is_within_radius' => $lokasiResult['is_within_radius'],
+                    'jarak_meter' => $lokasiResult['jarak_meter'],
+                ]);
+            } else {
+                $existing->update([
+                    'jadwal_id' => $jadwal->id,
+                    'kantor_id' => $lokasiResult['kantor_id'],
+                    'status' => 'HADIR',
+                    'jam_masuk' => $now->format('H:i:s'),
+                    'status_masuk' => $status_masuk,
+                    'foto_masuk' => $fileName,
+                    'lat_masuk' => $request->lat,
+                    'lng_masuk' => $request->lng,
+                    'is_within_radius' => $lokasiResult['is_within_radius'],
+                    'jarak_meter' => $lokasiResult['jarak_meter'],
+                ]);
+                $absensi = $existing;
+            }
 
             return response()->json([
                 'status' => 'success',
