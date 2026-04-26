@@ -189,8 +189,8 @@
     <dialog id="user-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
         x-on:open-modal.window="$event.detail.id === 'user-modal' && $el.showModal()"
         x-on:close-modal.window="$event.detail.id === 'user-modal' && $el.close()">
-        <div class="modal-box shadow max-h-[80vh] overflow-y-auto relative">
-            <div class="flex justify-between items-center mb-4">
+        <div class="modal-box p-0 shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
+            <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
                 <h3 class="font-bold text-lg">
                     {{ $userId ? 'Edit Admin' : 'Tambah Admin' }}
                 </h3>
@@ -198,7 +198,7 @@
                     onclick="document.getElementById('user-modal').close()">✕</button>
             </div>
             <form wire:submit="save">
-                <div class="space-y-4">
+                <div class="space-y-4 p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Nama --}}
                         <div class="form-control w-full">
@@ -382,7 +382,7 @@
                     </div>
                 </div>
 
-                <div class="modal-action mt-6">
+                <div class="modal-action px-6 pb-6">
                     <button type="button" class="btn btn-ghost"
                         x-on:click="document.getElementById('user-modal').close()">Batal</button>
                     <button type="submit" class="btn btn-secondary" wire:loading.attr="disabled">
