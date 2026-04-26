@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Device;
 use App\Http\Controllers\Controller;
 use App\Models\Personnel;
 use App\Models\Absensi;
@@ -13,6 +14,92 @@ use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
 {
+    public function activateLicense(Request $request)
+    {
+        $request->validate([
+            'license_key' => 'required|string',
+            'unique_device_id' => 'required|string',
+            'brand' => 'nullable|string',
+            'model' => 'nullable|string',
+            'android_version' => 'nullable|string',
+        ]);
+
+        $device = Device::where('license_key', $request->license_key)->first();
+
+        if (!$device) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lisensi tidak ditemukan. Silakan hubungi Admin.'
+            ], 404);
+        }
+
+        if ($device->status === 'suspended') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lisensi ini telah ditangguhkan.'
+            ], 403);
+        }
+
+        // Jika lisensi sudah aktif di perangkat lain
+        if ($device->unique_device_id && $device->unique_device_id !== $request->unique_device_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lisensi ini sudah digunakan di perangkat lain.'
+            ], 403);
+        }
+
+        // Aktivasi
+        $device->update([
+            'unique_device_id' => $request->unique_device_id,
+            'brand' => $request->brand,
+            'model' => $request->model,
+            'android_version' => $request->android_version,
+            'status' => 'active',
+            'activated_at' => now(),
+            'last_seen_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Aktivasi berhasil!',
+            'data' => $device
+        ]);
+    }
+
+    public function checkLicense(Request $request)
+    {
+        $request->validate([
+            'license_key' => 'required|string',
+            'unique_device_id' => 'required|string',
+        ]);
+
+        $device = Device::where('license_key', $request->license_key)
+            ->where('unique_device_id', $request->unique_device_id)
+            ->first();
+
+        if (!$device) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Perangkat tidak terdaftar.'
+            ], 404);
+        }
+
+        if ($device->status !== 'active') {
+            $msg = $device->status === 'suspended' ? 'Akses perangkat ditangguhkan oleh Admin.' : 'Perangkat belum aktif.';
+            return response()->json([
+                'status' => 'error',
+                'message' => $msg
+            ], 403);
+        }
+
+        $device->update(['last_seen_at' => now()]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Lisensi valid.',
+            'data' => $device
+        ]);
+    }
     public function personnels()
     {
         $personnels = Personnel::select('id', 'name', 'foto')->orderBy('name')->get();
