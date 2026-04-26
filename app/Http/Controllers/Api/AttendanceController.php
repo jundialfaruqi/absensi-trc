@@ -67,6 +67,9 @@ class AttendanceController extends Controller
             ], 403);
         }
 
+        $shift = $jadwal->shift;
+        $activeDate = ($jadwal->tanggal instanceof \DateTime) ? $jadwal->tanggal->format('Y-m-d') : $jadwal->tanggal;
+
         $existing = Absensi::where('personnel_id', $id)
             ->where('tanggal', $activeDate)
             ->first();
@@ -89,10 +92,7 @@ class AttendanceController extends Controller
             }
         }
 
-        // Logic check: Are we in ANY valid window?
-        $shift = $jadwal->shift;
-        $activeDate = ($jadwal->tanggal instanceof \DateTime) ? $jadwal->tanggal->format('Y-m-d') : $jadwal->tanggal;
-        
+        // ─── TIME WINDOW VALIDATION (BEFORE PIN) ───
         $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
         $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
         $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
