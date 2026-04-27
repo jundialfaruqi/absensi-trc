@@ -288,6 +288,19 @@
                             @enderror
                         </div>
 
+                        {{-- NIK --}}
+                        <div class="form-control w-full">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text text-sm font-medium text-base-content">NIK (No Induk Kependudukan)</span>
+                            </label>
+                            <input type="text" wire:model="nik"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('nik') input-error @enderror"
+                                placeholder="Cth: 3201234567890001">
+                            @error('nik')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Email --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
@@ -298,6 +311,19 @@
                                 class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('email') input-error @enderror"
                                 placeholder="Cth: john@example.com">
                             @error('email')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Nomor HP --}}
+                        <div class="form-control w-full">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text text-sm font-medium text-base-content">Nomor HP</span>
+                            </label>
+                            <input type="tel" wire:model="nomor_hp"
+                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('nomor_hp') input-error @enderror"
+                                placeholder="Cth: 08123456789">
+                            @error('nomor_hp')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                             @enderror
                         </div>
@@ -373,17 +399,15 @@
                         {{-- PIN --}}
                         <div class="form-control w-full" x-data="{ show: false }">
                             <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium text-base-content">PIN (4 Digit)
-                                    @if (!$personnelId)
-                                        <span class="text-error">*</span>
-                                    @endif
+                                <span class="label-text text-sm font-medium text-base-content">PIN (6 Digit)
+                                    <span class="text-error">*</span>
                                 </span>
                             </label>
                             <div class="relative flex items-center">
-                                <input x-bind:type="show ? 'text' : 'password'" wire:model="pin" maxlength="4"
+                                <input x-bind:type="show ? 'text' : 'password'" wire:model="pin" maxlength="6"
                                     pattern="[0-9]*" inputmode="numeric"
                                     class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all @error('pin') input-error @enderror"
-                                    placeholder="{{ $personnelId ? '(Kosongkan jika tidak diubah)' : 'Masukkan 4 digit PIN absen...' }}">
+                                    placeholder="6 digit PIN otomatis...">
                                 <button type="button" @click="show = !show"
                                     class="absolute inset-y-0 right-0 px-3 flex items-center text-base-content/50 hover:text-base-content focus:outline-none">
                                     <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -407,37 +431,7 @@
                             @enderror
                         </div>
 
-                        {{-- Nomor HP --}}
-                        <div class="form-control w-full">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium text-base-content">Nomor HP</span>
-                            </label>
-                            <input type="tel" wire:model="nomor_hp"
-                                class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('nomor_hp') input-error @enderror"
-                                placeholder="Cth: 08123456789">
-                            @error('nomor_hp')
-                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-control w-full">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium text-base-content">Pilih OPD Induk <span
-                                        class="text-error">*</span></span>
-                            </label>
-                            <select wire:model="opd_id"
-                                class="select select-bordered focus:select-primary w-full transition-all @error('opd_id') select-error @enderror"
-                                @if (!auth()->user()->hasRole('super-admin')) disabled @endif>
-                                <option value="">-- Pilih OPD --</option>
-                                @foreach ($this->opds as $opd)
-                                    <option value="{{ $opd->id }}">{{ $opd->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('opd_id')
-                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
+                        {{-- Penugasan --}}
                         <div class="form-control w-full">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">Penugasan <span
@@ -451,6 +445,24 @@
                                 @endforeach
                             </select>
                             @error('penugasan_id')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-control w-full md:col-span-2">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text text-sm font-medium text-base-content">Pilih OPD Induk <span
+                                        class="text-error">*</span></span>
+                            </label>
+                            <select wire:model="opd_id"
+                                class="select select-bordered focus:select-primary w-full transition-all @error('opd_id') select-error @enderror"
+                                @if (!auth()->user()->hasRole('super-admin')) disabled @endif>
+                                <option value="">-- Pilih OPD --</option>
+                                @foreach ($this->opds as $opd)
+                                    <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('opd_id')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                             @enderror
                         </div>
@@ -507,7 +519,7 @@
                         </div>
 
                         {{-- Foto --}}
-                        <div class="form-control w-full md:col-span-2">
+                        <div class="form-control w-full md:col-span-2" x-data="personnelCamera()">
                             <label class="label mb-1 px-1">
                                 <span class="label-text text-sm font-medium text-base-content">Foto Personnel
                                     @if (!$personnelId)
@@ -515,36 +527,88 @@
                                     @endif
                                 </span>
                             </label>
-                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                <div class="w-full sm:flex-1">
-                                    <input type="file"
-                                        class="file-input file-input-bordered focus:file-input-primary transition-all w-full @error('foto') file-input-error @enderror"
-                                        accept="image/png, image/jpeg, image/jpg"
-                                        onchange="handlePersonnelImageUpload(this)" />
-                                    @error('foto')
-                                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                                    @enderror
-                                    <div wire:loading wire:target="foto"
-                                        class="mt-2 text-xs text-info font-medium italic">Mengunggah foto...</div>
+                            
+                            <div class="flex flex-col gap-4">
+                                {{-- Preview & Camera View --}}
+                                <div class="flex flex-col sm:flex-row gap-4 items-start">
+                                    {{-- Camera / Current Foto --}}
+                                    <div class="relative w-40 h-48 bg-base-300 rounded-lg overflow-hidden border-2 border-base-200">
+                                        <video x-ref="video" x-show="isCameraOpen" autoplay muted playsinline class="w-full h-full object-cover"></video>
+                                        <canvas x-ref="canvas" class="hidden"></canvas>
+                                        
+                                        <div x-show="!isCameraOpen" class="w-full h-full flex items-center justify-center">
+                                            @if ($foto && !$errors->has('foto'))
+                                                <img src="{{ $foto->temporaryUrl() }}" class="w-full h-full object-cover">
+                                            @elseif ($oldFoto)
+                                                <img src="{{ asset('storage/' . $oldFoto) }}" class="w-full h-full object-cover">
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 opacity-20">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                                                </svg>
+                                            @endif
+                                        </div>
+
+                                        {{-- Loading Models Overlay --}}
+                                        <div x-show="isLoadingModels" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white z-10">
+                                            <span class="loading loading-spinner loading-xs mb-2"></span>
+                                            <span class="text-[8px] uppercase font-bold tracking-widest">AI Engine...</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 space-y-3 w-full">
+                                        <div class="flex flex-wrap gap-2">
+                                            {{-- Toggle Camera --}}
+                                            <button type="button" @click="isCameraOpen ? stopCamera() : startCamera()" 
+                                                class="btn btn-sm" :class="isCameraOpen ? 'btn-error' : 'btn-neutral'">
+                                                <svg x-show="!isCameraOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                                                </svg>
+                                                <span x-text="isCameraOpen ? 'Tutup Kamera' : 'Ambil dari Kamera'"></span>
+                                            </button>
+
+                                            {{-- Capture Button --}}
+                                            <button x-show="isCameraOpen" type="button" @click="capture()" class="btn btn-sm btn-primary">
+                                                Jepret Foto
+                                            </button>
+
+                                            {{-- File Upload --}}
+                                            <div class="relative">
+                                                <input type="file" x-ref="fileInput" class="hidden" accept="image/*" @change="handleFileUpload($event)">
+                                                <button type="button" @click="$refs.fileInput.click()" class="btn btn-sm btn-outline">
+                                                    Upload File
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <p class="text-[10px] text-base-content/50 leading-relaxed italic">
+                                            Direkomendasikan mengambil foto langsung agar AI dapat mendeteksi wajah dengan lebih akurat.
+                                        </p>
+
+                                        @error('foto')
+                                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                        @enderror
+                                        
+                                        @if($face_descriptor)
+                                            <div class="badge badge-success badge-xs gap-1 py-2 px-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Face Code Ready
+                                            </div>
+                                        @else
+                                            <div class="badge badge-warning badge-xs gap-1 py-2 px-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                                </svg>
+                                                Face Code Not Extracted
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
-                                @if ($foto && !$errors->has('foto'))
-                                    <div
-                                        class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-100 shrink-0">
-                                        <div class="w-16 h-20 rounded">
-                                            <img src="{{ $foto->temporaryUrl() }}" class="object-cover bg-white">
-                                        </div>
-                                    </div>
-                                @elseif ($oldFoto)
-                                    <div
-                                        class="avatar p-1 border border-base-200 rounded-lg shadow-sm bg-base-200/50 shrink-0">
-                                        <div class="w-16 h-20 rounded">
-                                            <img src="{{ asset('storage/' . $oldFoto) }}" class="object-cover">
-                                        </div>
-                                    </div>
-                                @endif
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -581,7 +645,114 @@
             </div>
         </div>
     </dialog>
-</div>
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script>
+    (function() {
+        const initPersonnelCamera = () => {
+            if (window.Alpine && !Alpine.data('personnelCamera')) {
+                Alpine.data('personnelCamera', () => ({
+                    isCameraOpen: false,
+                    isLoadingModels: false,
+                    stream: null,
+                    faceApiLoaded: false,
+
+                    async startCamera() {
+                        this.isCameraOpen = true;
+                        if (!this.faceApiLoaded) {
+                            await this.loadModels();
+                        }
+                        
+                        try {
+                            this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                            this.$refs.video.srcObject = this.stream;
+                        } catch (err) {
+                            console.error("Error accessing camera: ", err);
+                            alert("Tidak dapat mengakses kamera.");
+                            this.isCameraOpen = false;
+                        }
+                    },
+
+                    stopCamera() {
+                        if (this.stream) {
+                            this.stream.getTracks().forEach(track => track.stop());
+                        }
+                        this.isCameraOpen = false;
+                    },
+
+                    async loadModels() {
+                        this.isLoadingModels = true;
+                        const MODEL_URL = '/models';
+                        try {
+                            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+                            this.faceApiLoaded = true;
+                        } catch (err) {
+                            console.error("Error loading face-api models: ", err);
+                        } finally {
+                            this.isLoadingModels = false;
+                        }
+                    },
+
+                    async handleFileUpload(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        // Preview & Upload to Livewire
+                        @this.upload('foto', file);
+
+                        // Extract descriptor
+                        if (!this.faceApiLoaded) await this.loadModels();
+                        
+                        const img = await faceapi.bufferToImage(file);
+                        const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                        
+                        if (detection) {
+                            @this.set('face_descriptor', JSON.stringify(Array.from(detection.descriptor)));
+                        } else {
+                            alert("Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain.");
+                            @this.set('face_descriptor', '');
+                        }
+                    },
+
+                    async capture() {
+                        const video = this.$refs.video;
+                        const canvas = this.$refs.canvas;
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        
+                        const context = canvas.getContext('2d');
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        // Extract descriptor from canvas
+                        if (!this.faceApiLoaded) await this.loadModels();
+                        const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                        
+                        if (detection) {
+                            @this.set('face_descriptor', JSON.stringify(Array.from(detection.descriptor)));
+                            
+                            // Convert to Blob and upload
+                            canvas.toBlob((blob) => {
+                                const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+                                @this.upload('foto', file);
+                                this.stopCamera();
+                            }, 'image/jpeg', 0.9);
+                        } else {
+                            alert("Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera.");
+                        }
+                    }
+                }));
+            }
+        };
+
+        if (window.Alpine) {
+            initPersonnelCamera();
+        } else {
+            document.addEventListener('alpine:init', initPersonnelCamera);
+        }
+    })();
+</script>
 
 <script>
     function handlePersonnelImageUpload(input) {
@@ -649,3 +820,4 @@
         };
     }
 </script>
+</div>

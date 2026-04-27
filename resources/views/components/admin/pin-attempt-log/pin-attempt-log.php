@@ -40,11 +40,13 @@ new #[Title('Log Percobaan PIN')] #[Layout('layouts::admin.app')] class extends 
                 $query->where('status', $this->selectedStatus);
             })
             ->when($this->search, function ($query) {
-                $query->whereHas('personnel', function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%');
-                })->orWhere('ip_address', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->whereHas('personnel', function ($sq) {
+                        $sq->where('name', 'like', '%' . $this->search . '%');
+                    })->orWhere('ip_address', 'like', '%' . $this->search . '%');
+                });
             })
-            ->orderBy('attempted_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
     }
 
