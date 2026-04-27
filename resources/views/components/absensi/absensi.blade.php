@@ -293,42 +293,72 @@
                             <p class="text-xs text-blue-200/50 uppercase tracking-widest font-bold">Masukkan 6 Digit PIN Anda</p>
                         </div>
 
-                        <div class="flex justify-center gap-2 sm:gap-3 mb-8">
-                            @for ($i = 0; $i < 6; $i++)
-                                <div
-                                    class="w-10 h-14 sm:w-12 sm:h-16 rounded-xl border-2 {{ strlen($pin) > $i ? 'border-primary bg-primary/20 shadow-[0_0_15px_rgba(var(--color-primary),0.3)]' : 'border-white/10 bg-white/5' }} flex items-center justify-center text-2xl sm:text-3xl font-bold transition-all text-white">
-                                    {{ strlen($pin) > $i ? '●' : '' }}
-                                </div>
-                            @endfor
-                        </div>
-
-                        @error('pin')
-                            <div class="alert alert-error mb-6 py-2 px-4 shadow-sm rounded-xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5"
-                                    fill="none" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="text-[10px] uppercase font-bold tracking-tight">{{ $message }}</span>
+                        {{-- Alpine.js managed PIN area --}}
+                        <div x-data="{ 
+                            localPin: '', 
+                            add(num) {
+                                if (this.localPin.length < 6) {
+                                    this.localPin += num;
+                                }
+                            },
+                            clear() {
+                                this.localPin = '';
+                                $wire.set('pin', '');
+                            },
+                            submit() {
+                                if (this.localPin.length === 6) {
+                                    $wire.set('pin', this.localPin);
+                                    $wire.verifyPin();
+                                }
+                            }
+                        }" x-init="$watch('$wire.pin', value => { if (value === '') localPin = ''; })">
+                            <div class="flex justify-center gap-2 sm:gap-3 mb-8">
+                                <template x-for="i in 6">
+                                    <div
+                                        class="w-10 h-14 sm:w-12 sm:h-16 rounded-xl border-2 flex items-center justify-center text-2xl sm:text-3xl font-bold transition-all text-white"
+                                        :class="localPin.length >= i ? 'border-primary bg-primary/20 shadow-[0_0_15px_rgba(var(--color-primary),0.3)]' : 'border-white/10 bg-white/5'">
+                                        <span x-show="localPin.length >= i">●</span>
+                                    </div>
+                                </template>
                             </div>
-                        @enderror
 
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            @foreach ([1, 2, 3, 4, 5, 6, 7, 8, 9] as $num)
-                                <button type="button" wire:click="appendPin({{ $num }})"
-                                    class="btn btn-ghost bg-white/5 border border-white/5 h-14 sm:h-16 text-xl font-black text-white hover:bg-white/10 hover:border-white/20 active:scale-95 transition-all rounded-2xl">{{ $num }}</button>
-                            @endforeach
-                            <button type="button" wire:click="clearPin"
-                                class="btn btn-ghost bg-white/5 border border-white/5 h-14 sm:h-16 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-2xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="2.5" stroke="currentColor" class="size-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <button type="button" wire:click="appendPin(0)"
-                                class="btn btn-ghost bg-white/5 border border-white/5 h-14 sm:h-16 text-xl font-black text-white hover:bg-white/10 rounded-2xl">0</button>
-                            <div class="flex items-center justify-center">
-                                <div wire:loading wire:target="verifyPin" class="loading loading-spinner text-primary"></div>
+                            @error('pin')
+                                <div class="alert alert-error mb-6 py-2 px-4 shadow-sm rounded-xl">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="text-[10px] uppercase font-bold tracking-tight">{{ $message }}</span>
+                                </div>
+                            @enderror
+
+                            <div class="grid grid-cols-3 gap-3 mb-4">
+                                @foreach ([1, 2, 3, 4, 5, 6, 7, 8, 9] as $num)
+                                    <button type="button" @click="add({{ $num }})"
+                                        class="btn btn-ghost bg-white/5 border border-white/5 h-14 sm:h-16 text-xl font-black text-white hover:bg-white/10 hover:border-white/20 active:scale-95 transition-all rounded-2xl">{{ $num }}</button>
+                                @endforeach
+                                <button type="button" @click="clear()"
+                                    class="btn btn-ghost bg-white/5 border border-white/5 h-14 sm:h-16 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-2xl">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2.5" stroke="currentColor" class="size-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                <button type="button" @click="add(0)"
+                                    class="btn btn-ghost bg-white/5 border border-white/5 h-14 sm:h-16 text-xl font-black text-white hover:bg-white/10 rounded-2xl">0</button>
+                                
+                                {{-- Tombol Proses / OK --}}
+                                <button type="button" @click="submit()"
+                                    :disabled="localPin.length < 6"
+                                    class="btn btn-primary h-14 sm:h-16 rounded-2xl border-none disabled:bg-white/5 disabled:text-white/20 shadow-lg shadow-primary/20">
+                                    <div wire:loading wire:target="verifyPin" class="loading loading-spinner loading-sm"></div>
+                                    <div wire:loading.remove wire:target="verifyPin">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
