@@ -100,12 +100,38 @@ class AttendanceController extends Controller
             'data' => $device
         ]);
     }
-    public function personnels()
+    public function personnels(Request $request)
     {
-        $personnels = Personnel::select('id', 'name', 'foto')->orderBy('name')->get();
+        $device = $request->get('device');
+        
+        if (!$device) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Informasi perangkat tidak ditemukan.'
+            ], 403);
+        }
+
+        // Get personnels in this OPD
+        $personnels = Personnel::where('opd_id', $device->opd_id)
+            ->select('id', 'name', 'foto', 'face_descriptor', 'face_recognition')
+            ->orderBy('name')
+            ->get();
+
+        // Get OPD Settings for Geofencing
+        $opd = $device->opd;
+
         return response()->json([
             'status' => 'success',
-            'data' => $personnels
+            'data' => [
+                'personnels' => $personnels,
+                'settings' => [
+                    'opd_name' => $opd->name,
+                    'lat' => $opd->lat,
+                    'lng' => $opd->lng,
+                    'radius' => $opd->radius,
+                    'is_face_recognition_enabled' => (bool) \App\Models\Setting::get('face_recognition_enabled', true),
+                ]
+            ]
         ]);
     }
 
@@ -266,12 +292,27 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'personnel_id' => 'nullable|exists:personnels,id',
             'foto' => 'required|string', // Base64 image
             'lat' => 'required|numeric',
             'lng' => 'required|numeric',
         ]);
 
         $personnel = $request->user();
+        
+        // If not authenticated via Sanctum (Proses 3), get from personnel_id
+        if (!$personnel) {
+            if (!$request->personnel_id) {
+                return response()->json(['status' => 'error', 'message' => 'ID Personel diperlukan.'], 400);
+            }
+            $personnel = Personnel::find($request->personnel_id);
+            
+            // Security: Ensure this personnel belongs to the device's OPD
+            $device = $request->get('device');
+            if ($personnel->opd_id !== $device->opd_id) {
+                return response()->json(['status' => 'error', 'message' => 'Personel tidak terdaftar di OPD perangkat ini.'], 403);
+            }
+        }
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
         $yesterday = $now->copy()->subDay()->format('Y-m-d');

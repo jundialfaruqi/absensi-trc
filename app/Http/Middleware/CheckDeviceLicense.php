@@ -51,6 +51,9 @@ class CheckDeviceLicense
         // Update last seen
         $device->update(['last_seen_at' => now()]);
 
+        // Attach device to request
+        $request->attributes->add(['device' => $device]);
+
         return $next($request);
     }
 }
