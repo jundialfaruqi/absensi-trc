@@ -112,9 +112,20 @@ class AttendanceController extends Controller
         }
 
         // Get all personnels for face recognition (no OPD filter for Android)
-        $personnels = Personnel::select('id', 'name', 'foto', 'face_descriptor', 'face_recognition')
+        $personnels = Personnel::with('opd:id,name')
+            ->select('id', 'name', 'foto', 'face_descriptor', 'face_recognition', 'opd_id')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'foto' => $p->foto,
+                    'face_descriptor' => $p->face_descriptor,
+                    'face_recognition' => $p->face_recognition,
+                    'opd_name' => $p->opd ? $p->opd->name : '-'
+                ];
+            });
 
         // Get OPD Settings for Geofencing
         $opd = $device->opd;
@@ -305,12 +316,6 @@ class AttendanceController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'ID Personel diperlukan.'], 400);
             }
             $personnel = Personnel::find($request->personnel_id);
-            
-            // Security: Ensure this personnel belongs to the device's OPD
-            $device = $request->get('device');
-            if ($personnel->opd_id !== $device->opd_id) {
-                return response()->json(['status' => 'error', 'message' => 'Personel tidak terdaftar di OPD perangkat ini.'], 403);
-            }
         }
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
