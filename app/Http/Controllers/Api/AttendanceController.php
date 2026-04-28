@@ -111,6 +111,16 @@ class AttendanceController extends Controller
             ], 403);
         }
 
+        // Return only IDs for cleanup feature in App
+        if ($request->has('ids_only')) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'ids' => Personnel::pluck('id')
+                ]
+            ]);
+        }
+
         // Get all personnels for face recognition (no OPD filter for Android)
         $query = Personnel::with('opd:id,name')
             ->select('id', 'name', 'foto', 'face_descriptor', 'face_recognition', 'opd_id');
