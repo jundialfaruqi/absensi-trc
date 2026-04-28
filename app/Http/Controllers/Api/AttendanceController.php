@@ -112,9 +112,14 @@ class AttendanceController extends Controller
         }
 
         // Get all personnels for face recognition (no OPD filter for Android)
-        $personnels = Personnel::with('opd:id,name')
-            ->select('id', 'name', 'foto', 'face_descriptor', 'face_recognition', 'opd_id')
-            ->orderBy('name')
+        $query = Personnel::with('opd:id,name')
+            ->select('id', 'name', 'foto', 'face_descriptor', 'face_recognition', 'opd_id');
+
+        if ($request->has('last_id')) {
+            $query->where('id', '>', $request->last_id);
+        }
+
+        $personnels = $query->orderBy('name')
             ->get()
             ->map(function($p) {
                 return [
