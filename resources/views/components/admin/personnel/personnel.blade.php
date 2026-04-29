@@ -51,6 +51,17 @@
                         </button>
                     @endif
                 </div>
+
+                @if (auth()->user()->hasRole('super-admin'))
+                    <div class="w-full sm:w-auto">
+                        <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
+                            <option value="">Semua OPD (Filter)</option>
+                            @foreach ($this->opds as $opd)
+                                <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
             </div>
         </div>
         <div class="flex gap-2">
@@ -142,8 +153,24 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $currentOpd = null;
+                                $isSuperAdmin = auth()->user()->hasRole('super-admin');
+                            @endphp
                             @forelse ($this->personnels as $r)
-                                <tr class="hover:bg-base-200/50">
+                                    @if ($isSuperAdmin && $currentOpd !== $r->opd_id)
+                                        <tr class="bg-base-200">
+                                            <td colspan="8"
+                                                class="py-2 px-4 border-b border-base-200 font-black uppercase text-[11px] text-primary">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-1.5 h-4 bg-primary rounded-full"></div>
+                                                    {{ $r->opd?->name ?? 'TANPA OPD' }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @php $currentOpd = $r->opd_id; @endphp
+                                    @endif
+                                    <tr class="hover:bg-base-200/50">
                                     <td class="text-center font-bold">
                                         {{ $this->personnels->firstItem() + $loop->index }}
                                     </td>

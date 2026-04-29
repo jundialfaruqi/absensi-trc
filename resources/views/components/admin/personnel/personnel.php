@@ -19,7 +19,11 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
 
     public bool $readyToLoad = false;
     public int $perPage = 10;
+    #[Url]
     public string $search = '';
+
+    #[Url]
+    public string $selectedOpd = '';
 
     // Form
     public ?int $personnelId = null;
@@ -56,19 +60,22 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         }
 
         $query = Personnel::with(['opd', 'penugasan', 'kantor'])
+            ->join('opds', 'personnels.opd_id', '=', 'opds.id')
+            ->select('personnels.*')
             ->when($this->search, fn($q) => $q->where(function ($sub) {
-                $sub->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('nik', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%')
-                    ->orWhere('pin', 'like', '%' . $this->search . '%');
-            }));
+                $sub->where('personnels.name', 'like', '%' . $this->search . '%')
+                    ->orWhere('personnels.nik', 'like', '%' . $this->search . '%')
+                    ->orWhere('personnels.email', 'like', '%' . $this->search . '%')
+                    ->orWhere('personnels.pin', 'like', '%' . $this->search . '%');
+            }))
+            ->when($this->selectedOpd, fn($q) => $q->where('personnels.opd_id', $this->selectedOpd));
 
         if (!auth()->user()->hasRole('super-admin')) {
             $userOpdId = auth()->user()->opd()?->id;
-            $query->where('opd_id', $userOpdId);
+            $query->where('personnels.opd_id', $userOpdId);
         }
 
-        return $query->orderBy('name')->paginate($this->perPage);
+        return $query->orderBy('opds.name')->orderBy('personnels.name')->paginate($this->perPage);
     }
 
     #[Computed]
