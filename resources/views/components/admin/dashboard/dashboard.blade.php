@@ -184,7 +184,21 @@
                                         </tr>
                                     @endfor
                                 @else
+                                    @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
+                                        @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
+                                            <tr class="bg-base-200/50">
+                                                <td colspan="4" class="py-2 px-4">
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="w-1.5 h-3 bg-primary rounded-full"></div>
+                                                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                                                            {{ $log->personnel->opd->name }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @php $currentOpd = $log->personnel->opd_id; @endphp
+                                        @endif
                                         <tr
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group {{ $log->status === 'LIBUR' ? 'bg-base-200/80 opacity-25 grayscale' : '' }}">
                                             <td>

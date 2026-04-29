@@ -294,9 +294,10 @@
                                 <span class="label-text text-sm font-medium text-base-content">NIK (No Induk Kependudukan) <span
                                         class="text-error">*</span></span>
                             </label>
-                            <input type="text" wire:model="nik"
+                            <input type="text" wire:model="nik" maxlength="16" pattern="[0-9]*"
+                                inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                 class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('nik') input-error @enderror"
-                                placeholder="Cth: 3201234567890001">
+                                placeholder="16 digit NIK personel...">
                             @error('nik')
                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                             @enderror

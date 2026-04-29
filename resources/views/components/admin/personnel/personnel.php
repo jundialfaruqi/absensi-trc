@@ -164,7 +164,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         return [
             'name' => 'required|string|max:255',
             'nik' => [
-                'required', 'string', 'max:20',
+                'required', 'numeric', 'max_digits:20',
                 Rule::unique('personnels')->ignore($this->personnelId),
             ],
             'opd_id' => 'required|exists:opds,id',
@@ -199,6 +199,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'image' => 'File harus berupa gambar.',
             'confirmed' => 'Konfirmasi password tidak cocok.',
             'digits' => 'Kolom :attribute harus berjumlah :digits digit.',
+            'numeric' => 'Kolom :attribute harus berupa angka.',
+            'max_digits' => 'Kolom :attribute maksimal :max_digits digit.',
             'exists' => 'Pilihan :attribute tidak valid.',
         ];
     }

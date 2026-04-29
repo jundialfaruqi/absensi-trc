@@ -90,9 +90,12 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
             })
+            ->join('personnels', 'absensis.personnel_id', '=', 'personnels.id')
+            ->join('opds', 'personnels.opd_id', '=', 'opds.id')
+            ->select('absensis.*')
             ->with(['personnel.opd', 'jadwal.shift'])
-            ->orderByRaw("jam_masuk IS NULL DESC")
-            ->latest('updated_at')
+            ->orderBy('opds.name')
+            ->latest('absensis.updated_at')
             ->get();
 
         // Pending Leave Requests
