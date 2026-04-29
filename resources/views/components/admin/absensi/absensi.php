@@ -34,6 +34,9 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     #[Url]
     public string $endDate = '';
 
+    #[Url]
+    public string $selectedOpd = '';
+
     public string $paperSize = 'a4';
 
     protected $listeners = [
@@ -114,13 +117,19 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                 $query->with('shift');
             }, 'penugasan'])
             ->when(!Auth::user()->hasRole('super-admin'), function ($q) use ($opdId) {
-                $q->where('opd_id', $opdId);
+                $q->where('personnels.opd_id', $opdId);
+            })
+            ->when(Auth::user()->hasRole('super-admin') && $this->selectedOpd, function ($q) {
+                $q->where('personnels.opd_id', $this->selectedOpd);
             })
             ->when($this->search, function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
+                $q->where('personnels.name', 'like', '%' . $this->search . '%');
             })
-            ->orderByRaw('LENGTH(regu) ASC, regu ASC')
-            ->orderBy('name')
+            ->join('opds', 'personnels.opd_id', '=', 'opds.id')
+            ->select('personnels.*')
+            ->orderBy('opds.name')
+            ->orderByRaw('LENGTH(personnels.regu) ASC, personnels.regu ASC')
+            ->orderBy('personnels.name')
             ->paginate($this->perPage);
 
         // Key their data by date for easy lookup in the view
@@ -178,5 +187,11 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public function updatedPerPage(): void
     {
         $this->resetPage();
+    }
+
+    #[Computed]
+    public function opds()
+    {
+        return \App\Models\Opd::orderBy('name')->get();
     }
 };

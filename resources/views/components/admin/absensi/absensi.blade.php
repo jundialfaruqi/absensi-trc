@@ -46,6 +46,17 @@
                 </select>
             </div>
 
+            @if (auth()->user()->hasRole('super-admin'))
+                <div class="w-full sm:w-auto">
+                    <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
+                        <option value="">Semua OPD (Filter)</option>
+                        @foreach ($this->opds as $opd)
+                            <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
             <div class="flex flex-wrap items-center gap-3">
                 <div class="join w-full sm:w-auto">
                     <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
@@ -206,7 +217,26 @@
 
                         {{-- ─── Real Table Data ────────────────────────────────────────── --}}
                         @if ($readyToLoad)
+                            @php
+                                $currentOpd = null;
+                                $isSuperAdmin = auth()->user()->hasRole('super-admin');
+                            @endphp
                             @forelse ($this->personnels as $p)
+                                @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
+                                    <tr class="bg-base-200">
+                                        <td colspan="{{ count($this->dates) * 2 + 1 }}"
+                                            class="sticky left-0 z-10 py-2 px-4 border-b border-base-200">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-1.5 h-4 bg-primary rounded-full"></div>
+                                                <span
+                                                    class="text-[11px] font-black uppercase tracking-[0.2em] text-primary">
+                                                    {{ $p->opd->name }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @php $currentOpd = $p->opd_id; @endphp
+                                @endif
                                 <tr class="group">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">

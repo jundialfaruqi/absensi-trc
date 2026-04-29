@@ -22,7 +22,50 @@
         </div>
     </div>
 
-    {{-- ─── Toolbar: Search + Filters + Buttons ──────────────────────────────────────── --}}
+    {{-- ─── Toolbar: Search + Aksi ──────────────────────────────────────── --}}
+    <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
+        <div class="relative w-full sm:w-auto">
+            <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
+                class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </span>
+            @if ($search)
+                <button type="button" wire:click="$set('search', '')"
+                    class="absolute inset-y-0 right-0 pr-3 text-base-content/50">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            @endif
+        </div>
+
+        <div class="flex flex-wrap gap-2 justify-end">
+            <a wire:navigate href="{{ route('jadwal.generate') }}" class="btn btn-primary text-white gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Generate Otomatis
+            </a>
+            <a wire:navigate href="{{ route('jadwal.import', ['month' => $month, 'year' => $year]) }}"
+                class="btn btn-success text-white gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Import Excel
+            </a>
+        </div>
+    </div>
+
+    {{-- ─── Toolbar: Filters ──────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
         <div class="flex flex-col sm:flex-row items-center gap-3">
             <div class="join">
@@ -34,25 +77,17 @@
                     <option value="50">50</option>
                 </select>
             </div>
-            <div class="relative w-full sm:w-auto">
-                <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
-                    class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </span>
-                @if ($search)
-                    <button type="button" wire:click="$set('search', '')"
-                        class="absolute inset-y-0 right-0 pr-3 text-base-content/50">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                @endif
-            </div>
+
+            @if (auth()->user()->hasRole('super-admin'))
+                <div class="w-full sm:w-auto">
+                    <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
+                        <option value="">Semua OPD (Filter)</option>
+                        @foreach ($this->opds as $opd)
+                            <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
 
             <div class="flex flex-wrap items-center gap-3">
                 <div class="join w-full sm:w-auto">
@@ -93,26 +128,6 @@
                     @endif
                 </div>
             </div>
-        </div>
-
-        <div class="flex flex-wrap gap-2 justify-end">
-            <a wire:navigate href="{{ route('jadwal.generate') }}" class="btn btn-primary text-white gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-                Generate Otomatis
-            </a>
-            <a wire:navigate href="{{ route('jadwal.import', ['month' => $month, 'year' => $year]) }}"
-                class="btn btn-success text-white gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-                Import Excel
-            </a>
         </div>
     </div>
 
@@ -184,7 +199,24 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @php 
+                                $currentOpd = null; 
+                                $isSuperAdmin = Auth::user()->hasRole('super-admin');
+                            @endphp
                             @forelse ($this->personnels as $p)
+                                @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
+                                    <tr class="bg-base-200">
+                                        <td colspan="{{ count($this->dates) + 1 }}" class="sticky left-0 z-10 py-2 px-4 border-b border-base-200">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-1.5 h-4 bg-primary rounded-full"></div>
+                                                <span class="text-[11px] font-black uppercase tracking-[0.2em] text-primary">
+                                                    {{ $p->opd->name }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @php $currentOpd = $p->opd_id; @endphp
+                                @endif
                                 <tr>
                                     <td class="sticky left-0 z-40 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
