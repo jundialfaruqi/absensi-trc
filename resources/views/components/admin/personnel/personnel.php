@@ -164,14 +164,15 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         return [
             'name' => 'required|string|max:255',
             'nik' => [
-                'nullable', 'string', 'max:20',
+                'required', 'string', 'max:20',
                 Rule::unique('personnels')->ignore($this->personnelId),
             ],
             'opd_id' => 'required|exists:opds,id',
             'penugasan_id' => 'required|exists:penugasans,id',
             'nomor_hp' => 'nullable|string|max:30',
             'email' => [
-                'required', 'email', 'max:255',
+                $this->personnelId ? 'required' : 'nullable', 
+                'email', 'max:255',
                 Rule::unique('personnels')->ignore($this->personnelId),
             ],
             'foto' => $this->personnelId ? 'nullable|image|max:2048' : 'required|image|max:2048',
@@ -179,11 +180,42 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'kantor_id' => 'nullable|exists:kantors,id',
             'wajib_absen_di_lokasi' => 'boolean',
             'face_recognition' => 'boolean',
-            'password' => (!$this->personnelId || $this->password) ? 'required|string|min:8|confirmed' : 'nullable|string|min:8|confirmed',
+            'password' => ($this->personnelId && $this->password) ? 'string|min:8|confirmed' : 'nullable',
             'pin' => [
                 'required', 'string', 'digits:6',
                 Rule::unique('personnels')->ignore($this->personnelId),
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'required' => 'Kolom :attribute wajib diisi.',
+            'email' => 'Format email tidak valid.',
+            'unique' => ':attribute sudah terdaftar.',
+            'max' => 'Kolom :attribute maksimal :max karakter.',
+            'min' => 'Kolom :attribute minimal :min karakter.',
+            'image' => 'File harus berupa gambar.',
+            'confirmed' => 'Konfirmasi password tidak cocok.',
+            'digits' => 'Kolom :attribute harus berjumlah :digits digit.',
+            'exists' => 'Pilihan :attribute tidak valid.',
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'name' => 'Nama',
+            'nik' => 'NIK',
+            'opd_id' => 'OPD',
+            'penugasan_id' => 'Penugasan',
+            'nomor_hp' => 'Nomor HP',
+            'email' => 'Email',
+            'foto' => 'Foto',
+            'password' => 'Password',
+            'pin' => 'PIN',
+            'kantor_id' => 'Kantor',
         ];
     }
 
@@ -204,7 +236,6 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'opd_id' => $this->opd_id,
             'penugasan_id' => $this->penugasan_id,
             'nomor_hp' => $this->nomor_hp,
-            'email' => $this->email,
             'pin' => $this->pin,
             'face_descriptor' => $this->face_descriptor ?: null,
             'kantor_id' => $this->kantor_id ?: null,
@@ -212,16 +243,38 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             'face_recognition' => $this->face_recognition,
         ];
 
+        // LOGIKA OTOMATISASI UNTUK PERSONEL BARU
+        if (!$this->personnelId) {
+            // 1. Generate Email Unik
+            $baseEmail = strtolower(str_replace(' ', '', $this->name));
+            $email = $baseEmail . '@trc.com';
+            $counter = 1;
+            while (Personnel::where('email', $email)->exists()) {
+                $email = $baseEmail . $counter . '@trc.com';
+                $counter++;
+            }
+            $data['email'] = $email;
+
+            // 2. Generate Password Default (admintrc112_[penugasan])
+            $penugasan = Penugasan::find($this->penugasan_id);
+            $suffix = $penugasan ? strtolower(str_replace(' ', '', $penugasan->name)) : 'dev';
+            $data['password'] = Hash::make('admintrc112_' . $suffix);
+        } else {
+            // Tetap gunakan email yang diinput jika sedang edit
+            $data['email'] = $this->email;
+            
+            // Update password jika diisi saat edit
+            if ($this->password) {
+                $data['password'] = Hash::make($this->password);
+            }
+        }
+
         if ($this->foto) {
             $data['foto'] = $this->foto->store('personnel-fotos', 'public');
 
             if ($this->personnelId && $this->oldFoto) {
                 Storage::disk('public')->delete($this->oldFoto);
             }
-        }
-
-        if ($this->password) {
-            $data['password'] = Hash::make($this->password);
         }
 
         if ($this->personnelId) {
