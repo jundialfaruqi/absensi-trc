@@ -190,8 +190,8 @@
                                 </label>
                                 <div class="join w-full">
                                     <div class="relative flex-1">
-                                        <input x-bind:type="show ? 'text' : 'password'" wire:model="pin" maxlength="6"
-                                            pattern="[0-9]*" inputmode="numeric"
+                                        <input x-bind:type="show ? 'text' : 'password'" wire:model="pin"
+                                            maxlength="6" pattern="[0-9]*" inputmode="numeric"
                                             class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all join-item @error('pin') input-error @enderror"
                                             placeholder="6 digit PIN otomatis...">
                                         <button type="button" @click="show = !show"
@@ -212,11 +212,17 @@
                                             </svg>
                                         </button>
                                     </div>
-                                    <button type="button" wire:click="regeneratePin" class="btn btn-neutral join-item" title="Generate Ulang" wire:loading.attr="disabled">
-                                        <svg wire:loading.remove wire:target="regeneratePin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                    <button type="button" wire:click="regeneratePin"
+                                        class="btn btn-neutral join-item" title="Generate Ulang"
+                                        wire:loading.attr="disabled">
+                                        <svg wire:loading.remove wire:target="regeneratePin"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                                         </svg>
-                                        <span wire:loading wire:target="regeneratePin" class="loading loading-spinner loading-xs"></span>
+                                        <span wire:loading wire:target="regeneratePin"
+                                            class="loading loading-spinner loading-xs"></span>
                                     </button>
                                 </div>
                                 @error('pin')
@@ -298,7 +304,7 @@
                                 <div class="flex flex-col gap-4 items-center w-full">
                                     {{-- Camera / Current Foto --}}
                                     <div
-                                        class="relative w-full max-w-70 aspect-[5/6 bg-base-300 rounded-lg overflow-hidden border-2 border-base-200">
+                                        class="relative w-full max-w-70 aspect-5/6 bg-base-300 rounded-lg overflow-hidden border-2 border-base-200">
                                         <video x-ref="video" x-show="isCameraOpen" autoplay muted playsinline
                                             class="w-full h-full object-cover"></video>
                                         <canvas x-ref="canvas" class="hidden"></canvas>
