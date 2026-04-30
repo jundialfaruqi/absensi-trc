@@ -583,6 +583,22 @@
                                             @endif
                                         </div>
 
+                                        {{-- Face Guide Overlay --}}
+                                        <div x-show="isCameraOpen" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                                            <svg class="w-full h-full" viewBox="0 0 160 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <!-- Dashed Oval -->
+                                                <ellipse cx="80" cy="96" rx="55" ry="75" stroke="rgba(255, 255, 255, 0.6)" stroke-width="2" stroke-dasharray="6 6" />
+                                                <!-- Top Left -->
+                                                <path d="M 40 36 L 25 36 L 25 51" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" fill="none" />
+                                                <!-- Top Right -->
+                                                <path d="M 120 36 L 135 36 L 135 51" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" fill="none" />
+                                                <!-- Bottom Left -->
+                                                <path d="M 40 156 L 25 156 L 25 141" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" fill="none" />
+                                                <!-- Bottom Right -->
+                                                <path d="M 120 156 L 135 156 L 135 141" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" fill="none" />
+                                            </svg>
+                                        </div>
+
                                         {{-- Loading Models Overlay --}}
                                         <div x-show="isLoadingModels" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white z-10">
                                             <span class="loading loading-spinner loading-xs mb-2"></span>
