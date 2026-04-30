@@ -249,21 +249,21 @@
                                             class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
                                             <svg class="w-full h-full" viewBox="0 0 160 192" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
-                                                <!-- Dashed Oval -->
-                                                <ellipse cx="80" cy="96" rx="55" ry="75"
+                                                <!-- Dashed Oval (More narrow and slightly higher) -->
+                                                <ellipse cx="80" cy="86" rx="42" ry="60"
                                                     stroke="rgba(255, 255, 255, 0.6)" stroke-width="2"
                                                     stroke-dasharray="6 6" />
                                                 <!-- Top Left -->
-                                                <path d="M 40 36 L 25 36 L 25 51" stroke="rgba(255, 255, 255, 0.8)"
+                                                <path d="M 50 35 L 35 35 L 35 50" stroke="rgba(255, 255, 255, 0.8)"
                                                     stroke-width="2" fill="none" />
                                                 <!-- Top Right -->
-                                                <path d="M 120 36 L 135 36 L 135 51" stroke="rgba(255, 255, 255, 0.8)"
+                                                <path d="M 110 35 L 125 35 L 125 50" stroke="rgba(255, 255, 255, 0.8)"
                                                     stroke-width="2" fill="none" />
                                                 <!-- Bottom Left -->
-                                                <path d="M 40 156 L 25 156 L 25 141" stroke="rgba(255, 255, 255, 0.8)"
+                                                <path d="M 50 145 L 35 145 L 35 130" stroke="rgba(255, 255, 255, 0.8)"
                                                     stroke-width="2" fill="none" />
                                                 <!-- Bottom Right -->
-                                                <path d="M 120 156 L 135 156 L 135 141"
+                                                <path d="M 110 145 L 125 145 L 125 130"
                                                     stroke="rgba(255, 255, 255, 0.8)" stroke-width="2"
                                                     fill="none" />
                                             </svg>
