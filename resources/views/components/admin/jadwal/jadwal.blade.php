@@ -180,7 +180,7 @@
             @if ($readyToLoad)
                 <div wire:loading.remove
                     wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage"
-                    class="overflow-x-auto max-h-150 overflow-y-auto">
+                    class="overflow-x-auto max-h-250 overflow-y-auto">
                     <table class="table table-sm w-full border-separate border-spacing-0">
                         <thead class="sticky top-0 z-20 bg-base-100">
                             <tr>
