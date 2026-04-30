@@ -46,6 +46,14 @@ Route::group([
         ->middleware('permission:manajemen-personel')
         ->name('personnel');
 
+    Route::livewire('/personnel/tambah', 'admin::personnel-create')
+        ->middleware('permission:manajemen-personel')
+        ->name('personnel.tambah');
+
+    Route::livewire('/personnel/{id}/edit', 'admin::personnel-edit')
+        ->middleware('permission:manajemen-personel')
+        ->name('personnel.edit');
+
     Route::livewire('/kantor', 'admin::kantors')
         ->middleware('permission:manajemen-kantor')
         ->name('kantor');
