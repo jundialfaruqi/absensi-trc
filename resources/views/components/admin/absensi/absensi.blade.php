@@ -160,7 +160,7 @@
     <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
         <div class="card-body p-0">
             <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
-                <table class="table table-sm table-zebra w-full border-separate border-spacing-0">
+                <table class="table table-sm w-full border-separate border-spacing-0">
                     <thead class="sticky top-0 z-110 bg-base-100">
                         <tr>
                             <th rowspan="2"
@@ -225,12 +225,12 @@
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
                                     <tr class="bg-base-200">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
-                                            class="sticky left-0 z-10 py-2 px-4 border-b border-base-200">
-                                            <div class="flex items-center gap-2">
+                                            class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
+                                            <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
                                                 <div class="w-1.5 h-4 bg-primary rounded-full"></div>
                                                 <span
-                                                    class="text-[11px] font-black uppercase tracking-[0.2em] text-primary">
-                                                    {{ $p->opd->name }}
+                                                    class="text-[11px] font-black uppercase tracking-[0.2em] text-primary whitespace-nowrap">
+                                                    {{ $p->opd->singkatan }}
                                                 </span>
                                             </div>
                                         </td>

@@ -68,7 +68,8 @@
         <div class="flex gap-2">
             <button wire:click="goToAdd" class="btn btn-neutral gap-2" wire:loading.attr="disabled">
                 <span wire:loading wire:target="goToAdd" class="loading loading-spinner loading-xs"></span>
-                <svg wire:loading.remove wire:target="goToAdd" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <svg wire:loading.remove wire:target="goToAdd" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 Tambah Personnel
@@ -139,7 +140,7 @@
             {{-- ─── Real Table Data ────────────────────────────────────────── --}}
             @if ($readyToLoad)
                 <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full">
+                    <table class="table w-full">
                         <thead>
                             <tr>
                                 <th class="text-center w-16">#</th>
@@ -158,19 +159,22 @@
                                 $isSuperAdmin = auth()->user()->hasRole('super-admin');
                             @endphp
                             @forelse ($this->personnels as $r)
-                                    @if ($isSuperAdmin && $currentOpd !== $r->opd_id)
-                                        <tr class="bg-base-200">
-                                            <td colspan="8"
-                                                class="py-2 px-4 border-b border-base-200 font-black uppercase text-[11px] text-primary">
-                                                <div class="flex items-center gap-2">
-                                                    <div class="w-1.5 h-4 bg-primary rounded-full"></div>
-                                                    {{ $r->opd?->name ?? 'TANPA OPD' }}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        @php $currentOpd = $r->opd_id; @endphp
-                                    @endif
-                                    <tr class="hover:bg-base-200/50">
+                                @if ($isSuperAdmin && $currentOpd !== $r->opd_id)
+                                    <tr class="bg-base-200">
+                                        <td colspan="8"
+                                            class="sticky left-0 top-12 z-50 p-0 border-b border-base-200 bg-base-200">
+                                            <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
+                                                <div class="w-1.5 h-4 bg-primary rounded-full"></div>
+                                                <span
+                                                    class="text-[11px] font-black uppercase tracking-[0.2em] text-primary whitespace-nowrap">
+                                                    {{ $r->opd?->singkatan ?? ($r->opd?->name ?? 'TANPA OPD') }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @php $currentOpd = $r->opd_id; @endphp
+                                @endif
+                                <tr class="hover:bg-base-200/50">
                                     <td class="text-center font-bold">
                                         {{ $this->personnels->firstItem() + $loop->index }}
                                     </td>
@@ -254,7 +258,8 @@
                                             <ul tabindex="0"
                                                 class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
                                                 <li>
-                                                    <a wire:navigate href="{{ route('personnel.edit', $r->id) }}">Edit</a>
+                                                    <a wire:navigate
+                                                        href="{{ route('personnel.edit', $r->id) }}">Edit</a>
                                                 </li>
                                                 <li>
                                                     <button type="button" class="text-error"
