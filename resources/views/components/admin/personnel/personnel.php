@@ -107,9 +107,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
 
         $this->deleteId = $id;
         $this->deleteName = $name;
-        $this->dispatch('open-modal', [
-            'id' => 'personnel-delete-modal'
-        ]);
+        $this->dispatch('open-modal', id: 'personnel-delete-modal');
     }
 
     public function executeDelete(): void
@@ -127,9 +125,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
 
         $this->deleteId = null;
         $this->deleteName = '';
-        $this->dispatch('close-modal', [
-            'id' => 'personnel-delete-modal'
-        ]);
+        $this->dispatch('close-modal', id: 'personnel-delete-modal');
         $this->dispatch('toast', [
             'type' => 'success',
             'title' => 'Berhasil',

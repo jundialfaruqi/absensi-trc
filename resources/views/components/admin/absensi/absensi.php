@@ -18,13 +18,13 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
     public bool $readyToLoad = false;
     public int $perPage = 10;
-    
+
     #[Url]
     public string $search = '';
-    
+
     #[Url]
     public string $month = '';
-    
+
     #[Url]
     public string $year = '';
 
@@ -164,12 +164,9 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         $this->resetPage();
     }
 
-    public function openEditAbsensi(int $personnelId, string $tanggal): void
+    public function editAbsensi($personnelId, $tanggal)
     {
-        $this->dispatch('openEditAbsensi', [
-            'personnelId' => $personnelId,
-            'tanggal' => $tanggal
-        ])->to('admin::absensi-edit-modal');
+        $this->dispatch('openEditAbsensi', personnelId: $personnelId, tanggal: $tanggal)->to('admin::absensi-edit-modal');
     }
 
     public function updatedSearch(): void
@@ -195,6 +192,6 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     #[Computed]
     public function opds()
     {
-        return \App\Models\Opd::query()->orderBy('name', 'asc')->get(['*']);
+        return \App\Models\Opd::orderBy('name')->get();
     }
 };
