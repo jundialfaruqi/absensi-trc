@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\Personnel;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Opd;
 use App\Models\Penugasan;
 use App\Models\Kantor;
@@ -33,8 +34,8 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
 
     public function mount()
     {
-        if (!auth()->user()->hasRole('super-admin')) {
-            $this->opd_id = (string) auth()->user()->opd()?->id;
+        if (!Auth::user()->hasRole('super-admin')) {
+            $this->opd_id = (string) Auth::user()->opd()?->id;
         }
 
         $this->pin = $this->generateUniquePin();
@@ -43,28 +44,28 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function opds()
     {
-        if (auth()->user()->hasRole('super-admin')) {
-            return Opd::orderBy('name')->get();
+        if (Auth::user()->hasRole('super-admin')) {
+            return Opd::query()->orderBy('name', 'asc')->get(['*']);
         } else {
-            $userOpdId = auth()->user()->opd()?->id;
-            return Opd::where('id', $userOpdId)->get();
+            $userOpdId = Auth::user()->opd()?->id;
+            return Opd::query()->where('id', '=', $userOpdId)->get(['*']);
         }
     }
 
     #[Computed]
     public function penugasans()
     {
-        return Penugasan::orderBy('name')->get();
+        return Penugasan::query()->orderBy('name', 'asc')->get(['*']);
     }
 
     #[Computed]
     public function kantors()
     {
-        $query = Kantor::orderBy('name');
-        if (!auth()->user()->hasRole('super-admin')) {
-            $query->where('opd_id', auth()->user()->opd()?->id);
+        $query = Kantor::query()->orderBy('name', 'asc');
+        if (!Auth::user()->hasRole('super-admin')) {
+            $query->where('opd_id', '=', Auth::user()->opd()?->id);
         }
-        return $query->get();
+        return $query->get(['*']);
     }
 
     public function regeneratePin(): void
@@ -76,7 +77,7 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     {
         do {
             $pin = sprintf("%06d", mt_rand(1, 999999));
-        } while (Personnel::where('pin', $pin)->exists());
+        } while (Personnel::query()->where('pin', '=', $pin)->exists());
 
         return $pin;
     }
@@ -157,8 +158,8 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
 
     public function save()
     {
-        if (!auth()->user()->hasRole('super-admin')) {
-            if ($this->opd_id != auth()->user()->opd()?->id) {
+        if (!Auth::user()->hasRole('super-admin')) {
+            if ($this->opd_id != Auth::user()->opd()?->id) {
                 abort(403, 'Unauthorized action.');
             }
         }
@@ -182,14 +183,14 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
         $baseEmail = strtolower(str_replace(' ', '', $this->name));
         $email = $baseEmail . '@trc.com';
         $counter = 1;
-        while (Personnel::where('email', $email)->exists()) {
+        while (Personnel::query()->where('email', '=', $email)->exists()) {
             $email = $baseEmail . $counter . '@trc.com';
             $counter++;
         }
         $data['email'] = $email;
 
         // Generate Password Default
-        $penugasan = Penugasan::find($this->penugasan_id);
+        $penugasan = Penugasan::query()->find($this->penugasan_id);
         $suffix = $penugasan ? strtolower(str_replace(' ', '', $penugasan->name)) : 'dev';
         $data['password'] = Hash::make('admintrc112_' . $suffix);
 
@@ -199,7 +200,11 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
 
         Personnel::create($data);
 
-        $this->dispatch('set-pending-toast', type: 'success', title: 'Berhasil', message: 'Data Personnel berhasil ditambahkan.');
-        return $this->redirectRoute('personnel', navigate: true);
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data Personnel berhasil ditambahkan.'
+        ]);
+        return $this->redirectRoute('personnel', [], true, true);
     }
 };

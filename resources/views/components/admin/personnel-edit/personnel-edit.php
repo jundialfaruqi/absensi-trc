@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\Personnel;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Opd;
 use App\Models\Penugasan;
 use App\Models\Kantor;
@@ -44,35 +45,35 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     #[Computed]
     public function opds()
     {
-        if (auth()->user()->hasRole('super-admin')) {
-            return Opd::orderBy('name')->get();
+        if (Auth::user()->hasRole('super-admin')) {
+            return Opd::query()->orderBy('name', 'asc')->get(['*']);
         } else {
-            $userOpdId = auth()->user()->opd()?->id;
-            return Opd::where('id', $userOpdId)->get();
+            $userOpdId = Auth::user()->opd()?->id;
+            return Opd::query()->where('id', '=', $userOpdId)->get(['*']);
         }
     }
 
     #[Computed]
     public function penugasans()
     {
-        return Penugasan::orderBy('name')->get();
+        return Penugasan::query()->orderBy('name', 'asc')->get(['*']);
     }
 
     #[Computed]
     public function kantors()
     {
-        $query = Kantor::orderBy('name');
-        if (!auth()->user()->hasRole('super-admin')) {
-            $query->where('opd_id', auth()->user()->opd()?->id);
+        $query = Kantor::query()->orderBy('name', 'asc');
+        if (!Auth::user()->hasRole('super-admin')) {
+            $query->where('opd_id', '=', Auth::user()->opd()?->id);
         }
-        return $query->get();
+        return $query->get(['*']);
     }
 
     private function loadPersonnelData(int $id): void
     {
         $item = Personnel::findOrFail($id);
 
-        if (!auth()->user()->hasRole('super-admin') && $item->opd_id !== auth()->user()->opd()?->id) {
+        if (!Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -100,7 +101,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     {
         do {
             $pin = sprintf("%06d", mt_rand(1, 999999));
-        } while (Personnel::where('pin', $pin)->exists());
+        } while (Personnel::query()->where('pin', '=', $pin)->exists());
 
         return $pin;
     }
@@ -190,8 +191,8 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
     public function save()
     {
-        if (!auth()->user()->hasRole('super-admin')) {
-            if ($this->opd_id != auth()->user()->opd()?->id) {
+        if (!Auth::user()->hasRole('super-admin')) {
+            if ($this->opd_id != Auth::user()->opd()?->id) {
                 abort(403, 'Unauthorized action.');
             }
         }
@@ -227,7 +228,11 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $personnel = Personnel::findOrFail($this->personnelId);
         $personnel->update($data);
 
-        $this->dispatch('set-pending-toast', type: 'success', title: 'Berhasil', message: 'Data Personnel berhasil diperbarui.');
-        return $this->redirectRoute('personnel', navigate: true);
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data Personnel berhasil diperbarui.'
+        ]);
+        return $this->redirectRoute('personnel', [], true, true);
     }
 };

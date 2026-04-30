@@ -201,6 +201,6 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function opds()
     {
-        return \App\Models\Opd::orderBy('name')->get();
+        return \App\Models\Opd::query()->orderBy('name', 'asc')->get(['*']);
     }
 };
