@@ -22,30 +22,34 @@
                     <li class="step step-primary">
                         <div class="text-left ml-2">
                             <span class="font-medium text-base">Unduh Template</span>
-                            <p class="text-base-content/60 text-xs mt-1">Unduh format template Excel yang telah
-                                disediakan.</p>
+                            <p class="text-base-content/60 text-xs mt-1">Pilih periode (Bulan & Tahun) lalu klik tombol
+                                unduh template matrix di bawah.</p>
                         </div>
                     </li>
                     <li class="step step-primary">
                         <div class="text-left ml-2">
                             <span class="font-medium text-base">Isi Data Jadwal</span>
-                            <p class="text-base-content/60 text-xs mt-1">Buka file di Excel dan isi berdasar ID
-                                Personnel dan ID Shift. Format tanggal harus YYYY-MM-DD.</p>
+                            <p class="text-base-content/60 text-xs mt-1">Buka file Excel dan isi kolom tanggal dengan
+                                <b>Nama Shift</b> (PAGI, SIANG, MALAM) atau ketik <b>LIBUR</b>. Lihat daftar referensi
+                                shift di bagian bawah file.
+                            </p>
                         </div>
                     </li>
                     <li class="step step-primary">
                         <div class="text-left ml-2">
                             <span class="font-medium text-base">Unggah File</span>
-                            <p class="text-base-content/60 text-xs mt-1">Simpan dan unggah kembali file pada kolom di
-                                samping untuk memproses jadwal.</p>
+                            <p class="text-base-content/60 text-xs mt-1">Simpan perubahan file Anda, lalu unggah kembali
+                                pada kolom di samping untuk memproses jadwal.</p>
                         </div>
                     </li>
                 </ul>
                 <div class="mt-8 space-y-4">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="form-control">
-                            <label class="label p-1"><span class="label-text text-xs">Bulan</span></label>
-                            <select wire:model.live="month" class="select select-bordered select-sm">
+                    <div class="flex gap-4">
+                        <div class="form-control flex-1">
+                            <label class="label p-1">
+                                <span class="label-text text-xs text-base-content font-medium">Bulan</span>
+                            </label>
+                            <select wire:model.live="month" class="select select-bordered select-sm w-full">
                                 @for ($i = 1; $i <= 12; $i++)
                                     <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
                                         {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
@@ -53,9 +57,11 @@
                                 @endfor
                             </select>
                         </div>
-                        <div class="form-control">
-                            <label class="label p-1"><span class="label-text text-xs">Tahun</span></label>
-                            <select wire:model.live="year" class="select select-bordered select-sm">
+                        <div class="form-control flex-1">
+                            <label class="label p-1">
+                                <span class="label-text text-xs text-base-content font-medium">Tahun</span>
+                            </label>
+                            <select wire:model.live="year" class="select select-bordered select-sm w-full">
                                 @for ($i = date('Y') - 1; $i <= date('Y') + 1; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                 @endfor
@@ -82,7 +88,7 @@
                 <form wire:submit="import">
                     <div class="form-control w-full mb-6">
                         <label class="label">
-                            <span class="label-text font-medium">Pilih File (.xlsx, .xls) <span
+                            <span class="label-text font-medium text-base-content mb-2">Pilih File (.xlsx, .xls) <span
                                     class="text-error">*</span></span>
                         </label>
                         <input type="file" wire:model="file"
