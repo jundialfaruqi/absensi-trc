@@ -98,6 +98,9 @@ Route::group([
         ->middleware('permission:manajemen-perangkat')
         ->name('perangkat');
 
+    Route::livewire('/profil-saya', 'admin::profile-saya')
+        ->name('profile');
+
     Route::get('/absensi/export-pdf', [App\Http\Controllers\Admin\ReportController::class, 'exportAbsensiPdf'])
         ->middleware('permission:manajemen-absensi')
         ->name('absensi.export-pdf');
