@@ -29,6 +29,22 @@ new #[Title('Profil Saya')] #[Layout('layouts::admin.app')] class extends Compon
         $this->old_foto = $user->foto;
     }
  
+    public function updatedFoto()
+    {
+        try {
+            $this->validateOnly('foto', [
+                'foto' => 'image|mimes:png,jpeg,jpg,webp|max:2048',
+            ], [
+                'foto.image' => 'File harus berupa gambar.',
+                'foto.mimes' => 'Format foto harus png, jpeg, jpg, atau webp.',
+                'foto.max' => 'Ukuran foto maksimal 2MB.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->foto = null;
+            throw $e;
+        }
+    }
+ 
     public function updateProfile()
     {
         $user = auth()->user();

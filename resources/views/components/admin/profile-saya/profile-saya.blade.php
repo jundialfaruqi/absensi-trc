@@ -44,7 +44,7 @@
                                 </div>
                             </div>
                         </div>
-
+ 
                         <!-- Photo Actions -->
                         <template x-if="isEditing">
                             <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
@@ -72,7 +72,13 @@
                             </div>
                         </template>
                     </div>
-
+ 
+                    @error('foto')
+                        <div class="mt-4">
+                            <span class="bg-error/10 text-error text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tight">{{ $message }}</span>
+                        </div>
+                    @enderror
+ 
                     <div class="mt-4">
                         <h2 class="text-xl font-bold text-base-content">{{ $name }}</h2>
                         <p class="text-xs font-medium text-base-content/40 uppercase tracking-widest">
