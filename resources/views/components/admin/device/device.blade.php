@@ -2,10 +2,10 @@
     {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-black tracking-tight uppercase">Manajemen Perangkat</h2>
+            <h2 class="font-black uppercase text-xl">Manajemen Perangkat</h2>
             <p class="text-sm text-base-content/60">Kelola lisensi dan akses perangkat mobile personel TRC</p>
         </div>
-        <button wire:click="openModal" class="btn btn-primary shadow-lg shadow-primary/20">
+        <button wire:click="openModal" class="btn btn-secondary">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -50,30 +50,33 @@
     </div>
 
     {{-- Table Section --}}
+
+    <div class="border-b border-base-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full md:w-80">
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama, lisensi, atau ID..."
+                class="input input-bordered w-full placeholder:text-base-content/60 pl-10 pr-10 bg-base-100" />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="size-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="join">
+                <span class="btn btn-disabled join-item text-base-content pointer-events-none">Show</span>
+                <select wire:model.live="perPage" class="select select-bordered join-item w-20">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body p-0">
-            <div class="p-6 border-b border-base-200 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="relative w-full md:w-80">
-                    <input type="text" wire:model.live.debounce.300ms="search"
-                        placeholder="Cari nama, lisensi, atau ID..."
-                        class="input input-bordered w-full pl-10 bg-base-200/50 focus:bg-base-100 transition-all border-none" />
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="size-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <select wire:model.live="perPage" class="select select-bordered bg-base-200 border-none">
-                        <option value="10">10 Baris</option>
-                        <option value="25">25 Baris</option>
-                        <option value="50">50 Baris</option>
-                    </select>
-                </div>
-            </div>
-
             <div class="min-h-[400px]">
                 {{-- Desktop View --}}
                 <div class="hidden md:block overflow-x-auto">

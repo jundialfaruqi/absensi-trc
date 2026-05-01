@@ -2,7 +2,7 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Manajemen Admin</h1>
+            <h1 class="text-xl font-black uppercase">Manajemen Admin</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola akun dan role Admin</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
@@ -15,28 +15,6 @@
                     </a>
                 </li>
             </ul>
-        </div>
-    </div>
-
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <div class="card bg-linear-to-r from-secondary to-neutral text-base-100 p-5">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-lg text-white font-bold">Manajemen Admin</div>
-                    <div class="text-sm text-white opacity-80">List Akun Admin</div>
-                </div>
-                <div class="flex flex-wrap gap-4 md:gap-8 mt-1 md:mt-0">
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Admin</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['with_role'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Memiliki Role</div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 

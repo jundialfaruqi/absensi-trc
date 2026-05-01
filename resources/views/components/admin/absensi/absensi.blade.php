@@ -227,9 +227,9 @@
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
                                             <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
-                                                <div class="w-1.5 h-4 bg-primary rounded-full"></div>
+                                                <div class="w-1.5 h-4 bg-base-content"></div>
                                                 <span
-                                                    class="text-[11px] font-black uppercase tracking-[0.2em] text-primary whitespace-nowrap">
+                                                    class="text-[11px] font-black uppercase tracking-[0.2em] text-base-content whitespace-nowrap">
                                                     {{ $p->opd->singkatan }}
                                                 </span>
                                             </div>

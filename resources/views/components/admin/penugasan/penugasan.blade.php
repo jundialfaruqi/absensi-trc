@@ -18,24 +18,6 @@
         </div>
     </div>
 
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <div class="card bg-linear-to-r from-neutral to-secondary text-base-100 p-5">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-lg text-white font-bold">Manajemen Penugasan</div>
-                    <div class="text-sm text-white opacity-80">List Data Penugasan</div>
-                </div>
-                <div class="flex flex-wrap gap-4 md:gap-0 mt-1 md:mt-0">
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Penugasan</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ─── Toolbar: Search + Buttons ──────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <div class="form-control">
@@ -157,8 +139,7 @@
                     {{-- Nama --}}
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text font-medium">Nama Penugasan <span
-                                    class="text-error">*</span></span>
+                            <span class="label-text font-medium">Nama Penugasan <span class="text-error">*</span></span>
                         </label>
                         <input type="text" wire:model="name"
                             class="input input-bordered focus:input-primary w-full transition-all @error('name') input-error @enderror"

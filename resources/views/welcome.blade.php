@@ -444,7 +444,7 @@
                 </div>
                 <div class="relative z-10 space-y-4">
                     <div
-                        class="h-12 w-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 shadow-lg shadow-red-500/5">
+                        class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shadow-lg shadow-red-500/5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -469,7 +469,7 @@
                     </svg>
                 </div>
                 <div class="relative z-10 space-y-4">
-                    <div class="h-12 w-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <div class="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -494,7 +494,8 @@
                     </svg>
                 </div>
                 <div class="relative z-10 space-y-4">
-                    <div class="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                    <div
+                        class="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -520,7 +521,7 @@
                 </div>
                 <div class="relative z-10 space-y-4">
                     <div
-                        class="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                        class="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -624,7 +625,7 @@
                         <div
                             class="p-5 glass-panel rounded-2xl border-white/5 space-y-3 hover:border-blue-500/20 transition-all group">
                             <div
-                                class="h-10 w-10 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
+                                class="h-10 w-10 flex items-center justify-center rounded-full bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                     fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -639,7 +640,7 @@
                         <div
                             class="p-5 glass-panel rounded-2xl border-white/5 space-y-3 hover:border-red-500/20 transition-all group">
                             <div
-                                class="h-10 w-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 group-hover:scale-110 transition-transform">
+                                class="h-10 w-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 group-hover:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                     fill="currentColor">
                                     <path
@@ -754,8 +755,8 @@
     <footer class="relative z-10 border-t border-white/5 mt-12 py-12 px-6">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex flex-col items-center md:items-start space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 p-1 rounded-lg glass-panel border-white/10">
+                <div class="flex items-center gap-1">
+                    <div class="h-10 w-10">
                         <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
                             class="h-full w-full object-contain" />
                     </div>
@@ -774,7 +775,7 @@
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] opacity-40">Powered by
                         Diskominfo Pekanbaru</span>
                 </div>
-                <div class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                <div class="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center md:text-right">
                     &copy; 2026 Pemerintah Kota Pekanbaru. Seluruh Hak Cipta Dilindungi.
                 </div>
             </div>

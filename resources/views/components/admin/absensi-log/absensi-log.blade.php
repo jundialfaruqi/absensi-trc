@@ -2,7 +2,7 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Log Aktifitas Absensi</h1>
+            <h1 class="text-xl font-black uppercase">Log Aktifitas Absensi</h1>
             <p class="text-sm text-base-content/60 mt-1">Riwayat perubahan data absensi oleh Admin</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">

@@ -7,7 +7,7 @@
                 {{ $opdName }} • {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
             </p>
         </div>
-        <div class="flex items-center gap-2 px-4 py-2 bg-base-100 rounded-xl border border-base-300 shadow-sm">
+        <div class="flex items-center gap-2 px-4 py-2 bg-base-100 rounded-xl shadow">
             <span class="relative flex h-2 w-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
@@ -191,7 +191,8 @@
                                                 <td colspan="4" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-primary rounded-full"></div>
-                                                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                                                        <span
+                                                            class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
                                                             {{ $log->personnel->opd->name }}
                                                         </span>
                                                     </div>
@@ -376,7 +377,7 @@
             </div>
 
             {{-- Monitoring Hub: Late & Absent --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Pegawai Terlambat --}}
                 <div class="card bg-base-100 border border-base-200 overflow-hidden">
                     <div class="p-4 bg-error/5 border-b border-base-200 flex items-center justify-between">

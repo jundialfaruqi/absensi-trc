@@ -2,7 +2,7 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Log Percobaan PIN</h1>
+            <h1 class="text-xl font-black uppercase">Log Percobaan PIN</h1>
             <p class="text-sm text-base-content/60 mt-1">Riwayat upaya memasukkan PIN pada Portal Absensi Web</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
@@ -45,7 +45,8 @@
                 <option value="fail">GAGAL</option>
             </select>
 
-            <button wire:click="clearOldLogs" wire:loading.attr="disabled" class="btn btn-error btn-outline">
+            <button wire:click="clearOldLogs" wire:loading.attr="disabled"
+                class="btn btn-error btn-outline w-full sm:w-auto">
                 <span wire:loading wire:target="clearOldLogs" class="loading loading-spinner loading-xs"></span>
                 <svg wire:loading.remove wire:target="clearOldLogs" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
