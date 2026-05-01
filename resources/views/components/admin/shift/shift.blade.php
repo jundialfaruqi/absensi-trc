@@ -2,7 +2,7 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Manajemen Shift</h1>
+            <h1 class="text-xl font-black uppercase">Manajemen Shift</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola data jadwal shift karyawan</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
@@ -15,24 +15,6 @@
                     </a>
                 </li>
             </ul>
-        </div>
-    </div>
-
-    {{-- ─── Stats Banner ───────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <div class="card bg-linear-to-r from-neutral to-secondary text-base-100 p-5">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-lg text-white font-bold">Manajemen Shift</div>
-                    <div class="text-sm text-white opacity-80">Daftar Jam Kerja Shift</div>
-                </div>
-                <div class="flex flex-wrap gap-4 md:gap-8 mt-1 md:mt-0">
-                    <div class="text-center">
-                        <div class="text-2xl text-white font-bold">{{ $this->stats['total'] ?? 0 }}</div>
-                        <div class="text-xs text-white opacity-80">Total Shift</div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 

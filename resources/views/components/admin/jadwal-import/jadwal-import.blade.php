@@ -1,7 +1,7 @@
 <div>
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold">Import Jadwal</h1>
+            <h1 class="text-xl font-black uppercase">Import Jadwal</h1>
             <p class="text-sm text-base-content/60 mt-1">Unggah jadwal shift secara massal</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">

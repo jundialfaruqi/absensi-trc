@@ -2,7 +2,7 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
-            <h1 class="text-xl font-bold">Manajemen Master Cuti</h1>
+            <h1 class="text-xl font-black uppercase">Manajemen Master Cuti</h1>
             <p class="text-sm text-base-content/60 mt-1">Kelola jenis-jenis cuti yang tersedia bagi personel</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
@@ -147,7 +147,8 @@
 
             <form wire:submit="save" class="p-6 space-y-6">
                 <div class="form-control w-full">
-                    <label class="label py-1"><span class="label-text text-sm font-medium text-base-content">Nama Jenis
+                    <label class="label py-1"><span class="label-text text-sm font-medium text-base-content">Nama
+                            Jenis
                             Cuti
                             <span class="text-error">*</span></span></label>
                     <div class="relative">

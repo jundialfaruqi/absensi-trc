@@ -2,7 +2,7 @@
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold text-base-content">Generate Jadwal Otomatis</h1>
+            <h1 class="text-xl font-black uppercase text-base-content">Generate Jadwal Otomatis</h1>
             <p class="text-sm text-base-content/60 mt-1">Sistem rotasi cerdas untuk efisiensi penjadwalan personnel</p>
         </div>
         <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
@@ -195,8 +195,12 @@
                                                         wire:loading.attr="disabled"
                                                         @if ($index === 0) disabled @endif
                                                         class="btn btn-ghost btn-xs btn-square {{ $index === 0 ? 'opacity-10' : '' }}">
-                                                        <span wire:loading wire:target="movePersonnelUp('{{ $pId }}')" class="loading loading-spinner loading-[10px]"></span>
-                                                        <svg wire:loading.remove wire:target="movePersonnelUp('{{ $pId }}')" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        <span wire:loading
+                                                            wire:target="movePersonnelUp('{{ $pId }}')"
+                                                            class="loading loading-spinner loading-[10px]"></span>
+                                                        <svg wire:loading.remove
+                                                            wire:target="movePersonnelUp('{{ $pId }}')"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="3"
                                                             stroke="currentColor" class="w-3 h-3">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -208,8 +212,12 @@
                                                         wire:loading.attr="disabled"
                                                         @if ($index === count($selectedPersonnelIds) - 1) disabled @endif
                                                         class="btn btn-ghost btn-xs btn-square {{ $index === count($selectedPersonnelIds) - 1 ? 'opacity-10' : '' }}">
-                                                        <span wire:loading wire:target="movePersonnelDown('{{ $pId }}')" class="loading loading-spinner loading-[10px]"></span>
-                                                        <svg wire:loading.remove wire:target="movePersonnelDown('{{ $pId }}')" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        <span wire:loading
+                                                            wire:target="movePersonnelDown('{{ $pId }}')"
+                                                            class="loading loading-spinner loading-[10px]"></span>
+                                                        <svg wire:loading.remove
+                                                            wire:target="movePersonnelDown('{{ $pId }}')"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="3"
                                                             stroke="currentColor" class="w-3 h-3">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -367,8 +375,11 @@
                                             <button type="button" wire:click="removeSequence({{ $index }})"
                                                 wire:loading.attr="disabled"
                                                 class="btn btn-error btn-square btn-sm h-9 w-9 min-h-0">
-                                                <span wire:loading wire:target="removeSequence({{ $index }})" class="loading loading-spinner loading-xs"></span>
-                                                <svg wire:loading.remove wire:target="removeSequence({{ $index }})" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                <span wire:loading wire:target="removeSequence({{ $index }})"
+                                                    class="loading loading-spinner loading-xs"></span>
+                                                <svg wire:loading.remove
+                                                    wire:target="removeSequence({{ $index }})"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
                                                     class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -384,9 +395,11 @@
                         <div class="flex justify-center">
                             <button type="button" wire:click="addSequence" wire:loading.attr="disabled"
                                 class="btn btn-ghost btn-sm gap-2 text-primary hover:bg-primary/5 rounded-lg border-2 border-dashed border-primary/20 px-10">
-                                <span wire:loading wire:target="addSequence" class="loading loading-spinner loading-xs"></span>
-                                <svg wire:loading.remove wire:target="addSequence" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                <span wire:loading wire:target="addSequence"
+                                    class="loading loading-spinner loading-xs"></span>
+                                <svg wire:loading.remove wire:target="addSequence" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+                                    class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
                                 <span wire:loading.remove wire:target="addSequence">Tambah Urutan</span>
@@ -654,10 +667,12 @@
                                         <span class="text-[10px] text-error mt-1">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <button type="button" wire:click="saveCurrentAsTemplate" wire:loading.attr="disabled"
-                                    class="btn btn-primary btn-sm rounded-lg px-6">
-                                    <span wire:loading wire:target="saveCurrentAsTemplate" class="loading loading-spinner loading-xs"></span>
-                                    <span wire:loading.remove wire:target="saveCurrentAsTemplate">Simpan Template</span>
+                                <button type="button" wire:click="saveCurrentAsTemplate"
+                                    wire:loading.attr="disabled" class="btn btn-primary btn-sm rounded-lg px-6">
+                                    <span wire:loading wire:target="saveCurrentAsTemplate"
+                                        class="loading loading-spinner loading-xs"></span>
+                                    <span wire:loading.remove wire:target="saveCurrentAsTemplate">Simpan
+                                        Template</span>
                                 </button>
                             </div>
                         @endif
@@ -793,9 +808,11 @@
                     @if ($step > 1 && (Auth::user()->hasRole('super-admin') || $step > 2))
                         <button type="button" wire:click="prevStep" wire:loading.attr="disabled"
                             class="btn btn-ghost gap-2 font-bold uppercase text-[10px]">
-                            <span wire:loading wire:target="prevStep" class="loading loading-spinner loading-xs"></span>
-                            <svg wire:loading.remove wire:target="prevStep" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                            <span wire:loading wire:target="prevStep"
+                                class="loading loading-spinner loading-xs"></span>
+                            <svg wire:loading.remove wire:target="prevStep" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"
+                                class="w-3 h-3">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                             </svg>
@@ -810,10 +827,12 @@
                     @if ($step < 4)
                         <button type="button" wire:click="nextStep" wire:loading.attr="disabled"
                             class="btn btn-primary px-6 font-bold uppercase text-[10px] tracking-widest gap-2">
-                            <span wire:loading wire:target="nextStep" class="loading loading-spinner loading-xs"></span>
+                            <span wire:loading wire:target="nextStep"
+                                class="loading loading-spinner loading-xs"></span>
                             <span wire:loading.remove wire:target="nextStep">Lanjut</span>
-                            <svg wire:loading.remove wire:target="nextStep" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                            <svg wire:loading.remove wire:target="nextStep" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"
+                                class="w-3 h-3">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                             </svg>

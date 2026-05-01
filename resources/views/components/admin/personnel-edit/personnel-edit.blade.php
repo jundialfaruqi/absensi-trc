@@ -3,7 +3,7 @@
         <div
             class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-base-200">
             <div>
-                <h3 class="font-bold text-xl">
+                <h3 class="font-black uppercase text-xl">
                     Edit Personnel
                 </h3>
                 <p class="text-sm text-base-content/60 mt-1">Lengkapi data profil dan foto personnel di bawah ini.</p>
