@@ -38,8 +38,14 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     #[Computed]
     public function personnels()
     {
+        return $this->getPersonnelsQuery()->paginate($this->perPage);
+    }
+
+    private function getPersonnelsQuery()
+    {
         if (!$this->readyToLoad) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+            // Return a query that returns nothing but has the right structure
+            return Personnel::query()->whereRaw('1 = 0');
         }
 
         return Personnel::query()
@@ -53,12 +59,28 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
                     ->orWhere('personnels.pin', 'like', '%' . $this->search . '%');
             }))
             ->when($this->selectedOpd, fn($q) => $q->where('personnels.opd_id', '=', $this->selectedOpd))
-            ->when(!Auth::user()->hasRole('super-admin'), function($q) {
+            ->when(!Auth::user()->hasRole('super-admin'), function ($q) {
                 $q->where('personnels.opd_id', '=', Auth::user()->opd()?->id);
             })
             ->orderBy('opds.name', 'asc')
             ->orderBy('personnels.name', 'asc')
-            ->paginate($this->perPage);
+            ->orderBy('personnels.id', 'asc');
+    }
+
+    public function getOpdOffset($personnelId, $opdId)
+    {
+        $target = Personnel::findOrFail($personnelId);
+
+        return $this->getPersonnelsQuery()
+            ->where('personnels.opd_id', $opdId)
+            ->where(function ($q) use ($target) {
+                $q->where('personnels.name', '<', $target->name)
+                    ->orWhere(function ($q2) use ($target) {
+                        $q2->where('personnels.name', '=', $target->name)
+                            ->where('personnels.id', '<', $target->id);
+                    });
+            })
+            ->count();
     }
 
     #[Computed]

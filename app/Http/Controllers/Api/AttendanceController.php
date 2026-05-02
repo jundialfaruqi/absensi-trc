@@ -198,6 +198,13 @@ class AttendanceController extends Controller
             ], 404);
         }
 
+        if ($jadwal->shift && $jadwal->shift->type === 'off') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Maaf, status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.'
+            ], 403);
+        }
+
         if ($jadwal->status === 'LIBUR') {
             return response()->json([
                 'status' => 'error',
@@ -370,6 +377,13 @@ class AttendanceController extends Controller
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki jadwal shift hari ini.'
             ], 404);
+        }
+
+        if ($jadwal->shift && $jadwal->shift->type === 'off') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.'
+            ], 403);
         }
 
         if ($jadwal->status === 'LIBUR') {

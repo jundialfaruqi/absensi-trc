@@ -32,7 +32,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public bool $useRegu = false;
 
     // Step 3: Shift Sequence
-    // Each item: ['type' => 'SHIFT|LIBUR', 'shift_id' => null, 'duration' => 1, 'count' => 1]
+    // Each item: ['type' => 'SHIFT|OFF', 'shift_id' => null, 'duration' => 1, 'count' => 1]
     #[Url]
     public array $shiftSequence = [
         ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1, 'count' => 1]
@@ -55,7 +55,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
     public bool $showConfirmModal = false;
 
-    // Step 3 Weekly: [dayIndex => ['type' => 'SHIFT|LIBUR', 'shift_id' => '']]
+    // Step 3 Weekly: [dayIndex => ['type' => 'SHIFT|OFF', 'shift_id' => '']]
     public array $weeklyConfig = [];
 
     // Step 3 Quota: [shift_id => headcount]
@@ -87,9 +87,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             }
         }
 
-        // Initialize Quota Config
+        // Initialize Quota Config (Only for WORK shifts)
         if (empty($this->quotaConfig)) {
-            foreach ($this->shifts as $s) {
+            foreach ($this->shifts->where('type', 'shift') as $s) {
                 $this->quotaConfig[$s->id] = 1; // Default 1 person per shift
             }
         }
@@ -301,8 +301,8 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             foreach ($this->shiftSequence as $seq) {
                 for ($d = 0; $d < ($seq['duration'] ?? 1); $d++) {
                     $dailyCycle[] = [
-                        'status' => $seq['type'],
-                        'shift_id' => $seq['type'] === 'SHIFT' ? $seq['shift_id'] : null,
+                        'type' => $seq['type'], // SHIFT or OFF
+                        'shift_id' => $seq['shift_id'],
                         'count' => $seq['count'] ?? 1
                     ];
                 }
@@ -332,10 +332,14 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
                     $config = $dailyCycle[$cycleIndex];
 
+                    $sObj = Shift::find($config['shift_id']);
+                    $finalStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
+                    $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+
                     $jadwal = Jadwal::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
-                            'status' => $config['status'], 
+                            'status' => $finalStatus, 
                             'shift_id' => $config['shift_id'],
                             'is_manual' => false,
                             'keterangan' => null
@@ -346,9 +350,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
                             'jadwal_id' => $jadwal->id,
-                            'status' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                            'status_masuk' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                            'status_pulang' => $config['status'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status' => $absensiStatus,
+                            'status_masuk' => $absensiStatus,
+                            'status_pulang' => $absensiStatus,
                         ]
                     );
 
@@ -367,11 +371,15 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $dayOfWeek = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
                     $config = $this->weeklyConfig[$dayOfWeek];
 
+                    $sObj = Shift::find($config['shift_id']);
+                    $finalStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
+                    $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+
                     $jadwal = Jadwal::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
-                            'status' => $config['type'], 
-                            'shift_id' => $config['type'] === 'SHIFT' ? $config['shift_id'] : null,
+                            'status' => $finalStatus, 
+                            'shift_id' => $config['shift_id'],
                             'is_manual' => false,
                             'keterangan' => null
                         ]
@@ -381,9 +389,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
                             'jadwal_id' => $jadwal->id,
-                            'status' => $config['type'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                            'status_masuk' => $config['type'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                            'status_pulang' => $config['type'] === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status' => $absensiStatus,
+                            'status_masuk' => $absensiStatus,
+                            'status_pulang' => $absensiStatus,
                         ]
                     );
                 }
@@ -408,6 +416,10 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 stripos($s->name, 'malam') !== false || 
                 (Carbon::parse($s->start_time)->hour >= 18 || Carbon::parse($s->start_time)->hour < 4)
             )->pluck('id')->toArray();
+
+            // Find default OFF shift for quota mode (e.g. LIBUR)
+            $defaultOffShift = Shift::where('type', 'off')->where('name', 'L')->first() 
+                ?? Shift::where('type', 'off')->first();
 
             foreach ($period as $date) {
                 $dateStr = $date->format('Y-m-d');
@@ -463,22 +475,25 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
                 // 4. Update Database & Stats
                 foreach ($pIds as $pId) {
-                    $s = &$stats[$pId];
-                    $status = isset($assignedToday[$pId]) ? 'SHIFT' : 'LIBUR';
-                    $shiftId = $assignedToday[$pId] ?? null;
+                    $sObj = isset($assignedToday[$pId]) ? Shift::find($assignedToday[$pId]) : $defaultOffShift;
+                    $status = isset($assignedToday[$pId]) ? 'SHIFT' : 'OFF';
+                    
+                    $finalStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
+                    $absensiStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+                    $shiftId = $sObj->id ?? null;
 
                     $jadwal = Jadwal::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
-                        ['status' => $status, 'shift_id' => $shiftId, 'is_manual' => false, 'keterangan' => null]
+                        ['status' => $finalStatus, 'shift_id' => $shiftId, 'is_manual' => false, 'keterangan' => null]
                     );
 
                     Absensi::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
                             'jadwal_id' => $jadwal->id,
-                            'status' => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                            'status_masuk' => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                            'status_pulang' => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
+                            'status' => $absensiStatus,
+                            'status_masuk' => $absensiStatus,
+                            'status_pulang' => $absensiStatus,
                         ]
                     );
 

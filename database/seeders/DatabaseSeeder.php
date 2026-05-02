@@ -65,5 +65,14 @@ class DatabaseSeeder extends Seeder
 
         // 5. Default Settings
         \App\Models\Setting::set('personnel_registration_enabled', false, 'boolean');
+
+        // 6. Seed OPD
+        $this->call(OpdSeeder::class);
+
+        // 7. Seed Shift
+        $this->call(ShiftSeeder::class);
+
+        // 8. Seed Personnel
+        $this->call(PersonnelSeeder::class);
     }
 }

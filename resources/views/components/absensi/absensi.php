@@ -246,6 +246,13 @@ new #[Layout('layouts.absensi.app')] class extends Component
             return;
         }
 
+        if ($this->activeJadwal->shift && $this->activeJadwal->shift->type === 'off') {
+            $this->isSuccess = false;
+            $this->message = "Status Anda hari ini: " . strtoupper($this->activeJadwal->shift->keterangan ?? 'OFF');
+            $this->step = 3;
+            return;
+        }
+
         if ($this->activeJadwal->status === 'LIBUR') {
             $this->isSuccess = false;
             $this->message = 'Anda sedang LIBUR hari ini.';
@@ -356,9 +363,15 @@ new #[Layout('layouts.absensi.app')] class extends Component
             return;
         }
 
-        if (!$this->selectedPersonnel || !$this->activeJadwal || $this->activeJadwal->status === 'LIBUR' || !$this->activeJadwal->shift) {
+        if (
+            !$this->selectedPersonnel || 
+            !$this->activeJadwal || 
+            $this->activeJadwal->status === 'LIBUR' || 
+            !$this->activeJadwal->shift ||
+            $this->activeJadwal->shift->type === 'off'
+        ) {
             $this->isSuccess = false;
-            $this->message = 'Data jadwal tidak valid.';
+            $this->message = 'Data jadwal tidak valid atau Anda sedang tidak bertugas.';
             $this->step = 3;
             return;
         }

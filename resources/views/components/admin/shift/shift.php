@@ -17,6 +17,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     // Form attributes
     public ?int $shiftId = null;
     public string $name = '';
+    public string $type = 'shift';
     public string $keterangan = '';
     public string $start_time = '';
     public string $end_time = '';
@@ -55,9 +56,10 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
 
         $this->shiftId = $item->id;
         $this->name = $item->name;
+        $this->type = $item->type;
         $this->keterangan = $item->keterangan;
-        $this->start_time = \Carbon\Carbon::parse($item->start_time)->format('H:i');
-        $this->end_time = \Carbon\Carbon::parse($item->end_time)->format('H:i');
+        $this->start_time = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '';
+        $this->end_time = $item->end_time ? \Carbon\Carbon::parse($item->end_time)->format('H:i') : '';
         $this->color = $item->color ?? '#64748b';
 
         $this->dispatch('open-modal', id: 'shift-modal');
@@ -67,9 +69,10 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     {
         $rules = [
             'name' => 'required|string|max:255',
+            'type' => 'required|in:shift,off',
             'keterangan' => 'nullable|string|max:255',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i',
+            'start_time' => $this->type === 'shift' ? 'required|date_format:H:i' : 'nullable',
+            'end_time' => $this->type === 'shift' ? 'required|date_format:H:i' : 'nullable',
             'color' => 'required|string|max:7',
         ];
 
@@ -77,9 +80,10 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
 
         $data = [
             'name' => $this->name,
+            'type' => $this->type,
             'keterangan' => $this->keterangan,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
+            'start_time' => $this->type === 'shift' ? $this->start_time : null,
+            'end_time' => $this->type === 'shift' ? $this->end_time : null,
             'color' => $this->color,
         ];
 
@@ -117,6 +121,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     {
         $this->shiftId = null;
         $this->name = '';
+        $this->type = 'shift';
         $this->keterangan = '';
         $this->start_time = '';
         $this->end_time = '';
