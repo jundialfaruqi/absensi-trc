@@ -442,53 +442,6 @@
         </div>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-4 text-xs opacity-60">
-        <div class="flex items-center gap-1.5">
-            <div class="w-3 h-3 bg-success/20 border border-success/30 rounded"></div>
-            <span>Hadir tepat waktu (HADIR)</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <div class="w-3 h-3 bg-error/20 border border-error/30 rounded"></div>
-            <span>Telat (TELAT)</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <div class="w-3 h-3 bg-base-300/50 border border-base-400/50 rounded"></div>
-            <span>Tidak Absen (ALFA)</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <div class="w-3 h-3 bg-neutral/20 border border-neutral/30 rounded"></div>
-            <span>Sakit/Izin/Cuti/Alfa (Manual)</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                stroke="currentColor" class="size-3 text-primary">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
-                <path d="M16 5l3 3" />
-            </svg>
-            <span>Data Diedit Admin</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
-                stroke="currentColor" class="size-3 text-success">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-            </svg>
-            <span>Dalam Radius</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
-                stroke="currentColor" class="size-3 text-error">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-            </svg>
-            <span>Luar Radius</span>
-        </div>
-    </div>
-
     <livewire:admin::absensi-edit-modal />
     {{-- Teleport Preview Overlay --}}
     @teleport('body')
