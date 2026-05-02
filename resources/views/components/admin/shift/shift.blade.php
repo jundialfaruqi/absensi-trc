@@ -75,8 +75,8 @@
                             <th class="text-center w-16">#</th>
                             <th>Nama Shift</th>
                             <th>Keterangan</th>
-                            <th>Jam Mulai (Masuk)</th>
-                            <th>Jam Selesai (Pulang)</th>
+                            <th class="text-center">Jam Mulai (Masuk)</th>
+                            <th class="text-center">Jam Selesai (Pulang)</th>
                             <th class="text-center w-24">Action</th>
                         </tr>
                     </thead>
@@ -88,19 +88,38 @@
                                     <div class="flex items-center gap-2">
                                         <div class="w-3 h-3 rounded-full shadow-xs"
                                             style="background-color: {{ $r->color ?? '#64748b' }}"></div>
-                                        {{ $r->name }}
+                                        <div>
+                                            <div class="font-bold">{{ $r->name }}</div>
+                                            <div class="text-[10px] uppercase tracking-wider opacity-50">
+                                                @if ($r->type === 'off')
+                                                    <span
+                                                        class="badge badge-error badge-xs py-1.5 px-2 text-[9px] font-black text-white">OFF</span>
+                                                @else
+                                                    <span
+                                                        class="badge badge-primary badge-xs py-1.5 px-2 text-[9px] font-black text-white">SHIFT</span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
                                     <span class="text-xs">{{ $r->keterangan }}</span>
                                 </td>
-                                <td>
-                                    <div class="badge badge-lg badge-outline">
-                                        {{ \Carbon\Carbon::parse($r->start_time)->format('H:i') }}</div>
+                                <td class="text-center">
+                                    @if ($r->type === 'shift')
+                                        <div class="font-mono font-black/70">
+                                            {{ \Carbon\Carbon::parse($r->start_time)->format('H:i') }}</div>
+                                    @else
+                                        <span class="text-base-content/30">-:-</span>
+                                    @endif
                                 </td>
-                                <td>
-                                    <div class="badge badge-lg badge-outline">
-                                        {{ \Carbon\Carbon::parse($r->end_time)->format('H:i') }}</div>
+                                <td class="text-center">
+                                    @if ($r->type === 'shift')
+                                        <div class="font-mono font-black/70">
+                                            {{ \Carbon\Carbon::parse($r->end_time)->format('H:i') }}</div>
+                                    @else
+                                        <span class="text-base-content/30">-:-</span>
+                                    @endif
                                 </td>
                                 <td class="text-center">
                                     <div class="dropdown dropdown-left dropdown-end">
@@ -127,7 +146,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-sm text-base-content/60 py-8">Tidak ada data
+                                <td colspan="5" class="text-center text-sm text-base-content/60 py-8">Tidak ada
+                                    data
                                     Shift</td>
                             </tr>
                         @endforelse
@@ -169,6 +189,22 @@
 
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
+                            <span class="label-text text-sm font-medium text-base-content">Tipe Shift <span
+                                    class="text-error">*</span></span>
+                        </label>
+                        <div class="join w-full">
+                            <input class="join-item btn flex-1 btn-outline checked:btn-primary! checked:text-white!"
+                                type="radio" wire:model.live="type" value="shift" aria-label="SHIFT" />
+                            <input class="join-item btn flex-1 btn-outline checked:btn-error! checked:text-white!"
+                                type="radio" wire:model.live="type" value="off" aria-label="OFF (Libur)" />
+                        </div>
+                        @error('type')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label mb-1 px-1">
                             <span class="label-text text-sm font-medium text-base-content">Keterangan <span
                                     class="text-error">*</span></span>
                         </label>
@@ -180,31 +216,33 @@
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-control w-full">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium text-base-content">Jam Masuk <span
-                                        class="text-error">*</span></span>
-                            </label>
-                            <input type="time" wire:model="start_time"
-                                class="input input-bordered focus:input-primary w-full text-base-content/60 transition-all @error('start_time') input-error @enderror">
-                            @error('start_time')
-                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
+                    @if ($type === 'shift')
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-control w-full">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text text-sm font-medium text-base-content">Jam Masuk <span
+                                            class="text-error">*</span></span>
+                                </label>
+                                <input type="time" wire:model="start_time"
+                                    class="input input-bordered focus:input-primary w-full text-base-content/60 transition-all @error('start_time') input-error @enderror">
+                                @error('start_time')
+                                    <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                        <div class="form-control w-full">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium text-base-content">Jam Pulang <span
-                                        class="text-error">*</span></span>
-                            </label>
-                            <input type="time" wire:model="end_time"
-                                class="input input-bordered focus:input-primary w-full text-base-content/60 transition-all @error('end_time') input-error @enderror">
-                            @error('end_time')
-                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                            @enderror
+                            <div class="form-control w-full">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text text-sm font-medium text-base-content">Jam Pulang <span
+                                            class="text-error">*</span></span>
+                                </label>
+                                <input type="time" wire:model="end_time"
+                                    class="input input-bordered focus:input-primary w-full text-base-content/60 transition-all @error('end_time') input-error @enderror">
+                                @error('end_time')
+                                    <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <div class="form-control w-full" x-data="{
                         color: $wire.entangle('color'),

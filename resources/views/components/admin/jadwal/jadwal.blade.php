@@ -229,7 +229,8 @@
                                                             alt="{{ $p->name }}" />
                                                     </div>
                                                 @else
-                                                    <div class="bg-neutral text-neutral-content w-8 rounded-full">
+                                                    <div
+                                                        class="flex items-center justify-center bg-neutral text-neutral-content w-8 rounded-full">
                                                         <span
                                                             class="text-xs">{{ strtoupper(substr($p->name, 0, 1)) }}</span>
                                                     </div>
