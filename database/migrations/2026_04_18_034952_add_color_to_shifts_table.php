@@ -17,8 +17,8 @@ return new class extends Migration
 
          // Seed default data
         DB::table('shifts')->insert([
-            ['name' => 'NS-SR', 'keterangan' => 'Non-Shift Senin - Rabu', 'start_time' => '07:30', 'end_time' => '16:00', 'color' => '#0ea5e9', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'NS-KJ', 'keterangan' => 'Non-Shift Kamis - Jumat', 'start_time' => '08:00', 'end_time' => '16:30', 'color' => '#06b6d4', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'M', 'keterangan' => 'MALAM', 'start_time' => '20:00', 'end_time' => '08:00', 'color' => '#2563eb', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'P', 'keterangan' => 'PAGI', 'start_time' => '08:00', 'end_time' => '20:00', 'color' => '#22c55e', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 
