@@ -65,7 +65,9 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
         foreach ($shifts as $s) {
             $data->push([
                 $s->name,
-                Carbon::parse($s->start_time)->format('H:i') . ' - ' . Carbon::parse($s->end_time)->format('H:i'),
+                $s->type === 'shift' 
+                    ? Carbon::parse($s->start_time)->format('H:i') . ' - ' . Carbon::parse($s->end_time)->format('H:i')
+                    : '---',
                 $s->keterangan
             ]);
         }

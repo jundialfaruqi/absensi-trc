@@ -92,7 +92,8 @@
                                         <input type="checkbox" wire:model.live="selectedPersonnelIds"
                                             value="{{ $p->id }}" class="checkbox checkbox-primary checkbox-sm">
                                         <div class="avatar placeholder">
-                                            <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                            <div
+                                                class="flex items-center justify-center bg-neutral text-neutral-content rounded-full w-8">
                                                 @if ($p->foto)
                                                     <img src="{{ asset('storage/' . $p->foto) }}" />
                                                 @else
@@ -176,7 +177,8 @@
                                                 <div class="text-[10px] font-bold opacity-30 w-4">{{ $index + 1 }}
                                                 </div>
                                                 <div class="avatar placeholder">
-                                                    <div class="bg-neutral text-neutral-content rounded-full w-6">
+                                                    <div
+                                                        class="flex items-center justify-center bg-neutral text-neutral-content rounded-full w-6">
                                                         @if ($person?->foto)
                                                             <img src="{{ asset('storage/' . $person->foto) }}" />
                                                         @else
@@ -312,36 +314,31 @@
                                         <select wire:model.live="shiftSequence.{{ $index }}.type"
                                             class="select select-bordered select-sm font-bold rounded-lg h-9 min-h-0">
                                             <option value="SHIFT">KERJA (SHIFT)</option>
-                                            <option value="LIBUR">LIBUR</option>
+                                            <option value="OFF">OFF (LIBUR/DINAS)</option>
                                         </select>
                                     </div>
 
-                                    @if ($seq['type'] === 'SHIFT')
-                                        <div class="form-control flex flex-col flex-1">
-                                            <label class="label pt-0"><span
-                                                    class="label-text text-[10px] font-bold uppercase opacity-60">Jam
-                                                    Kerja</span></label>
-                                            <select wire:model.live="shiftSequence.{{ $index }}.shift_id"
-                                                class="select select-bordered select-sm font-bold text-xs rounded-lg h-9 min-h-0">
-                                                <option value="">-- Pilih Shift --</option>
-                                                @foreach ($this->shifts as $s)
-                                                    <option value="{{ $s->id }}">{{ $s->name }}
+                                    <div class="form-control flex flex-col flex-1">
+                                        <label class="label pt-0">
+                                            <span class="label-text text-[10px] font-bold uppercase opacity-60">
+                                                {{ $seq['type'] === 'SHIFT' ? 'Jam Kerja' : 'Status OFF' }}
+                                            </span>
+                                        </label>
+                                        <select wire:model.live="shiftSequence.{{ $index }}.shift_id"
+                                            class="select select-bordered select-sm font-bold text-xs rounded-lg h-9 min-h-0">
+                                            <option value="">-- Pilih {{ $seq['type'] === 'SHIFT' ? 'Shift' : 'Status' }} --</option>
+                                            @foreach ($this->shifts->where('type', strtolower($seq['type'])) as $s)
+                                                <option value="{{ $s->id }}">{{ $s->name }}
+                                                    @if($s->type === 'shift')
                                                         ({{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }} -
                                                         {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    @else
-                                        <div class="form-control flex flex-col flex-1">
-                                            <label class="label pt-0"><span
-                                                    class="label-text text-[10px] font-bold uppercase opacity-60">Status</span></label>
-                                            <div
-                                                class="flex items-center h-9 text-[10px] font-bold uppercase tracking-widest text-base-content/30 px-3 bg-base-100/50 rounded-lg border border-dashed border-base-300">
-                                                Hari Libur
-                                            </div>
-                                        </div>
-                                    @endif
+                                                    @else
+                                                        ({{ $s->keterangan }})
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
                                     <div class="flex flex-wrap sm:flex-nowrap gap-3 items-end">
                                         <div class="form-control flex flex-col w-24 sm:w-28">
@@ -432,27 +429,23 @@
                                         <select wire:model.live="weeklyConfig.{{ $index }}.type"
                                             class="select select-bordered select-xs font-bold rounded-lg h-8 flex-1">
                                             <option value="SHIFT">MASUK</option>
-                                            <option value="LIBUR">LIBUR</option>
+                                            <option value="OFF">OFF</option>
                                         </select>
 
-                                        @if ($weeklyConfig[$index]['type'] === 'SHIFT')
-                                            <select wire:model.live="weeklyConfig.{{ $index }}.shift_id"
-                                                class="select select-bordered select-xs font-bold text-[10px] rounded-lg h-8 flex-2">
-                                                <option value="">-- Pilih Shift --</option>
-                                                @foreach ($this->shifts as $s)
-                                                    <option value="{{ $s->id }}">{{ $s->name }}
+                                        <select wire:model.live="weeklyConfig.{{ $index }}.shift_id"
+                                            class="select select-bordered select-xs font-bold text-[10px] rounded-lg h-8 flex-2">
+                                            <option value="">-- {{ $weeklyConfig[$index]['type'] === 'SHIFT' ? 'Shift' : 'Status' }} --</option>
+                                            @foreach ($this->shifts->where('type', strtolower($weeklyConfig[$index]['type'])) as $s)
+                                                <option value="{{ $s->id }}">{{ $s->name }}
+                                                    @if($s->type === 'shift')
                                                         ({{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }} -
                                                         {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        @else
-                                            <div
-                                                class="flex-1 bg-base-100/50 rounded-lg border border-dashed border-base-300 flex items-center justify-center">
-                                                <span
-                                                    class="text-[9px] font-bold opacity-20 uppercase tracking-tighter">Libur</span>
-                                            </div>
-                                        @endif
+                                                    @else
+                                                        ({{ $s->keterangan }})
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                             @endforeach
@@ -537,15 +530,20 @@
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    @foreach ($this->shifts as $s)
+                                    @foreach ($this->shifts->where('type', 'shift') as $s)
                                         <div
                                             class="flex items-center justify-between p-4 bg-base-100 rounded-2xl border border-base-200 shadow-sm">
                                             <div>
                                                 <span
                                                     class="block font-bold text-xs uppercase">{{ $s->name }}</span>
-                                                <span
-                                                    class="text-[9px] opacity-40 font-bold tracking-tight">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
-                                                    - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>
+                                                <span class="text-[9px] opacity-40 font-bold tracking-tight">
+                                                    @if ($s->type === 'shift')
+                                                        {{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }} -
+                                                        {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}
+                                                    @else
+                                                        {{ $s->keterangan }}
+                                                    @endif
+                                                </span>
                                             </div>
                                             <div class="flex items-center gap-3">
                                                 <div
@@ -715,7 +713,7 @@
                                     <div
                                         class="px-3 py-1.5 rounded-lg {{ $conf['type'] == 'SHIFT' ? 'bg-primary/20 text-primary border border-primary/20' : 'bg-base-300 text-base-content/40' }} text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
                                         <span class="opacity-50">{{ $name }}:</span>
-                                        <span>{{ $conf['type'] === 'SHIFT' ? $this->shifts->find($conf['shift_id'])?->name ?? '---' : 'LIBUR' }}</span>
+                                        <span>{{ $this->shifts->find($conf['shift_id'])?->name ?? '---' }}</span>
                                     </div>
                                 @endforeach
                             @elseif($generateMode === 'quota')

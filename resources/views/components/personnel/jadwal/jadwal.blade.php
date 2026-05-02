@@ -59,11 +59,16 @@
                                 class="h-2 w-2 rounded-full {{ $this->todayJadwal?->status === 'SHIFT' ? 'bg-blue-500 animate-pulse' : 'bg-slate-500' }}">
                             </div>
                             <span class="text-[10px] font-black text-white uppercase tracking-widest italic">
-                                {{ $this->todayJadwal?->status === 'SHIFT' ? $this->todayJadwal->shift->name : ($this->todayJadwal?->status ?? 'LIBUR') }}
+                                @if ($this->todayJadwal?->shift)
+                                    {{ $this->todayJadwal->shift->keterangan }}
+                                @else
+                                    {{ $this->todayJadwal?->status ?? 'LIBUR' }}
+                                @endif
                             </span>
                         </div>
-                        @if ($this->todayJadwal?->shift)
-                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+                        @if ($this->todayJadwal?->shift && $this->todayJadwal->shift->type === 'shift')
+                            <div
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-500" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -131,7 +136,7 @@
                                 $textColor = 'text-white';
 
                                 if ($j) {
-                                    if ($j->status === 'SHIFT') {
+                                    if ($j->shift) {
                                         $bgColor = $j->shift->color ?? '#3b82f6';
                                     } elseif ($j->status === 'LIBUR') {
                                         $bgColor = '#1e293b';
@@ -149,15 +154,17 @@
                                         <div class="w-full h-1 absolute top-0"
                                             style="background-color: {{ $bgColor }}"></div>
 
-                                        @if ($j->status === 'SHIFT')
+                                        @if ($j->shift)
                                             <span
                                                 class="text-[10px] font-black uppercase tracking-tight {{ $textColor }} leading-tight mb-1">
                                                 {{ $j->shift->name ?? 'N/A' }}
                                             </span>
-                                            <span
-                                                class="text-[8px] font-bold opacity-60 uppercase tracking-widest {{ $textColor }}">
-                                                {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
-                                            </span>
+                                            @if ($j->shift->type === 'shift')
+                                                <span
+                                                    class="text-[8px] font-bold opacity-60 uppercase tracking-widest {{ $textColor }}">
+                                                    {{ \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') }}
+                                                </span>
+                                            @endif
                                         @else
                                             <span
                                                 class="text-[10px] font-black uppercase tracking-widest {{ $textColor }}">

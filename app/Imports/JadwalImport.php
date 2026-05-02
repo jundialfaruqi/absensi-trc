@@ -104,35 +104,53 @@ class JadwalImport implements ToCollection
                 if ($shiftValue !== '') {
                     $tanggal = Carbon::create($this->year, $this->month, $day)->format('Y-m-d');
                     
-                    $status = 'SHIFT';
                     $shiftId = $this->lookupShiftId($shiftValue);
- 
-                    // If no shift found, check if it represents a special status
-                    if (!$shiftId) {
-                        if (strtoupper($shiftValue) === 'LIBUR') {
-                            $status = 'LIBUR';
-                        }
-                    }
- 
-                    if ($shiftId || $status !== 'SHIFT') {
+                    $sObj = $shiftId ? Shift::find($shiftId) : null;
+
+                    if ($sObj) {
+                        $status = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
+                        $absensiStatus = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+
                         $jadwal = Jadwal::updateOrCreate(
                             [
                                 'personnel_id' => $personnel->id,
                                 'tanggal'      => $tanggal,
                             ],
                             [
-                                'shift_id' => $status === 'SHIFT' ? $shiftId : null,
+                                'shift_id' => $shiftId,
                                 'status'   => $status,
-                                // we don't handle keterangan from Excel yet as the template doesn't have it
+                                'is_manual' => false,
                             ]
                         );
 
-                        // CREATE/UPDATE ABSENSI PLACEHOLDER
-                        $absensi = \App\Models\Absensi::where('personnel_id', $personnel->id)
-                            ->where('tanggal', $tanggal)
-                            ->first();
+                        // CREATE/UPDATE ABSENSI
+                        \App\Models\Absensi::updateOrCreate(
+                            [
+                                'personnel_id' => $personnel->id,
+                                'tanggal'      => $tanggal,
+                            ],
+                            [
+                                'jadwal_id' => $jadwal->id,
+                                'status'    => $absensiStatus,
+                                'status_masuk' => $absensiStatus,
+                                'status_pulang' => $absensiStatus,
+                            ]
+                        );
+                    } else {
+                        // Fallback logic for literal "LIBUR" if no shift matches
+                        if (strtoupper($shiftValue) === 'LIBUR') {
+                            $jadwal = Jadwal::updateOrCreate(
+                                [
+                                    'personnel_id' => $personnel->id,
+                                    'tanggal'      => $tanggal,
+                                ],
+                                [
+                                    'shift_id' => null,
+                                    'status'   => 'LIBUR',
+                                    'is_manual' => false,
+                                ]
+                            );
 
-                        if (!$absensi || in_array($absensi->status, ['ALFA', 'LIBUR'])) {
                             \App\Models\Absensi::updateOrCreate(
                                 [
                                     'personnel_id' => $personnel->id,
@@ -140,16 +158,14 @@ class JadwalImport implements ToCollection
                                 ],
                                 [
                                     'jadwal_id' => $jadwal->id,
-                                    'status'    => $status === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                                    'status_masuk' => 'ALFA',
-                                    'status_pulang' => 'ALFA',
+                                    'status'    => 'LIBUR',
+                                    'status_masuk' => 'LIBUR',
+                                    'status_pulang' => 'LIBUR',
                                 ]
                             );
                         } else {
-                            $absensi->update(['jadwal_id' => $jadwal->id]);
+                            Log::warning("JadwalImport: Data '{$shiftValue}' tidak dikenali sebagai Shift atau Status (Personnel {$personnel->name}, Day {$day}).");
                         }
-                    } else {
-                        Log::warning("JadwalImport: Data '{$shiftValue}' tidak dikenali sebagai Shift atau Status (Personnel {$personnel->name}, Day {$day}).");
                     }
                 }
             }

@@ -109,12 +109,16 @@
                     <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Penugasan Hari Ini
                     </p>
                     <h3 class="text-2xl font-black text-white uppercase italic tracking-tighter leading-tight">
-                        {{ $todayJadwal?->status === 'SHIFT' ? $todayJadwal->shift->name : $todayJadwal?->status ?? 'LIBUR' }}
+                        @if ($todayJadwal?->shift)
+                            {{ $todayJadwal->shift->keterangan }}
+                        @else
+                            {{ $todayJadwal?->status ?? 'LIBUR' }}
+                        @endif
                     </h3>
                 </div>
 
                 <div class="space-y-3 my-6">
-                    @if ($todayJadwal?->shift)
+                    @if ($todayJadwal?->shift && $todayJadwal->shift->type === 'shift')
                         <div
                             class="flex items-center justify-between p-3 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors">
                             <div class="flex items-center gap-3">

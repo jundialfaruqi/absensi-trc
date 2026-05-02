@@ -257,17 +257,17 @@
                                             $j = $p->jadwal_map[$date] ?? null;
                                             $isToday = \Carbon\Carbon::parse($date)->isToday();
 
-                                            $cellClass = match ($j->status ?? '') {
-                                                'LIBUR' => 'bg-yellow-500 text-white',
-                                                default => '',
-                                            };
+                                            $cellClass = '';
+                                            $style = '';
 
-                                            $style =
-                                                $j && $j->status === 'SHIFT'
-                                                    ? 'background-color: ' .
-                                                        ($j->shift->color ?? '#64748b') .
-                                                        '; color: white;'
-                                                    : '';
+                                            if ($j) {
+                                                if ($j->shift_id) {
+                                                    $style = 'background-color: ' . ($j->shift->color ?? '#64748b') . '; color: white;';
+                                                } elseif ($j->status === 'LIBUR') {
+                                                    // Fallback for legacy LIBUR status without shift_id
+                                                    $cellClass = 'bg-yellow-500 text-white';
+                                                }
+                                            }
                                         @endphp
                                         <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
                                             style="{{ $style }}"
@@ -287,15 +287,17 @@
                                                 @if ($j)
                                                     <div
                                                         class="flex flex-col items-center justify-center w-full h-full relative font-bold">
-                                                        @if ($j->status === 'SHIFT')
+                                                        @if ($j->shift_id)
                                                             <span
-                                                                class="text-[10px] leading-tight">{{ $j->shift->name ?? 'N/A' }}</span>
-                                                            <span class="text-[8px] opacity-80 mt-0.5">
-                                                                {{ $j->shift ? \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') : '' }}
-                                                            </span>
-                                                            <span class="text-[8px] opacity-80 mt-0.1">
-                                                                {{ $j->shift ? \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') : '' }}
-                                                            </span>
+                                                                class="text-[10px] leading-tight">{{ $j->shift->name ?? $j->status }}</span>
+                                                            @if ($j->shift && $j->shift->type === 'shift')
+                                                                <span class="text-[8px] opacity-80 mt-0.5">
+                                                                    {{ \Carbon\Carbon::parse($j->shift->start_time)->format('H:i') }}
+                                                                </span>
+                                                                <span class="text-[8px] opacity-80 mt-0.1">
+                                                                    {{ \Carbon\Carbon::parse($j->shift->end_time)->format('H:i') }}
+                                                                </span>
+                                                            @endif
                                                         @else
                                                             <span
                                                                 class="text-[10px] whitespace-nowrap">{{ $j->status }}</span>

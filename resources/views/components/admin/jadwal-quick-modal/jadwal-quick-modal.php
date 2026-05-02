@@ -13,7 +13,7 @@ new class extends Component
     public $quickPersonnelId;
     public string $quickDate = '';
     public $quickShiftId;
-    public $quickStatus = 'SHIFT';
+    public $quickStatus = 'SHIFT'; // 'SHIFT' or 'OFF'
     public $quickKeterangan = '';
     
     // Substitution Properties
@@ -30,13 +30,22 @@ new class extends Component
         $this->quickPersonnelId = $personnelId;
         $this->quickDate = $date;
 
-        // Find existing jadwal for this date if any
-        $jadwal = Jadwal::where('personnel_id', $personnelId)
+        $jadwal = Jadwal::with('shift')->where('personnel_id', $personnelId)
             ->where('tanggal', $date)
             ->first();
 
         $this->quickShiftId = $jadwal ? $jadwal->shift_id : '';
-        $this->quickStatus = $jadwal ? $jadwal->status : 'SHIFT';
+        
+        if ($jadwal) {
+            if ($jadwal->shift) {
+                $this->quickStatus = strtoupper($jadwal->shift->type); // 'SHIFT' or 'OFF'
+            } else {
+                $this->quickStatus = $jadwal->status === 'SHIFT' ? 'SHIFT' : 'OFF';
+            }
+        } else {
+            $this->quickStatus = 'SHIFT';
+        }
+        
         $this->quickKeterangan = $jadwal ? $jadwal->keterangan : '';
 
         // Reset Swap
@@ -50,18 +59,13 @@ new class extends Component
     public function saveQuickJadwal(): void
     {
         $rules = [
-            'quickStatus' => 'required|string',
+            'quickStatus' => 'required|in:SHIFT,OFF',
             'quickKeterangan' => 'nullable|string',
+            'quickShiftId' => 'required|exists:shifts,id',
         ];
 
-        if ($this->quickStatus === 'SHIFT') {
-            $rules['quickShiftId'] = 'required|exists:shifts,id';
-        } else {
-            $rules['quickShiftId'] = 'nullable';
-        }
-
         $this->validate($rules, [
-            'quickShiftId.required' => 'Pilih shift terlebih dahulu.',
+            'quickShiftId.required' => 'Pilih shift/status terlebih dahulu.',
         ]);
 
         $personnel = Personnel::findOrFail($this->quickPersonnelId);
@@ -70,37 +74,36 @@ new class extends Component
             return;
         }
 
+        $selectedShift = \App\Models\Shift::find($this->quickShiftId);
+
         $jadwal = Jadwal::updateOrCreate(
             ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
             [
-                'shift_id'   => $this->quickStatus === 'SHIFT' ? $this->quickShiftId : null,
-                'status'     => $this->quickStatus,
+                'shift_id'   => $this->quickShiftId,
+                'status'     => $this->quickStatus === 'OFF' ? ($selectedShift->keterangan ?? 'OFF') : 'SHIFT',
                 'keterangan' => $this->quickKeterangan,
                 'is_manual'  => false,
             ]
         );
 
-        $absensi = \App\Models\Absensi::where('personnel_id', $this->quickPersonnelId)
-            ->where('tanggal', $this->quickDate)
-            ->first();
-
-        if (!$absensi || in_array($absensi->status, ['ALFA', 'LIBUR'])) {
-             \App\Models\Absensi::updateOrCreate(
-                ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
-                [
-                    'jadwal_id' => $jadwal->id,
-                    'status' => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                    'status_masuk' => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                    'status_pulang' => $this->quickStatus === 'LIBUR' ? 'LIBUR' : 'ALFA',
-                ]
-            );
-        } else {
-            $absensi->update(['jadwal_id' => $jadwal->id]);
-        }
+        $absensi = \App\Models\Absensi::updateOrCreate(
+            ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
+            [
+                'jadwal_id' => $jadwal->id,
+                'status' => $this->quickStatus === 'SHIFT' ? 'ALFA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status_masuk' => $this->quickStatus === 'SHIFT' ? 'ALFA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status_pulang' => $this->quickStatus === 'SHIFT' ? 'ALFA' : ($selectedShift->keterangan ?? 'OFF'),
+            ]
+        );
 
         $this->dispatch('close-modal', id: 'quick-add-modal');
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil disimpan.');
         $this->dispatch('refreshJadwal');
+    }
+
+    public function updatedQuickStatus(): void
+    {
+        $this->quickShiftId = null;
     }
 
     public function updatedActiveTab()
@@ -111,7 +114,8 @@ new class extends Component
     #[Computed]
     public function shifts()
     {
-        return \App\Models\Shift::orderBy('name')->get();
+        $type = strtolower($this->quickStatus);
+        return \App\Models\Shift::where('type', $type)->orderBy('name')->get();
     }
 
     #[Computed]

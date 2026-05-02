@@ -50,7 +50,7 @@
                                         Kehadiran</span>
                                 </label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    @foreach (['SHIFT', 'LIBUR'] as $status)
+                                    @foreach (['SHIFT', 'OFF'] as $status)
                                         <label
                                             class="label cursor-pointer justify-start gap-2 p-2 border border-base-200 rounded-lg hover:bg-base-200 transition-all {{ $quickStatus == $status ? 'bg-primary/10 border-primary' : '' }}">
                                             <input type="radio" wire:model.live="quickStatus"
@@ -61,38 +61,42 @@
                                 </div>
                             </div>
 
-                            {{-- Shift Selection (Only if status is SHIFT) --}}
-                            @if ($quickStatus === 'SHIFT')
-                                <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
-                                    <label class="label mb-1 px-1">
-                                        <span class="label-text font-medium text-xs text-base-content">Pilih Shift</span>
-                                    </label>
-                                    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
-                                        @foreach ($this->shifts as $s)
-                                            <label wire:key="shift-{{ $s->id }}"
-                                                class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-xl hover:bg-base-200 transition-all {{ (int) $quickShiftId === (int) $s->id ? 'bg-primary/10 border-primary' : '' }}">
-                                                <input type="radio" wire:model.live="quickShiftId"
-                                                    value="{{ $s->id }}" class="radio radio-primary radio-sm">
-                                                <div class="flex flex-col">
-                                                    <span
-                                                        class="font-bold text-xs text-base-content">{{ $s->name }}</span>
-                                                    <span
-                                                        class="text-[10px] opacity-60 text-base-content">{{ $s->keterangan }}</span>
-                                                    <span
-                                                        class="text-[10px] opacity-60 text-base-content">{{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }}
-                                                        - {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}</span>
-                                                </div>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    @error('quickShiftId')
-                                        <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
-                                    @enderror
+                            {{-- Shift Selection --}}
+                            <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text font-medium text-xs text-base-content">
+                                        {{ $quickStatus === 'SHIFT' ? 'Pilih Shift' : 'Pilih Status OFF' }}
+                                    </span>
+                                </label>
+                                <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
+                                    @foreach ($this->shifts as $s)
+                                        <label wire:key="shift-{{ $s->id }}"
+                                            class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-xl hover:bg-base-200 transition-all {{ (int) $quickShiftId === (int) $s->id ? 'bg-primary/10 border-primary' : '' }}">
+                                            <input type="radio" wire:model.live="quickShiftId"
+                                                value="{{ $s->id }}" class="radio radio-primary radio-sm">
+                                            <div class="flex flex-col">
+                                                <span
+                                                    class="font-bold text-xs text-base-content">{{ $s->name }}</span>
+                                                <span class="text-[10px] opacity-60 text-base-content">
+                                                    @if ($s->type === 'shift')
+                                                        <div>{{ $s->keterangan }}</div>
+                                                        {{ \Carbon\Carbon::parse($s->start_time)->format('H:i') }} -
+                                                        {{ \Carbon\Carbon::parse($s->end_time)->format('H:i') }}
+                                                    @else
+                                                        {{ $s->keterangan }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        </label>
+                                    @endforeach
                                 </div>
-                            @endif
+                                @error('quickShiftId')
+                                    <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                            {{-- Keterangan (Only for non-SHIFT) --}}
-                            @if ($quickStatus !== 'SHIFT')
+                            {{-- Keterangan (Only for OFF) --}}
+                            @if ($quickStatus === 'OFF')
                                 <div class="form-control w-full animate-in fade-in slide-in-from-top-1">
                                     <label class="label mb-1 px-1">
                                         <span class="label-text font-medium text-xs">Keterangan Status</span>
@@ -147,7 +151,8 @@
                         {{-- Select Target Personnel --}}
                         <div class="form-control">
                             <label class="label mb-1 px-1">
-                                <span class="label-text font-medium text-xs text-base-content/70">Pilih Personel Pengganti
+                                <span class="label-text font-medium text-xs text-base-content/70">Pilih Personel
+                                    Pengganti
                                     (Sedang Libur)</span>
                             </label>
                             <select wire:model.live="swapTargetPersonnelId"
@@ -157,7 +162,8 @@
                                     <option value="{{ $sub->id }}">{{ $sub->name }}</option>
                                 @endforeach
                             </select>
-                            <p class="text-[10px] text-base-content/50 mt-2 italic">* Hanya menampilkan personel yang libur
+                            <p class="text-[10px] text-base-content/50 mt-2 italic">* Hanya menampilkan personel yang
+                                libur
                                 dan tidak memiliki tabrakan jadwal Malam-Siang.</p>
                         </div>
 

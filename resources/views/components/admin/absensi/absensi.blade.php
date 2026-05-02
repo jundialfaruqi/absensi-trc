@@ -300,17 +300,22 @@
                                                     $cellClassM .= ' bg-success/10';
                                                 } elseif ($a->status_masuk === 'TELAT') {
                                                     $cellClassM .= ' bg-error/10';
+                                                } elseif ($j && $j->shift && $j->shift->type === 'off') {
+                                                    // Handled below via inline style for dynamic color
                                                 } elseif ($a->status === 'LIBUR') {
                                                     $cellClassM .= ' bg-base-200/50';
                                                 }
                                             } elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday) {
                                                 $cellClassM .= ' bg-base-300/30';
                                             }
+                                            $cellStyleM = ($a && $j && $j->shift && $j->shift->type === 'off') 
+                                                ? "background-color: {$j->shift->color}20;" 
+                                                : "";
                                         @endphp
                                         <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
                                             wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
-                                            class="{{ $cellClassM }}">
+                                            class="{{ $cellClassM }}" style="{{ $cellStyleM }}">
                                             <div class="relative w-full h-full flex items-center justify-center">
                                                 {{-- Specific Cell Loader --}}
                                                 <div wire:loading
@@ -327,7 +332,9 @@
                                                 @endif
 
                                                 @if ($a)
-                                                    @if ($a->status === 'LIBUR')
+                                                    @if ($j && $j->shift && $j->shift->type === 'off')
+                                                        <span class="text-[10px] font-black" style="color: {{ $j->shift->color }};">{{ $j->shift->name }}</span>
+                                                    @elseif ($a->status === 'LIBUR')
                                                         <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                                     @elseif ($a->jam_masuk)
                                                         <div class="flex flex-col items-center justify-center">
@@ -362,17 +369,22 @@
                                                     $cellClassP .= ' bg-success/10';
                                                 } elseif ($a->status_pulang === 'PC') {
                                                     $cellClassP .= ' bg-warning/10';
+                                                } elseif ($j && $j->shift && $j->shift->type === 'off') {
+                                                    // Handled via inline style
                                                 } elseif ($a->status === 'LIBUR') {
                                                     $cellClassP .= ' bg-base-200/50';
                                                 }
                                             } elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday) {
                                                 $cellClassP .= ' bg-base-300/30';
                                             }
+                                            $cellStyleP = ($a && $j && $j->shift && $j->shift->type === 'off') 
+                                                ? "background-color: {$j->shift->color}20;" 
+                                                : "";
                                         @endphp
                                         <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
                                             wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
-                                            class="{{ $cellClassP }}">
+                                            class="{{ $cellClassP }}" style="{{ $cellStyleP }}">
                                             <div class="relative w-full h-full flex items-center justify-center">
                                                 {{-- Specific Cell Loader --}}
                                                 <div wire:loading
@@ -389,7 +401,9 @@
                                                 @endif
 
                                                 @if ($a)
-                                                    @if ($a->status === 'LIBUR')
+                                                    @if ($j && $j->shift && $j->shift->type === 'off')
+                                                        <span class="text-[10px] font-black" style="color: {{ $j->shift->color }};">{{ $j->shift->name }}</span>
+                                                    @elseif ($a->status === 'LIBUR')
                                                         <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                                     @elseif ($a->jam_pulang)
                                                         <div class="flex flex-col items-center justify-center">
