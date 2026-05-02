@@ -405,14 +405,37 @@
                     {{-- Group --}}
                     <div class="form-control md:col-span-2 mb-2">
                         <label class="label mb-2">
-                            <span class="label-text text-sm font-medium text-base-content">Nama Group Permission</span>
+                            <span class="label-text text-sm font-medium text-base-content">Group Permission</span>
                         </label>
-                        <input type="text" wire:model="permissionGroup" id="permission-group"
-                            class="input input-bordered placeholder:text-base-content/60 w-full @error('permissionGroup') input-error @enderror"
-                            placeholder="Masukkan nama group permission">
-                        @error('permissionGroup')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
+                        <div class="join w-full mb-3">
+                            <input
+                                class="join-item btn btn-sm flex-1 btn-outline border border-base-300 checked:!btn-primary checked:!text-white"
+                                type="radio" wire:model.live="groupMode" value="existing"
+                                aria-label="Pilih Group" />
+                            <input
+                                class="join-item btn btn-sm flex-1 btn-outline border border-base-300 checked:!btn-primary checked:!text-white"
+                                type="radio" wire:model.live="groupMode" value="new" aria-label="Group Baru" />
+                        </div>
+
+                        @if ($groupMode === 'existing')
+                            <select wire:model="permissionGroup"
+                                class="select select-bordered w-full @error('permissionGroup') select-error @enderror">
+                                <option value="">-- Pilih Group --</option>
+                                @foreach ($this->existingGroups as $group)
+                                    <option value="{{ $group }}">{{ $group }}</option>
+                                @endforeach
+                            </select>
+                            @error('permissionGroup')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        @else
+                            <input type="text" wire:model="newGroupName"
+                                class="input input-bordered placeholder:text-base-content/60 w-full @error('newGroupName') input-error @enderror"
+                                placeholder="Nama group baru">
+                            @error('newGroupName')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        @endif
                     </div>
                     {{-- Guard --}}
                     <div class="form-control md:col-span-2 mb-2">

@@ -35,6 +35,8 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
     public string $permissionName  = '';
     public string $permissionGroup = '';
     public string $permissionGuard = 'web';
+    public string $groupMode       = 'existing'; // 'existing' atau 'new'
+    public string $newGroupName    = '';
 
     // Delete confirmation
     public string $deleteType = '';
@@ -74,6 +76,12 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
             'opd_role_count'     => Role::where('name', 'admin-opd')->withCount('users')->first()?->users_count ?? 0,
             'superadmin_role_count' => Role::where('name', 'super-admin')->withCount('users')->first()?->users_count ?? 0,
         ];
+    }
+
+    #[Computed]
+    public function existingGroups()
+    {
+        return Permission::distinct()->whereNotNull('group')->orderBy('group')->pluck('group')->toArray();
     }
 
     // ─── Computed: Roles (paginated) ────────────────────────────────────────────
@@ -228,6 +236,7 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
         $this->permissionName  = $permission->name;
         $this->permissionGroup = $permission->group ?? '';
         $this->permissionGuard = $permission->guard_name;
+        $this->groupMode       = 'existing';
         $this->showPermissionModal = true;
         $this->dispatch('open-modal', id: 'permission-modal');
     }
@@ -240,24 +249,28 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
                     ? Rule::unique('permissions', 'name')->ignore($this->permissionId)
                     : Rule::unique('permissions', 'name')
             ],
-            'permissionGroup' => 'nullable|string|max:100',
+            'permissionGroup' => 'required_if:groupMode,existing|nullable|string|max:100',
+            'newGroupName'    => 'required_if:groupMode,new|nullable|string|max:100',
             'permissionGuard' => 'required|string|in:web,api',
         ], [], [
             'permissionName'  => 'Nama',
             'permissionGroup' => 'Group',
+            'newGroupName'    => 'Nama Group Baru',
             'permissionGuard' => 'Guard Name',
         ]);
+
+        $group = ($this->groupMode === 'new') ? $this->newGroupName : $this->permissionGroup;
 
         if ($this->permissionId) {
             Permission::findOrFail($this->permissionId)->update([
                 'name'       => $this->permissionName,
-                'group'      => $this->permissionGroup ?: null,
+                'group'      => $group ?: null,
                 'guard_name' => $this->permissionGuard,
             ]);
         } else {
             Permission::create([
                 'name'       => $this->permissionName,
-                'group'      => $this->permissionGroup ?: null,
+                'group'      => $group ?: null,
                 'guard_name' => $this->permissionGuard,
             ]);
         }
@@ -278,6 +291,8 @@ new #[Title('Role & Permission')] #[Layout('layouts::admin.app')] class extends 
         $this->permissionId    = null;
         $this->permissionName  = '';
         $this->permissionGroup = '';
+        $this->newGroupName    = '';
+        $this->groupMode       = 'existing';
         $this->permissionGuard = 'web';
         $this->resetErrorBag();
     }

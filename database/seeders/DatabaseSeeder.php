@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         // 1. Seed Permissions with Groups
         $permissions = [
             ['name' => 'manajemen-absensi', 'group' => 'Absensi'],
+            ['name' => 'lihat-log-absensi', 'group' => 'Absensi'],
             ['name' => 'manajemen-permohonan-cuti', 'group' => 'Cuti'],
             ['name' => 'manajemen-personel', 'group' => 'Personel'],
             ['name' => 'manajemen-opd', 'group' => 'OPD'],
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'manajemen-jadwal-import', 'group' => 'Jadwal'],
             ['name' => 'manajemen-user', 'group' => 'Pengguna'],
             ['name' => 'manajemen-role-permission', 'group' => "Role & Permission"],
+            ['name' => 'manajemen-perangkat', 'group' => 'Perangkat'],
             ['name' => 'manajemen-pengaturan', 'group' => 'Pengaturan'],
         ];
 
@@ -38,10 +40,19 @@ class DatabaseSeeder extends Seeder
 
         // 2. Seed Roles
         $superAdminRole = \Spatie\Permission\Models\Role::create(['name' => 'super-admin', 'color' => '#ef4444']);
-        \Spatie\Permission\Models\Role::create(['name' => 'admin-opd', 'color' => '#3b82f6']);
+        $adminOpdRole = \Spatie\Permission\Models\Role::create(['name' => 'admin-opd', 'color' => '#3b82f6']);
 
         // 3. Assign all permissions to super-admin
         $superAdminRole->givePermissionTo(\Spatie\Permission\Models\Permission::all());
+
+        // 4. Assign specific permissions to admin-opd
+        $adminOpdRole->givePermissionTo([
+            'manajemen-absensi',
+            'manajemen-permohonan-cuti',
+            'manajemen-personel',
+            'manajemen-jadwal',
+            'manajemen-jadwal-import',
+        ]);
 
         // 4. Create Super Admin User
         $user = User::factory()->create([
@@ -53,6 +64,6 @@ class DatabaseSeeder extends Seeder
         $user->assignRole('super-admin');
 
         // 5. Default Settings
-        \App\Models\Setting::set('personnel_registration_enabled', true, 'boolean');
+        \App\Models\Setting::set('personnel_registration_enabled', false, 'boolean');
     }
 }
