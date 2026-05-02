@@ -71,9 +71,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // Stats
         $totalScheduled = $personnelQuery->count(); // Total (incl. LIBUR)
-        $totalRequired = (clone $personnelQuery)->whereHas('jadwals', function($q) use ($today) {
-            $q->whereDate('tanggal', $today)->where('status', '!=', 'LIBUR');
-        })->count(); // Only active shifts
+        $totalRequired = (clone $personnelQuery)->whereHas('jadwals.shift', function ($q) {
+            $q->where('type', 'shift');
+        })->count(); // Only active working shifts
 
         $totalMasuk = (clone $absensiQuery)->whereNotNull('jam_masuk')->count();
         $totalPulang = (clone $absensiQuery)->whereNotNull('jam_pulang')->count();
@@ -85,8 +85,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         // Activities (latest records) - STICK TO TODAY'S DATE
         $activities = Absensi::query()
             ->whereDate('tanggal', $today)
-            ->whereNotNull('jadwal_id')
-            ->where('status', '!=', 'LIBUR')
+            ->whereHas('jadwal.shift', function ($q) {
+                $q->where('type', 'shift');
+            })
             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
             })
@@ -117,7 +118,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         // --- Monitoring: Belum Absen (Today) ---
         $absentPersonnel = Absensi::whereDate('tanggal', $today)
             ->where('status', 'ALFA')
-            ->whereNotNull('jadwal_id')
+            ->whereHas('jadwal.shift', function ($q) {
+                $q->where('type', 'shift');
+            })
             ->when(!$isSuperAdmin, function($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
             })

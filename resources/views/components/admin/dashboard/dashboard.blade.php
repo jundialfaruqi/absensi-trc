@@ -190,10 +190,10 @@
                                             <tr class="bg-base-200/50">
                                                 <td colspan="4" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
-                                                        <div class="w-1.5 h-3 bg-primary rounded-full"></div>
+                                                        <div class="w-1.5 h-3 bg-base-content"></div>
                                                         <span
-                                                            class="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                                                            {{ $log->personnel->opd->name }}
+                                                            class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content">
+                                                            {{ $log->personnel->opd->singkatan }}
                                                         </span>
                                                     </div>
                                                 </td>
@@ -201,7 +201,7 @@
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
                                         <tr
-                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group {{ $log->status === 'LIBUR' ? 'bg-base-200/80 opacity-25 grayscale' : '' }}">
+                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar">
@@ -234,24 +234,25 @@
                                             </td>
                                             <td>
                                                 <div class="flex flex-col gap-1">
-                                                    @php
-                                                        $badgeColor = match ($log->status) {
-                                                            'HADIR' => 'success',
-                                                            'ALFA' => 'error',
-                                                            'LIBUR' => 'neutral',
-                                                            'CUTI', 'IZIN', 'SAKIT' => 'primary',
-                                                            default => 'ghost',
-                                                        };
-                                                    @endphp
-                                                    <span
-                                                        class="badge badge-{{ $badgeColor }} badge-sm font-black text-[9px] tracking-widest uppercase">{{ $log->status }}</span>
-
-                                                    @if ($log->is_within_radius === false)
+                                                    <div class="flex flex-col gap-1">
+                                                        @php
+                                                            $badgeColor = match ($log->status) {
+                                                                'HADIR' => 'success',
+                                                                'ALFA' => 'error',
+                                                                'LIBUR' => 'neutral',
+                                                                'CUTI', 'IZIN', 'SAKIT' => 'primary',
+                                                                default => 'ghost',
+                                                            };
+                                                        @endphp
                                                         <span
-                                                            class="text-[8px] font-black text-error uppercase tracking-tighter">LUAR
-                                                            RADIUS</span>
-                                                    @endif
-                                                </div>
+                                                            class="badge badge-{{ $badgeColor }} badge-sm font-black text-[9px] text-white tracking-widest uppercase">{{ $log->status }}</span>
+
+                                                        @if ($log->is_within_radius === false)
+                                                            <span
+                                                                class="text-[8px] font-black text-error uppercase tracking-tighter">LUAR
+                                                                RADIUS</span>
+                                                        @endif
+                                                    </div>
                                             </td>
                                             <td class="text-center">
                                                 <div class="flex flex-col items-center gap-1">
@@ -265,7 +266,7 @@
                                                             };
                                                         @endphp
                                                         <span
-                                                            class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
+                                                            class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] text-white tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
                                                     @else
                                                         <span
                                                             class="text-[9px] font-bold text-base-content/20">-</span>
@@ -292,7 +293,7 @@
                                                             };
                                                         @endphp
                                                         <span
-                                                            class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
+                                                            class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] text-white tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
                                                     @else
                                                         <span
                                                             class="text-[9px] font-bold text-base-content/20">-</span>
@@ -410,7 +411,7 @@
                                         {{ $late->personnel->name }}</div>
                                     <div
                                         class="text-[9px] font-bold text-base-content/40 uppercase truncate tracking-tighter">
-                                        {{ $late->personnel->opd->name }}</div>
+                                        {{ $late->personnel->opd->singkatan }}</div>
                                 </div>
                                 <div class="flex-none text-right">
                                     <div class="text-xs font-black text-error uppercase">
@@ -462,7 +463,7 @@
                                         {{ $absent->personnel->name }}</div>
                                     <div
                                         class="text-[9px] font-bold text-base-content/40 uppercase truncate tracking-tighter">
-                                        {{ $absent->personnel->opd->name }}</div>
+                                        {{ $absent->personnel->opd->singkatan }}</div>
                                 </div>
                                 <div class="flex-none">
                                     <span
