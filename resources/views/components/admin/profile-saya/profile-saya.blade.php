@@ -44,7 +44,7 @@
                                 </div>
                             </div>
                         </div>
- 
+
                         <!-- Photo Actions -->
                         <template x-if="isEditing">
                             <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
@@ -60,25 +60,28 @@
                                     <input id="foto-input" type="file" class="hidden"
                                         accept="image/png,image/jpeg,image/jpg,image/webp" @change="handleFileSelect" />
                                 </label>
- 
-                                @if($foto || $old_foto)
+
+                                @if ($foto || $old_foto)
                                     <button type="button" wire:click="removeFoto"
                                         class="btn btn-circle btn-sm btn-error shadow-lg hover:scale-110 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                         </svg>
                                     </button>
                                 @endif
                             </div>
                         </template>
                     </div>
- 
+
                     @error('foto')
                         <div class="mt-4">
-                            <span class="bg-error/10 text-error text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tight">{{ $message }}</span>
+                            <span
+                                class="bg-error/10 text-error text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tight">{{ $message }}</span>
                         </div>
                     @enderror
- 
+
                     <div class="mt-4">
                         <h2 class="text-xl font-bold text-base-content">{{ $name }}</h2>
                         <p class="text-xs font-medium text-base-content/40 uppercase tracking-widest">
@@ -142,7 +145,7 @@
                             <div class="flex items-center gap-3">
                                 <div>
                                     <h3 class="text-xl font-black text-base-content">Informasi Dasar</h3>
-                                    <p class="text-[10px] text-base-content/60">
+                                    <p class="text-xs text-base-content/60">
                                         Klik tombol Edit untuk mengubah data profil</p>
                                 </div>
                             </div>
@@ -193,8 +196,8 @@
                         <div class="flex items-center gap-3 mb-8">
                             <div>
                                 <h3 class="text-xl font-black text-base-content">Ubah Password</h3>
-                                <p class="text-[10px] text-base-content/60">
-                                    Biarkan kosong jika tidak ingin mengubah</p>
+                                <p class="text-xs text-base-content/60">
+                                    Biarkan kosong jika tidak ingin mengubah password</p>
                             </div>
                         </div>
 

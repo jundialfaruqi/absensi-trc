@@ -182,10 +182,10 @@
                             @foreach ($this->dates as $date)
                                 <th
                                     class="text-[9px] font-black text-center border-b border-r border-base-200 p-1 bg-base-200/30">
-                                    M</th>
+                                    IN</th>
                                 <th
                                     class="text-[9px] font-black text-center border-b border-r border-base-200 p-1 bg-base-200/30">
-                                    P</th>
+                                    OUT</th>
                             @endforeach
                         </tr>
                     </thead>
@@ -308,9 +308,10 @@
                                             } elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday) {
                                                 $cellClassM .= ' bg-base-300/30';
                                             }
-                                            $cellStyleM = ($a && $j && $j->shift && $j->shift->type === 'off') 
-                                                ? "background-color: {$j->shift->color}20;" 
-                                                : "";
+                                            $cellStyleM =
+                                                $a && $j && $j->shift && $j->shift->type === 'off'
+                                                    ? "background-color: {$j->shift->color}20;"
+                                                    : '';
                                         @endphp
                                         <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
@@ -333,7 +334,8 @@
 
                                                 @if ($a)
                                                     @if ($j && $j->shift && $j->shift->type === 'off')
-                                                        <span class="text-[10px] font-black" style="color: {{ $j->shift->color }};">{{ $j->shift->name }}</span>
+                                                        <span class="text-[10px] font-black"
+                                                            style="color: {{ $j->shift->color }};">{{ $j->shift->name }}</span>
                                                     @elseif ($a->status === 'LIBUR')
                                                         <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                                     @elseif ($a->jam_masuk)
@@ -377,9 +379,10 @@
                                             } elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday) {
                                                 $cellClassP .= ' bg-base-300/30';
                                             }
-                                            $cellStyleP = ($a && $j && $j->shift && $j->shift->type === 'off') 
-                                                ? "background-color: {$j->shift->color}20;" 
-                                                : "";
+                                            $cellStyleP =
+                                                $a && $j && $j->shift && $j->shift->type === 'off'
+                                                    ? "background-color: {$j->shift->color}20;"
+                                                    : '';
                                         @endphp
                                         <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
@@ -402,7 +405,8 @@
 
                                                 @if ($a)
                                                     @if ($j && $j->shift && $j->shift->type === 'off')
-                                                        <span class="text-[10px] font-black" style="color: {{ $j->shift->color }};">{{ $j->shift->name }}</span>
+                                                        <span class="text-[10px] font-black"
+                                                            style="color: {{ $j->shift->color }};">{{ $j->shift->name }}</span>
                                                     @elseif ($a->status === 'LIBUR')
                                                         <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                                     @elseif ($a->jam_pulang)
