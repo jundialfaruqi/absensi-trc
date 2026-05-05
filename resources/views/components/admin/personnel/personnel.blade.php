@@ -145,6 +145,7 @@
                             <tr>
                                 <th class="text-center w-16">#</th>
                                 <th>Nama Personnel</th>
+                                <th>Mode Absensi</th>
                                 <th>Kontak</th>
                                 <th>Penugasan</th>
                                 <th>Kantor / Lokasi</th>
@@ -206,6 +207,10 @@
                                                 <div class="text-xs opacity-70">{{ $r->email }}</div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td>
+                                        <div class="badge badge-sm font-medium text-nowrap">
+                                            {{ ucfirst($r->attendance_type) }}</div>
                                     </td>
                                     <td>
                                         <div class="text-sm">{{ $r->nomor_hp ?: '-' }}</div>
