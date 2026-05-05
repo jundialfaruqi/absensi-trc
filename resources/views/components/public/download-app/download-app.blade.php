@@ -1,17 +1,15 @@
-<div class="min-h-[80vh] flex items-center justify-center px-6 py-20 relative z-10">
+<div class="min-h-[80vh] flex items-center justify-center px-2 py-4 md:py-10 relative z-10">
     <div class="w-full max-w-md">
-        <div class="glass-panel p-8 md:p-12 rounded-[2.5rem] border-white/10 shadow-2xl relative overflow-hidden group">
+        <div class="glass-panel p-6 md:p-10 rounded-[2.5rem] border-white/10 shadow-2xl relative overflow-hidden group">
             <!-- Animated background accent -->
             <div
                 class="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-700">
             </div>
 
-            <div class="relative z-10 flex flex-col items-center text-center space-y-8">
+            <div class="relative z-10 flex flex-col items-center text-center space-y-4">
                 <!-- Icon -->
-                <div
-                    class="h-20 w-20 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center p-4 shadow-inner">
-                    <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
-                        class="w-full h-full object-contain" />
+                <div class="flex items-center justify-center p-4">
+                    <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC" class="w-20 h-20 object-contain" />
                 </div>
 
                 <div class="space-y-2">
@@ -25,7 +23,7 @@
                         <div class="relative">
                             <input x-bind:type="show ? 'text' : 'password'" wire:model.live="pin" maxlength="6"
                                 placeholder="••••••"
-                                class="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-6 py-5 text-center text-3xl font-black tracking-[0.5em] text-white focus:border-blue-500/50 focus:ring-0 transition-all placeholder:opacity-20">
+                                class="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-4 py-4 md:px-6 md:py-5 text-center text-xl md:text-3xl font-black tracking-[0.5em] text-white focus:border-blue-500/50 focus:ring-0 transition-all placeholder:text-base-content/30">
                             <button type="button" @click="show = !show"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
                                 <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -51,9 +49,10 @@
                     <button type="submit"
                         class="w-full py-5 bg-linear-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-black rounded-2xl shadow-xl transition-all neon-glow-blue flex items-center justify-center gap-3 group/btn relative overflow-hidden"
                         wire:loading.attr="disabled">
-                        
+
                         <!-- Spinner Overlay -->
-                        <div wire:loading wire:target="download" class="absolute inset-0 flex items-center justify-center bg-blue-600/50 backdrop-blur-sm z-20">
+                        <div wire:loading wire:target="download"
+                            class="absolute inset-0 flex items-center justify-center bg-blue-600/50 backdrop-blur-sm z-20">
                             <span class="loading loading-spinner loading-md"></span>
                         </div>
 

@@ -17,8 +17,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(10px, 15px) rotate(2deg); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(10px, 15px) rotate(2deg);
+            }
         }
 
         .animate-float {
@@ -48,8 +55,10 @@
                 <circle cx="10" cy="10" r="1" fill="currentColor" />
                 <circle cx="30" cy="20" r="1.2" fill="currentColor" />
                 <circle cx="50" cy="15" r="1.5" fill="currentColor" />
-                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor" stroke-width="0.3" />
-                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor" stroke-width="0.3" />
+                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor"
+                    stroke-width="0.3" />
             </svg>
         </div>
     </div>
@@ -65,7 +74,7 @@
                 <span class="text-[8px] font-bold text-blue-400 tracking-widest uppercase">Emergency 112</span>
             </div>
         </a>
-        <a href="/" class="btn btn-ghost btn-sm text-slate-300">Kembali ke Beranda</a>
+        <a href="/" class="btn btn-ghost btn-sm text-slate-300">Home</a>
     </nav>
 
     {{-- Main Content --}}
@@ -74,7 +83,7 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="relative z-10 border-t border-white/5 mt-12 py-12 px-6 text-center">
+    <footer class="relative z-10 border-t border-white/5 mt-6 py-8 px-6 text-center">
         <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
             &copy; 2026 Pemerintah Kota Pekanbaru. Seluruh Hak Cipta Dilindungi.
         </p>
@@ -82,4 +91,5 @@
 
     @livewireScripts
 </body>
+
 </html>
