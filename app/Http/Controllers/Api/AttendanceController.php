@@ -186,34 +186,70 @@ class AttendanceController extends Controller
         $jadwal = null;
         $activeDate = $today;
 
-        // Night Shift Buffer: Check if user is still in the "OUT" window of yesterday's night shift
-        if ($nowTime < '10:00:00') {
+        // --- PHASE 1: PREVIOUS DAY PRIORITY (00:00 - 06:00) ---
+        // In the dead of night, we prioritize what happened yesterday
+        if ($nowTime < '06:00:00') {
             $yesterdayJadwal = Jadwal::where('personnel_id', $id)
                 ->whereDate('tanggal', $yesterday)
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift) {
-                $startStr = $yesterdayJadwal->shift->start_time;
-                $endStr = $yesterdayJadwal->shift->end_time;
-                
-                // Night shift crosses midnight
-                if (strcmp($startStr, $endStr) > 0) {
-                    $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
-                    if ($nowTime < $endWithBuffer) {
+            if ($yesterdayJadwal) {
+                if ($yesterdayJadwal->shift) {
+                    $startStr = $yesterdayJadwal->shift->start_time;
+                    $endStr = $yesterdayJadwal->shift->end_time;
+                    
+                    // If it's a night shift, check if we're still in the OUT window (until 11:00 AM)
+                    if (strcmp($startStr, $endStr) > 0) {
+                        $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
+                        if ($nowTime < $endWithBuffer) {
+                            $jadwal = $yesterdayJadwal;
+                            $activeDate = $yesterday;
+                        }
+                    } else {
+                        // It's a normal day shift yesterday, but it's 00:00 - 06:00 now.
+                        // We stay with yesterday's schedule to show "Time is up" instead of "Next shift in 22h"
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
+                } else {
+                    // Yesterday was OFF/LIBUR/DINAS (no shift object)
+                    // Stay with this until 06:00 AM
+                    $jadwal = $yesterdayJadwal;
+                    $activeDate = $yesterday;
                 }
             }
         }
 
+        // --- PHASE 2: TODAY'S SCHEDULE (Fallback or Morning) ---
         if (!$jadwal) {
-            $jadwal = Jadwal::where('personnel_id', $id)
-                ->whereDate('tanggal', $today)
-                ->with('shift')
-                ->first();
-            $activeDate = $today;
+            // Buffer: Still check yesterday's night shift even until 10:00 AM if Phase 1 didn't catch it
+            if ($nowTime >= '06:00:00' && $nowTime < '10:00:00') {
+                $yesterdayJadwal = Jadwal::where('personnel_id', $id)
+                    ->whereDate('tanggal', $yesterday)
+                    ->with('shift')
+                    ->first();
+
+                if ($yesterdayJadwal && $yesterdayJadwal->shift) {
+                    $startStr = $yesterdayJadwal->shift->start_time;
+                    $endStr = $yesterdayJadwal->shift->end_time;
+                    if (strcmp($startStr, $endStr) > 0) {
+                        $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
+                        if ($nowTime < $endWithBuffer) {
+                            $jadwal = $yesterdayJadwal;
+                            $activeDate = $yesterday;
+                        }
+                    }
+                }
+            }
+
+            if (!$jadwal) {
+                $jadwal = Jadwal::where('personnel_id', $id)
+                    ->whereDate('tanggal', $today)
+                    ->with('shift')
+                    ->first();
+                $activeDate = $today;
+            }
         }
 
         if (!$jadwal) {
@@ -399,43 +435,73 @@ class AttendanceController extends Controller
                     'status' => 'error',
                     'message' => 'Perangkat ini hanya diizinkan untuk absensi pemilik perangkat.'
                 ], 403);
+}
             }
         }
+
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
         $yesterday = $now->copy()->subDay()->format('Y-m-d');
         $nowTime = $now->format('H:i:s');
-
-        // SMART LOOKUP: Check if we should use yesterday's night shift
         $jadwal = null;
         $activeDate = $today;
 
-        // Buffer: 00:00 to 10:00 AM
-        if ($nowTime < '10:00:00') {
+        // --- PHASE 1: PREVIOUS DAY PRIORITY (00:00 - 06:00) ---
+        if ($nowTime < '06:00:00') {
             $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $yesterday)
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift) {
-                $startStr = $yesterdayJadwal->shift->start_time;
-                $endStr = $yesterdayJadwal->shift->end_time;
-
-                if (strcmp($startStr, $endStr) > 0) {
-                    $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
-                    if ($nowTime < $endWithBuffer) {
+            if ($yesterdayJadwal) {
+                if ($yesterdayJadwal->shift) {
+                    $startStr = $yesterdayJadwal->shift->start_time;
+                    $endStr = $yesterdayJadwal->shift->end_time;
+                    if (strcmp($startStr, $endStr) > 0) {
+                        $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
+                        if ($nowTime < $endWithBuffer) {
+                            $jadwal = $yesterdayJadwal;
+                            $activeDate = $yesterday;
+                        }
+                    } else {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
+                } else {
+                    $jadwal = $yesterdayJadwal;
+                    $activeDate = $yesterday;
                 }
             }
         }
 
+        // --- PHASE 2: TODAY'S SCHEDULE (Fallback or Morning) ---
         if (!$jadwal) {
-            $jadwal = Jadwal::where('personnel_id', $personnel->id)
-                ->whereDate('tanggal', $today)
-                ->with('shift')
-                ->first();
+            if ($nowTime >= '06:00:00' && $nowTime < '10:00:00') {
+                $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
+                    ->whereDate('tanggal', $yesterday)
+                    ->with('shift')
+                    ->first();
+
+                if ($yesterdayJadwal && $yesterdayJadwal->shift) {
+                    $startStr = $yesterdayJadwal->shift->start_time;
+                    $endStr = $yesterdayJadwal->shift->end_time;
+                    if (strcmp($startStr, $endStr) > 0) {
+                        $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
+                        if ($nowTime < $endWithBuffer) {
+                            $jadwal = $yesterdayJadwal;
+                            $activeDate = $yesterday;
+                        }
+                    }
+                }
+            }
+
+            if (!$jadwal) {
+                $jadwal = Jadwal::where('personnel_id', $personnel->id)
+                    ->whereDate('tanggal', $today)
+                    ->with('shift')
+                    ->first();
+                $activeDate = $today;
+            }
         }
 
         if (!$jadwal) {
