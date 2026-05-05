@@ -52,8 +52,22 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         $this->readyToLoad = true;
     }
 
-    public function openQuickAdd($personnelId, $date): void
+    public function openQuickAdd($personnelId, $date, $attendanceType = null): void
     {
+        if (!$attendanceType) {
+            $personnel = \App\Models\Personnel::find($personnelId);
+            $attendanceType = $personnel?->attendance_type;
+        }
+
+        if ($attendanceType === 'FLEXIBLE') {
+            $this->dispatch('toast', 
+                type: 'warning', 
+                title: 'Informasi', 
+                message: 'Personnel ini memiliki tipe Flexible dan tidak membutuhkan jadwal untuk absensi.'
+            );
+            return;
+        }
+
         $this->dispatch('openQuickEdit', personnelId: $personnelId, date: $date)->to('admin::jadwal-quick-modal');
     }
 

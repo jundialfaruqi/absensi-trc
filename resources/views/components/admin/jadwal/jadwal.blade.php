@@ -248,6 +248,12 @@
                                                             {{ $p->regu }}
                                                         </span>
                                                     @endif
+                                                    @if ($p->attendance_type === 'FLEXIBLE')
+                                                        <span
+                                                            class="px-1 py-0.5 rounded bg-warning/10 text-warning text-[8px] font-bold border border-warning/20 leading-none">
+                                                            FLEX
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -262,7 +268,10 @@
 
                                             if ($j) {
                                                 if ($j->shift_id) {
-                                                    $style = 'background-color: ' . ($j->shift->color ?? '#64748b') . '; color: white;';
+                                                    $style =
+                                                        'background-color: ' .
+                                                        ($j->shift->color ?? '#64748b') .
+                                                        '; color: white;';
                                                 } elseif ($j->status === 'LIBUR') {
                                                     // Fallback for legacy LIBUR status without shift_id
                                                     $cellClass = 'bg-yellow-500 text-white';
@@ -271,14 +280,14 @@
                                         @endphp
                                         <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
                                             style="{{ $style }}"
-                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}')"
+                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}', '{{ $p->attendance_type }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
-                                            wire:target="openQuickAdd('{{ $p->id }}', '{{ $date }}')">
+                                            wire:target="openQuickAdd('{{ $p->id }}', '{{ $date }}', '{{ $p->attendance_type }}')">
 
                                             <div class="relative w-full h-full flex items-center justify-center">
                                                 {{-- Specific Cell Loader --}}
                                                 <div wire:loading
-                                                    wire:target="openQuickAdd('{{ $p->id }}', '{{ $date }}')"
+                                                    wire:target="openQuickAdd('{{ $p->id }}', '{{ $date }}', '{{ $p->attendance_type }}')"
                                                     class="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
                                                     <span
                                                         class="loading loading-spinner loading-xs text-primary"></span>

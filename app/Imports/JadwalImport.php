@@ -85,6 +85,7 @@ class JadwalImport implements ToCollection
             $personnel = Personnel::when($this->opdId, function($q) {
                     $q->where('opd_id', $this->opdId);
                 })
+                ->where('attendance_type', '!=', 'FLEXIBLE')
                 ->find($personnelId);
             if (!$personnel) {
                 Log::warning("JadwalImport: Personnel with ID {$personnelId} not found or unauthorized for current OPD context.");

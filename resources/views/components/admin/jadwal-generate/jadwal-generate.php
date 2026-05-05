@@ -106,6 +106,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     {
         if (!$this->selectedOpdId) return collect();
         return Personnel::where('opd_id', $this->selectedOpdId)
+            ->where('attendance_type', '!=', 'FLEXIBLE')
             ->orderBy('name')
             ->get();
     }

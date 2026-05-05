@@ -35,6 +35,7 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
     public function collection()
     {
         $personnels = Personnel::where('opd_id', $this->opdId)
+            ->where('attendance_type', '!=', 'FLEXIBLE')
             ->orderBy('name')
             ->get();
             
