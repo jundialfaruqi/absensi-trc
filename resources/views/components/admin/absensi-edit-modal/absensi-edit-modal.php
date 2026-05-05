@@ -34,6 +34,8 @@ new class extends Component
     public $uniqueDeviceIdPulang;
     public bool $isOfficialDeviceMasuk = false;
     public bool $isOfficialDevicePulang = false;
+    public $officialDeviceNameMasuk;
+    public $officialDeviceNamePulang;
     public bool $isEdited = false;
 
     #[On('openEditAbsensi')]
@@ -76,10 +78,14 @@ new class extends Component
             $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
 
             if ($this->uniqueDeviceIdMasuk) {
-                $this->isOfficialDeviceMasuk = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdMasuk)->exists();
+                $device = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdMasuk)->first();
+                $this->isOfficialDeviceMasuk = !is_null($device);
+                $this->officialDeviceNameMasuk = $device?->name;
             }
             if ($this->uniqueDeviceIdPulang) {
-                $this->isOfficialDevicePulang = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdPulang)->exists();
+                $device = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdPulang)->first();
+                $this->isOfficialDevicePulang = !is_null($device);
+                $this->officialDeviceNamePulang = $device?->name;
             }
 
             $this->isEdited = !is_null($absensi->original_status_masuk);
@@ -220,6 +226,8 @@ new class extends Component
         $this->uniqueDeviceIdPulang = null;
         $this->isOfficialDeviceMasuk = false;
         $this->isOfficialDevicePulang = false;
+        $this->officialDeviceNameMasuk = null;
+        $this->officialDeviceNamePulang = null;
         $this->isEdited = false;
     }
 
