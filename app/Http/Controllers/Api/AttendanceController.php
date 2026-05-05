@@ -435,7 +435,6 @@ class AttendanceController extends Controller
                     'status' => 'error',
                     'message' => 'Perangkat ini hanya diizinkan untuk absensi pemilik perangkat.'
                 ], 403);
-}
             }
         }
 
