@@ -158,7 +158,7 @@
                                 <label class="label mb-1 px-1">
                                     <span class="label-text text-sm font-medium text-base-content">Pilih Kantor</span>
                                 </label>
-                                <select wire:model="kantor_id"
+                                <select wire:model.live="kantor_id"
                                     class="select select-bordered focus:select-primary w-full transition-all @error('kantor_id') select-error @enderror">
                                     <option value="">-- Tidak Terikat Kantor --</option>
                                     @foreach ($this->kantors as $k)
@@ -170,23 +170,25 @@
                                 @enderror
                             </div>
 
-                            <div class="form-control w-full md:col-span-2">
-                                <label
-                                    class="label w-full cursor-pointer justify-start gap-4 bg-base-200/50 p-4 rounded-xl border border-base-300">
-                                    <input type="checkbox" wire:model="wajib_absen_di_lokasi"
-                                        class="checkbox checkbox-md checkbox-primary">
-                                    <div class="flex-1 min-w-0">
-                                        <span
-                                            class="label-text font-bold block uppercase text-xs whitespace-normal text-base-content/70">Wajib
-                                            Absen di Lokasi
-                                            Kantor</span>
-                                        <span
-                                            class="text-[10px] text-base-content opacity-60 block whitespace-normal wrap-break-word">Jika
-                                            dicentang, personil tidak bisa absen jika
-                                            berada di luar radius kantor.</span>
-                                    </div>
-                                </label>
-                            </div>
+                            @if ($kantor_id)
+                                <div class="form-control w-full md:col-span-2">
+                                    <label
+                                        class="label w-full cursor-pointer justify-start gap-4 bg-base-200/50 p-4 rounded-xl border border-base-300">
+                                        <input type="checkbox" wire:model="wajib_absen_di_lokasi"
+                                            class="checkbox checkbox-md checkbox-primary">
+                                        <div class="flex-1 min-w-0">
+                                            <span
+                                                class="label-text font-bold block uppercase text-xs whitespace-normal text-base-content/70">Wajib
+                                                Absen di Lokasi
+                                                Kantor</span>
+                                            <span
+                                                class="text-[10px] text-base-content opacity-60 block whitespace-normal wrap-break-word">Jika
+                                                dicentang, personil tidak bisa absen jika
+                                                berada di luar radius kantor.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            @endif
 
                             <div class="form-control w-full md:col-span-2">
                                 <label

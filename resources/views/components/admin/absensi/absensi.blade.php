@@ -26,7 +26,7 @@
                 <li>Overview</li>
                 <li>
                     <a href="{{ route('absensi') }}">
-                        <span class="text-base-content font-bold">Absensi</span>
+                        <span class="text-base-content font-bold">Rekap Absensi</span>
                     </a>
                 </li>
             </ul>

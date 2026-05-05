@@ -39,6 +39,16 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
         }
 
         $this->pin = $this->generateUniquePin();
+        $this->face_recognition = true;
+    }
+
+    public function updatedKantorId($value)
+    {
+        if ($value === '') {
+            $this->wajib_absen_di_lokasi = false;
+        } else {
+            $this->wajib_absen_di_lokasi = true;
+        }
     }
 
     #[Computed]

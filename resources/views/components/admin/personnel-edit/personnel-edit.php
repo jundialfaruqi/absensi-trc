@@ -42,6 +42,15 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->loadPersonnelData($id);
     }
 
+    public function updatedKantorId($value)
+    {
+        if ($value === '') {
+            $this->wajib_absen_di_lokasi = false;
+        } else {
+            $this->wajib_absen_di_lokasi = true;
+        }
+    }
+
     #[Computed]
     public function opds()
     {

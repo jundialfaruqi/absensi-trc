@@ -336,7 +336,7 @@
                                             <path d="M4 11h16" />
                                             <path d="M15 19l2 2l4 -4" />
                                         </svg>
-                                        <span>Absensi</span>
+                                        <span>Rekap Absensi</span>
                                     </div>
                                     <span class="text-[8px] text-base-content opacity-50 ml-7">
                                         Monitoring Kehadiran
