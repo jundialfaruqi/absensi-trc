@@ -192,6 +192,33 @@ class AttendanceController extends Controller
         }
 
         if (!$jadwal) {
+            // Check if personnel is FLEXIBLE
+            $personnel = Personnel::find($id);
+            if ($personnel && $personnel->attendance_type === 'FLEXIBLE') {
+                // For flexible, we just check if they have absensi today
+                $existing = Absensi::where('personnel_id', $id)
+                    ->where('tanggal', $today)
+                    ->first();
+                
+                if ($existing && $existing->jam_masuk && $existing->jam_pulang) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Anda sudah melakukan absen masuk dan pulang hari ini."
+                    ], 403);
+                }
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Mode Fleksibel Aktif',
+                    'data' => [
+                        'id' => null,
+                        'personnel_id' => $id,
+                        'tanggal' => $today,
+                        'is_flexible' => true,
+                    ]
+                ]);
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Maaf, Anda tidak memiliki jadwal shift hari ini.'
@@ -326,8 +353,10 @@ class AttendanceController extends Controller
         $request->validate([
             'personnel_id' => 'nullable|exists:personnels,id',
             'foto' => 'required|string', // Base64 image
-            'lat' => 'required|numeric',
             'lng' => 'required|numeric',
+            'platform' => 'nullable|string',
+            'device_name' => 'nullable|string',
+            'unique_device_id' => 'nullable|string',
         ]);
 
         $personnel = $request->user();
@@ -373,10 +402,14 @@ class AttendanceController extends Controller
         }
 
         if (!$jadwal) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Anda tidak memiliki jadwal shift hari ini.'
-            ], 404);
+            if ($personnel->attendance_type === 'FLEXIBLE') {
+                $jadwal = null;
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Anda tidak memiliki jadwal shift hari ini.'
+                ], 404);
+            }
         }
 
         if ($jadwal->shift && $jadwal->shift->type === 'off') {
@@ -394,24 +427,26 @@ class AttendanceController extends Controller
         }
 
         // ─── TIME WINDOW VALIDATION (SYCHRONIZED WITH WEB) ───
-        $shift = $jadwal->shift;
-        $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
-        $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
-        $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
-        $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+        if ($jadwal) {
+            $shift = $jadwal->shift;
+            $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
+            $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
+            $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
+            $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
 
-        // Windows Calculation
-        $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
-        $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
-        $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
+            // Windows Calculation
+            $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
+            $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
+            $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
-        $pulangDate = $activeDate;
-        if ($shift->start_time > $shift->end_time) {
-            $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+            $pulangDate = $activeDate;
+            if ($shift->start_time > $shift->end_time) {
+                $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+            }
+            $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
+            $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
+            $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
         }
-        $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
-        $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
-        $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
         $existing = Absensi::where('personnel_id', $personnel->id)
             ->where('tanggal', $activeDate)
@@ -420,39 +455,39 @@ class AttendanceController extends Controller
         // VALIDATION LOGIC
         if (!$existing || !$existing->jam_masuk) {
             // MODE: ATTEMPT CHECK IN
-            if ($now->lessThan($windowInStart)) {
-                $diff = $windowInStart->diffForHumans($now, true);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
-                ], 403);
-            }
-            if ($now->greaterThan($windowInEnd)) {
-                // If it's too late to check in, check if it's already time for check out (missing IN)
-                if ($now->between($windowOutStart, $windowOutEnd)) {
-                    // Allowed to proceed but will be treated as check-in later? 
-                    // Actually web allows OUT if missing IN during OUT window.
-                } else {
+            if ($jadwal) {
+                if ($now->lessThan($windowInStart)) {
+                    $diff = $windowInStart->diffForHumans($now, true);
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Batas waktu Absen Masuk sudah berakhir."
+                        'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
                     ], 403);
+                }
+                if ($now->greaterThan($windowInEnd)) {
+                    if (!$now->between($windowOutStart, $windowOutEnd)) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => "Batas waktu Absen Masuk sudah berakhir."
+                        ], 403);
+                    }
                 }
             }
         } else {
             // MODE: ATTEMPT CHECK OUT
-            if ($now->lessThan($windowOutStart)) {
-                $diff = $windowOutStart->diffForHumans($now, true);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi."
-                ], 403);
-            }
-            if ($now->greaterThan($windowOutEnd)) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => "Batas waktu Absen Pulang sudah berakhir."
-                ], 403);
+            if ($jadwal) {
+                if ($now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, true);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi."
+                    ], 403);
+                }
+                if ($now->greaterThan($windowOutEnd)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu Absen Pulang sudah berakhir."
+                    ], 403);
+                }
             }
         }
 
@@ -479,25 +514,27 @@ class AttendanceController extends Controller
             // CHECK IN LOGIC
             $status_masuk = 'HADIR';
             
-            // Night Shift Status Logic
-            $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
-            
-            // Tolerance: 1 minute
-            $startTimeWithBuffer = Carbon::parse($jadwal->shift->start_time)->addMinute()->format('H:i:s');
+            if ($jadwal) {
+                // Night Shift Status Logic
+                $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
+                
+                // Tolerance: 1 minute
+                $startTimeWithBuffer = Carbon::parse($jadwal->shift->start_time)->addMinute()->format('H:i:s');
 
-            if ($isNightShift) {
-                // If arrived between 00:00 and EndTime, late relative to Day 1 StartTime
-                if ($nowTime <= $jadwal->shift->end_time) {
-                    $status_masuk = 'TELAT';
+                if ($isNightShift) {
+                    // If arrived between 00:00 and EndTime, late relative to Day 1 StartTime
+                    if ($nowTime <= $jadwal->shift->end_time) {
+                        $status_masuk = 'TELAT';
+                    } else {
+                        // Between StartTime and Midnight
+                        if ($nowTime > $startTimeWithBuffer) {
+                            $status_masuk = 'TELAT';
+                        }
+                    }
                 } else {
-                    // Between StartTime and Midnight
                     if ($nowTime > $startTimeWithBuffer) {
                         $status_masuk = 'TELAT';
                     }
-                }
-            } else {
-                if ($nowTime > $startTimeWithBuffer) {
-                    $status_masuk = 'TELAT';
                 }
             }
 
@@ -520,6 +557,9 @@ class AttendanceController extends Controller
                     'lng_masuk' => $request->lng,
                     'is_within_radius' => $lokasiResult['is_within_radius'],
                     'jarak_meter' => $lokasiResult['jarak_meter'],
+                    'platform_masuk' => $request->platform,
+                    'device_name_masuk' => $request->device_name,
+                    'unique_device_id_masuk' => $request->unique_device_id,
                 ]);
             } else {
                 $existing->update([
@@ -533,6 +573,9 @@ class AttendanceController extends Controller
                     'lng_masuk' => $request->lng,
                     'is_within_radius' => $lokasiResult['is_within_radius'],
                     'jarak_meter' => $lokasiResult['jarak_meter'],
+                    'platform_masuk' => $request->platform,
+                    'device_name_masuk' => $request->device_name,
+                    'unique_device_id_masuk' => $request->unique_device_id,
                 ]);
                 $absensi = $existing;
             }
@@ -553,21 +596,23 @@ class AttendanceController extends Controller
 
             $status_pulang = 'HADIR';
             
-            $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
-            $isNextDay = ($activeDate !== $today);
-            $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
+            if ($jadwal) {
+                $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
+                $isNextDay = ($activeDate !== $today);
+                $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
 
-            if ($isNightShift) {
-                if (!$isNextDay) {
-                    $status_pulang = 'PC';
+                if ($isNightShift) {
+                    if (!$isNextDay) {
+                        $status_pulang = 'PC';
+                    } else {
+                        if ($nowTime < $endTime) {
+                            $status_pulang = 'PC';
+                        }
+                    }
                 } else {
                     if ($nowTime < $endTime) {
                         $status_pulang = 'PC';
                     }
-                }
-            } else {
-                if ($nowTime < $endTime) {
-                    $status_pulang = 'PC';
                 }
             }
 
@@ -586,6 +631,9 @@ class AttendanceController extends Controller
                 'kantor_id_pulang' => $lokasiResult['kantor_id'],
                 'is_within_radius_pulang' => $lokasiResult['is_within_radius'],
                 'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
+                'platform_pulang' => $request->platform,
+                'device_name_pulang' => $request->device_name,
+                'unique_device_id_pulang' => $request->unique_device_id,
             ]);
 
             return response()->json([

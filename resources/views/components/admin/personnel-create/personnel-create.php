@@ -31,6 +31,7 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     public string $kantor_id = '';
     public bool $wajib_absen_di_lokasi = false;
     public bool $face_recognition = false;
+    public string $attendance_type = 'SCHEDULED';
 
     public function mount()
     {
@@ -114,6 +115,7 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
             'foto' => 'required|image|max:2048', // Max 2MB
             'face_descriptor' => 'nullable|string',
             'kantor_id' => 'nullable|exists:kantors,id',
+            'attendance_type' => 'required|in:SCHEDULED,FLEXIBLE',
         ];
     }
 
@@ -187,6 +189,7 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
             'kantor_id' => $this->kantor_id ?: null,
             'wajib_absen_di_lokasi' => $this->wajib_absen_di_lokasi,
             'face_recognition' => $this->face_recognition,
+            'attendance_type' => $this->attendance_type,
         ];
 
         // Generate Email Unik

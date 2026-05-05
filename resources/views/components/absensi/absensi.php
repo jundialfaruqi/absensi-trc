@@ -240,6 +240,26 @@ new #[Layout('layouts.absensi.app')] class extends Component
         }
 
         if (!$this->activeJadwal) {
+            if ($this->selectedPersonnel->attendance_type === 'FLEXIBLE') {
+                $this->activeDate = $today;
+                $this->activeAbsensi = Absensi::where('personnel_id', $this->selectedPersonnel->id)
+                    ->where('tanggal', $this->activeDate)
+                    ->first();
+                
+                if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk && $this->activeAbsensi->jam_pulang) {
+                    $this->isSuccess = false;
+                    $this->message = "Anda sudah melakukan absen masuk dan pulang hari ini.";
+                    $this->step = 3;
+                    return;
+                }
+                
+                $this->isTooLateToIn = false; // Flexible is never too late
+                if (!$checkWindowOnly) {
+                    $this->step = 2;
+                }
+                return;
+            }
+
             $this->isSuccess = false;
             $this->message = 'Anda tidak memiliki jadwal shift hari ini.';
             $this->step = 3;
@@ -365,10 +385,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
         if (
             !$this->selectedPersonnel || 
-            !$this->activeJadwal || 
-            $this->activeJadwal->status === 'LIBUR' || 
-            !$this->activeJadwal->shift ||
-            $this->activeJadwal->shift->type === 'off'
+            ($this->selectedPersonnel->attendance_type === 'SCHEDULED' && (!$this->activeJadwal || $this->activeJadwal->status === 'LIBUR' || !$this->activeJadwal->shift || $this->activeJadwal->shift->type === 'off'))
         ) {
             $this->isSuccess = false;
             $this->message = 'Data jadwal tidak valid atau Anda sedang tidak bertugas.';
@@ -378,9 +395,10 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
         $now = $this->getCorrectedNow();
         $nowTime = $now->format('H:i:s');
-        $startTime = $this->activeJadwal->shift->start_time->format('H:i:s');
-        $endTime = $this->activeJadwal->shift->end_time->format('H:i:s');
-        $isNightShift = $startTime > $endTime;
+        
+        $startTime = $this->activeJadwal ? $this->activeJadwal->shift->start_time->format('H:i:s') : null;
+        $endTime = $this->activeJadwal ? $this->activeJadwal->shift->end_time->format('H:i:s') : null;
+        $isNightShift = $startTime && $endTime ? ($startTime > $endTime) : false;
 
         try {
             $imagePath = null;
@@ -394,16 +412,19 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
             if ($type === 'in') {
                 $status_masuk = 'HADIR';
-                $startTimeWithBuffer = $this->activeJadwal->shift->start_time->copy()->addMinute()->format('H:i:s');
+                
+                if ($this->activeJadwal) {
+                    $startTimeWithBuffer = $this->activeJadwal->shift->start_time->copy()->addMinute()->format('H:i:s');
 
-                if (($isNightShift && ($nowTime <= $endTime || $nowTime > $startTimeWithBuffer)) || (!$isNightShift && $nowTime > $startTimeWithBuffer)) {
-                    $status_masuk = 'TELAT';
+                    if (($isNightShift && ($nowTime <= $endTime || $nowTime > $startTimeWithBuffer)) || (!$isNightShift && $nowTime > $startTimeWithBuffer)) {
+                        $status_masuk = 'TELAT';
+                    }
                 }
 
                 $this->activeAbsensi = Absensi::updateOrCreate(
                     ['personnel_id' => $this->selectedPersonnel->id, 'tanggal' => $this->activeDate],
                     [
-                        'jadwal_id' => $this->activeJadwal->id,
+                        'jadwal_id' => $this->activeJadwal ? $this->activeJadwal->id : null,
                         'status' => 'HADIR',
                         'jam_masuk' => $now->format('H:i:s'),
                         'status_masuk' => $status_masuk,
@@ -413,6 +434,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
                         'kantor_id' => $lokasiResult['kantor_id'],
                         'is_within_radius' => $lokasiResult['is_within_radius'],
                         'jarak_meter' => $lokasiResult['jarak_meter'],
+                        'platform_masuk' => 'web',
                     ]
                 );
                 $this->lastAbsensi = $this->activeAbsensi;
@@ -422,8 +444,10 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $status_pulang = 'HADIR';
                 $isNextDay = ($this->activeDate !== $now->format('Y-m-d'));
 
-                if (($isNightShift && (!$isNextDay || $nowTime < $endTime)) || (!$isNightShift && $nowTime < $endTime)) {
-                    $status_pulang = 'PC';
+                if ($this->activeJadwal) {
+                    if (($isNightShift && (!$isNextDay || $nowTime < $endTime)) || (!$isNightShift && $nowTime < $endTime)) {
+                        $status_pulang = 'PC';
+                    }
                 }
 
                 $this->activeAbsensi->update([
@@ -436,6 +460,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     'kantor_id_pulang' => $lokasiResult['kantor_id'],
                     'is_within_radius_pulang' => $lokasiResult['is_within_radius'],
                     'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
+                    'platform_pulang' => 'web',
                 ]);
                 $this->lastAbsensi = $this->activeAbsensi;
                 $this->isSuccess = true;

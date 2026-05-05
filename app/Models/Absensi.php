@@ -39,6 +39,12 @@ class Absensi extends Model
         'nomor_surat',
         'cuti_id',
         'keterangan',
+        'platform_masuk',
+        'platform_pulang',
+        'device_name_masuk',
+        'device_name_pulang',
+        'unique_device_id_masuk',
+        'unique_device_id_pulang',
     ];
 
     protected $casts = [

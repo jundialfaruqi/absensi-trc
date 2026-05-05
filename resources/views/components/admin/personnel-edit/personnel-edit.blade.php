@@ -181,6 +181,43 @@
                                 @enderror
                             </div>
 
+                            {{-- Attendance Type --}}
+                            <div class="form-control w-full md:col-span-2">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text text-sm font-medium text-base-content">Mode Absensi <span
+                                            class="text-error">*</span></span>
+                                </label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label
+                                        class="label cursor-pointer bg-base-200/50 p-4 rounded-xl border border-base-300 transition-all hover:bg-base-200">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" wire:model="attendance_type" value="SCHEDULED"
+                                                class="radio radio-primary radio-sm">
+                                            <div>
+                                                <span class="label-text font-bold block">Jadwal Tetap</span>
+                                                <span class="text-[10px] opacity-60 text-wrap">Wajib mengikuti shift
+                                                    yang telah diatur.</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label
+                                        class="label cursor-pointer bg-base-200/50 p-4 rounded-xl border border-base-300 transition-all hover:bg-base-200">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" wire:model="attendance_type" value="FLEXIBLE"
+                                                class="radio radio-primary radio-sm">
+                                            <div>
+                                                <span class="label-text font-bold block">Fleksibel</span>
+                                                <span class="text-[10px] opacity-60 text-wrap">Bisa absen kapan saja
+                                                    tanpa terikat shift.</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                @error('attendance_type')
+                                    <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             {{-- PIN --}}
                             <div class="form-control w-full" x-data="{ show: false }">
                                 <label class="label mb-1 px-1">

@@ -53,8 +53,10 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // Base queries
         $absensiQuery = Absensi::whereDate('tanggal', $today);
-        $personnelQuery = Personnel::whereHas('jadwals', function ($q) use ($today) {
-            $q->whereDate('tanggal', $today);
+        $personnelQuery = Personnel::where(function($q) use ($today) {
+            $q->whereHas('jadwals', function ($jq) use ($today) {
+                $jq->whereDate('tanggal', $today);
+            })->orWhere('attendance_type', 'FLEXIBLE');
         });
         $leaveRequestQuery = LeaveRequest::where('status', 'PENDING');
 
@@ -85,8 +87,13 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         // Activities (latest records) - STICK TO TODAY'S DATE
         $activities = Absensi::query()
             ->whereDate('tanggal', $today)
-            ->whereHas('jadwal.shift', function ($q) {
-                $q->where('type', 'shift');
+            ->where(function($q) {
+                $q->whereHas('jadwal.shift', function ($sq) {
+                    $sq->where('type', 'shift');
+                })
+                ->orWhereHas('personnel', function($pq) {
+                    $pq->where('attendance_type', 'FLEXIBLE');
+                });
             })
             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));

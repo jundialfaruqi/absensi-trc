@@ -26,6 +26,14 @@ new class extends Component
     public $keterangan;
     public $editingFotoMasuk;
     public $editingFotoPulang;
+    public $platformMasuk;
+    public $platformPulang;
+    public $deviceNameMasuk;
+    public $deviceNamePulang;
+    public $uniqueDeviceIdMasuk;
+    public $uniqueDeviceIdPulang;
+    public bool $isOfficialDeviceMasuk = false;
+    public bool $isOfficialDevicePulang = false;
     public bool $isEdited = false;
 
     #[On('openEditAbsensi')]
@@ -60,6 +68,20 @@ new class extends Component
             $this->keterangan = $absensi->keterangan;
             $this->editingFotoMasuk = $absensi->foto_masuk;
             $this->editingFotoPulang = $absensi->foto_pulang;
+            $this->platformMasuk = $absensi->platform_masuk;
+            $this->platformPulang = $absensi->platform_pulang;
+            $this->deviceNameMasuk = $absensi->device_name_masuk;
+            $this->deviceNamePulang = $absensi->device_name_pulang;
+            $this->uniqueDeviceIdMasuk = $absensi->unique_device_id_masuk;
+            $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
+
+            if ($this->uniqueDeviceIdMasuk) {
+                $this->isOfficialDeviceMasuk = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdMasuk)->exists();
+            }
+            if ($this->uniqueDeviceIdPulang) {
+                $this->isOfficialDevicePulang = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdPulang)->exists();
+            }
+
             $this->isEdited = !is_null($absensi->original_status_masuk);
         }
 
@@ -190,6 +212,14 @@ new class extends Component
         $this->keterangan = '';
         $this->editingFotoMasuk = null;
         $this->editingFotoPulang = null;
+        $this->platformMasuk = null;
+        $this->platformPulang = null;
+        $this->deviceNameMasuk = null;
+        $this->deviceNamePulang = null;
+        $this->uniqueDeviceIdMasuk = null;
+        $this->uniqueDeviceIdPulang = null;
+        $this->isOfficialDeviceMasuk = false;
+        $this->isOfficialDevicePulang = false;
         $this->isEdited = false;
     }
 

@@ -266,6 +266,12 @@
                                                             {{ $p->regu }}
                                                         </span>
                                                     @endif
+                                                    @if ($p->attendance_type === 'FLEXIBLE')
+                                                        <span
+                                                            class="px-1 py-0.5 rounded bg-warning/10 text-warning text-[8px] font-bold border border-warning/20 leading-none">
+                                                            FLEX
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>

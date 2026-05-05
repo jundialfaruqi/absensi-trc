@@ -36,6 +36,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     public string $kantor_id = '';
     public bool $wajib_absen_di_lokasi = false;
     public bool $face_recognition = false;
+    public string $attendance_type = 'SCHEDULED';
 
     public function mount(int $id)
     {
@@ -99,6 +100,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->kantor_id = (string) $item->kantor_id;
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
         $this->face_recognition = (bool) $item->face_recognition;
+        $this->attendance_type = (string) $item->attendance_type;
     }
 
     public function regeneratePin(): void
@@ -144,6 +146,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'foto' => 'nullable|image|max:2048', // Max 2MB
             'face_descriptor' => 'nullable|string',
             'kantor_id' => 'nullable|exists:kantors,id',
+            'attendance_type' => 'required|in:SCHEDULED,FLEXIBLE',
         ];
     }
 
@@ -220,6 +223,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'kantor_id' => $this->kantor_id ?: null,
             'wajib_absen_di_lokasi' => $this->wajib_absen_di_lokasi,
             'face_recognition' => $this->face_recognition,
+            'attendance_type' => $this->attendance_type,
         ];
 
         if ($this->password) {
