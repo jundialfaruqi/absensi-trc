@@ -167,7 +167,7 @@
                                     @endphp
                                     @if ($isSuperAdmin && $currentOpd !== $r->opd_id)
                                         <tr class="bg-base-200">
-                                            <td colspan="8"
+                                            <td colspan="9"
                                                 class="sticky left-0 top-12 z-50 p-0 border-b border-base-200 bg-base-200">
                                                 <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
                                                     <div class="w-1.5 h-4 bg-base-content"></div>
@@ -209,7 +209,8 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="badge badge-sm font-medium text-nowrap">
+                                        <div
+                                            class="badge badge-sm font-medium text-nowrap text-white {{ $r->attendance_type === 'FLEXIBLE' ? 'badge-error' : 'badge-primary' }}">
                                             {{ ucfirst($r->attendance_type) }}</div>
                                     </td>
                                     <td>
