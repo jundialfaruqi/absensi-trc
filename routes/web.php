@@ -105,6 +105,10 @@ Route::group([
         ->middleware('permission:manajemen-absensi')
         ->name('absensi.log.pin');
 
+    Route::livewire('/absensi/anomaly', 'admin::absensi-anomaly')
+        ->middleware('permission:manajemen-absensi-anomaly')
+        ->name('absensi.anomaly');
+
     Route::livewire('/pengaturan', 'admin::pengaturan')
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');

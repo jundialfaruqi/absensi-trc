@@ -538,6 +538,62 @@ class AttendanceController extends Controller
             ], 403);
         }
 
+        // 2. Anomaly Detection (Terima tapi tandai)
+        $isAnomaly = false;
+        $anomalyReason = null;
+
+        $incomingLat = (float) $request->lat;
+        $incomingLng = (float) $request->lng;
+
+        // Check 1: Koordinat (0,0) — sering dikirim oleh Fake GPS
+        if (abs($incomingLat) < 0.01 && abs($incomingLng) < 0.01) {
+            $isAnomaly = true;
+            $anomalyReason = 'Koordinat GPS tidak valid (0,0)';
+        }
+
+        // Check 2: Presisi terlalu bulat — indikasi input manual
+        if (!$isAnomaly) {
+            $latDecimals = strlen(substr(strrchr(number_format($incomingLat, 10, '.', ''), '.'), 1));
+            $lngDecimals = strlen(substr(strrchr(number_format($incomingLng, 10, '.', ''), '.'), 1));
+            // GPS asli biasanya punya 6+ digit desimal signifikan
+            $latStr = rtrim(number_format($incomingLat, 10, '.', ''), '0');
+            $lngStr = rtrim(number_format($incomingLng, 10, '.', ''), '0');
+            $latSigDecimals = strlen(explode('.', $latStr)[1] ?? '');
+            $lngSigDecimals = strlen(explode('.', $lngStr)[1] ?? '');
+            if ($latSigDecimals <= 2 && $lngSigDecimals <= 2) {
+                $isAnomaly = true;
+                $anomalyReason = 'Presisi GPS terlalu rendah (kemungkinan input manual)';
+            }
+        }
+
+        // Check 3: Kecepatan tidak wajar — bandingkan dengan absensi terakhir
+        if (!$isAnomaly) {
+            $lastAbsensi = Absensi::where('personnel_id', $personnel->id)
+                ->where(function ($q) {
+                    $q->whereNotNull('lat_masuk')->orWhereNotNull('lat_pulang');
+                })
+                ->orderByDesc('created_at')
+                ->first();
+
+            if ($lastAbsensi) {
+                // Ambil koordinat terakhir (prioritas pulang, fallback masuk)
+                $prevLat = $lastAbsensi->lat_pulang ?? $lastAbsensi->lat_masuk;
+                $prevLng = $lastAbsensi->lng_pulang ?? $lastAbsensi->lng_masuk;
+                $prevTime = $lastAbsensi->updated_at;
+
+                if ($prevLat && $prevLng && $prevTime) {
+                    $jarakKm = $this->haversineDistance($prevLat, $prevLng, $incomingLat, $incomingLng);
+                    $waktuJam = $now->diffInMinutes($prevTime) / 60;
+
+                    // Kecepatan >200 km/jam dan jarak >50km = anomali
+                    if ($waktuJam > 0 && $jarakKm > 50 && ($jarakKm / $waktuJam) > 200) {
+                        $isAnomaly = true;
+                        $anomalyReason = 'Perpindahan tidak wajar: ' . round($jarakKm) . 'km dalam ' . round($waktuJam * 60) . ' menit';
+                    }
+                }
+            }
+        }
+
         $existing = Absensi::where('personnel_id', $personnel->id)
             ->where('tanggal', $activeDate)
             ->first();
@@ -592,6 +648,8 @@ class AttendanceController extends Controller
                     'platform_masuk' => $request->platform,
                     'device_name_masuk' => $request->device_name,
                     'unique_device_id_masuk' => $request->unique_device_id,
+                    'is_location_anomaly' => $isAnomaly,
+                    'anomaly_reason' => $anomalyReason,
                 ]);
             } else {
                 $existing->update([
@@ -608,6 +666,8 @@ class AttendanceController extends Controller
                     'platform_masuk' => $request->platform,
                     'device_name_masuk' => $request->device_name,
                     'unique_device_id_masuk' => $request->unique_device_id,
+                    'is_location_anomaly' => $isAnomaly,
+                    'anomaly_reason' => $anomalyReason,
                 ]);
                 $absensi = $existing;
             }
@@ -666,6 +726,8 @@ class AttendanceController extends Controller
                 'platform_pulang' => $request->platform,
                 'device_name_pulang' => $request->device_name,
                 'unique_device_id_pulang' => $request->unique_device_id,
+                'is_location_anomaly' => $existing->is_location_anomaly || $isAnomaly,
+                'anomaly_reason' => $isAnomaly ? $anomalyReason : $existing->anomaly_reason,
             ]);
 
             return response()->json([
@@ -674,5 +736,25 @@ class AttendanceController extends Controller
                 'data' => $existing
             ]);
         }
+    }
+
+    /**
+     * Hitung jarak antara dua koordinat GPS menggunakan formula Haversine.
+     * @return float Jarak dalam kilometer
+     */
+    private function haversineDistance($lat1, $lng1, $lat2, $lng2): float
+    {
+        $earthRadius = 6371; // km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2)
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2))
+            * sin($dLng / 2) * sin($dLng / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
     }
 }

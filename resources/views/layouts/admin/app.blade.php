@@ -575,6 +575,34 @@
                                     </span>
                                 </a>
                             </li>
+                            @php
+                                $anomalyCount = \App\Models\Absensi::where('is_location_anomaly', true)
+                                    ->when(!auth()->user()->hasRole('super-admin'), function ($q) {
+                                        $q->whereHas('personnel', function ($pq) {
+                                            $pq->where('opd_id', auth()->user()->opd()?->id);
+                                        });
+                                    })
+                                    ->count();
+                            @endphp
+                            <li>
+                                <a wire:navigate href="{{ route('absensi.anomaly') }}"
+                                    class="{{ request()->routeIs('absensi.anomaly') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5 relative">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <span>Anomali Lokasi</span>
+                                        @if ($anomalyCount > 0)
+                                            <span class="badge badge-xs badge-error">{{ $anomalyCount }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Deteksi Fake GPS
+                                    </span>
+                                </a>
+                            </li>
                         @endcan
 
                         @can('manajemen-perangkat')

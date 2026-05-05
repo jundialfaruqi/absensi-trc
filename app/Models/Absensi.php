@@ -45,6 +45,8 @@ class Absensi extends Model
         'device_name_pulang',
         'unique_device_id_masuk',
         'unique_device_id_pulang',
+        'is_location_anomaly',
+        'anomaly_reason',
     ];
 
     protected $casts = [
