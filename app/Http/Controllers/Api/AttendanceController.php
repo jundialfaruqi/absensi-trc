@@ -62,7 +62,13 @@ class AttendanceController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Aktivasi berhasil!',
-            'data' => $device
+            'data' => [
+                'id' => $device->id,
+                'license_key' => $device->license_key,
+                'holder_type' => $device->personnel_id ? 'personnel' : 'user',
+                'target_personnel_id' => $device->personnel_id,
+                'status' => $device->status,
+            ]
         ]);
     }
 
@@ -97,7 +103,13 @@ class AttendanceController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Lisensi valid.',
-            'data' => $device
+            'data' => [
+                'id' => $device->id,
+                'license_key' => $device->license_key,
+                'holder_type' => $device->personnel_id ? 'personnel' : 'user',
+                'target_personnel_id' => $device->personnel_id,
+                'status' => $device->status,
+            ]
         ]);
     }
     public function personnels(Request $request)
@@ -127,6 +139,10 @@ class AttendanceController extends Controller
 
         if ($request->has('last_id')) {
             $query->where('id', '>', $request->last_id);
+        }
+
+        if ($device->personnel_id) {
+            $query->where('id', $device->personnel_id);
         }
 
         $personnels = $query->orderBy('name')
@@ -363,10 +379,18 @@ class AttendanceController extends Controller
         
         // If not authenticated via Sanctum (Proses 3), get from personnel_id
         if (!$personnel) {
-            if (!$request->personnel_id) {
-                return response()->json(['status' => 'error', 'message' => 'ID Personel diperlukan.'], 400);
-            }
             $personnel = Personnel::find($request->personnel_id);
+        }
+
+        // 0. Security Check: Personal Device restriction
+        $device = $request->get('device');
+        if ($device && $device->personnel_id) {
+            if ($personnel->id != $device->personnel_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Perangkat ini hanya diizinkan untuk absensi pemilik perangkat.'
+                ], 403);
+            }
         }
         $now = Carbon::now();
         $today = $now->format('Y-m-d');

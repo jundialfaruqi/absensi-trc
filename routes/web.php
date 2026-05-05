@@ -14,6 +14,21 @@ Route::livewire('/login', 'login')
 Route::livewire('/absensi-web', 'absensi')
     ->name('absensi-web');
 
+Route::livewire('/download-app', 'public::download-app')
+    ->name('download-app');
+
+Route::get('/direct-download-apk/{pin}', function ($pin) {
+    $personnel = \App\Models\Personnel::where('pin', $pin)->first();
+    if (!$personnel) abort(403);
+
+    $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
+    if (!file_exists($filePath)) abort(404);
+
+    return response()->download($filePath, 'TRC-Pekanbaru-Aman.apk', [
+        'Content-Type' => 'application/vnd.android.package-archive',
+    ]);
+})->name('apk.download.direct');
+
 // Admin Route
 Route::group([
     'middleware' => ['auth'],

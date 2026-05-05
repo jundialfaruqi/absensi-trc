@@ -34,6 +34,7 @@ return [
         'pages' => resource_path('views/pages'),
         'admin' => resource_path('views/components/admin'),
         'personnel' => resource_path('views/components/personnel'),
+        'public' => resource_path('views/components/public'),
     ],
 
     /*

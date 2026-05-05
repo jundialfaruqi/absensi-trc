@@ -49,7 +49,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         }
 
         return Personnel::query()
-            ->with(['opd', 'penugasan', 'kantor'])
+            ->with(['opd', 'penugasan', 'kantor', 'devices'])
             ->join('opds', 'personnels.opd_id', '=', 'opds.id')
             ->select(['personnels.*'])
             ->when($this->search, fn($q) => $q->where(function ($sub) {

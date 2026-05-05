@@ -244,6 +244,23 @@
                                     </div>
                                 </label>
                             </div>
+
+                            <div class="form-control w-full md:col-span-2">
+                                <label
+                                    class="label w-full cursor-pointer justify-start gap-4 bg-primary/5 p-4 rounded-xl border border-primary/20">
+                                    <input type="checkbox" wire:model="auto_create_device"
+                                        class="checkbox checkbox-md checkbox-primary">
+                                    <div class="flex-1 min-w-0">
+                                        <span
+                                            class="label-text font-bold block uppercase text-xs whitespace-normal text-primary">Otomatis
+                                            Buat Lisensi Perangkat</span>
+                                        <span
+                                            class="text-[10px] text-base-content opacity-60 block whitespace-normal wrap-break-word">Daftarkan
+                                            perangkat personal untuk personnel ini secara otomatis dan buatkan license
+                                            key.</span>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer border-t border-base-200 p-6 flex justify-end gap-3">

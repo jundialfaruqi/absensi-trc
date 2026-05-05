@@ -277,6 +277,29 @@
                                                         href="{{ route('personnel.edit', $r->id) }}">Edit</a>
                                                 </li>
                                                 <li>
+                                                    @php
+                                                        $waPhone = preg_replace('/^0/', '62', $r->nomor_hp);
+                                                        $licenseKey =
+                                                            $r->devices->first()?->license_key ?? 'Belum dibuat';
+                                                        $waText = "Halo *{$r->name}*, Berikut adalah data akun Personnel Anda:\n\n";
+                                                        $waText .= "Nama: {$r->name}\n";
+                                                        $waText .= "NIK: {$r->nik}\n";
+                                                        $waText .= "Email: {$r->email}\n";
+                                                        $waText .= "PIN: *{$r->pin}*\n";
+                                                        $waText .= "License Key: *{$licenseKey}*\n\n";
+                                                        $waText .=
+                                                            "Silakan download aplikasi TRC melalui link berikut:\n";
+                                                        $waText .= route('download-app') . "\n\n";
+                                                        $waText .= '*(Gunakan PIN Anda untuk mengunduh APK)*';
+
+                                                        $waUrl = "https://wa.me/{$waPhone}?text=" . urlencode($waText);
+                                                    @endphp
+                                                    <a href="{{ $waUrl }}" target="_blank"
+                                                        class="text-success">
+                                                        Kirim WA
+                                                    </a>
+                                                </li>
+                                                <li>
                                                     <button type="button" class="text-error"
                                                         wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">Delete</button>
                                                 </li>

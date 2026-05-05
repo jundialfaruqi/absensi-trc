@@ -45,4 +45,9 @@ class Personnel extends Authenticatable
     {
         return $this->hasMany(Absensi::class);
     }
+
+    public function devices()
+    {
+        return $this->hasMany(Device::class);
+    }
 }

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\Opd;
 use App\Models\Penugasan;
 use App\Models\Kantor;
@@ -32,6 +33,7 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     public bool $wajib_absen_di_lokasi = false;
     public bool $face_recognition = false;
     public string $attendance_type = 'SCHEDULED';
+    public bool $auto_create_device = false;
 
     public function mount()
     {
@@ -211,12 +213,25 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
             $data['foto'] = $this->foto->store('personnel-fotos', 'public');
         }
 
-        Personnel::create($data);
+        $personnel = Personnel::create($data);
+
+        $licenseMsg = '';
+        if ($this->auto_create_device) {
+            $licenseKey = strtoupper(Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4));
+            \App\Models\Device::create([
+                'opd_id' => $personnel->opd_id,
+                'personnel_id' => $personnel->id,
+                'name' => 'HP Personal - ' . $personnel->name,
+                'license_key' => $licenseKey,
+                'status' => 'inactive',
+            ]);
+            $licenseMsg = " | License Key: " . $licenseKey;
+        }
 
         $this->dispatch('set-pending-toast', [
             'type' => 'success',
             'title' => 'Berhasil',
-            'message' => 'Data Personnel berhasil ditambahkan.'
+            'message' => 'Data Personnel berhasil ditambahkan.' . $licenseMsg
         ]);
         return $this->redirectRoute('personnel', [], true, true);
     }

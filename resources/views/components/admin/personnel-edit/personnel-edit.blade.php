@@ -319,6 +319,44 @@
                                     </div>
                                 </label>
                             </div>
+
+                            <div class="form-control w-full md:col-span-2">
+                                @if ($has_personal_device)
+                                    <div
+                                        class="flex items-center gap-4 bg-success/5 p-4 rounded-xl border border-success/20">
+                                        <div class="bg-success/10 p-2 rounded-lg">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2" stroke="currentColor" class="w-5 h-5 text-success">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <span
+                                                class="label-text font-bold block uppercase text-xs text-success">Perangkat
+                                                Terdaftar</span>
+                                            <span class="text-[10px] text-base-content opacity-60 block truncate italic">
+                                                {{ $existing_device_name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <label
+                                        class="label w-full cursor-pointer justify-start gap-4 bg-primary/5 p-4 rounded-xl border border-primary/20">
+                                        <input type="checkbox" wire:model="auto_create_device"
+                                            class="checkbox checkbox-md checkbox-primary">
+                                        <div class="flex-1 min-w-0">
+                                            <span
+                                                class="label-text font-bold block uppercase text-xs whitespace-normal text-primary">Otomatis
+                                                Buat Lisensi Perangkat</span>
+                                            <span
+                                                class="text-[10px] text-base-content opacity-60 block whitespace-normal wrap-break-word">Daftarkan
+                                                perangkat personal untuk personnel ini secara otomatis dan buatkan
+                                                license key.</span>
+                                        </div>
+                                    </label>
+                                @endif
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer border-t border-base-200 p-6 flex justify-end gap-3">
