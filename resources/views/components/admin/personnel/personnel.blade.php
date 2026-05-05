@@ -243,13 +243,14 @@
                                     </td>
                                     <td class="text-center">
                                         @if ($r->face_recognition)
-                                            <div class="badge badge-success badge-xs font-bold text-[8px] uppercase">
-                                                Aktif
+                                            <div
+                                                class="badge badge-success badge-xs font-bold text-[8px] text-white uppercase">
+                                                Face On
                                             </div>
                                         @else
                                             <div
                                                 class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
-                                                Non-Aktif</div>
+                                                Face Off</div>
                                         @endif
                                     </td>
                                     <td class="text-center">
