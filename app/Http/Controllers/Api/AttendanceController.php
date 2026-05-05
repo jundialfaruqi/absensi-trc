@@ -184,7 +184,8 @@ class AttendanceController extends Controller
         $nowTime = $now->format('H:i:s');
 
         $jadwal = null;
-        
+        $activeDate = $today;
+
         // Night Shift Buffer: Check if user is still in the "OUT" window of yesterday's night shift
         if ($nowTime < '10:00:00') {
             $yesterdayJadwal = Jadwal::where('personnel_id', $id)
@@ -193,14 +194,15 @@ class AttendanceController extends Controller
                 ->first();
 
             if ($yesterdayJadwal && $yesterdayJadwal->shift) {
-                $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
-                $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+                $startStr = $yesterdayJadwal->shift->start_time;
+                $endStr = $yesterdayJadwal->shift->end_time;
                 
-                // It's a night shift if start_time > end_time
-                if ($sTime->format('H:i:s') > $eTime->format('H:i:s')) {
-                    $endTimePlusBuffer = $eTime->copy()->addHours(3)->format('H:i:s');
-                    if ($nowTime < $endTimePlusBuffer) {
+                // Night shift crosses midnight
+                if (strcmp($startStr, $endStr) > 0) {
+                    $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
+                    if ($nowTime < $endWithBuffer) {
                         $jadwal = $yesterdayJadwal;
+                        $activeDate = $yesterday;
                     }
                 }
             }
@@ -211,6 +213,7 @@ class AttendanceController extends Controller
                 ->whereDate('tanggal', $today)
                 ->with('shift')
                 ->first();
+            $activeDate = $today;
         }
 
         if (!$jadwal) {
@@ -262,7 +265,7 @@ class AttendanceController extends Controller
         }
 
         $shift = $jadwal->shift;
-        $activeDate = ($jadwal->tanggal instanceof \DateTime) ? $jadwal->tanggal->format('Y-m-d') : $jadwal->tanggal;
+        // $activeDate already set above
 
         $existing = Absensi::where('personnel_id', $id)
             ->where('tanggal', $activeDate)
@@ -407,19 +410,23 @@ class AttendanceController extends Controller
         $jadwal = null;
         $activeDate = $today;
 
-        // Buffer: 00:00 to 09:00 AM
-        if ($nowTime < '09:00:00') {
+        // Buffer: 00:00 to 10:00 AM
+        if ($nowTime < '10:00:00') {
             $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $yesterday)
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time > $yesterdayJadwal->shift->end_time) {
-                // If now is before EndTime + 2 hours buffer, use yesterday
-                $endTimePlusBuffer = Carbon::parse($yesterdayJadwal->shift->end_time)->addHours(2)->format('H:i:s');
-                if ($nowTime < $endTimePlusBuffer) {
-                    $jadwal = $yesterdayJadwal;
-                    $activeDate = $yesterday;
+            if ($yesterdayJadwal && $yesterdayJadwal->shift) {
+                $startStr = $yesterdayJadwal->shift->start_time;
+                $endStr = $yesterdayJadwal->shift->end_time;
+
+                if (strcmp($startStr, $endStr) > 0) {
+                    $endWithBuffer = Carbon::parse($endStr)->addHours(3)->format('H:i:s');
+                    if ($nowTime < $endWithBuffer) {
+                        $jadwal = $yesterdayJadwal;
+                        $activeDate = $yesterday;
+                    }
                 }
             }
         }
