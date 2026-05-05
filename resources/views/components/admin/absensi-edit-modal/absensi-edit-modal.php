@@ -8,6 +8,7 @@ use App\Models\Absensi;
 use App\Models\Cuti;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component
 {
@@ -193,6 +194,38 @@ new class extends Component
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
         $this->dispatch('toast', message: 'Data absensi telah dikembalikan ke kondisi awal', type: 'success');
+        $this->dispatch('refreshAbsensi');
+    }
+
+    public function resetAbsensi()
+    {
+        if (!$this->editingAbsensiId) return;
+
+        // Permission check
+        if (!Auth::user()->can('reset-absen')) return;
+
+        $absensi = Absensi::findOrFail($this->editingAbsensiId);
+
+        // Authorization check
+        if (!Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
+            return;
+        }
+
+        // Hapus file foto masuk
+        if ($absensi->foto_masuk && Storage::disk('public')->exists($absensi->foto_masuk)) {
+            Storage::disk('public')->delete($absensi->foto_masuk);
+        }
+
+        // Hapus file foto pulang
+        if ($absensi->foto_pulang && Storage::disk('public')->exists($absensi->foto_pulang)) {
+            Storage::disk('public')->delete($absensi->foto_pulang);
+        }
+
+        // Hapus record absensi
+        $absensi->delete();
+
+        $this->dispatch('close-modal', id: 'edit-absensi-modal');
+        $this->dispatch('toast', message: 'Data absensi berhasil dihapus (termasuk foto)', type: 'success');
         $this->dispatch('refreshAbsensi');
     }
 
