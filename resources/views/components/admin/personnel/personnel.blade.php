@@ -144,7 +144,7 @@
                         <thead>
                             <tr>
                                 <th class="text-center w-16">#</th>
-                                <th>Personnel</th>
+                                <th>Nama Personnel</th>
                                 <th>Kontak</th>
                                 <th>Penugasan</th>
                                 <th>Kantor / Lokasi</th>
@@ -222,13 +222,13 @@
                                         @if ($r->kantor)
                                             <div class="text-sm font-bold">{{ $r->kantor->name }}</div>
                                             @if ($r->wajib_absen_di_lokasi)
-                                                <div class="badge badge-error badge-xs font-bold text-[8px] uppercase">
-                                                    Wajib
-                                                    Lokasi</div>
+                                                <div
+                                                    class="badge badge-success badge-xs font-bold text-[8px] text-white uppercase">
+                                                    Location On</div>
                                             @else
                                                 <div
-                                                    class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
-                                                    Luar Lokasi OK</div>
+                                                    class="badge badge-error badge-xs font-bold text-[8px] text-white uppercase">
+                                                    Location Off</div>
                                             @endif
                                         @else
                                             <div class="text-xs italic text-base-content/50">Belum diatur</div>
@@ -236,7 +236,7 @@
                                     </td>
                                     <td>
                                         @if ($r->opd)
-                                            <div class="text-sm font-semibold mb-1">{{ $r->opd->name }}</div>
+                                            <div class="text-sm font-semibold mb-1">{{ $r->opd->singkatan }}</div>
                                         @else
                                             <div class="text-sm text-base-content/50 italic mb-1">Tanpa OPD</div>
                                         @endif
