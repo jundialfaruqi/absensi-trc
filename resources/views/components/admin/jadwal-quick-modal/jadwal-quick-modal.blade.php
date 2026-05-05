@@ -111,7 +111,17 @@
                         </div>
 
                         <div class="modal-action flex justify-between gap-2 mt-8">
-                            <div></div>
+                            @if ($this->originJadwal)
+                                <button type="button" wire:click="deleteJadwal"
+                                    wire:confirm="Apakah Anda yakin ingin menghapus jadwal dan seluruh data absensi personil ini pada tanggal {{ $quickDate }}? Foto absensi juga akan dihapus permanen."
+                                    class="btn btn-error btn-sm text-white px-4" wire:loading.attr="disabled">
+                                    <span wire:loading wire:target="deleteJadwal"
+                                        class="loading loading-spinner loading-xs"></span>
+                                    Hapus
+                                </button>
+                            @else
+                                <div></div>
+                            @endif
                             <div class="flex gap-2">
                                 <button type="button" class="btn btn-ghost btn-sm"
                                     x-on:click="document.getElementById('quick-add-modal').close()">Batal</button>
