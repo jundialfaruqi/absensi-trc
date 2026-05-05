@@ -27,7 +27,8 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     // Form Properties
     public $deviceId;
     public $opd_id;
-    public $holder_type = 'existing'; // existing, manual
+    public $holder_type = 'personnel'; // personnel, user, manual
+    public $personnel_id;
     public $user_id;
     public $holder_name;
     public $name;
@@ -53,6 +54,16 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     }
 
     #[Computed]
+    public function personnelList()
+    {
+        return Personnel::orderBy('name')
+            ->when(!Auth::user()->hasRole('super-admin'), function($q) {
+                $q->where('opd_id', Auth::user()->opd()?->id);
+            })
+            ->get();
+    }
+
+    #[Computed]
     public function usersList()
     {
         return User::orderBy('name')->get();
@@ -63,7 +74,7 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     {
         if (!$this->readyToLoad) return [];
 
-        return Device::with(['opd', 'user'])
+        return Device::with(['opd', 'user', 'personnel'])
             ->when(!Auth::user()->hasRole('super-admin'), function ($q) {
                 $q->where('opd_id', Auth::user()->opd()?->id);
             })
@@ -73,6 +84,9 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
                   ->orWhere('holder_name', 'like', '%' . $this->search . '%')
                   ->orWhereHas('user', function($uq) {
                       $uq->where('name', 'like', '%' . $this->search . '%');
+                  })
+                  ->orWhereHas('personnel', function($pq) {
+                      $pq->where('name', 'like', '%' . $this->search . '%');
                   });
             })
             ->latest()
@@ -88,7 +102,8 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     {
         $this->deviceId = null;
         $this->opd_id = Auth::user()->hasRole('super-admin') ? '' : Auth::user()->opd()?->id;
-        $this->holder_type = 'existing';
+        $this->holder_type = 'personnel';
+        $this->personnel_id = '';
         $this->user_id = '';
         $this->holder_name = '';
         $this->name = '';
@@ -109,9 +124,17 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     {
         $this->deviceId = $device->id;
         $this->opd_id = $device->opd_id;
+        $this->personnel_id = $device->personnel_id;
         $this->user_id = $device->user_id;
         $this->holder_name = $device->holder_name;
-        $this->holder_type = $device->user_id ? 'existing' : ($device->holder_name ? 'manual' : 'existing');
+        
+        if ($device->personnel_id) {
+            $this->holder_type = 'personnel';
+        } elseif ($device->user_id) {
+            $this->holder_type = 'user';
+        } else {
+            $this->holder_type = 'manual';
+        }
         $this->name = $device->name;
         $this->license_key = $device->license_key;
         $this->status = $device->status;
@@ -127,9 +150,11 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
             'name' => 'required|min:2',
             'license_key' => 'required|unique:devices,license_key,' . $this->deviceId,
             'status' => 'required|in:active,inactive,suspended',
-            'user_id' => 'required_if:holder_type,existing',
+            'personnel_id' => 'required_if:holder_type,personnel',
+            'user_id' => 'required_if:holder_type,user',
             'holder_name' => 'required_if:holder_type,manual',
         ], [
+            'personnel_id.required_if' => 'Pilih personel dari daftar.',
             'user_id.required_if' => 'Pilih user dari daftar.',
             'holder_name.required_if' => 'Masukkan nama pemegang perangkat.',
         ]);
@@ -138,7 +163,8 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
             ['id' => $this->deviceId],
             [
                 'opd_id' => $this->opd_id,
-                'user_id' => $this->holder_type === 'existing' ? $this->user_id : null,
+                'personnel_id' => $this->holder_type === 'personnel' ? $this->personnel_id : null,
+                'user_id' => $this->holder_type === 'user' ? $this->user_id : null,
                 'holder_name' => $this->holder_type === 'manual' ? $this->holder_name : null,
                 'name' => $this->name,
                 'license_key' => $this->license_key,

@@ -157,7 +157,12 @@
                                         </td>
                                         <td>
                                             <div class="flex flex-col">
-                                                @if ($device->user)
+                                                @if ($device->personnel)
+                                                    <span
+                                                        class="text-xs font-bold">{{ $device->personnel->name }}</span>
+                                                    <span
+                                                        class="text-[9px] opacity-50 uppercase tracking-tighter">Personnel</span>
+                                                @elseif ($device->user)
                                                     <span class="text-xs font-bold">{{ $device->user->name }}</span>
                                                     <span
                                                         class="text-[9px] opacity-50 uppercase tracking-tighter">System
@@ -264,7 +269,13 @@
                                     <div class="flex flex-col">
                                         <span class="text-[9px] uppercase opacity-40 font-bold mb-1">Pemegang</span>
                                         <span class="text-xs font-bold truncate">
-                                            {{ $device->user?->name ?? ($device->holder_name ?? 'Belum diset') }}
+                                            @if ($device->personnel)
+                                                {{ $device->personnel->name }}
+                                            @elseif ($device->user)
+                                                {{ $device->user->name }}
+                                            @else
+                                                {{ $device->holder_name ?? 'Belum diset' }}
+                                            @endif
                                         </span>
                                     </div>
                                     @if ($device->brand)
@@ -366,13 +377,20 @@
                                     class="label-text text-sm font-medium text-base-content uppercase tracking-wider opacity-50">Konfigurasi
                                     Pemegang</span>
                             </label>
-                            <div class="flex gap-6 px-1 py-2">
+                            <div class="flex flex-wrap gap-4 px-1 py-2">
                                 <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="radio" wire:model.live="holder_type" value="existing"
+                                    <input type="radio" wire:model.live="holder_type" value="personnel"
                                         class="radio radio-primary radio-sm">
                                     <span
                                         class="text-sm font-semibold group-hover:text-primary transition-colors">Ambil
-                                        dari Users</span>
+                                        dari Personnel</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" wire:model.live="holder_type" value="user"
+                                        class="radio radio-primary radio-sm">
+                                    <span
+                                        class="text-sm font-semibold group-hover:text-primary transition-colors">Ambil
+                                        dari Admin</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer group">
                                     <input type="radio" wire:model.live="holder_type" value="manual"
@@ -384,15 +402,34 @@
                             </div>
                         </div>
 
-                        @if ($holder_type === 'existing')
+                        @if ($holder_type === 'personnel')
+                            <div class="form-control w-full md:col-span-2" wire:key="field-personnel-id">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text text-sm font-medium text-base-content">Pilih Personnel
+                                        <span class="text-error">*</span></span>
+                                </label>
+                                <select wire:model="personnel_id"
+                                    class="select select-bordered focus:select-primary w-full transition-all @error('personnel_id') select-error @enderror">
+                                    <option value="">-- Pilih dari Personnel --</option>
+                                    @foreach ($this->personnelList as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}
+                                            ({{ $p->opd->singkatan ?? 'No OPD' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('personnel_id')
+                                    <span class="text-error text-xs mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        @elseif ($holder_type === 'user')
                             <div class="form-control w-full md:col-span-2" wire:key="field-user-id">
                                 <label class="label mb-1 px-1">
-                                    <span class="label-text text-sm font-medium text-base-content">Pilih User <span
+                                    <span class="label-text text-sm font-medium text-base-content">Pilih Admin <span
                                             class="text-error">*</span></span>
                                 </label>
                                 <select wire:model="user_id"
                                     class="select select-bordered focus:select-primary w-full transition-all @error('user_id') select-error @enderror">
-                                    <option value="">-- Pilih User dari Tabel Users --</option>
+                                    <option value="">-- Pilih Admin --</option>
                                     @foreach ($this->usersList as $user)
                                         <option value="{{ $user->id }}">{{ $user->name }}
                                             ({{ $user->email }})
