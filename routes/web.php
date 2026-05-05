@@ -109,6 +109,15 @@ Route::group([
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');
 
+    Route::get('/pengaturan/download-apk', function () {
+        $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
+        if (!file_exists($filePath)) abort(404, 'File aplikasi tidak ditemukan di server.');
+
+        return response()->download($filePath, 'TRC-Pekanbaru-Aman.apk', [
+            'Content-Type' => 'application/vnd.android.package-archive',
+        ]);
+    })->middleware('permission:manajemen-pengaturan')->name('pengaturan.download-apk');
+
     Route::livewire('/perangkat', 'admin::device')
         ->middleware('permission:manajemen-perangkat')
         ->name('perangkat');

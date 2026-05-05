@@ -23,8 +23,8 @@
         {{-- Pendaftaran Personnel --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 text-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -55,8 +55,8 @@
         {{-- Web Absensi Status --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 bg-secondary/10 rounded-lg text-secondary">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 text-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -87,8 +87,8 @@
         {{-- Batasan Waktu Absensi --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 bg-accent/10 rounded-lg text-accent">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 rounded-full text-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -162,8 +162,9 @@
                 </div>
 
                 <div class="card-actions justify-end mt-6 pt-6 border-t border-base-200">
-                    <button wire:click="saveTimeSettings" wire:loading.attr="disabled" class="btn btn-secondary">
-                        <span wire:loading.remove>Simpan Batasan Waktu</span>
+                    <button wire:click="saveTimeSettings" wire:loading.attr="disabled"
+                        class="btn btn-primary text-white">
+                        <span wire:loading.remove>Simpan</span>
                         <span wire:loading>Menyimpan...</span>
                     </button>
                 </div>
@@ -173,8 +174,8 @@
         {{-- Keamanan & Rate Limit --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 bg-error/10 rounded-lg text-error">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 text-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -219,10 +220,58 @@
                 </div>
 
                 <div class="card-actions justify-end mt-auto pt-6 border-t border-base-200">
-                    <button wire:click="saveSecuritySettings" wire:loading.attr="disabled" class="btn btn-secondary">
-                        <span wire:loading.remove>Simpan Keamanan</span>
+                    <button wire:click="saveSecuritySettings" wire:loading.attr="disabled"
+                        class="btn btn-primary text-white">
+                        <span wire:loading.remove>Simpan</span>
                         <span wire:loading>Menyimpan...</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Download App Card --}}
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
+            <div class="card-body p-6">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </div>
+                    <h2 class="text-sm font-black uppercase">Download Aplikasi (APK)</h2>
+                </div>
+
+                <div class="p-4 rounded-xl bg-info/5 border border-info/10 flex items-center gap-2">
+                    <div class="text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-8" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <line x1="12" y1="18" x2="12.01" y2="18" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs font-bold uppercase tracking-tight">Android Application</h3>
+                        <p class="text-[10px] text-base-content/50 uppercase font-medium leading-relaxed">
+                            Versi terbaru aplikasi absensi untuk perangkat Android.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-actions justify-end mt-6 pt-6 border-t border-base-200">
+                    <a href="{{ route('pengaturan.download-apk') }}"
+                        class="btn btn-primary w-full sm:w-auto text-white" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 mr-2" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <span>Download APK</span>
+                    </a>
                 </div>
             </div>
         </div>
