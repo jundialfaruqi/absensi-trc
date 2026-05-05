@@ -185,17 +185,23 @@ class AttendanceController extends Controller
 
         $jadwal = null;
         
-        // Night Shift Buffer
-        if ($nowTime < '09:00:00') {
+        // Night Shift Buffer: Check if user is still in the "OUT" window of yesterday's night shift
+        if ($nowTime < '10:00:00') {
             $yesterdayJadwal = Jadwal::where('personnel_id', $id)
                 ->whereDate('tanggal', $yesterday)
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time > $yesterdayJadwal->shift->end_time) {
-                $endTimePlusBuffer = Carbon::parse($yesterdayJadwal->shift->end_time)->addHours(2)->format('H:i:s');
-                if ($nowTime < $endTimePlusBuffer) {
-                    $jadwal = $yesterdayJadwal;
+            if ($yesterdayJadwal && $yesterdayJadwal->shift) {
+                $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
+                $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+                
+                // It's a night shift if start_time > end_time
+                if ($sTime->format('H:i:s') > $eTime->format('H:i:s')) {
+                    $endTimePlusBuffer = $eTime->copy()->addHours(3)->format('H:i:s');
+                    if ($nowTime < $endTimePlusBuffer) {
+                        $jadwal = $yesterdayJadwal;
+                    }
                 }
             }
         }
@@ -436,18 +442,20 @@ class AttendanceController extends Controller
             }
         }
 
-        if ($jadwal->shift && $jadwal->shift->type === 'off') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.'
-            ], 403);
-        }
+        if ($jadwal) {
+            if ($jadwal->shift && $jadwal->shift->type === 'off') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.'
+                ], 403);
+            }
 
-        if ($jadwal->status === 'LIBUR') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Anda sedang LIBUR hari ini.'
-            ], 403);
+            if ($jadwal->status === 'LIBUR') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Anda sedang LIBUR hari ini.'
+                ], 403);
+            }
         }
 
         // ─── TIME WINDOW VALIDATION (SYCHRONIZED WITH WEB) ───
@@ -570,7 +578,7 @@ class AttendanceController extends Controller
             if (!$existing) {
                 $absensi = Absensi::create([
                     'personnel_id' => $personnel->id,
-                    'jadwal_id' => $jadwal->id,
+                    'jadwal_id' => $jadwal ? $jadwal->id : null,
                     'kantor_id' => $lokasiResult['kantor_id'],
                     'tanggal' => $activeDate,
                     'status' => 'HADIR',
@@ -587,7 +595,7 @@ class AttendanceController extends Controller
                 ]);
             } else {
                 $existing->update([
-                    'jadwal_id' => $jadwal->id,
+                    'jadwal_id' => $jadwal ? $jadwal->id : null,
                     'kantor_id' => $lokasiResult['kantor_id'],
                     'status' => 'HADIR',
                     'jam_masuk' => $now->format('H:i:s'),
