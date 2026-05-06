@@ -35,6 +35,7 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     public $license_key;
     public $status = 'inactive';
     public $notes;
+    public $personnelSearch = '';
 
     // Delete Properties
     public $deleteId;
@@ -59,6 +60,15 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
         return Personnel::orderBy('name')
             ->when(!Auth::user()->hasRole('super-admin'), function($q) {
                 $q->where('opd_id', Auth::user()->opd()?->id);
+            })
+            ->where(function($q) {
+                $q->whereDoesntHave('devices')
+                  ->orWhereHas('devices', function($dq) {
+                      $dq->where('id', $this->deviceId);
+                  });
+            })
+            ->when(strlen($this->personnelSearch) >= 3, function($q) {
+                $q->where('name', 'like', '%' . $this->personnelSearch . '%');
             })
             ->get();
     }
@@ -147,7 +157,7 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     {
         $this->validate([
             'opd_id' => 'required',
-            'name' => 'required|min:2',
+            'name' => $this->holder_type === 'manual' ? 'required|min:2' : 'nullable',
             'license_key' => 'required|unique:devices,license_key,' . $this->deviceId,
             'status' => 'required|in:active,inactive,suspended',
             'personnel_id' => 'required_if:holder_type,personnel',
@@ -156,8 +166,29 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
         ], [
             'personnel_id.required_if' => 'Pilih personel dari daftar.',
             'user_id.required_if' => 'Pilih user dari daftar.',
-            'holder_name.required_if' => 'Masukkan nama pemegang perangkat.',
+            'name.required' => 'Nama perangkat wajib diisi.',
         ]);
+
+        // Double check for duplicate personnel device
+        if ($this->holder_type === 'personnel' && $this->personnel_id) {
+            $exists = Device::where('personnel_id', $this->personnel_id)
+                ->where('id', '!=', $this->deviceId)
+                ->exists();
+            
+            if ($exists) {
+                $this->addError('personnel_id', 'Personnel ini sudah memiliki perangkat terdaftar.');
+                return;
+            }
+        }
+
+        // Auto-generate name based on holder type
+        if ($this->holder_type === 'personnel') {
+            $personnel = Personnel::find($this->personnel_id);
+            $this->name = 'Personal - ' . ($personnel?->name ?? 'Unknown');
+        } elseif ($this->holder_type === 'user') {
+            $user = User::find($this->user_id);
+            $this->name = 'Global - ' . ($user?->name ?? 'Unknown');
+        }
 
         Device::updateOrCreate(
             ['id' => $this->deviceId],

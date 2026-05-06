@@ -166,7 +166,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {{-- Status Masuk --}}
-                        <div class="form-control">
+                        <div class="form-control order-1 md:order-1">
                             <label class="label py-1"><span
                                     class="label-text text-sm font-medium text-base-content">Status
                                     Masuk</span></label>
@@ -187,7 +187,7 @@
                         </div>
 
                         {{-- Status Pulang --}}
-                        <div class="form-control">
+                        <div class="form-control order-3 md:order-2">
                             <label class="label py-1"><span
                                     class="label-text text-sm font-medium text-base-content">Status
                                     Pulang</span></label>
@@ -205,7 +205,7 @@
                         </div>
 
                         {{-- Jam Masuk --}}
-                        <div class="form-control">
+                        <div class="form-control order-2 md:order-3">
                             <label class="label py-1"><span class="label-text text-sm font-medium">Jam
                                     Masuk</span></label>
                             <div class="relative">
@@ -223,7 +223,7 @@
                         </div>
 
                         {{-- Jam Pulang --}}
-                        <div class="form-control">
+                        <div class="form-control order-4 md:order-4">
                             <label class="label py-1"><span class="label-text text-sm font-medium">Jam
                                     Pulang</span></label>
                             <div class="relative">

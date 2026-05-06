@@ -403,20 +403,72 @@
                         </div>
 
                         @if ($holder_type === 'personnel')
-                            <div class="form-control w-full md:col-span-2" wire:key="field-personnel-id">
+                            <div class="form-control w-full md:col-span-2" wire:key="field-personnel-id"
+                                x-data="{
+                                    open: false,
+                                    selectedId: @entangle('personnel_id'),
+                                    selectedName: '{{ $personnel_id ? $this->personnelList->firstWhere('id', $personnel_id)?->name ?? '-- Pilih Personnel --' : '-- Pilih Personnel --' }}'
+                                }" @click.away="open = false">
                                 <label class="label mb-1 px-1">
                                     <span class="label-text text-sm font-medium text-base-content">Pilih Personnel
                                         <span class="text-error">*</span></span>
                                 </label>
-                                <select wire:model="personnel_id"
-                                    class="select select-bordered focus:select-primary w-full transition-all @error('personnel_id') select-error @enderror">
-                                    <option value="">-- Pilih dari Personnel --</option>
-                                    @foreach ($this->personnelList as $p)
-                                        <option value="{{ $p->id }}">{{ $p->name }}
-                                            ({{ $p->opd->singkatan ?? 'No OPD' }})
-                                        </option>
-                                    @endforeach
-                                </select>
+
+                                <div class="relative">
+                                    {{-- Trigger Button --}}
+                                    <button type="button" @click="open = !open"
+                                        class="select select-bordered w-full flex items-center justify-between font-normal focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all @error('personnel_id') select-error @enderror">
+                                        <span x-text="selectedName" class="truncate"></span>
+
+                                    </button>
+
+                                    {{-- Dropdown Menu --}}
+                                    <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                                        x-transition:enter-start="transform opacity-0 scale-95"
+                                        x-transition:enter-end="transform opacity-100 scale-100"
+                                        class="absolute z-[100] mt-2 w-full bg-base-100 border border-base-200 rounded-xl shadow-2xl overflow-hidden">
+
+                                        {{-- Search Input inside Dropdown --}}
+                                        <div class="p-2 border-b border-base-200 bg-base-200/30">
+                                            <div class="relative">
+                                                <input type="text" wire:model.live.debounce.300ms="personnelSearch"
+                                                    placeholder="Ketik nama untuk mencari..."
+                                                    class="input input-sm input-bordered w-full pl-8 bg-base-100 focus:input-primary"
+                                                    @keydown.escape="open = false" />
+                                                <div
+                                                    class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none opacity-40">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                                        class="size-3.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Results List --}}
+                                        <div class="max-h-60 overflow-y-auto">
+                                            @forelse ($this->personnelList as $p)
+                                                <button type="button"
+                                                    @click="selectedId = '{{ $p->id }}'; selectedName = '{{ addslashes($p->name) }}'; open = false"
+                                                    class="w-full text-left px-4 py-3 hover:bg-primary hover:text-white transition-colors border-b border-base-200/50 last:border-0 group">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-sm font-bold">{{ $p->name }}</span>
+                                                        <span
+                                                            class="text-[10px] opacity-60 group-hover:opacity-100 uppercase tracking-widest font-black">
+                                                            {{ $p->opd->singkatan ?? 'No OPD' }}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            @empty
+                                                <div class="px-4 py-8 text-center opacity-40 italic text-xs">
+                                                    Tidak ada personnel ditemukan
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                </div>
                                 @error('personnel_id')
                                     <span class="text-error text-xs mt-1">{{ $message }}</span>
                                 @enderror
@@ -455,18 +507,20 @@
                             </div>
                         @endif
 
-                        <div class="form-control w-full md:col-span-2" wire:key="field-device-name">
-                            <label class="label mb-1 px-1">
-                                <span class="label-text text-sm font-medium text-base-content">Nama Perangkat <span
-                                        class="text-error">*</span></span>
-                            </label>
-                            <input type="text" wire:model="name"
-                                placeholder="Cth: Operasional Regu A - Samsung A54"
-                                class="input input-bordered placeholder:text-base-content/40 focus:input-primary w-full transition-all @error('name') input-error @enderror" />
-                            @error('name')
-                                <span class="text-error text-xs mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
+                        @if ($holder_type === 'manual')
+                            <div class="form-control w-full md:col-span-2" wire:key="field-device-name">
+                                <label class="label mb-1 px-1">
+                                    <span class="label-text text-sm font-medium text-base-content">Nama Perangkat <span
+                                            class="text-error">*</span></span>
+                                </label>
+                                <input type="text" wire:model="name"
+                                    placeholder="Cth: Operasional Regu A - Samsung A54"
+                                    class="input input-bordered placeholder:text-base-content/40 focus:input-primary w-full transition-all @error('name') input-error @enderror" />
+                                @error('name')
+                                    <span class="text-error text-xs mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        @endif
 
                         <div class="form-control w-full md:col-span-2" wire:key="field-license-key">
                             <label class="label mb-1 px-1">

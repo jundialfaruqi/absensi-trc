@@ -36,6 +36,11 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
     {
         $personnels = Personnel::where('opd_id', $this->opdId)
             ->where('attendance_type', '!=', 'FLEXIBLE')
+            ->with(['jadwals' => function($q) {
+                $q->whereYear('tanggal', $this->year)
+                  ->whereMonth('tanggal', $this->month)
+                  ->with('shift');
+            }])
             ->orderBy('name')
             ->get();
             
@@ -48,8 +53,24 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
                 'id' => $p->id,
                 'nama' => $p->name,
             ];
+
             $daysInMonth = Carbon::create($this->year, $this->month, 1)->daysInMonth;
-            for ($i = 1; $i <= $daysInMonth; $i++) { $row[] = ''; }
+            
+            // Map jadwals by date for quick lookup
+            $mappedJadwal = $p->jadwals->keyBy(function($item) {
+                return Carbon::parse($item->tanggal)->format('j');
+            });
+
+            for ($i = 1; $i <= $daysInMonth; $i++) { 
+                $jadwal = $mappedJadwal->get($i);
+                if ($jadwal) {
+                    // Gunakan nama asli shift dari database (misal: PAGI, SIANG, OFF-A, dll)
+                    // Jika jadwal tidak terikat ke shift (manual), baru gunakan fallback 'LIBUR'
+                    $row[] = $jadwal->shift ? $jadwal->shift->name : 'LIBUR';
+                } else {
+                    $row[] = ''; 
+                }
+            }
             $data->push($row);
         }
  
