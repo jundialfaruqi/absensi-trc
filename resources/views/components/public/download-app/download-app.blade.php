@@ -47,7 +47,7 @@
                     </div>
 
                     @if (!app()->isLocal())
-                        <div class="flex justify-center py-10" wire:ignore>
+                        <div class="flex justify-center py-2 bg-transparent" wire:ignore>
                             <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
                                 data-callback="onRecaptchaSuccess"></div>
                         </div>
