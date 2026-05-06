@@ -49,7 +49,7 @@
                     @if (!app()->isLocal())
                         <div class="flex justify-center py-2" wire:ignore>
                             <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
-                                data-callback="onRecaptchaSuccess" data-theme="dark"></div>
+                                data-callback="onRecaptchaSuccess"></div>
                         </div>
 
                         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
