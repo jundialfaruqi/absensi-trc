@@ -59,12 +59,15 @@ class AttendanceController extends Controller
             'last_seen_at' => now(),
         ]);
 
+        $token = $device->createToken('device-token')->plainTextToken;
+
         return response()->json([
             'status' => 'success',
             'message' => 'Aktivasi berhasil!',
             'data' => [
                 'id' => $device->id,
                 'license_key' => $device->license_key,
+                'token' => $token,
                 'holder_type' => $device->personnel_id ? 'personnel' : 'user',
                 'target_personnel_id' => $device->personnel_id,
                 'status' => $device->status,
@@ -100,12 +103,15 @@ class AttendanceController extends Controller
 
         $device->update(['last_seen_at' => now()]);
 
+        $token = $device->createToken('device-token')->plainTextToken;
+
         return response()->json([
             'status' => 'success',
             'message' => 'Lisensi valid.',
             'data' => [
                 'id' => $device->id,
                 'license_key' => $device->license_key,
+                'token' => $token,
                 'holder_type' => $device->personnel_id ? 'personnel' : 'user',
                 'target_personnel_id' => $device->personnel_id,
                 'status' => $device->status,

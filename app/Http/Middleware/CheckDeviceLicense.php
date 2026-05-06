@@ -16,27 +16,39 @@ class CheckDeviceLicense
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $licenseKey = $request->header('X-LICENSE-KEY');
-        $deviceId = $request->header('X-DEVICE-ID');
+        $device = null;
 
-        if (!$licenseKey || !$deviceId) {
-            return response()->json([
-                'status' => 'license_required',
-                'message' => 'Lisensi perangkat diperlukan untuk mengakses layanan ini.'
-            ], 403);
+        // 1. Coba autentikasi via Token (Sanctum) - Metode Baru
+        if ($token = $request->bearerToken()) {
+            $device = \Laravel\Sanctum\PersonalAccessToken::findToken($token)?->tokenable;
+            
+            // Pastikan yang punya token adalah model Device
+            if (!($device instanceof Device)) {
+                $device = null;
+            }
         }
 
-        $device = Device::where('license_key', $licenseKey)
-            ->where('unique_device_id', $deviceId)
-            ->first();
+        // 2. Jika Token tidak ada/tidak valid, coba via Header (Metode Lama/Legacy)
+        if (!$device) {
+            $licenseKey = $request->header('X-LICENSE-KEY');
+            $deviceId = $request->header('X-DEVICE-ID');
 
+            if ($licenseKey && $deviceId) {
+                $device = Device::where('license_key', $licenseKey)
+                    ->where('unique_device_id', $deviceId)
+                    ->first();
+            }
+        }
+
+        // 3. Jika tetap tidak ketemu
         if (!$device) {
             return response()->json([
-                'status' => 'license_invalid',
-                'message' => 'Lisensi perangkat tidak valid atau tidak terdaftar.'
+                'status' => 'license_required',
+                'message' => 'Otentikasi perangkat diperlukan. Silakan aktivasi kembali jika masalah berlanjut.'
             ], 403);
         }
 
+        // 4. Cek Status Perangkat
         if ($device->status !== 'active') {
             $msg = $device->status === 'suspended' 
                 ? 'Akses perangkat ditangguhkan oleh Admin. Silakan hubungi operator.' 
