@@ -331,34 +331,31 @@
                     </div>
                     @if ($activities->count() > 0)
                         <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4">
-                            <div class="flex items-center justify-center gap-4 md:gap-6">
-                                <div class="flex items-center gap-1 md:gap-2">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">PERSONEL:</span>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black text-primary">{{ $stats['total_required'] }}</span>
+                            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-primary/30"></div>
+                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TOTAL:</span>
+                                    <span class="text-[10px] md:text-[10px] font-black text-base-content">{{ $stats['total_required'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-1 md:gap-2">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-success"></div>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">HADIR:</span>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-success"></div>
+                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">HADIR:</span>
+                                    <span class="text-[10px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-1 md:gap-2">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-error"></div>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">ALFA:</span>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-error"></div>
+                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALFA:</span>
+                                    <span class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-1 md:gap-2">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-error"></div>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">TELAT:</span>
-                                    <span
-                                        class="text-[8px] md:text-[10px] font-black text-error">{{ $stats['total_telat'] }}</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN:</span>
+                                    <span class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-warning"></div>
+                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TELAT:</span>
+                                    <span class="text-[10px] md:text-[10px] font-black text-warning">{{ $stats['total_telat'] }}</span>
                                 </div>
                             </div>
                             <a href="{{ route('absensi') }}"

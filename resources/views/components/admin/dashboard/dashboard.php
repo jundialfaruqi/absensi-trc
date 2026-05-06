@@ -36,6 +36,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                     'total_terlambat' => 0,
                     'total_alfa' => 0,
                     'total_hadir' => 0,
+                    'total_izin' => 0,
                     'total_telat' => 0,
                     'pending_leaves_count' => 0,
                     'total_required' => 0,
@@ -58,109 +59,67 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         $today = Carbon::today();
 
-        // Base queries
-        $absensiQuery = Absensi::whereDate('tanggal', $today);
-        $personnelQuery = Personnel::where(function($q) use ($today) {
-            $q->whereHas('jadwals', function ($jq) use ($today) {
-                $jq->whereDate('tanggal', $today);
-            })->orWhere('attendance_type', 'FLEXIBLE');
-        });
-        $leaveRequestQuery = LeaveRequest::where('status', 'PENDING');
-
-        // Apply OPD filtering
-        if (!$isSuperAdmin) {
-            $absensiQuery->whereHas('personnel', function ($q) use ($opdId) {
-                $q->where('opd_id', $opdId);
-            });
-            $personnelQuery->where('opd_id', $opdId);
-            $leaveRequestQuery->whereHas('personnel', function ($q) use ($opdId) {
-                $q->where('opd_id', $opdId);
-            });
-        }
-
-        // Stats
-        $totalScheduled = $personnelQuery->count(); // Total (incl. LIBUR)
-        $totalRequired = (clone $personnelQuery)->where(function($q) use ($today) {
-            $q->whereHas('jadwals.shift', function ($sq) {
-                $sq->where('type', 'shift');
-            })->orWhere(function($sq) use ($today) {
-                $sq->where('attendance_type', 'FLEXIBLE')
-                   ->whereHas('absensis', function($aq) use ($today) {
-                       $aq->whereDate('tanggal', $today);
-                   });
-            });
-        })->count(); // Scheduled shifts + Flexible personnel who have checked in
-
-        $totalMasuk = (clone $absensiQuery)->whereNotNull('jam_masuk')->count();
-        $totalPulang = (clone $absensiQuery)->whereNotNull('jam_pulang')->count();
-        $totalTerlambat = (clone $absensiQuery)->where('status_masuk', 'TELAT')->count();
-        $totalAlfa = (clone $absensiQuery)->where('status', 'ALFA')->count();
-        $totalHadir = (clone $absensiQuery)->where('status', 'HADIR')->count();
-        $totalTelat = (clone $absensiQuery)->where('status_masuk', 'TELAT')->count();
-
-        // Activities (latest records) - STICK TO TODAY'S DATE
-        $activities = Absensi::query()
-            ->whereDate('tanggal', $today)
+        // Base query for attendance today
+        $absensiBase = Absensi::whereDate('tanggal', $today)
             ->where(function($q) {
-                $q->whereHas('jadwal.shift', function ($sq) {
-                    $sq->where('type', 'shift');
-                })
-                ->orWhereHas('personnel', function($pq) {
-                    $pq->where('attendance_type', 'FLEXIBLE');
-                });
+                // Count records that are NOT 'LIBUR'
+                $q->whereHas('jadwal.shift', fn($sq) => $sq->where('type', 'shift'))
+                  ->orWhereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
             })
             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
-            })
-            ->join('personnels', 'absensis.personnel_id', '=', 'personnels.id')
-            ->join('opds', 'personnels.opd_id', '=', 'opds.id')
-            ->select('absensis.*')
+            });
+
+        // Detailed Stats
+        $totalRequired = (clone $absensiBase)->count();
+        $totalHadir = (clone $absensiBase)->where('status', 'HADIR')->count();
+        $totalAlfa = (clone $absensiBase)->where('status', 'ALFA')->count();
+        $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT'])->count();
+        
+        $totalMasuk = (clone $absensiBase)->whereNotNull('jam_masuk')->count();
+        $totalPulang = (clone $absensiBase)->whereNotNull('jam_pulang')->count();
+        $totalTelat = (clone $absensiBase)->where('status_masuk', 'TELAT')->count();
+
+        $hadirPercentage = $totalRequired > 0 
+            ? round((($totalHadir + $totalIzin) / $totalRequired) * 100) 
+            : 0;
+
+        // Activities
+        $activities = (clone $absensiBase)
             ->with(['personnel.opd', 'jadwal.shift'])
-            ->orderBy('opds.name')
             ->latest('absensis.updated_at')
             ->get();
 
         // Pending Leave Requests
-        $pendingLeaves = $leaveRequestQuery->with(['personnel.opd', 'cuti'])
+        $pendingLeaves = LeaveRequest::where('status', 'PENDING')
+            ->when(!$isSuperAdmin, function ($q) use ($opdId) {
+                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            })
+            ->with(['personnel.opd', 'cuti'])
             ->latest()
             ->take(5)
             ->get();
 
-        // --- Monitoring: Pegawai Terlambat (Today) ---
-        $latePersonnel = Absensi::whereDate('tanggal', $today)
-            ->where('status_masuk', 'TELAT')
-            ->when(!$isSuperAdmin, function($q) use ($opdId) {
-                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
-            })
-            ->with(['personnel.opd'])
-            ->latest('jam_masuk')
-            ->get();
+        // --- Monitoring lists ---
+        $latePersonnel = (clone $absensiBase)->where('status_masuk', 'TELAT')->with(['personnel.opd'])->latest('jam_masuk')->get();
+        $absentPersonnel = (clone $absensiBase)->where('status', 'ALFA')->with(['personnel.opd', 'jadwal.shift'])->get();
 
-        // --- Monitoring: Belum Absen (Today) ---
-        $absentPersonnel = Absensi::whereDate('tanggal', $today)
-            ->where('status', 'ALFA')
-            ->whereHas('jadwal.shift', function ($q) {
-                $q->where('type', 'shift');
-            })
-            ->when(!$isSuperAdmin, function($q) use ($opdId) {
-                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
-            })
-            ->with(['personnel.opd', 'jadwal.shift'])
-            ->get();
-
+        // Total Registered Personnel (All in DB, filtered by OPD)
+        $totalRegistered = Personnel::when(!$isSuperAdmin, fn($q) => $q->where('opd_id', $opdId))->count();
 
         return [
             'stats' => [
-                'total_personnel' => $totalScheduled,
+                'total_personnel' => $totalRegistered,
                 'total_masuk' => $totalMasuk,
                 'total_pulang' => $totalPulang,
-                'total_terlambat' => $totalTerlambat,
+                'total_terlambat' => $totalTelat,
                 'total_alfa' => $totalAlfa,
                 'total_hadir' => $totalHadir,
+                'total_izin' => $totalIzin,
                 'total_telat' => $totalTelat,
-                'pending_leaves_count' => $leaveRequestQuery->count(),
+                'pending_leaves_count' => LeaveRequest::where('status', 'PENDING')->when(!$isSuperAdmin, fn($q) => $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId)))->count(),
                 'total_required' => $totalRequired,
-                'hadir_percentage' => $totalRequired > 0 ? round(($totalMasuk / $totalRequired) * 100) : 0,
+                'hadir_percentage' => $hadirPercentage,
             ],
             'activities' => $activities,
             'pendingLeaves' => $pendingLeaves,
