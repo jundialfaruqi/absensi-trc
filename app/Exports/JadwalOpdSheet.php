@@ -82,7 +82,7 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
         $data->push(['DAFTAR REFERENSI NAMA SHIFT']);
         $data->push(['Gunakan nama di bawah ini untuk mengisi kolom tanggal di atas (Copy-Paste)']);
         $data->push(['Nama Shift', 'Jam Kerja', 'Keterangan']);
-
+ 
         $shifts = Shift::orderBy('name')->get();
         foreach ($shifts as $s) {
             $data->push([
@@ -139,8 +139,15 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
 
         $sheet->mergeCells('A1:' . $lastColumn . '1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1')->getAlignment()->setWrapText(false)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(35);
+
+        $sheet->getStyle('A2:B3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         $sheet->getStyle('A2:A3')->getFont()->setBold(true);
         $sheet->getStyle('B3')->getFont()->setBold(true)->getColor()->setARGB('FFFF0000');
+        $sheet->getStyle('B3')->getAlignment()->setWrapText(false);
+        $sheet->getRowDimension(2)->setRowHeight(25);
+        $sheet->getRowDimension(3)->setRowHeight(25);
 
         $sheet->mergeCells('A5:A6');
         $sheet->mergeCells('B5:B6');
@@ -179,9 +186,9 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
         }
 
         $refStartRow = $highestPersonnelRow + 3; // Baris "DAFTAR REFERENSI NAMA SHIFT"
-        $sheet->mergeCells('A' . $refStartRow . ':' . $lastColumn . $refStartRow); // Merge sepanjang tabel
+        $sheet->mergeCells('A' . $refStartRow . ':' . $lastColumn . $refStartRow); 
         $sheet->getStyle('A' . $refStartRow)->getFont()->setBold(true)->setSize(14);
-
+        
         $refHeaderRow = $highestPersonnelRow + 5; // Baris "Nama Shift | Jam Kerja | Keterangan"
         $sheet->mergeCells('C' . $refHeaderRow . ':E' . $refHeaderRow); // Merge Header Keterangan C-E
         $sheet->getStyle('A' . $refHeaderRow . ':E' . $refHeaderRow)->applyFromArray([
@@ -268,7 +275,7 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
                     'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFCCCCCC']]],
                 ]);
 
-                $event->sheet->freezePane('C7');
+                $event->sheet->freezePane('A7');
 
                 // Align ID (A) and Name (B) to Middle Center/Left
                 $event->sheet->getStyle('A7:B' . $highestPersonnelRow)->applyFromArray([
