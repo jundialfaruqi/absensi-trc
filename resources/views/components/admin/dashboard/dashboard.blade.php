@@ -578,16 +578,21 @@
                 <progress class="progress progress-primary w-full h-1.5" value="{{ $stats['hadir_percentage'] }}"
                     max="100"></progress>
 
-                <div class="grid grid-cols-2 gap-4 pt-2">
+                <div class="grid grid-cols-3 gap-3 pt-2">
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-1">Masuk</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Masuk</span>
                         <span class="text-lg font-black text-success">{{ $stats['total_masuk'] }}</span>
                     </div>
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-1">Pulang</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Pulang</span>
                         <span class="text-lg font-black text-secondary">{{ $stats['total_pulang'] }}</span>
+                    </div>
+                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
+                        <span
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Alfa</span>
+                        <span class="text-lg font-black text-error">{{ $stats['total_alfa'] }}</span>
                     </div>
                 </div>
             </div>
