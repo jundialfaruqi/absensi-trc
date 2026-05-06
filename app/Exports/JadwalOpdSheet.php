@@ -212,6 +212,24 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
 
                 $event->sheet->getStyle($matrixRange)->setConditionalStyles($conditionalStyles);
 
+                // 3. Data Validation (Dropdown)
+                $options = $shifts->pluck('name')->push('LIBUR')->unique()->implode(',');
+                
+                if (!empty($options)) {
+                    $validation = $event->sheet->getDelegate()->getDataValidation($matrixRange);
+                    $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
+                    $validation->setAllowBlank(true);
+                    $validation->setShowInputMessage(true);
+                    $validation->setShowErrorMessage(true);
+                    $validation->setShowDropDown(true);
+                    $validation->setErrorTitle('Input Tidak Valid');
+                    $validation->setError('Harap pilih shift yang tersedia dari daftar atau ketik dengan benar.');
+                    $validation->setPromptTitle('Pilih Jadwal');
+                    $validation->setPrompt('Pilih shift dari daftar dropdown yang muncul.');
+                    $validation->setFormula1('"' . $options . '"');
+                }
+
                 $refStartRow = $highestPersonnelRow + 5;
                 $highestRow = $event->sheet->getHighestRow();
                 $event->sheet->getStyle('A' . $refStartRow . ':C' . $highestRow)->applyFromArray([
