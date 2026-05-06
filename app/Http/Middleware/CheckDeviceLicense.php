@@ -20,11 +20,17 @@ class CheckDeviceLicense
 
         // 1. Coba autentikasi via Token (Sanctum) - Metode Baru
         if ($token = $request->bearerToken()) {
-            $device = \Laravel\Sanctum\PersonalAccessToken::findToken($token)?->tokenable;
-            
-            // Pastikan yang punya token adalah model Device
-            if (!($device instanceof Device)) {
-                $device = null;
+            $tokenModel = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+            if ($tokenModel) {
+                $device = $tokenModel->tokenable;
+                
+                // Pastikan yang punya token adalah model Device
+                if ($device instanceof Device) {
+                    // Update waktu penggunaan terakhir token
+                    $tokenModel->forceFill(['last_used_at' => now()])->save();
+                } else {
+                    $device = null;
+                }
             }
         }
 
