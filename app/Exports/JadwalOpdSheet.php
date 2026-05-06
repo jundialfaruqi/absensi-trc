@@ -174,21 +174,54 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
                 $daysInMonth = Carbon::create($this->year, $this->month, 1)->daysInMonth;
                 $lastColumn = Coordinate::stringFromColumnIndex($daysInMonth + 2);
                 $highestPersonnelRow = 6 + $this->personnelCount;
+                $matrixRange = 'C7:' . $lastColumn . $highestPersonnelRow;
                 
+                // 1. Basic Borders & Alignment
                 $event->sheet->getStyle('A5:' . $lastColumn . $highestPersonnelRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFCCCCCC']]],
                 ]);
- 
+
+                // 2. Conditional Formatting for Shifts
+                $shifts = Shift::all();
+                $conditionalStyles = [];
+
+                foreach ($shifts as $s) {
+                    if ($s->color) {
+                        $color = str_replace('#', '', $s->color);
+                        // Ensure it's a valid hex
+                        if (strlen($color) === 6) {
+                            $conditional = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+                            $conditional->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS);
+                            $conditional->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_EQUAL);
+                            $conditional->addCondition('"' . $s->name . '"');
+                            $conditional->getStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF' . strtoupper($color));
+                            $conditional->getStyle()->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF'); // White text for colored bg
+                            $conditionalStyles[] = $conditional;
+                        }
+                    }
+                }
+
+                // Fallback for 'LIBUR' if not in shifts
+                $liburConditional = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+                $liburConditional->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS);
+                $liburConditional->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_EQUAL);
+                $liburConditional->addCondition('"LIBUR"');
+                $liburConditional->getStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFCA5A5'); // Light Red
+                $liburConditional->getStyle()->getFont()->getColor()->setARGB('FF991B1B'); // Dark Red Text
+                $conditionalStyles[] = $liburConditional;
+
+                $event->sheet->getStyle($matrixRange)->setConditionalStyles($conditionalStyles);
+
                 $refStartRow = $highestPersonnelRow + 5;
                 $highestRow = $event->sheet->getHighestRow();
                 $event->sheet->getStyle('A' . $refStartRow . ':C' . $highestRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFCCCCCC']]],
                 ]);
- 
+
                 $event->sheet->freezePane('C7');
                 $event->sheet->getStyle('A7:A' . $highestPersonnelRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
- 
-                $event->sheet->getStyle('C7:' . $lastColumn . $highestPersonnelRow)->applyFromArray([
+
+                $event->sheet->getStyle($matrixRange)->applyFromArray([
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                         'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
