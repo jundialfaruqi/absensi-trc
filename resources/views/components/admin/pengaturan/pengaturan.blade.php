@@ -346,6 +346,71 @@
                 </div>
             </div>
         </div>
+
+        {{-- Riwayat Rilis APK Card --}}
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
+            <div class="card-body p-0">
+                <div class="p-6 pb-0 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="p-0 text-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                            </svg>
+                        </div>
+                        <h2 class="text-sm font-black uppercase">Riwayat Versi APK</h2>
+                    </div>
+                    <span
+                        class="badge badge-neutral badge-sm text-[10px] font-black uppercase">{{ $apkReleases->total() }}
+                        Rilis</span>
+                </div>
+
+                <div class="overflow-x-auto mt-4">
+                    <table class="table table-xs w-full">
+                        <thead>
+                            <tr class="bg-base-200/50">
+                                <th class="text-[9px] font-black uppercase py-3">Versi</th>
+                                <th class="text-[9px] font-black uppercase py-3">Tanggal</th>
+                                <th class="text-[9px] font-black uppercase py-3">Deskripsi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-base-200">
+                            @forelse($apkReleases as $release)
+                                <tr class="hover:bg-base-50/50 transition-colors group">
+                                    <td class="py-3">
+                                        <span
+                                            class="badge badge-primary badge-sm text-[9px] font-black px-1.5 h-4">{{ $release->version }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span
+                                            class="text-[10px] font-bold text-base-content/60 uppercase">{{ $release->release_date->format('d/m/Y') }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <p
+                                            class="text-[10px] leading-relaxed line-clamp-1 group-hover:line-clamp-none transition-all duration-300">
+                                            {{ $release->description }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center py-10 opacity-30">
+                                        <p class="text-[10px] font-black uppercase">Belum ada riwayat rilis</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                @if ($apkReleases->hasPages())
+                    <div class="p-4 border-t border-base-200 bg-base-50/30">
+                        {{ $apkReleases->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 
     {{-- ─── Modal: Update APK Info ────────────────────────────────────────── --}}

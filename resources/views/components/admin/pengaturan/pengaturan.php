@@ -4,8 +4,10 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use App\Models\Setting;
+use Livewire\WithPagination;
 
 new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends Component {
+    use WithPagination;
     public $registrationEnabled;
     public $webAbsensiActive;
     public $masukMulai;
@@ -143,7 +145,9 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     public function with()
     {
         return [
-            //
+            'apkReleases' => \App\Models\ApkRelease::orderByDesc('release_date')
+                ->orderByDesc('id')
+                ->paginate(10)
         ];
     }
 };
