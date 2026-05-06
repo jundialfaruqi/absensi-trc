@@ -107,6 +107,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         // Total Registered Personnel (All in DB, filtered by OPD)
         $totalRegistered = Personnel::when(!$isSuperAdmin, fn($q) => $q->where('opd_id', $opdId))->count();
 
+        // APK Info from latest release
+        $latestApk = \App\Models\ApkRelease::latestRelease();
+
         return [
             'stats' => [
                 'total_personnel' => $totalRegistered,
@@ -128,10 +131,11 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             'isSuperAdmin' => $isSuperAdmin,
             'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
             'apkInfo' => [
-                'version' => Setting::get('apk_version', 'v1.2.0'),
-                'description' => Setting::get('apk_description', 'Rilis terbaru dengan penguatan sistem keamanan perangkat.'),
-                'whats_new' => Setting::get('apk_whats_new', ''),
-                'optional_message' => Setting::get('apk_optional_message', ''),
+                'version' => $latestApk?->version ?? 'v1.2.0',
+                'description' => $latestApk?->description ?? 'Rilis terbaru dengan penguatan sistem keamanan perangkat.',
+                'whats_new' => $latestApk?->whats_new ?? [],
+                'optional_message' => $latestApk?->optional_message ?? '',
+                'release_date' => $latestApk?->release_date?->format('d/m/Y'),
             ]
         ];
     }

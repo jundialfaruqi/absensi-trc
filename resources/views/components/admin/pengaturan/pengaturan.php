@@ -18,8 +18,9 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     
     // APK Information Settings
     public $apkVersion;
+    public $apkReleaseDate;
     public $apkDescription;
-    public $apkWhatsNew = []; // Diubah menjadi array
+    public $apkWhatsNew = []; 
     public $apkOptionalMessage;
 
     public function addWhatsNewPoint()
@@ -45,23 +46,38 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         $this->pinLock5 = Setting::get('pin_lock_duration_5', 5);
         $this->pinLock10 = Setting::get('pin_lock_duration_10', 15);
         
-        // Load APK Settings
-        $this->apkVersion = Setting::get('apk_version', 'v1.2.0');
-        $this->apkDescription = Setting::get('apk_description', 'Rilis terbaru dengan penguatan sistem keamanan perangkat.');
+        $this->loadApkSettings();
+    }
+
+    public function loadApkSettings()
+    {
+        $latest = \App\Models\ApkRelease::latestRelease();
         
-        $whatsNew = Setting::get('apk_whats_new');
-        if ($whatsNew) {
-            $this->apkWhatsNew = is_array(json_decode($whatsNew, true)) ? json_decode($whatsNew, true) : [$whatsNew];
+        if ($latest) {
+            $this->apkVersion = $latest->version;
+            $this->apkReleaseDate = $latest->release_date?->format('Y-m-d');
+            $this->apkDescription = $latest->description;
+            $this->apkWhatsNew = $latest->whats_new ?? [];
+            $this->apkOptionalMessage = $latest->optional_message;
         } else {
-            $this->apkWhatsNew = [
-                'Keamanan Berlapis: Autentikasi digital (Sanctum) yang diperbarui otomatis setiap 30 hari.',
-                'Blokir Real-time: Perangkat yang dihapus/suspend otomatis terkunci dari akses sistem.',
-                'Bebas PIN: Menghapus modul PIN yang tidak terpakai untuk mempercepat performa.',
-                'Monitoring Aktivitas: Pelacakan waktu aktif terakhir perangkat (Last Seen) di database.'
-            ];
+            // Load Legacy APK Settings
+            $this->apkVersion = Setting::get('apk_version', 'v1.2.0');
+            $this->apkReleaseDate = now()->format('Y-m-d');
+            $this->apkDescription = Setting::get('apk_description', 'Rilis terbaru dengan penguatan sistem keamanan perangkat.');
+            
+            $whatsNew = Setting::get('apk_whats_new');
+            if ($whatsNew) {
+                $this->apkWhatsNew = is_array(json_decode($whatsNew, true)) ? json_decode($whatsNew, true) : [$whatsNew];
+            } else {
+                $this->apkWhatsNew = [
+                    'Keamanan Berlapis: Autentikasi digital (Enkripsi Kunci Dinamis) yang diperbarui otomatis setiap 30 hari.',
+                    'Blokir Real-time: Perangkat yang dihapus/suspend otomatis terkunci dari akses sistem.',
+                    'Bebas PIN: Menghapus modul PIN yang tidak terpakai untuk mempercepat performa.',
+                    'Monitoring Aktivitas: Pelacakan waktu aktif terakhir perangkat (Last Seen) di database.'
+                ];
+            }
+            $this->apkOptionalMessage = Setting::get('apk_optional_message', '');
         }
-        
-        $this->apkOptionalMessage = Setting::get('apk_optional_message', '');
     }
 
     public function openApkModal()
@@ -107,12 +123,21 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
 
     public function saveApkSettings()
     {
-        Setting::set('apk_version', $this->apkVersion);
-        Setting::set('apk_description', $this->apkDescription);
-        Setting::set('apk_whats_new', json_encode(array_values(array_filter($this->apkWhatsNew)))); // Simpan sebagai JSON
-        Setting::set('apk_optional_message', $this->apkOptionalMessage);
+        $this->validate([
+            'apkVersion' => 'required',
+            'apkReleaseDate' => 'required|date',
+        ]);
 
-        $this->dispatch('toast', type: 'success', message: 'Informasi APK berhasil diperbarui.');
+        \App\Models\ApkRelease::create([
+            'version' => $this->apkVersion,
+            'release_date' => $this->apkReleaseDate,
+            'description' => $this->apkDescription,
+            'whats_new' => array_values(array_filter($this->apkWhatsNew)),
+            'optional_message' => $this->apkOptionalMessage,
+        ]);
+
+        $this->dispatch('toast', type: 'success', message: 'Informasi rilis APK baru berhasil disimpan.');
+        $this->dispatch('close-modal', 'apk-modal');
     }
 
     public function with()

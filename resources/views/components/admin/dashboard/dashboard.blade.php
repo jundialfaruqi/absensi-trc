@@ -606,7 +606,9 @@
                     <div class="flex items-center gap-2 mb-3">
                         <span
                             class="badge badge-white/20 text-base-content border-none text-[10px] font-black uppercase">{{ $apkInfo['version'] }}</span>
-                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Update Tersedia</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">
+                            {{ $apkInfo['release_date'] ?? 'Update Tersedia' }}
+                        </span>
                     </div>
 
                     <h3 class="text-lg font-black uppercase tracking-tighter leading-tight mb-2">

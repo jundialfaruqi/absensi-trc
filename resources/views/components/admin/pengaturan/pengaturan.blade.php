@@ -251,7 +251,7 @@
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                         </svg>
-                        Edit Info APK
+                        Edit
                     </button>
                 </div>
 
@@ -271,6 +271,10 @@
                                 <h3 class="text-xs font-black uppercase tracking-tight">Android Application</h3>
                                 <span
                                     class="badge badge-primary badge-sm text-[10px] font-black h-4 px-1.5">{{ $apkVersion }}</span>
+                                @if ($apkReleaseDate)
+                                    <span
+                                        class="text-[9px] font-bold opacity-40 uppercase tracking-tighter">{{ \Carbon\Carbon::parse($apkReleaseDate)->format('d M Y') }}</span>
+                                @endif
                             </div>
                             <p class="text-[10px] text-base-content/50 uppercase font-bold leading-relaxed">
                                 {{ $apkDescription }}
@@ -369,7 +373,7 @@
 
             <form wire:submit="saveApkSettings">
                 <div class="p-6 space-y-6">
-                    <div class="grid grid-cols-1 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {{-- Versi --}}
                         <div class="form-control w-full">
                             <label class="label py-1">
@@ -381,16 +385,26 @@
                                 placeholder="Cth: v1.2.0">
                         </div>
 
-                        {{-- Deskripsi --}}
+                        {{-- Tanggal Rilis --}}
                         <div class="form-control w-full">
                             <label class="label py-1">
-                                <span class="label-text text-[10px] font-black uppercase text-base-content">Deskripsi
-                                    Singkat</span>
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Tanggal
+                                    Rilis <span class="text-error">*</span></span>
                             </label>
-                            <textarea wire:model="apkDescription"
-                                class="textarea textarea-bordered focus:textarea-primary placeholder:text-base-content/40 w-full transition-all h-20 text-xs"
-                                placeholder="Cth: Perbaikan bug dan peningkatan performa"></textarea>
+                            <input type="date" wire:model="apkReleaseDate"
+                                class="input input-bordered focus:input-primary font-bold w-full transition-all">
                         </div>
+                    </div>
+
+                    {{-- Deskripsi --}}
+                    <div class="form-control w-full">
+                        <label class="label py-1">
+                            <span class="label-text text-[10px] font-black uppercase text-base-content">Deskripsi
+                                Singkat</span>
+                        </label>
+                        <textarea wire:model="apkDescription"
+                            class="textarea textarea-bordered focus:textarea-primary placeholder:text-base-content/40 w-full transition-all h-20 text-xs"
+                            placeholder="Cth: Perbaikan bug dan peningkatan performa"></textarea>
                     </div>
 
                     {{-- Whats New --}}
