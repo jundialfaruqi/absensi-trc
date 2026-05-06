@@ -73,9 +73,16 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // Stats
         $totalScheduled = $personnelQuery->count(); // Total (incl. LIBUR)
-        $totalRequired = (clone $personnelQuery)->whereHas('jadwals.shift', function ($q) {
-            $q->where('type', 'shift');
-        })->count(); // Only active working shifts
+        $totalRequired = (clone $personnelQuery)->where(function($q) use ($today) {
+            $q->whereHas('jadwals.shift', function ($sq) {
+                $sq->where('type', 'shift');
+            })->orWhere(function($sq) use ($today) {
+                $sq->where('attendance_type', 'FLEXIBLE')
+                   ->whereHas('absensis', function($aq) use ($today) {
+                       $aq->whereDate('tanggal', $today);
+                   });
+            });
+        })->count(); // Scheduled shifts + Flexible personnel who have checked in
 
         $totalMasuk = (clone $absensiQuery)->whereNotNull('jam_masuk')->count();
         $totalPulang = (clone $absensiQuery)->whereNotNull('jam_pulang')->count();

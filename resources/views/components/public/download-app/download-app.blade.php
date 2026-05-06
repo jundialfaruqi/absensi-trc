@@ -23,7 +23,7 @@
                         <div class="relative">
                             <input x-bind:type="show ? 'text' : 'password'" wire:model.live="pin" maxlength="6"
                                 placeholder="••••••"
-                                class="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-4 py-4 md:px-6 md:py-5 text-center text-xl md:text-3xl font-black tracking-[0.5em] text-white focus:border-blue-500/50 focus:ring-0 transition-all placeholder:text-base-content/30">
+                                class="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-4 py-4 md:px-5 md:py-5 text-center text-xl md:text-3xl font-black tracking-[0.5em] text-white focus:border-blue-500/50 focus:ring-0 transition-all placeholder:text-base-content/30">
                             <button type="button" @click="show = !show"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
                                 <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -70,13 +70,8 @@
                         </div>
 
                         <!-- Button Content (Hidden when loading) -->
-                        <div wire:loading.remove wire:target="download" class="flex items-center gap-2">
+                        <div wire:loading.remove wire:target="download" class="items-center">
                             <span class="text-white">DOWNLOAD</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                            </svg>
                         </div>
                     </button>
                 </form>

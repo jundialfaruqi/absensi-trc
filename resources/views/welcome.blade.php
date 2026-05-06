@@ -226,10 +226,11 @@
                     class="h-10 w-10 md:h-13 md:w-13 object-contain" />
             </div>
             <div class="flex flex-col leading-none">
-                <span class="text-sm md:text-xl font-black tracking-tighter text-white uppercase whitespace-nowrap">TRC
-                    PEKANBARU</span>
+                <a href="/"
+                    class="text-sm md:text-xl font-black tracking-tighter text-white uppercase whitespace-nowrap">TRC
+                    PEKANBARU</a>
                 <span
-                    class="text-[8px] md:text-[10px] font-bold text-blue-400 tracking-widest md:tracking-[0.2em] uppercase whitespace-nowrap">Emergency
+                    class="text-[8px] md:text-[10px] font-bold text-blue-400 tracking-widest md:tracking-[0.2em] uppercase whitespace-nowrap">AMAN
                     112</span>
             </div>
         </div>
