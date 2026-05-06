@@ -122,16 +122,21 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
  
     public function columnWidths(): array
     {
-        return ['A' => 20, 'B' => 40];
+        // Meningkatkan lebar kolom untuk menampung font yang lebih besar
+        return [
+            'A' => 20, 
+            'B' => 50, // Nama Personnel lebih lebar
+        ];
     }
  
     public function styles(Worksheet $sheet)
     {
         $daysInMonth = Carbon::create($this->year, $this->month, 1)->daysInMonth;
         $lastColumn = Coordinate::stringFromColumnIndex($daysInMonth + 2);
+        $highestPersonnelRow = 6 + $this->personnelCount;
         
         $sheet->mergeCells('A1:' . $lastColumn . '1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A2:A3')->getFont()->setBold(true);
         $sheet->getStyle('B3')->getFont()->setBold(true)->getColor()->setARGB('FFFF0000');
  
@@ -145,6 +150,23 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
         ]);
+
+        // Style untuk Nama Personnel (B7 sampai akhir)
+        $sheet->getStyle('B7:B' . $highestPersonnelRow)->getFont()->setBold(true)->setSize(16);
+
+        // Style untuk Matrix Jadwal (C7 sampai akhir)
+        $sheet->getStyle('C7:' . $lastColumn . $highestPersonnelRow)->getFont()->setSize(16);
+
+        // Mengatur tinggi baris agar terlihat seperti ada padding
+        for ($i = 7; $i <= $highestPersonnelRow; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight(35);
+        }
+
+        // Mengatur lebar kolom tanggal agar proporsional dengan font besar
+        for ($i = 3; $i <= $daysInMonth + 2; $i++) {
+            $col = Coordinate::stringFromColumnIndex($i);
+            $sheet->getColumnDimension($col)->setWidth(12);
+        }
  
         for ($i = 1; $i <= $daysInMonth; $i++) {
             $date = Carbon::create($this->year, $this->month, $i);
@@ -154,9 +176,9 @@ class JadwalOpdSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wi
             }
         }
  
-        $refStartRow = 6 + $this->personnelCount + 3;
+        $refStartRow = $highestPersonnelRow + 5;
         $sheet->mergeCells('A' . $refStartRow . ':C' . $refStartRow);
-        $sheet->getStyle('A' . $refStartRow)->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A' . $refStartRow)->getFont()->setBold(true)->setSize(14);
         
         $refHeaderRow = $refStartRow + 2;
         $sheet->getStyle('A' . $refHeaderRow . ':C' . $refHeaderRow)->applyFromArray([
