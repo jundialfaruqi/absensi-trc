@@ -61,7 +61,7 @@
                     @endif
 
                     <button type="submit"
-                        class="w-full h-16 bg-linear-to-br from-blue-600 to-blue-700 text-white font-black rounded-2xl shadow-xl transition-all neon-glow-blue flex items-center justify-center gap-3 group/btn relative overflow-hidden"
+                        class="w-full h-12 bg-linear-to-br from-blue-600 to-blue-700 text-white font-black rounded-2xl shadow-xl neon-glow-blue flex items-center justify-center gap-3 group/btn relative overflow-hidden"
                         wire:loading.attr="disabled">
 
                         <!-- Spinner -->
