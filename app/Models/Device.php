@@ -33,6 +33,16 @@ class Device extends Model
         'last_seen_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Saat device dihapus, hapus juga semua tokennya
+        static::deleting(function ($device) {
+            $device->tokens()->delete();
+        });
+    }
+
     public function opd(): BelongsTo
     {
         return $this->belongsTo(Opd::class);
