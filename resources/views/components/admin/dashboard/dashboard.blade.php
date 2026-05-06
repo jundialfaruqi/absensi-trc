@@ -595,29 +595,83 @@
                         <span class="text-lg font-black text-error">{{ $stats['total_alfa'] }}</span>
                     </div>
                 </div>
-            </div>
-
-            {{-- Help Card --}}
+            </div> {{-- APK Info Card --}}
             <div class="card bg-primary text-primary-content p-6 relative overflow-hidden group">
                 <div
                     class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-32 h-32">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                        <line x1="12" y1="18" x2="12.01" y2="18" />
                     </svg>
                 </div>
-                <div class="relative z-10 space-y-3">
-                    <h3 class="text-lg font-black uppercase tracking-tighter leading-none">Bantuan &
-                        <br>Informasi
+                <div class="relative z-10 flex flex-col h-full">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span
+                            class="badge badge-white/20 text-base-content border-none text-[10px] font-black uppercase">{{ $apkInfo['version'] }}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Update Tersedia</span>
+                    </div>
+
+                    <h3 class="text-lg font-black uppercase tracking-tighter leading-tight mb-2">
+                        {{ $apkInfo['description'] }}
                     </h3>
-                    <p class="text-xs font-medium opacity-80 leading-relaxed uppercase tracking-tighter">
-                        Butuh bantuan dalam mengelola absensi? <br>Klik tombol di bawah ini.
-                    </p>
-                    <button
-                        class="btn btn-sm bg-white/20 hover:bg-white/30 border-none text-white text-[10px] font-black uppercase tracking-widest mt-2">
-                        Pusat Bantuan
-                    </button>
+
+                    @if ($apkInfo['whats_new'])
+                        @php
+                            $whats_new = is_string($apkInfo['whats_new'])
+                                ? json_decode($apkInfo['whats_new'], true)
+                                : $apkInfo['whats_new'];
+                        @endphp
+                        @if (is_array($whats_new))
+                            <div class="space-y-1.5 mb-4 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                                @foreach ($whats_new as $line)
+                                    @if (trim($line))
+                                        <div class="flex items-start gap-2 opacity-80">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0 mt-0.5"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                            <p class="text-[10px] font-medium uppercase leading-tight">
+                                                {{ trim($line) }}</p>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+                    @endif
+
+                    @if ($apkInfo['optional_message'])
+                        <p class="text-[10px] font-medium opacity-70 italic mb-4 leading-relaxed line-clamp-2">
+                            "{{ $apkInfo['optional_message'] }}"
+                        </p>
+                    @endif
+
+                    <div class="mt-auto">
+                        @can('download-apk')
+                            <a href="{{ route('pengaturan.download-apk') }}" target="_blank"
+                                class="btn btn-sm bg-white text-primary hover:bg-white/90 border-none text-[10px] font-black uppercase tracking-widest">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 mr-1.5" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Download APK
+                            </a>
+                        @else
+                            <div class="text-[9px] font-bold uppercase opacity-50 flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                                Hubungi Admin untuk Izin Download
+                            </div>
+                        @endcan
+                    </div>
                 </div>
             </div>
         </div>

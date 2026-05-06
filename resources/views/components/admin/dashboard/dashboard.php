@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Setting;
 
 new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -46,6 +47,12 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'absentPersonnel' => collect(),
                 'isSuperAdmin' => $isSuperAdmin,
                 'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+                'apkInfo' => [
+                    'version' => '',
+                    'description' => '',
+                    'whats_new' => '',
+                    'optional_message' => '',
+                ]
             ];
         }
 
@@ -161,6 +168,12 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             'absentPersonnel' => $absentPersonnel,
             'isSuperAdmin' => $isSuperAdmin,
             'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+            'apkInfo' => [
+                'version' => Setting::get('apk_version', 'v1.2.0'),
+                'description' => Setting::get('apk_description', 'Rilis terbaru dengan penguatan sistem keamanan perangkat.'),
+                'whats_new' => Setting::get('apk_whats_new', ''),
+                'optional_message' => Setting::get('apk_optional_message', ''),
+            ]
         ];
     }
 

@@ -230,34 +230,101 @@
         </div>
 
         {{-- Download App Card --}}
+        {{-- Download App Card (PREVIEW) --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="p-0 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-2">
+                        <div class="p-0 text-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                        </div>
+                        <h2 class="text-sm font-black uppercase">Download APK</h2>
                     </div>
-                    <h2 class="text-sm font-black uppercase">Download Aplikasi (APK)</h2>
+                    <button type="button" wire:click="openApkModal" class="btn btn-xs btn-neutral gap-1.5 px-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                        </svg>
+                        Edit Info APK
+                    </button>
                 </div>
 
-                <div class="p-4 rounded-xl bg-info/5 border border-info/10 flex items-center gap-2">
-                    <div class="text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-8" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                            <line x1="12" y1="18" x2="12.01" y2="18" />
-                        </svg>
+                <div class="flex flex-col gap-6">
+                    {{-- App Info --}}
+                    <div class="p-4 rounded-xl bg-info/5 border border-info/10 flex items-center gap-4">
+                        <div class="text-primary p-3 bg-white rounded-lg shadow-sm border border-base-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-8" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                                <line x1="12" y1="18" x2="12.01" y2="18" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="text-xs font-black uppercase tracking-tight">Android Application</h3>
+                                <span
+                                    class="badge badge-primary badge-sm text-[10px] font-black h-4 px-1.5">{{ $apkVersion }}</span>
+                            </div>
+                            <p class="text-[10px] text-base-content/50 uppercase font-bold leading-relaxed">
+                                {{ $apkDescription }}
+                            </p>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <h3 class="text-xs font-bold uppercase tracking-tight">Android Application</h3>
-                        <p class="text-[10px] text-base-content/50 uppercase font-medium leading-relaxed">
-                            Versi terbaru aplikasi absensi untuk perangkat Android.
-                        </p>
+
+                    {{-- What's New List --}}
+                    <div class="space-y-4">
+                        <h4
+                            class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
+                            <span class="w-4 h-[1px] bg-base-content/20"></span>
+                            Apa yang baru
+                        </h4>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            @foreach ($apkWhatsNew as $line)
+                                @if (trim($line))
+                                    @php
+                                        $parts = explode(':', $line, 2);
+                                        $title = trim($parts[0]);
+                                        $desc = isset($parts[1]) ? trim($parts[1]) : '';
+                                    @endphp
+                                    <div class="flex gap-3">
+                                        <div
+                                            class="size-6 rounded bg-success/10 text-success flex items-center justify-center shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-[11px] font-bold text-base-content uppercase tracking-tight">
+                                                {{ $title }}</p>
+                                            @if ($desc)
+                                                <p class="text-[10px] text-base-content/60 leading-normal">
+                                                    {{ $desc }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
+
+                    @if ($apkOptionalMessage)
+                        <div class="p-3 rounded-lg bg-warning/5 border border-warning/10 italic">
+                            <p class="text-[10px] text-warning-content/70 leading-relaxed font-medium">
+                                "{{ $apkOptionalMessage }}"
+                            </p>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="card-actions justify-end mt-6 pt-6 border-t border-base-200">
@@ -276,4 +343,131 @@
             </div>
         </div>
     </div>
+
+    {{-- ─── Modal: Update APK Info ────────────────────────────────────────── --}}
+    <dialog id="apk-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
+        x-on:open-modal.window="$event.detail.id === 'apk-modal' && $el.showModal()"
+        x-on:close-modal.window="$event.detail.id === 'apk-modal' && $el.close()">
+        <div class="modal-box shadow p-0 max-h-[90vh] max-w-2xl overflow-y-auto relative">
+            <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-primary text-primary-content flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-sm uppercase tracking-tight">Update Informasi APK</h3>
+                        <p class="text-[10px] text-base-content/50 uppercase font-bold">Sesuaikan detail rilis aplikasi
+                            mobile</p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('apk-modal').close()">✕</button>
+            </div>
+
+            <form wire:submit="saveApkSettings">
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 gap-6">
+                        {{-- Versi --}}
+                        <div class="form-control w-full">
+                            <label class="label py-1">
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Versi
+                                    Aplikasi <span class="text-error">*</span></span>
+                            </label>
+                            <input type="text" wire:model="apkVersion"
+                                class="input input-bordered focus:input-primary font-bold placeholder:text-base-content/40 w-full transition-all"
+                                placeholder="Cth: v1.2.0">
+                        </div>
+
+                        {{-- Deskripsi --}}
+                        <div class="form-control w-full">
+                            <label class="label py-1">
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Deskripsi
+                                    Singkat</span>
+                            </label>
+                            <textarea wire:model="apkDescription"
+                                class="textarea textarea-bordered focus:textarea-primary placeholder:text-base-content/40 w-full transition-all h-20 text-xs"
+                                placeholder="Cth: Perbaikan bug dan peningkatan performa"></textarea>
+                        </div>
+                    </div>
+
+                    {{-- Whats New --}}
+                    <div class="form-control w-full">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="label py-0">
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Poin Fitur
+                                    Baru</span>
+                            </label>
+                            <button type="button" wire:click="addWhatsNewPoint"
+                                class="btn btn-xs btn-primary gap-1 text-[9px] font-black uppercase px-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 5v14M5 12h14" />
+                                </svg>
+                                Tambah Poin
+                            </button>
+                        </div>
+
+                        <div class="space-y-4 bg-base-200/50 p-4 rounded-xl border border-base-200">
+                            @forelse($apkWhatsNew as $index => $point)
+                                <div class="flex gap-3 group items-start">
+                                    <div
+                                        class="size-8 rounded-lg bg-white border border-base-200 flex items-center justify-center shrink-0 text-success shadow-sm mt-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <textarea wire:model="apkWhatsNew.{{ $index }}"
+                                            class="textarea textarea-bordered w-full text-xs focus:textarea-primary transition-all h-20"
+                                            placeholder="Cth: Keamanan: Penjelasan singkat fitur baru..."></textarea>
+                                    </div>
+                                    <button type="button" wire:click="removeWhatsNewPoint({{ $index }})"
+                                        class="btn btn-sm btn-ghost text-error p-1 h-8 min-h-8 mt-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="text-center py-4">
+                                    <p class="text-[10px] text-base-content/40 font-bold uppercase">Belum ada poin
+                                        fitur baru</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    {{-- Pesan Khusus --}}
+                    <div class="form-control w-full">
+                        <label class="label py-1">
+                            <span class="label-text text-[10px] font-black uppercase text-base-content">Pesan Khusus
+                                (Opsional)</span>
+                        </label>
+                        <textarea wire:model="apkOptionalMessage"
+                            class="textarea textarea-bordered focus:textarea-primary placeholder:text-base-content/40 w-full transition-all h-24 text-xs"
+                            placeholder="Tuliskan pesan khusus untuk ditampilkan di Dashboard..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-action mt-0 p-6 border-t border-base-200 bg-base-100 sticky bottom-0 z-50">
+                    <button type="button" class="btn btn-ghost btn-sm"
+                        onclick="document.getElementById('apk-modal').close()">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm text-white px-8" wire:click="closeApkModal">
+                        <span wire:loading wire:target="saveApkSettings"
+                            class="loading loading-spinner loading-xs"></span>
+                        <span wire:loading.remove wire:target="saveApkSettings">Simpan Perubahan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
 </div>

@@ -15,6 +15,23 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     public $pinMaxAttempts;
     public $pinLock5;
     public $pinLock10;
+    
+    // APK Information Settings
+    public $apkVersion;
+    public $apkDescription;
+    public $apkWhatsNew = []; // Diubah menjadi array
+    public $apkOptionalMessage;
+
+    public function addWhatsNewPoint()
+    {
+        $this->apkWhatsNew[] = '';
+    }
+
+    public function removeWhatsNewPoint($index)
+    {
+        unset($this->apkWhatsNew[$index]);
+        $this->apkWhatsNew = array_values($this->apkWhatsNew); // Re-index array
+    }
 
     public function mount()
     {
@@ -27,6 +44,34 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         $this->pinMaxAttempts = Setting::get('pin_max_attempts', 5);
         $this->pinLock5 = Setting::get('pin_lock_duration_5', 5);
         $this->pinLock10 = Setting::get('pin_lock_duration_10', 15);
+        
+        // Load APK Settings
+        $this->apkVersion = Setting::get('apk_version', 'v1.2.0');
+        $this->apkDescription = Setting::get('apk_description', 'Rilis terbaru dengan penguatan sistem keamanan perangkat.');
+        
+        $whatsNew = Setting::get('apk_whats_new');
+        if ($whatsNew) {
+            $this->apkWhatsNew = is_array(json_decode($whatsNew, true)) ? json_decode($whatsNew, true) : [$whatsNew];
+        } else {
+            $this->apkWhatsNew = [
+                'Keamanan Berlapis: Autentikasi digital (Sanctum) yang diperbarui otomatis setiap 30 hari.',
+                'Blokir Real-time: Perangkat yang dihapus/suspend otomatis terkunci dari akses sistem.',
+                'Bebas PIN: Menghapus modul PIN yang tidak terpakai untuk mempercepat performa.',
+                'Monitoring Aktivitas: Pelacakan waktu aktif terakhir perangkat (Last Seen) di database.'
+            ];
+        }
+        
+        $this->apkOptionalMessage = Setting::get('apk_optional_message', '');
+    }
+
+    public function openApkModal()
+    {
+        $this->dispatch('open-modal', id: 'apk-modal');
+    }
+
+    public function closeApkModal()
+    {
+        $this->dispatch('close-modal', id: 'apk-modal');
     }
 
     public function updatedRegistrationEnabled($value)
@@ -58,6 +103,16 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         Setting::set('pin_lock_duration_10', $this->pinLock10, 'integer');
 
         $this->dispatch('toast', type: 'success', message: 'Pengaturan keamanan PIN berhasil disimpan.');
+    }
+
+    public function saveApkSettings()
+    {
+        Setting::set('apk_version', $this->apkVersion);
+        Setting::set('apk_description', $this->apkDescription);
+        Setting::set('apk_whats_new', json_encode(array_values(array_filter($this->apkWhatsNew)))); // Simpan sebagai JSON
+        Setting::set('apk_optional_message', $this->apkOptionalMessage);
+
+        $this->dispatch('toast', type: 'success', message: 'Informasi APK berhasil diperbarui.');
     }
 
     public function with()
