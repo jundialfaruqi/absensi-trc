@@ -349,31 +349,10 @@ class AttendanceController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'personnel_id' => 'required|exists:personnels,id',
-            'pin' => 'required|string',
-        ]);
-
-        $personnel = Personnel::findOrFail($request->personnel_id);
-
-        // In this app, PIN is stored as a hash in the 'pin' column.
-        if (!Hash::check($request->pin, $personnel->pin)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'PIN yang Anda masukkan salah.'
-            ], 401);
-        }
-
-        $token = $personnel->createToken('mobile-app')->plainTextToken;
-
         return response()->json([
-            'status' => 'success',
-            'message' => 'Login berhasil',
-            'data' => [
-                'personnel' => $personnel,
-                'token' => $token
-            ]
-        ]);
+            'status' => 'error',
+            'message' => 'Fitur Login PIN sudah tidak didukung pada versi ini.'
+        ], 403);
     }
 
     public function store(Request $request)

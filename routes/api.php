@@ -18,8 +18,8 @@ Route::middleware('mobile_auth')->group(function () {
             Route::get('/personnels/check-status/{id}', [AttendanceController::class, 'checkStatus']);
         });
 
-        // Login PIN — Ketat: 5 percobaan per 5 menit
-        Route::post('/login/pin', [AttendanceController::class, 'login'])->middleware('throttle:5,5');
+        // Login PIN (Dinonaktifkan karena sudah tidak digunakan)
+        // Route::post('/login/pin', [AttendanceController::class, 'login'])->middleware('throttle:5,5');
 
         // Absensi — 10 request per menit
         Route::post('/absensi', [AttendanceController::class, 'store'])->middleware('throttle:10,1');
