@@ -346,11 +346,13 @@
                                                         <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                                     @elseif ($a->jam_masuk)
                                                         <div class="flex flex-col items-center justify-center">
+                                                            <div
+                                                                class="text-[11px] font-black leading-tight {{ $a->status_masuk === 'TELAT' ? 'text-error' : 'text-success' }}">
+                                                                {{ \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') }}
+                                                            </div>
                                                             <div class="flex items-center gap-1">
-                                                                <div
-                                                                    class="text-[11px] font-black leading-tight {{ $a->status_masuk === 'TELAT' ? 'text-error' : 'text-success' }}">
-                                                                    {{ \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') }}
-                                                                </div>
+                                                                <div class="text-[8px] font-black uppercase opacity-60">
+                                                                    {{ $a->status_masuk }}</div>
                                                                 {{-- Indikator Radius Masuk --}}
                                                                 <div class="tooltip tooltip-primary"
                                                                     data-tip="{{ $a->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter, 0) }}m)">
@@ -363,8 +365,6 @@
                                                                     </svg>
                                                                 </div>
                                                             </div>
-                                                            <div class="text-[8px] font-black uppercase opacity-60">
-                                                                {{ $a->status_masuk }}</div>
                                                         </div>
                                                     @else
                                                         <span
@@ -430,11 +430,13 @@
                                                         <span class="text-[10px] font-black opacity-30">LIBUR</span>
                                                     @elseif ($a->jam_pulang)
                                                         <div class="flex flex-col items-center justify-center">
+                                                            <div
+                                                                class="text-[11px] font-black leading-tight {{ $a->status_pulang === 'PC' ? 'text-warning' : 'text-success' }}">
+                                                                {{ \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') }}
+                                                            </div>
                                                             <div class="flex items-center gap-1">
-                                                                <div
-                                                                    class="text-[11px] font-black leading-tight {{ $a->status_pulang === 'PC' ? 'text-warning' : 'text-success' }}">
-                                                                    {{ \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') }}
-                                                                </div>
+                                                                <div class="text-[8px] font-black uppercase opacity-60">
+                                                                    {{ $a->status_pulang }}</div>
                                                                 {{-- Indikator Radius Pulang --}}
                                                                 <div class="tooltip tooltip-primary"
                                                                     data-tip="{{ $a->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter_pulang, 0) }}m)">
@@ -447,8 +449,6 @@
                                                                     </svg>
                                                                 </div>
                                                             </div>
-                                                            <div class="text-[8px] font-black uppercase opacity-60">
-                                                                {{ $a->status_pulang }}</div>
                                                         </div>
                                                     @else
                                                         <span
