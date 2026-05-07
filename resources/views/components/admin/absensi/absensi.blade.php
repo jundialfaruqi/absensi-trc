@@ -349,44 +349,61 @@
                                                             <div class="text-[8px] font-black uppercase opacity-60">
                                                                 {{ $a->status_masuk }}</div>
                                                             {{-- Indikator Radius Masuk --}}
-                                                            <div class="tooltip tooltip-primary flex justify-center mt-0.5"
-                                                                data-tip="{{ $a->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter, 0) }}m)">
-                                                                @if ($a->is_within_radius)
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="size-3 text-success"
-                                                                        viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2.5"
-                                                                        stroke-linecap="round"
-                                                                        stroke-linejoin="round">
-                                                                        <path stroke="none" d="M0 0h24v24H0z"
-                                                                            fill="none" />
-                                                                        <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-                                                                        <path
-                                                                            d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
-                                                                    </svg>
-                                                                @else
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="size-3 text-error animate-pulse"
-                                                                        viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2.5"
-                                                                        stroke-linecap="round"
-                                                                        stroke-linejoin="round">
-                                                                        <path stroke="none" d="M0 0h24v24H0z"
-                                                                            fill="none" />
-                                                                        <path
-                                                                            d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" />
-                                                                        <path
-                                                                            d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" />
-                                                                        <path d="M3 3l18 18" />
-                                                                    </svg>
+                                                            {{-- Baris Ikon (Radius & Edit) --}}
+                                                            <div class="flex items-center justify-center gap-1 mt-0.5">
+                                                                {{-- Indikator Radius Masuk --}}
+                                                                <div class="tooltip tooltip-primary flex justify-center"
+                                                                    data-tip="{{ $a->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter, 0) }}m)">
+                                                                    @if ($a->is_within_radius)
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="size-3 text-success" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                            <path
+                                                                                d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
+                                                                        </svg>
+                                                                    @else
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="size-3 text-error animate-pulse"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" />
+                                                                            <path
+                                                                                d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" />
+                                                                            <path d="M3 3l18 18" />
+                                                                        </svg>
+                                                                    @endif
+                                                                </div>
+
+                                                                {{-- Indikator Edit Manual Masuk --}}
+                                                                @if ($a->original_status_masuk)
+                                                                    <div class="tooltip tooltip-primary flex justify-center"
+                                                                        data-tip="Diedit oleh Sistem/Admin (Asli: {{ $a->original_status_masuk }})">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="size-3 text-primary" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                                                                            <path
+                                                                                d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+                                                                            <path d="M16 5l3 3" />
+                                                                        </svg>
+                                                                    </div>
                                                                 @endif
                                                             </div>
-
-                                                            @if ($a->original_status_masuk)
-                                                                <div
-                                                                    class="text-[7px] font-medium text-red-500 uppercase mt-0.5 leading-none">
-                                                                    SYSTEM</div>
-                                                            @endif
                                                         </div>
                                                     @else
                                                         <span
@@ -454,45 +471,61 @@
                                                             </div>
                                                             <div class="text-[8px] font-black uppercase opacity-60">
                                                                 {{ $a->status_pulang }}</div>
-                                                            {{-- Indikator Radius Pulang --}}
-                                                            <div class="tooltip tooltip-primary flex justify-center mt-0.5"
-                                                                data-tip="{{ $a->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter_pulang, 0) }}m)">
-                                                                @if ($a->is_within_radius_pulang)
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="size-3 text-success"
-                                                                        viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2.5"
-                                                                        stroke-linecap="round"
-                                                                        stroke-linejoin="round">
-                                                                        <path stroke="none" d="M0 0h24v24H0z"
-                                                                            fill="none" />
-                                                                        <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-                                                                        <path
-                                                                            d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
-                                                                    </svg>
-                                                                @else
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="size-3 text-error animate-pulse"
-                                                                        viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2.5"
-                                                                        stroke-linecap="round"
-                                                                        stroke-linejoin="round">
-                                                                        <path stroke="none" d="M0 0h24v24H0z"
-                                                                            fill="none" />
-                                                                        <path
-                                                                            d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" />
-                                                                        <path
-                                                                            d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" />
-                                                                        <path d="M3 3l18 18" />
-                                                                    </svg>
+                                                            {{-- Baris Ikon (Radius & Edit) --}}
+                                                            <div class="flex items-center justify-center gap-1 mt-0.5">
+                                                                {{-- Indikator Radius Pulang --}}
+                                                                <div class="tooltip tooltip-primary flex justify-center"
+                                                                    data-tip="{{ $a->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter_pulang, 0) }}m)">
+                                                                    @if ($a->is_within_radius_pulang)
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="size-3 text-success" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                            <path
+                                                                                d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
+                                                                        </svg>
+                                                                    @else
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="size-3 text-error animate-pulse"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" />
+                                                                            <path
+                                                                                d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" />
+                                                                            <path d="M3 3l18 18" />
+                                                                        </svg>
+                                                                    @endif
+                                                                </div>
+
+                                                                {{-- Indikator Edit Manual Pulang --}}
+                                                                @if ($a->original_status_pulang)
+                                                                    <div class="tooltip tooltip-primary flex justify-center"
+                                                                        data-tip="Diedit oleh Sistem/Admin (Asli: {{ $a->original_status_pulang }})">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="size-3 text-primary" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                                                                            <path
+                                                                                d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+                                                                            <path d="M16 5l3 3" />
+                                                                        </svg>
+                                                                    </div>
                                                                 @endif
                                                             </div>
-
-                                                            @if ($a->original_status_pulang)
-                                                                <div
-                                                                    class="text-[7px] font-medium text-primary uppercase mt-0.5 leading-none">
-                                                                    SYSTEM</div>
-                                                            @endif
                                                         </div>
                                                     @else
                                                         <span
