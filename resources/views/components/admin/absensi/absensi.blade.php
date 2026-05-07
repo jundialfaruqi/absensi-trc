@@ -353,18 +353,24 @@
                                                                 data-tip="{{ $a->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter, 0) }}m)">
                                                                 @if ($a->is_within_radius)
                                                                     <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        viewBox="0 0 20 20" fill="currentColor"
-                                                                        class="size-2.5 text-success">
-                                                                        <path fill-rule="evenodd"
-                                                                            d="m9.69 18.933.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 0 0 .281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 1 0 3 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 0 0 2.273 1.765 7.23 7.23 0 0 0 .757.433 5.73 5.73 0 0 0 .281.14l.019.008.006.003ZM10 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z"
-                                                                            clip-rule="evenodd" />
+                                                                        class="size-3 text-success"
+                                                                        viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2.5"
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round">
+                                                                        <path stroke="none" d="M0 0h24v24H0z"
+                                                                            fill="none" />
+                                                                        <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                        <path
+                                                                            d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
                                                                     </svg>
                                                                 @else
                                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                                         class="size-3 text-error animate-pulse"
                                                                         viewBox="0 0 24 24" fill="none"
                                                                         stroke="currentColor" stroke-width="2.5"
-                                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round">
                                                                         <path stroke="none" d="M0 0h24v24H0z"
                                                                             fill="none" />
                                                                         <path
@@ -378,7 +384,7 @@
 
                                                             @if ($a->original_status_masuk)
                                                                 <div
-                                                                    class="text-[7px] font-black text-primary uppercase mt-0.5 leading-none">
+                                                                    class="text-[7px] font-medium text-red-500 uppercase mt-0.5 leading-none">
                                                                     SYSTEM</div>
                                                             @endif
                                                         </div>
@@ -453,18 +459,24 @@
                                                                 data-tip="{{ $a->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter_pulang, 0) }}m)">
                                                                 @if ($a->is_within_radius_pulang)
                                                                     <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        viewBox="0 0 20 20" fill="currentColor"
-                                                                        class="size-2.5 text-success">
-                                                                        <path fill-rule="evenodd"
-                                                                            d="m9.69 18.933.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 0 0 .281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 1 0 3 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 0 0 2.273 1.765 7.23 7.23 0 0 0 .757.433 5.73 5.73 0 0 0 .281.14l.019.008.006.003ZM10 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z"
-                                                                            clip-rule="evenodd" />
+                                                                        class="size-3 text-success"
+                                                                        viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2.5"
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round">
+                                                                        <path stroke="none" d="M0 0h24v24H0z"
+                                                                            fill="none" />
+                                                                        <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                        <path
+                                                                            d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
                                                                     </svg>
                                                                 @else
                                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                                         class="size-3 text-error animate-pulse"
                                                                         viewBox="0 0 24 24" fill="none"
                                                                         stroke="currentColor" stroke-width="2.5"
-                                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round">
                                                                         <path stroke="none" d="M0 0h24v24H0z"
                                                                             fill="none" />
                                                                         <path
@@ -478,7 +490,7 @@
 
                                                             @if ($a->original_status_pulang)
                                                                 <div
-                                                                    class="text-[7px] font-black text-primary uppercase mt-0.5 leading-none">
+                                                                    class="text-[7px] font-medium text-primary uppercase mt-0.5 leading-none">
                                                                     SYSTEM</div>
                                                             @endif
                                                         </div>
