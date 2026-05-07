@@ -23,7 +23,7 @@
                         <div class="relative">
                             <input x-bind:type="show ? 'text' : 'password'" wire:model.live="pin" maxlength="6"
                                 placeholder="••••••"
-                                class="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-4 py-4 md:px-5 md:py-5 text-center text-xl md:text-3xl font-black tracking-[0.5em] text-white focus:border-blue-500/50 focus:ring-0 transition-all placeholder:text-base-content/30">
+                                class="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-4 py-4 md:px-5 md:py-5 text-center text-xl md:text-3xl font-black tracking-[0.5em] text-white focus:border-blue-500/50 focus:ring-0 transition-all placeholder:text-white/50">
                             <button type="button" @click="show = !show"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
                                 <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none"

@@ -77,7 +77,7 @@
 
     <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body p-0">
-            <div class="min-h-[400px]">
+            <div class="min-h-100">
                 {{-- Desktop View --}}
                 <div class="hidden md:block overflow-x-auto">
                     <table class="table table-md w-full">
@@ -426,7 +426,7 @@
                                     <div x-show="open" x-transition:enter="transition ease-out duration-100"
                                         x-transition:enter-start="transform opacity-0 scale-95"
                                         x-transition:enter-end="transform opacity-100 scale-100"
-                                        class="absolute z-[100] mt-2 w-full bg-base-100 border border-base-200 rounded-xl shadow-2xl overflow-hidden">
+                                        class="absolute z-100 mt-2 w-full bg-base-100 border border-base-200 rounded-xl shadow-2xl overflow-hidden">
 
                                         {{-- Search Input inside Dropdown --}}
                                         <div class="p-2 border-b border-base-200 bg-base-200/30">

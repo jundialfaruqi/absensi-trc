@@ -286,7 +286,7 @@
                     <div class="space-y-4">
                         <h4
                             class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
-                            <span class="w-4 h-[1px] bg-base-content/20"></span>
+                            <span class="w-4 h-px bg-base-content/20"></span>
                             Apa yang baru
                         </h4>
 
@@ -324,7 +324,7 @@
 
                     @if ($apkOptionalMessage)
                         <div class="p-3 rounded-lg bg-warning/5 border border-warning/10 italic">
-                            <p class="text-[10px] text-warning-content/70 leading-relaxed font-medium">
+                            <p class="text-[10px] text-base-content leading-relaxed font-medium">
                                 "{{ $apkOptionalMessage }}"
                             </p>
                         </div>
@@ -353,8 +353,9 @@
                 <div class="p-6 pb-0 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="p-0 text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
                                 <path
                                     d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                             </svg>

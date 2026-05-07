@@ -19,7 +19,7 @@
                 </button>
             </div>
 
-            <div class="relative min-h-[300px]">
+            <div class="relative min-h-75">
                 {{-- Modal Content Loading Overlay --}}
                 <div wire:loading wire:target="activeTab"
                     class="absolute inset-0 z-50 flex items-center justify-center rounded-xl bg-base-100/50 backdrop-blur-[1px]">
@@ -182,7 +182,8 @@
                                 class="p-4 bg-warning/10 border border-warning/20 rounded-2xl flex items-start gap-3 animate-in shake duration-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                    stroke-linecap="round" stroke-linejoin="round" class="text-warning shrink-0 mt-0.5">
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="text-warning shrink-0 mt-0.5">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M12 9v4" />
                                     <path
@@ -190,7 +191,8 @@
                                     <path d="M12 16h.01" />
                                 </svg>
                                 <div>
-                                    <h4 class="text-xs font-black uppercase text-warning mb-1">Peringatan Istirahat</h4>
+                                    <h4 class="text-xs font-black uppercase text-warning mb-1">Peringatan Istirahat
+                                    </h4>
                                     <p class="text-[10px] leading-tight opacity-80">{!! $swapWarning !!}</p>
                                 </div>
                             </div>
