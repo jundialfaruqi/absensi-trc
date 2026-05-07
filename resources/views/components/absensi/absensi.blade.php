@@ -368,7 +368,8 @@
             {{-- ─── Step 2: Biometric & Location Verification ──────────────────────── --}}
             @if ($step === 2)
                 <div wire:key="step-2-verification-{{ $selectedPersonnel->id }}" x-data="absensiVerification()"
-                    x-init="initVerification('{{ $selectedPersonnel->face_descriptor }}', {{ $selectedPersonnel->face_recognition ? 'true' : 'false' }})"
+                    x-init="initVerification('{{ $selectedPersonnel->face_descriptor }}', {{ $selectedPersonnel->face_recognition ? 'true' : 'false' }});
+                    return () => { stopCamera(); }"
                     class="card bg-slate-900 border border-white/10 shadow-2xl animate-in zoom-in-95">
                     <div class="card-body p-4 sm:p-6 text-white text-center">
                         
@@ -434,10 +435,15 @@
                                 <h3 class="font-black uppercase text-sm truncate leading-tight">{{ $selectedPersonnel->name }}</h3>
                                 <p class="text-[10px] font-bold text-blue-300/60 uppercase tracking-widest truncate">{{ $selectedPersonnel->opd?->name ?? 'N/A' }}</p>
                                 <div class="flex items-center gap-2 mt-1">
-                                    @if ($activeJadwal->shift)
-                                        <span class="badge badge-primary badge-xs py-2 px-2 uppercase font-black text-[8px]">{{ $activeJadwal->shift->name }}</span>
-                                    @else
-                                        <span class="badge badge-error badge-xs py-2 px-2 uppercase font-black text-[8px]">{{ $activeJadwal->status }}</span>
+                                    @if ($activeJadwal && $activeJadwal->shift)
+                                        <span
+                                            class="badge badge-primary badge-xs py-2 px-2 uppercase font-black text-[8px]">{{ $activeJadwal->shift->name }}</span>
+                                    @elseif($activeJadwal)
+                                        <span
+                                            class="badge badge-error badge-xs py-2 px-2 uppercase font-black text-[8px]">{{ $activeJadwal->status }}</span>
+                                    @elseif($selectedPersonnel->attendance_type === 'FLEXIBLE')
+                                        <span
+                                            class="badge badge-info badge-xs py-2 px-2 uppercase font-black text-[8px]">FLEXIBLE</span>
                                     @endif
                                 </div>
                             </div>
@@ -717,6 +723,10 @@
                             }
                         },
 
+                        destroy() {
+                            this.stopCamera();
+                        },
+
                         async loadModels() {
                             const MODEL_URL = '/models';
                             await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
@@ -742,9 +752,16 @@
                         },
 
                         stopCamera() {
+                            console.log("Stopping camera...");
                             if (this.stream) {
-                                this.stream.getTracks().forEach(track => track.stop());
+                                this.stream.getTracks().forEach(track => {
+                                    track.stop();
+                                    console.log("Track stopped:", track.kind);
+                                });
                                 this.stream = null;
+                            }
+                            if (this.$refs.video) {
+                                this.$refs.video.srcObject = null;
                             }
                         },
 
@@ -844,6 +861,9 @@
                             canvas.height = video.videoHeight;
                             canvas.getContext('2d').drawImage(video, 0, 0);
                             const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+                            // Stop camera immediately
+                            this.stopCamera();
 
                             // Call Livewire
                             @this.submitAttendance(type, null, null, imageData);
