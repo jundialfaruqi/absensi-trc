@@ -61,4 +61,9 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
             })
             ->get();
     }
+
+    public function rendered($view)
+    {
+        $this->dispatch('devices-updated', devices: $this->devices);
+    }
 };

@@ -1,8 +1,6 @@
 <div wire:init="load">
     {{-- ─── Main Content ────────────────────────────────────────────────── --}}
     <div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-12rem)]">
-        {{-- Update markers on every Livewire render --}}
-        <div class="hidden" x-init="if (window.updateMarkers) { window.updateMarkers(@json($this->devices)); }"></div>
         {{-- Sidebar --}}
         <div class="w-full lg:w-80 bg-base-100 rounded-box shadow-sm p-4 flex flex-col gap-4">
             <div class="form-control w-full">
@@ -243,6 +241,10 @@
                 };
 
                 window.updateMarkers = updateMarkers;
+
+                Livewire.on('devices-updated', (data) => {
+                    updateMarkers(data.devices);
+                });
 
                 updateMarkers(@json($this->devices));
 
