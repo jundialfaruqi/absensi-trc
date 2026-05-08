@@ -75,7 +75,10 @@
         }
     </style>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" data-navigate-once />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" data-navigate-once />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
     <script>
         (function() {
             const initMapsHandler = () => {
@@ -96,6 +99,9 @@
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
                 }).addTo(map);
+
+                const markerCluster = L.markerClusterGroup();
+                map.addLayer(markerCluster);
 
                 // Fetch Pekanbaru boundary
                 fetch('https://nominatim.openstreetmap.org/search?city=Pekanbaru&format=json&polygon_geojson=1')
@@ -149,10 +155,8 @@
                 let markers = {};
 
                 function updateMarkers(devices) {
-                    // Clear existing markers
-                    for (let id in markers) {
-                        map.removeLayer(markers[id]);
-                    }
+                    // Clear existing markers from cluster
+                    markerCluster.clearLayers();
                     markers = {};
 
                     devices.forEach(d => {
@@ -177,8 +181,7 @@
 
                         const marker = L.marker([d.last_latitude, d.last_longitude], {
                                 icon: icon
-                            })
-                            .addTo(map);
+                            });
 
                         const name = d.personnel ? d.personnel.name : (d.name || 'Perangkat Global');
                         const opdName = d.opd ? d.opd.name : 'Global (Admin)';
@@ -208,6 +211,7 @@
                             fetchAddress(d.last_latitude, d.last_longitude, d.id);
                         });
 
+                        markerCluster.addLayer(marker);
                         markers[d.id] = marker;
                     });
 
