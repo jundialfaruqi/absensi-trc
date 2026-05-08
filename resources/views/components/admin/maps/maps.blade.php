@@ -41,21 +41,19 @@
 
             <div class="flex-1 overflow-y-auto space-y-2">
                 @forelse($this->devices as $d)
-                    @if ($d->personnel)
-                        <div class="p-2 hover:bg-base-200 rounded-lg cursor-pointer flex items-center gap-2"
-                            onclick="focusMarker({{ $d->last_latitude }}, {{ $d->last_longitude }})">
-                            <div class="avatar">
-                                <div class="w-10 rounded-full">
-                                    <img
-                                        src="{{ $d->personnel->foto ? asset('storage/' . $d->personnel->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($d->personnel->name) }}" />
-                                </div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-bold truncate">{{ $d->personnel->name }}</div>
-                                <div class="text-xs opacity-60 truncate">{{ $d->opd->name }}</div>
+                    <div class="p-2 hover:bg-base-200 rounded-lg cursor-pointer flex items-center gap-2"
+                        onclick="focusMarker({{ $d->last_latitude }}, {{ $d->last_longitude }})">
+                        <div class="avatar">
+                            <div class="w-10 rounded-full">
+                                <img
+                                    src="{{ $d->personnel?->foto ? asset('storage/' . $d->personnel->foto) : ($d->personnel ? 'https://ui-avatars.com/api/?name=' . urlencode($d->personnel->name) : asset('assets/logo/trc-logo.webp')) }}" />
                             </div>
                         </div>
-                    @endif
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold truncate">{{ $d->personnel?->name ?? 'Perangkat Global' }}</div>
+                            <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
+                        </div>
+                    </div>
                 @empty
                     <div class="text-center text-sm text-base-content/60 py-4">Tidak ada data lokasi</div>
                 @endforelse
@@ -158,14 +156,18 @@
                     markers = {};
 
                     devices.forEach(d => {
-                        if (!d.last_latitude || !d.last_longitude || !d.personnel) return;
+                        if (!d.last_latitude || !d.last_longitude) return;
+
+                        const iconUrl = d.personnel 
+                            ? (d.personnel.foto ? '/storage/'+d.personnel.foto : 'https://ui-avatars.com/api/?name='+encodeURIComponent(d.personnel.name))
+                            : '/assets/logo/trc-logo.webp';
 
                         const icon = L.divIcon({
                             className: 'custom-div-icon',
                             html: `<div class="relative w-10 h-10">
                                         <div class="avatar">
                                             <div class="w-10 rounded-full border-2 border-primary shadow-lg">
-                                                <img src="${d.personnel.foto ? '/storage/'+d.personnel.foto : 'https://ui-avatars.com/api/?name='+encodeURIComponent(d.personnel.name)}" />
+                                                <img src="${iconUrl}" />
                                             </div>
                                         </div>
                                    </div>`,
@@ -178,20 +180,24 @@
                             })
                             .addTo(map);
 
+                        const name = d.personnel ? d.personnel.name : 'Perangkat Global';
+                        const opdName = d.opd ? d.opd.name : 'Global (Admin)';
+                        const penugasan = d.personnel && d.personnel.penugasan ? d.personnel.penugasan.name : '-';
+
                         const popupContent = `
                             <div class="p-2 max-w-sm">
                                 <div class="flex items-center gap-2 mb-2">
                                     <div class="avatar">
                                         <div class="w-12 rounded-full">
-                                            <img src="${d.personnel.foto ? '/storage/'+d.personnel.foto : 'https://ui-avatars.com/api/?name='+encodeURIComponent(d.personnel.name)}" />
+                                            <img src="${iconUrl}" />
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="font-bold text-sm">${d.personnel.name}</div>
-                                        <div class="text-xs opacity-60">${d.opd.name}</div>
+                                        <div class="font-bold text-sm">${name}</div>
+                                        <div class="text-xs opacity-60">${opdName}</div>
                                     </div>
                                 </div>
-                                <div class="text-xs mb-1"><strong>Penugasan:</strong> ${d.personnel.penugasan ? d.personnel.penugasan.name : '-'}</div>
+                                <div class="text-xs mb-1"><strong>Penugasan:</strong> ${penugasan}</div>
                                 <div class="text-xs" id="address-${d.id}"><strong>Lokasi:</strong> Memuat alamat...</div>
                             </div>
                         `;
