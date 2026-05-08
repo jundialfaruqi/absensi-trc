@@ -211,11 +211,7 @@
                         markers[d.id] = marker;
                     });
 
-                    // Auto fit bounds if there are markers
-                    if (devices.length > 0) {
-                        const group = new L.featureGroup(Object.values(markers));
-                        map.fitBounds(group.getBounds().pad(0.1));
-                    }
+                    // Auto fit bounds disabled per user request
                 }
 
                 function fetchAddress(lat, lng, id) {
