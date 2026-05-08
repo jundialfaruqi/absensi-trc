@@ -199,7 +199,8 @@
                     </thead>
                     <tbody>
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
-                            <tr @if($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate" @endif>
+                            <tr
+                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate" @endif>
                                 <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
@@ -227,7 +228,8 @@
                             @endphp
                             @forelse ($this->personnels as $p)
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
-                                    <tr class="bg-base-200" wire:loading.remove wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
+                                    <tr class="bg-base-200" wire:loading.remove
+                                        wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
                                             <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
@@ -241,7 +243,8 @@
                                     </tr>
                                     @php $currentOpd = $p->opd_id; @endphp
                                 @endif
-                                <tr class="group" wire:loading.remove wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
+                                <tr class="group" wire:loading.remove
+                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
                                             <div class="avatar placeholder">
@@ -360,13 +363,15 @@
                                                                     data-tip="{{ $a->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter, 0) }}m)">
                                                                     @if ($a->is_within_radius)
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="size-3 text-success" viewBox="0 0 24 24"
-                                                                            fill="none" stroke="currentColor"
-                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            class="size-3 text-success"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5"
+                                                                            stroke-linecap="round"
                                                                             stroke-linejoin="round">
                                                                             <path stroke="none" d="M0 0h24v24H0z"
                                                                                 fill="none" />
-                                                                            <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                            <path
+                                                                                d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
                                                                             <path
                                                                                 d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
                                                                         </svg>
@@ -393,9 +398,10 @@
                                                                     <div class="tooltip tooltip-primary flex justify-center"
                                                                         data-tip="Diedit oleh Sistem/Admin (Asli: {{ $a->original_status_masuk }})">
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="size-3 text-primary" viewBox="0 0 24 24"
-                                                                            fill="none" stroke="currentColor"
-                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            class="size-3 text-primary"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5"
+                                                                            stroke-linecap="round"
                                                                             stroke-linejoin="round">
                                                                             <path stroke="none" d="M0 0h24v24H0z"
                                                                                 fill="none" />
@@ -482,13 +488,15 @@
                                                                     data-tip="{{ $a->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($a->jarak_meter_pulang, 0) }}m)">
                                                                     @if ($a->is_within_radius_pulang)
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="size-3 text-success" viewBox="0 0 24 24"
-                                                                            fill="none" stroke="currentColor"
-                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            class="size-3 text-success"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5"
+                                                                            stroke-linecap="round"
                                                                             stroke-linejoin="round">
                                                                             <path stroke="none" d="M0 0h24v24H0z"
                                                                                 fill="none" />
-                                                                            <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                            <path
+                                                                                d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
                                                                             <path
                                                                                 d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
                                                                         </svg>
@@ -515,9 +523,10 @@
                                                                     <div class="tooltip tooltip-primary flex justify-center"
                                                                         data-tip="Diedit oleh Sistem/Admin (Asli: {{ $a->original_status_pulang }})">
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="size-3 text-primary" viewBox="0 0 24 24"
-                                                                            fill="none" stroke="currentColor"
-                                                                            stroke-width="2.5" stroke-linecap="round"
+                                                                            class="size-3 text-primary"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.5"
+                                                                            stroke-linecap="round"
                                                                             stroke-linejoin="round">
                                                                             <path stroke="none" d="M0 0h24v24H0z"
                                                                                 fill="none" />
@@ -546,7 +555,8 @@
                                     @endforeach
                                 </tr>
                             @empty
-                                <tr wire:loading.remove wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
+                                <tr wire:loading.remove
+                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                     <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                         class="text-center py-12 text-sm text-base-content/60">
                                         <div class="flex flex-col items-center justify-center">
