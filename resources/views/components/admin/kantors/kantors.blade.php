@@ -1,4 +1,4 @@
-<div>
+<div wire:init="load">
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -81,14 +81,36 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- ─── Skeleton Loading ────────────────────────── --}}
+                        @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
+                            <tr @if($readyToLoad) wire:loading wire:target="perPage, search, filterOpd" @endif>
+                                <td class="text-center font-bold"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                                <td>
+                                    <div class="skeleton h-5 w-32 mb-1"></div>
+                                    <div class="skeleton h-3 w-48 mb-1"></div>
+                                    <div class="skeleton h-3 w-24"></div>
+                                </td>
+                                <td><div class="skeleton h-4 w-24"></div></td>
+                                <td><div class="skeleton h-4 w-12"></div></td>
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        <div class="skeleton h-4 w-4 rounded-full"></div>
+                                        <div class="skeleton h-4 w-8"></div>
+                                    </div>
+                                </td>
+                                <td><div class="skeleton h-5 w-16 rounded-full"></div></td>
+                                <td class="text-center"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                            </tr>
+                        @endfor
+
                         @forelse ($this->kantors as $r)
-                            <tr class="hover:bg-base-200/50">
+                            <tr class="hover:bg-base-200/50" @if($readyToLoad) wire:loading.remove wire:target="perPage, search, filterOpd" @endif>
                                 <td class="text-center font-bold">{{ $this->kantors->firstItem() + $loop->index }}</td>
                                 <td>
                                     <div class="font-bold">{{ $r->name }}</div>
                                     <div class="text-xs opacity-50 truncate max-w-xs">{{ $r->alamat }}</div>
                                     <div class="text-[10px] text-primary font-mono mt-1">{{ $r->latitude }},
-                                        {{ $r->longitude }}</div>
+                                         {{ $r->longitude }}</div>
                                 </td>
                                 <td>
                                     <div class="text-xs font-medium">{{ $r->opd->name }}</div>
@@ -134,7 +156,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
+                            <tr @if($readyToLoad) wire:loading.remove wire:target="perPage, search, filterOpd" @endif>
                                 <td colspan="7" class="text-center text-sm text-base-content/60 py-8">Tidak ada data
                                     Kantor</td>
                             </tr>

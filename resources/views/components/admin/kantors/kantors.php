@@ -3,6 +3,7 @@
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Kantor;
@@ -13,9 +14,21 @@ new #[Title('Manajemen Kantor')] #[Layout('layouts::admin.app')] class extends C
 {
     use WithPagination;
 
+    public bool $readyToLoad = false;
+
+    #[Url]
     public int $perPage = 10;
+
+    #[Url]
     public string $search = '';
+
+    #[Url]
     public string $filterOpd = '';
+
+    public function load(): void
+    {
+        $this->readyToLoad = true;
+    }
 
     // Form
     public ?int $kantorId = null;
@@ -34,8 +47,12 @@ new #[Title('Manajemen Kantor')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function kantors()
     {
+        if (!$this->readyToLoad) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        }
+
         return Kantor::with('opd')
-            ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+            ->when(strlen($this->search) >= 3, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
             ->when($this->filterOpd, fn($q) => $q->where('opd_id', $this->filterOpd))
             ->when(!auth()->user()->hasRole('super-admin'), function($q) {
                 $userOpdId = auth()->user()->opd()?->id;
