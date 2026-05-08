@@ -59,6 +59,8 @@ class AttendanceController extends Controller
             'last_seen_at' => now(),
         ]);
 
+        // Hapus token lama agar tidak menumpuk
+        $device->tokens()->delete();
         $token = $device->createToken('device-token')->plainTextToken;
 
         return response()->json([
@@ -103,6 +105,8 @@ class AttendanceController extends Controller
 
         $device->update(['last_seen_at' => now()]);
 
+        // Hapus token lama agar tidak menumpuk
+        $device->tokens()->delete();
         $token = $device->createToken('device-token')->plainTextToken;
 
         return response()->json([
