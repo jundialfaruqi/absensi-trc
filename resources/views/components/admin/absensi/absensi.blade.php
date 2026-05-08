@@ -34,124 +34,131 @@
     </div>
 
     {{-- ─── Matrix Toolbar ──────────────────────────────────────────────────── --}}
-    <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
-        <div class="flex flex-col sm:flex-row items-center gap-3">
-            <div class="join">
-                <span
-                    class="btn btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
-                <select wire:model.live="perPage" class="select select-bordered join-item w-20 rounded-end-md">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                </select>
-            </div>
-
-            @if (auth()->user()->hasRole('super-admin'))
-                <div class="w-full sm:w-auto">
-                    <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
-                        <option value="">Semua OPD (Filter)</option>
-                        @foreach ($this->opds as $opd)
-                            <option value="{{ $opd->id }}">{{ $opd->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+    {{-- ─── Matrix Toolbar ──────────────────────────────────────────────────── --}}
+    <div class="flex flex-col gap-4 mb-6">
+        {{-- Search Input --}}
+        <div class="relative w-full sm:w-64">
+            <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
+                class="input input-bordered w-full pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </span>
+            @if ($search)
+                <button type="button" wire:click="$set('search', '')"
+                    class="absolute inset-y-0 right-0 pr-3 text-base-content/50">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             @endif
-
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="join w-full sm:w-auto">
-                    <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
-                        @for ($i = 1; $i <= 12; $i++)
-                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
-                                {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
-                            </option>
-                        @endfor
-                    </select>
-                    <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
-                        @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
-                            <option value="{{ $y }}">{{ $y }}</option>
-                        @endfor
-                    </select>
-                </div>
-
-                <style>
-                    input[type="date"]::-webkit-calendar-picker-indicator {
-                        display: block !important;
-                        cursor: pointer;
-                        opacity: 0.5;
-                        filter: invert(1);
-                    }
-
-                    .dark input[type="date"]::-webkit-calendar-picker-indicator {
-                        filter: invert(0);
-                    }
-
-                    input[type="date"]::-webkit-calendar-picker-indicator:hover {
-                        opacity: 1;
-                    }
-                </style>
-
-                <div class="join w-full sm:w-auto">
-                    <div
-                        class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
-                        Dari</div>
-                    <input type="date" id="startDate" wire:model.live="startDate"
-                        class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
-                    <div
-                        class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
-                        S/D</div>
-                    <input type="date" id="endDate" wire:model.live="endDate"
-                        class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
-
-                    @if ($startDate || $endDate)
-                        <button type="button" wire:click="resetFilters"
-                            class="btn join-item px-3 text-error btn-bordered">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2.5" stroke="currentColor" class="size-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    @endif
-                </div>
-            </div>
         </div>
 
-        <div class="flex flex-wrap gap-2 justify-end">
-            {{-- Optional Action Buttons for Absensi --}}
-            <div class="relative w-full sm:w-64">
-                <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
-                    class="input input-bordered w-full pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg class="w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </span>
-                @if ($search)
-                    <button type="button" wire:click="$set('search', '')"
-                        class="absolute inset-y-0 right-0 pr-3 text-base-content/50">
-                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+        {{-- Filters and Actions --}}
+        <div class="flex flex-col md:flex-row justify-between gap-4">
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="join">
+                    <span
+                        class="btn btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
+                    <select wire:model.live="perPage" class="select select-bordered join-item w-20 rounded-end-md">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+                </div>
+
+                @if (auth()->user()->hasRole('super-admin'))
+                    <div class="w-full sm:w-auto">
+                        <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
+                            <option value="">Semua OPD (Filter)</option>
+                            @foreach ($this->opds as $opd)
+                                <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 @endif
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="join w-full sm:w-auto">
+                        <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
+                            @for ($i = 1; $i <= 12; $i++)
+                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
+                                    {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                                </option>
+                            @endfor
+                        </select>
+                        <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
+                            @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <style>
+                        input[type="date"]::-webkit-calendar-picker-indicator {
+                            display: block !important;
+                            cursor: pointer;
+                            opacity: 0.5;
+                            filter: invert(1);
+                        }
+
+                        .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(0);
+                        }
+
+                        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+                            opacity: 1;
+                        }
+                    </style>
+
+                    <div class="join w-full sm:w-auto">
+                        <div
+                            class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                            Dari</div>
+                        <input type="date" id="startDate" wire:model.live="startDate"
+                            class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
+                        <div
+                            class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                            S/D</div>
+                        <input type="date" id="endDate" wire:model.live="endDate"
+                            class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
+
+                        @if ($startDate || $endDate)
+                            <button type="button" wire:click="resetFilters"
+                                class="btn join-item px-3 text-error btn-bordered">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+                </div>
             </div>
 
-            <div class="join">
-                <select wire:model.live="paperSize" class="select select-bordered join-item">
-                    <option value="a4">Kertas A4</option>
-                    <option value="f4">Kertas F4 / Folio</option>
-                    <option value="legal">Kertas Legal</option>
-                </select>
-                <a href="{{ route('absensi.export-pdf', ['month' => $month, 'year' => $year, 'search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize]) }}"
-                    target="_blank" class="btn btn-neutral join-item gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                    Export PDF
-                </a>
+            <div class="flex flex-wrap gap-2 justify-end">
+                <div class="join">
+                    <select wire:model.live="paperSize" class="select select-bordered join-item">
+                        <option value="a4">Kertas A4</option>
+                        <option value="f4">Kertas F4 / Folio</option>
+                        <option value="legal">Kertas Legal</option>
+                    </select>
+                    <a href="{{ route('absensi.export-pdf', ['month' => $month, 'year' => $year, 'search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize]) }}"
+                        target="_blank" class="btn btn-neutral join-item gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                        Export PDF
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -159,6 +166,7 @@
     {{-- ─── Absensi Matrix ────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
         <div class="card-body p-0">
+            {{-- ─── Skeleton Loading ────────────────────────── --}}
             <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
                 <table class="table table-sm w-full border-separate border-spacing-0">
                     <thead class="sticky top-0 z-110 bg-base-100">
@@ -190,31 +198,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- ─── Skeleton Loading (While Not Ready) ────────────────────────── --}}
-                        @if (!$readyToLoad)
-                            @for ($i = 0; $i < $perPage; $i++)
-                                <tr>
-                                    <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
-                                        <div class="flex items-center gap-2 ps-4">
-                                            <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
-                                            <div class="flex flex-col gap-2">
-                                                <div class="skeleton h-3 w-28"></div>
-                                                <div class="skeleton h-2 w-20"></div>
-                                            </div>
+                        @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
+                            <tr @if($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate" @endif>
+                                <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
+                                    <div class="flex items-center gap-2 ps-4">
+                                        <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
+                                        <div class="flex flex-col gap-2">
+                                            <div class="skeleton h-3 w-28"></div>
+                                            <div class="skeleton h-2 w-20"></div>
                                         </div>
+                                    </div>
+                                </td>
+                                @foreach ($this->dates as $date)
+                                    <td class="border-r border-base-200 p-1 min-w-16">
+                                        <div class="skeleton h-10 w-full rounded-lg"></div>
                                     </td>
-                                    @foreach ($this->dates as $date)
-                                        <td class="border-r border-base-200 p-1 min-w-16">
-                                            <div class="skeleton h-10 w-full rounded-lg"></div>
-                                        </td>
-                                        <td class="border-r border-base-200 p-1 min-w-16">
-                                            <div class="skeleton h-10 w-full rounded-lg"></div>
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @endfor
-                        @endif
-
+                                    <td class="border-r border-base-200 p-1 min-w-16">
+                                        <div class="skeleton h-10 w-full rounded-lg"></div>
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endfor
                         {{-- ─── Real Table Data ────────────────────────────────────────── --}}
                         @if ($readyToLoad)
                             @php
@@ -223,7 +227,7 @@
                             @endphp
                             @forelse ($this->personnels as $p)
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
-                                    <tr class="bg-base-200">
+                                    <tr class="bg-base-200" wire:loading.remove wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
                                             <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
@@ -237,7 +241,7 @@
                                     </tr>
                                     @php $currentOpd = $p->opd_id; @endphp
                                 @endif
-                                <tr class="group">
+                                <tr class="group" wire:loading.remove wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
                                             <div class="avatar placeholder">
@@ -542,7 +546,7 @@
                                     @endforeach
                                 </tr>
                             @empty
-                                <tr>
+                                <tr wire:loading.remove wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                     <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                         class="text-center py-12 text-sm text-base-content/60">
                                         <div class="flex flex-col items-center justify-center">
