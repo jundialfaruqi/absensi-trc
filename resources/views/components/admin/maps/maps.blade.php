@@ -52,6 +52,10 @@
                         <div class="flex-1 min-w-0">
                             <div class="font-bold truncate">{{ $d->personnel?->name ?? $d->name ?? 'Perangkat Global' }}</div>
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
+                            <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
+                                Aktif: {{ $d->last_seen_human }}
+                            </div>
                         </div>
                     </div>
                 @empty
@@ -201,7 +205,8 @@
                                     </div>
                                 </div>
                                 <div class="text-xs mb-1"><strong>Penugasan:</strong> ${penugasan}</div>
-                                <div class="text-xs" id="address-${d.id}"><strong>Lokasi:</strong> Memuat alamat...</div>
+                                <div class="text-xs mb-1" id="address-${d.id}"><strong>Lokasi:</strong> Memuat alamat...</div>
+                                <div class="text-xs opacity-60"><strong>Terakhir Terlihat:</strong> ${d.last_seen_human}</div>
                             </div>
                         `;
 

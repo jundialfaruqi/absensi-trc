@@ -59,7 +59,11 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
                     $pq->where('name', 'like', '%' . $this->search . '%');
                 });
             })
-            ->get();
+            ->get()
+            ->map(function ($d) {
+                $d->last_seen_human = $d->last_seen_at ? $d->last_seen_at->diffForHumans() : 'Belum aktif';
+                return $d;
+            });
     }
 
     public function rendered($view)
