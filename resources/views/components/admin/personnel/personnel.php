@@ -18,7 +18,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     use WithPagination;
 
     public bool $readyToLoad = false;
-    public int $perPage = 10;
+    #[Url]
+    public int $perPage = 50;
     
     #[Url]
     public string $search = '';

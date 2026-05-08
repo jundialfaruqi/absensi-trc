@@ -30,6 +30,9 @@
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
                     </select>
                 </div>
                 <div class="relative w-full sm:w-auto">
@@ -80,66 +83,65 @@
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm mb-6">
         <div class="card-body p-0">
-            {{-- ─── Skeleton Loading (While Not Ready) ────────────────────────── --}}
-            @if (!$readyToLoad)
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full">
-                        <thead>
+            {{-- ─── Skeleton Loading ────────────────────────── --}}
+            <div class="overflow-x-auto"
+                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search" @endif>
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-center w-16">#</th>
+                            <th>Personnel</th>
+                            <th>Kontak</th>
+                            <th>Penugasan</th>
+                            <th>Kantor / Lokasi</th>
+                            <th>OPD Induk</th>
+                            <th class="text-center">Face</th>
+                            <th class="text-center w-24">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
                             <tr>
-                                <th class="text-center w-16">#</th>
-                                <th>Personnel</th>
-                                <th>Kontak</th>
-                                <th>Penugasan</th>
-                                <th>Kantor / Lokasi</th>
-                                <th>OPD Induk</th>
-                                <th class="text-center">Face</th>
-                                <th class="text-center w-24">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for ($i = 0; $i < $perPage; $i++)
-                                <tr>
-                                    <td class="text-center">
-                                        <div class="skeleton h-4 w-4 mx-auto"></div>
-                                    </td>
-                                    <td>
-                                        <div class="flex items-center gap-3">
-                                            <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
-                                            <div class="flex flex-col gap-2">
-                                                <div class="skeleton h-4 w-32"></div>
-                                                <div class="skeleton h-3 w-24"></div>
-                                            </div>
+                                <td class="text-center">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
+                                        <div class="flex flex-col gap-2">
+                                            <div class="skeleton h-4 w-32"></div>
+                                            <div class="skeleton h-3 w-24"></div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton h-4 w-24"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton h-5 w-20 rounded-full"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton h-4 w-32 mb-1"></div>
-                                        <div class="skeleton h-3 w-16"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton h-4 w-28"></div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="skeleton h-4 w-12 mx-auto rounded-full"></div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="skeleton h-6 w-6 mx-auto rounded-full"></div>
-                                    </td>
-                                </tr>
-                            @endfor
-                        </tbody>
-                    </table>
-                </div>
-            @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="skeleton h-4 w-24"></div>
+                                </td>
+                                <td>
+                                    <div class="skeleton h-5 w-20 rounded-full"></div>
+                                </td>
+                                <td>
+                                    <div class="skeleton h-4 w-32 mb-1"></div>
+                                    <div class="skeleton h-3 w-16"></div>
+                                </td>
+                                <td>
+                                    <div class="skeleton h-4 w-28"></div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="skeleton h-4 w-12 mx-auto rounded-full"></div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="skeleton h-6 w-6 mx-auto rounded-full"></div>
+                                </td>
+                            </tr>
+                        @endfor
+                    </tbody>
+                </table>
+            </div>
 
             {{-- ─── Real Table Data ────────────────────────────────────────── --}}
             @if ($readyToLoad)
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" wire:loading.remove wire:target="perPage, selectedOpd, search">
                     <table class="table w-full">
                         <thead>
                             <tr>
@@ -250,12 +252,12 @@
                                     <td class="text-center">
                                         @if ($r->face_recognition)
                                             <div
-                                                class="badge badge-success badge-xs font-bold text-[8px] text-white uppercase">
+                                                class="badge badge-success badge-xs font-bold text-[8px] text-white text-nowrap uppercase">
                                                 Face On
                                             </div>
                                         @else
                                             <div
-                                                class="badge badge-ghost badge-xs font-bold text-[8px] uppercase opacity-50">
+                                                class="badge badge-ghost badge-xs font-bold text-[8px] uppercase text-nowrap opacity-50">
                                                 Face Off</div>
                                         @endif
                                     </td>
