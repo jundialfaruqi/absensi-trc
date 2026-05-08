@@ -1,6 +1,8 @@
 <div wire:init="load">
     {{-- ─── Main Content ────────────────────────────────────────────────── --}}
     <div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-12rem)]">
+        {{-- Update markers on every Livewire render --}}
+        <div class="hidden" x-init="if (window.updateMarkers) { window.updateMarkers(@json($this->devices)); }"></div>
         {{-- Sidebar --}}
         <div class="w-full lg:w-80 bg-base-100 rounded-box shadow-sm p-4 flex flex-col gap-4">
             <div class="form-control w-full">
@@ -239,6 +241,8 @@
                         map.setView([lat, lng], 16);
                     }
                 };
+
+                window.updateMarkers = updateMarkers;
 
                 updateMarkers(@json($this->devices));
 
