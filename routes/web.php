@@ -126,6 +126,10 @@ Route::group([
         ->middleware('permission:manajemen-perangkat')
         ->name('perangkat');
 
+    Route::livewire('/maps', 'admin::maps')
+        ->middleware('permission:manajemen-absensi')
+        ->name('maps');
+
     Route::livewire('/profil-saya', 'admin::profile-saya')
         ->name('profile');
 

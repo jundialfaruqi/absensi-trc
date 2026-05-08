@@ -23,6 +23,8 @@ class Device extends Model
         'model',
         'android_version',
         'status',
+        'last_latitude',
+        'last_longitude',
         'notes',
         'activated_at',
         'last_seen_at',

@@ -16,6 +16,7 @@ Route::middleware('mobile_auth')->group(function () {
         Route::middleware('throttle:30,1')->group(function () {
             Route::get('/personnels', [AttendanceController::class, 'personnels']);
             Route::get('/personnels/check-status/{id}', [AttendanceController::class, 'checkStatus']);
+            Route::post('/device/location', [AttendanceController::class, 'updateLocation']);
         });
 
         // Login PIN (Dinonaktifkan karena sudah tidak digunakan)

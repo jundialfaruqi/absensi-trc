@@ -118,6 +118,35 @@ class AttendanceController extends Controller
             ]
         ]);
     }
+
+    public function updateLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $device = $request->get('device');
+
+        if (!$device) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Informasi perangkat tidak ditemukan.'
+            ], 403);
+        }
+
+        $device->update([
+            'last_latitude' => $request->latitude,
+            'last_longitude' => $request->longitude,
+            'last_seen_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Lokasi perangkat berhasil diperbarui.'
+        ]);
+    }
+
     public function personnels(Request $request)
     {
         $device = $request->get('device');
