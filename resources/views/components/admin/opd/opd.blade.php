@@ -1,4 +1,4 @@
-<div>
+<div wire:init="load">
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -81,8 +81,33 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- ─── Skeleton Loading ────────────────────────── --}}
+                        @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
+                            <tr @if($readyToLoad) wire:loading wire:target="perPage, search" @endif>
+                                <td class="text-center font-bold"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                                <td>
+                                    <div class="avatar placeholder">
+                                        <div class="skeleton w-12 h-12 rounded"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="skeleton h-4 w-48 mb-2"></div>
+                                    <div class="skeleton h-3 w-32"></div>
+                                </td>
+                                <td><div class="skeleton h-5 w-16 rounded-full"></div></td>
+                                <td>
+                                    <div class="flex -space-x-2">
+                                        <div class="skeleton w-8 h-8 rounded-full"></div>
+                                        <div class="skeleton w-8 h-8 rounded-full"></div>
+                                        <div class="skeleton w-8 h-8 rounded-full"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                            </tr>
+                        @endfor
+
                         @forelse ($this->opds as $r)
-                            <tr class="hover:bg-base-200/50">
+                            <tr class="hover:bg-base-200/50" @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td class="text-center font-bold">{{ $this->opds->firstItem() + $loop->index }}</td>
                                 <td>
                                     @if ($r->logo_url)
@@ -159,7 +184,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
+                            <tr @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td colspan="6" class="text-center text-sm text-base-content/60 py-8">Tidak ada
                                     data OPD</td>
                             </tr>

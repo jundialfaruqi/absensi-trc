@@ -3,6 +3,7 @@
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -15,8 +16,18 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
 {
     use WithPagination, WithFileUploads;
 
+    public bool $readyToLoad = false;
+
+    #[Url]
     public int $perPage = 10;
+
+    #[Url]
     public string $search = '';
+
+    public function load(): void
+    {
+        $this->readyToLoad = true;
+    }
     public string $userSearch = '';
 
     // Form
@@ -40,6 +51,10 @@ new #[Title('Manajemen OPD')] #[Layout('layouts::admin.app')] class extends Comp
     #[Computed]
     public function opds()
     {
+        if (!$this->readyToLoad) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        }
+
         return Opd::withCount('users')
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%')
                                               ->orWhere('singkatan', 'like', '%' . $this->search . '%'))
