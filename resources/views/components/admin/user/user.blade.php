@@ -1,4 +1,4 @@
-<div>
+<div wire:init="load">
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -80,8 +80,30 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- ─── Skeleton Loading ────────────────────────── --}}
+                        @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
+                            <tr @if($readyToLoad) wire:loading wire:target="perPage, search" @endif>
+                                <td class="text-center font-bold"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
+                                        <div class="flex flex-col gap-2">
+                                            <div class="skeleton h-4 w-28"></div>
+                                            <div class="skeleton h-3 w-20"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><div class="skeleton h-4 w-24"></div></td>
+                                <td>
+                                    <div class="skeleton h-4 w-32 mb-1"></div>
+                                    <div class="skeleton h-6 w-16 rounded-full"></div>
+                                </td>
+                                <td class="text-center"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                            </tr>
+                        @endfor
+
                         @forelse ($this->users as $r)
-                            <tr class="hover:bg-base-200/50">
+                            <tr class="hover:bg-base-200/50" @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td class="text-center font-bold">{{ $this->users->firstItem() + $loop->index }}</td>
                                 <td>
                                     <div class="flex items-center gap-3">
@@ -149,8 +171,8 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="4" class="text-center text-sm text-base-content/60 py-8">Tidak ada
+                            <tr @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
+                                <td colspan="5" class="text-center text-sm text-base-content/60 py-8">Tidak ada
                                     data Admin</td>
                             </tr>
                         @endforelse
