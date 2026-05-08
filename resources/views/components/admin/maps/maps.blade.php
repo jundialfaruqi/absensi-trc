@@ -50,7 +50,7 @@
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="font-bold truncate">{{ $d->personnel?->name ?? 'Perangkat Global' }}</div>
+                            <div class="font-bold truncate">{{ $d->personnel?->name ?? $d->name ?? 'Perangkat Global' }}</div>
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
                             })
                             .addTo(map);
 
-                        const name = d.personnel ? d.personnel.name : 'Perangkat Global';
+                        const name = d.personnel ? d.personnel.name : (d.name || 'Perangkat Global');
                         const opdName = d.opd ? d.opd.name : 'Global (Admin)';
                         const penugasan = d.personnel && d.personnel.penugasan ? d.personnel.penugasan.name : '-';
 
