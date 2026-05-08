@@ -107,6 +107,35 @@
                 const markerCluster = L.markerClusterGroup();
                 map.addLayer(markerCluster);
 
+                const kantorLayer = L.layerGroup().addTo(map);
+
+                function updateKantors(kantors) {
+                    kantorLayer.clearLayers();
+                    kantors.forEach(k => {
+                        if (!k.latitude || !k.longitude || !k.radius_meter) return;
+
+                        const circle = L.circle([k.latitude, k.longitude], {
+                            color: '#10b981', // green-500
+                            fillColor: '#10b981',
+                            fillOpacity: 0.15,
+                            radius: parseFloat(k.radius_meter),
+                            weight: 1.5,
+                            dashArray: '5, 5' // dashed line for better aesthetics
+                        });
+
+                        circle.bindPopup(`
+                            <div class="p-2">
+                                <div class="font-bold text-sm text-primary">${k.name}</div>
+                                <div class="text-xs opacity-70 mt-1">Radius Absensi: <strong>${k.radius_meter} meter</strong></div>
+                            </div>
+                        `);
+
+                        kantorLayer.addLayer(circle);
+                    });
+                }
+
+                window.updateKantors = updateKantors;
+
                 // Fetch Pekanbaru boundary
                 fetch('https://nominatim.openstreetmap.org/search?city=Pekanbaru&format=json&polygon_geojson=1')
                     .then(response => response.json())
@@ -251,7 +280,12 @@
                     updateMarkers(data.devices);
                 });
 
+                Livewire.on('kantors-updated', (data) => {
+                    updateKantors(data.kantors);
+                });
+
                 updateMarkers(@json($this->devices));
+                updateKantors(@json($this->kantors));
 
                 window.mapsInitialized = true;
             };

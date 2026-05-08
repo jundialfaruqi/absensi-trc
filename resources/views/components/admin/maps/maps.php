@@ -66,8 +66,19 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
             });
     }
 
+    #[Computed]
+    public function kantors()
+    {
+        return \App\Models\Kantor::when(!Auth::user()->hasRole('super-admin'), function ($q) {
+                $q->where('opd_id', Auth::user()->opd()?->id);
+            })
+            ->where('is_active', true)
+            ->get();
+    }
+
     public function rendered($view)
     {
         $this->dispatch('devices-updated', devices: $this->devices);
+        $this->dispatch('kantors-updated', kantors: $this->kantors);
     }
 };
