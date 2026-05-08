@@ -75,6 +75,9 @@
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="500">500</option>
                 </select>
             </div>
 
@@ -135,7 +138,7 @@
     <div class="card bg-base-100 shadow-sm mb-6 overflow-hidden min-h-150" wire:key="jadwal-main-container">
         <div class="card-body p-0">
             {{-- ─── Loading State (Skeleton) ────────────────────────────────── --}}
-            <div @if ($readyToLoad) wire:loading wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage" @endif
+            <div @if ($readyToLoad) wire:loading wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage, selectedOpd" @endif
                 class="w-full {{ !$readyToLoad ? '' : 'hidden' }}">
                 <div class="overflow-x-auto">
                     <table class="table table-sm w-full border-separate border-spacing-0">
@@ -179,7 +182,7 @@
             {{-- ─── Real Table Data ────────────────────────────────────────── --}}
             @if ($readyToLoad)
                 <div wire:loading.remove
-                    wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage"
+                    wire:target="month, year, search, perPage, startDate, endDate, resetFilters, gotoPage, nextPage, previousPage, selectedOpd"
                     class="overflow-x-auto max-h-250 overflow-y-auto">
                     <table class="table table-sm w-full border-separate border-spacing-0">
                         <thead class="sticky top-0 z-20 bg-base-100">
