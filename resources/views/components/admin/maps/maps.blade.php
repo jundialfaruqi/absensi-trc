@@ -299,8 +299,6 @@
             document.addEventListener('livewire:navigated', () => {
                 window.mapsInitialized = false; // Allow re-init for new DOM
                 initMapsHandler();
-            }, {
-                once: true
             });
         })();
     </script>
