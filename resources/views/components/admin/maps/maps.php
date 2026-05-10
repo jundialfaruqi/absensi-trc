@@ -40,7 +40,11 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
     {
         if (!$this->readyToLoad) return [];
 
-        return Device::with(['personnel', 'opd', 'personnel.penugasan'])
+        return Device::with([
+                'personnel:id,name,foto,penugasan_id,opd_id',
+                'personnel.penugasan:id,name',
+                'opd:id,name,singkatan',
+            ])
             ->whereNotNull('last_latitude')
             ->whereNotNull('last_longitude')
             ->when(!Auth::user()->hasRole('super-admin'), function ($q) {
@@ -59,6 +63,11 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
                     $pq->where('name', 'like', '%' . $this->search . '%');
                 });
             })
+            // Hanya ambil kolom yang diperlukan untuk peta (hilangkan data sensitif)
+            ->select([
+                'id', 'opd_id', 'personnel_id', 'name',
+                'last_latitude', 'last_longitude', 'last_seen_at',
+            ])
             ->get()
             ->map(function ($d) {
                 $d->last_seen_human = $d->last_seen_at ? $d->last_seen_at->diffForHumans() : 'Belum aktif';
