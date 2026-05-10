@@ -1,4 +1,3 @@
-
 <div wire:init="load">
     {{-- ─── Main Content ────────────────────────────────────────────────── --}}
     <div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-12rem)]">
@@ -338,7 +337,6 @@
                 window.updateMarkers = updateMarkers;
 
                 Livewire.on('devices-updated', (data) => {
-                    console.log('EVENT devices-updated diterima:', JSON.stringify(data));
                     updateMarkers(data.devices);
                 });
 
