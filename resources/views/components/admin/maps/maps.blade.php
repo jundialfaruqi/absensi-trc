@@ -367,6 +367,7 @@
                 window.updateMarkers = updateMarkers;
 
                 Livewire.on('devices-updated', (data) => {
+                    console.log('EVENT devices-updated diterima:', JSON.stringify(data));
                     updateMarkers(data.devices);
                 });
 
