@@ -41,6 +41,9 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     public $deleteId;
     public $deleteName;
 
+    // Counter untuk memaksa Alpine re-inisialisasi setiap modal dibuka
+    public int $modalKey = 0;
+
     public function load()
     {
         $this->readyToLoad = true;
@@ -127,6 +130,7 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     {
         $this->resetForm();
         $this->generateLicense();
+        $this->modalKey++; // Paksa Alpine re-inisialisasi
         $this->dispatch('open-modal', id: 'device-modal');
     }
 
@@ -150,6 +154,7 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
         $this->status = $device->status;
         $this->notes = $device->notes;
         
+        $this->modalKey++; // Paksa Alpine re-inisialisasi
         $this->dispatch('open-modal', id: 'device-modal');
     }
 

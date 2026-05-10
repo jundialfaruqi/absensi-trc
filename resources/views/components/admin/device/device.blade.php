@@ -404,7 +404,7 @@
 
                         @if ($holder_type === 'personnel')
                             <div class="form-control w-full md:col-span-2"
-                                wire:key="field-personnel-id-{{ $deviceId ?? 'new' }}"
+                                wire:key="field-personnel-id-{{ $modalKey }}"
                                 x-data="{
                                     open: false,
                                     selectedId: @entangle('personnel_id'),
