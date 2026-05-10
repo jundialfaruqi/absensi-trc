@@ -1,3 +1,4 @@
+<?php \Log::info('Debug Devices Maps:', ['count' => count($this->devices), 'data' => $this->devices->toArray()]); ?>
 <script>
     // Trik pamungkas untuk mengelabui Livewire dan menjaga Echo tetap bekerja
     (function() {
@@ -6,11 +7,17 @@
                 if (window.EchoConstructor) {
                     // Tambahkan fallback jika belum ada
                     if (typeof window.EchoConstructor.socketId !== 'function') {
-                        window.EchoConstructor.socketId = function() { return null; };
+                        window.EchoConstructor.socketId = function() {
+                            return null;
+                        };
                     }
                     return window.EchoConstructor;
                 }
-                return { socketId: function() { return null; } };
+                return {
+                    socketId: function() {
+                        return null;
+                    }
+                };
             },
             set: function(val) {
                 window.EchoConstructor = val;
@@ -74,11 +81,14 @@
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="font-bold truncate">{{ $d->personnel?->name ?? $d->name ?? 'Perangkat Global' }}</div>
+                            <div class="font-bold truncate">{{ $d->personnel?->name ?? ($d->name ?? 'Perangkat Global') }}
+                            </div>
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
-                                <span id="status-dot-{{ $d->personnel_id ?? 'd'.$d.id }}" class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
-                                <span id="status-text-{{ $d->personnel_id ?? 'd'.$d.id }}">Aktif: {{ $d->last_seen_human }}</span>
+                                <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d . id }}"
+                                    class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
+                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d . id }}">Aktif:
+                                    {{ $d->last_seen_human }}</span>
                             </div>
                         </div>
                     </div>
@@ -103,8 +113,10 @@
         }
     </style>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" data-navigate-once />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" data-navigate-once />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+        data-navigate-once />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+        data-navigate-once />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
     <script>
@@ -114,7 +126,7 @@
 
                 const mapEl = document.getElementById('map');
                 if (!mapEl) return;
-                
+
                 // Jika elemen kontainer sudah memiliki peta Leaflet, batalkan inisialisasi ulang
                 if (mapEl._leaflet_id) return;
 
@@ -222,9 +234,11 @@
                     devices.forEach(d => {
                         if (!d.last_latitude || !d.last_longitude) return;
 
-                        const iconUrl = d.personnel 
-                            ? (d.personnel.foto ? '/storage/'+d.personnel.foto : 'https://ui-avatars.com/api/?name='+encodeURIComponent(d.personnel.name))
-                            : '/assets/logo/trc-logo.webp';
+                        const iconUrl = d.personnel ?
+                            (d.personnel.foto ? '/storage/' + d.personnel.foto :
+                                'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.personnel.name)
+                                ) :
+                            '/assets/logo/trc-logo.webp';
 
                         const icon = L.divIcon({
                             className: 'custom-div-icon',
@@ -240,12 +254,13 @@
                         });
 
                         const marker = L.marker([d.last_latitude, d.last_longitude], {
-                                icon: icon
-                            });
+                            icon: icon
+                        });
 
                         const name = d.personnel ? d.personnel.name : (d.name || 'Perangkat Global');
                         const opdName = d.opd ? d.opd.name : 'Global (Admin)';
-                        const penugasan = d.personnel && d.personnel.penugasan ? d.personnel.penugasan.name : '-';
+                        const penugasan = d.personnel && d.personnel.penugasan ? d.personnel.penugasan
+                            .name : '-';
 
                         const popupContent = `
                             <div class="p-2 max-w-sm">
@@ -289,7 +304,7 @@
 
                     if (marker) {
                         marker.setLatLng([e.latitude, e.longitude]);
-                        
+
                         // Update last seen in popup if it's open
                         const lastSeenEl = document.getElementById(`last-seen-${e.personnel_id}`);
                         if (lastSeenEl) {
@@ -383,22 +398,22 @@
                             console.log('Location updated via WebSocket:', e);
                             window.updateSingleMarker(e);
                         });
-                    }
+                }
 
-                    window.mapsInitialized = true;
+                window.mapsInitialized = true;
 
-                    // Putuskan koneksi saat pindah halaman (Livewire Navigation)
-                    if (!window.hasWsDisconnectListener) {
-                        document.addEventListener('livewire:navigating', () => {
-                            if (window.EchoInstance) {
-                                console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
-                                window.EchoInstance.disconnect();
-                                window.EchoInstance = null;
-                            }
-                        });
-                        window.hasWsDisconnectListener = true;
-                    }
-                };
+                // Putuskan koneksi saat pindah halaman (Livewire Navigation)
+                if (!window.hasWsDisconnectListener) {
+                    document.addEventListener('livewire:navigating', () => {
+                        if (window.EchoInstance) {
+                            console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
+                            window.EchoInstance.disconnect();
+                            window.EchoInstance = null;
+                        }
+                    });
+                    window.hasWsDisconnectListener = true;
+                }
+            };
 
             // Initial load
             if (window.Livewire) {
