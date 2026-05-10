@@ -382,7 +382,8 @@
                     // Aktifkan log ke console untuk debugging
                     Pusher.logToConsole = true;
 
-                    window.EchoInstance = new Echo({
+                    const EchoConstructor = typeof window.EchoConstructor === 'function' ? window.EchoConstructor : Echo;
+                    window.EchoInstance = new EchoConstructor({
                         broadcaster: 'pusher',
                         key: '{{ env('REVERB_APP_KEY') }}',
                         cluster: 'mt1',
