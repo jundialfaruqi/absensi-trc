@@ -174,9 +174,11 @@ new class extends Component
     #[Computed]
     public function availableSubstitutes()
     {
+        // Jangan query jika bukan di tab swap (optimasi utama)
+        if ($this->activeTab !== 'swap') return collect();
         if (!$this->quickPersonnelId || !$this->quickDate) return collect();
 
-        $originJadwal = Jadwal::where('personnel_id', $this->quickPersonnelId)->where('tanggal', $this->quickDate)->first();
+        $originJadwal = Jadwal::with('shift')->where('personnel_id', $this->quickPersonnelId)->where('tanggal', $this->quickDate)->first();
         if (!$originJadwal || $originJadwal->status !== 'SHIFT' || !$originJadwal->shift) return collect();
         
         $targetShift = $originJadwal->shift;
@@ -198,18 +200,33 @@ new class extends Component
             ->whereDoesntHave('jadwals', function($q) use ($todayStr) {
                 $q->whereDate('tanggal', $todayStr)->where('is_manual', true);
             })
-            ->get();
+            ->pluck('id');
 
-        return $candidates->filter(function($p) use ($yesterday, $tomorrow, $isTargetNight, $isTargetDay) {
-            $jPrev = Jadwal::where('personnel_id', $p->id)->where('tanggal', $yesterday)->first();
-            $jNext = Jadwal::where('personnel_id', $p->id)->where('tanggal', $tomorrow)->first();
+        if ($candidates->isEmpty()) return collect();
 
-            $isNight = function($j) {
-                if (!$j || $j->status !== 'SHIFT' || !$j->shift) return false;
-                $s = $j->shift;
-                return stripos($s->name, 'malam') !== false || (Carbon::parse($s->start_time)->hour >= 18 || Carbon::parse($s->start_time)->hour < 4);
-            };
-            $isWork = fn($j) => $j && $j->status === 'SHIFT';
+        // Eager load jadwal kemarin & besok untuk semua kandidat sekaligus (anti N+1)
+        $jadwalsPrev = Jadwal::with('shift')
+            ->whereIn('personnel_id', $candidates)
+            ->where('tanggal', $yesterday)
+            ->get()
+            ->keyBy('personnel_id');
+
+        $jadwalsNext = Jadwal::with('shift')
+            ->whereIn('personnel_id', $candidates)
+            ->where('tanggal', $tomorrow)
+            ->get()
+            ->keyBy('personnel_id');
+
+        $isNight = function($j) {
+            if (!$j || $j->status !== 'SHIFT' || !$j->shift) return false;
+            $s = $j->shift;
+            return stripos($s->name, 'malam') !== false || (Carbon::parse($s->start_time)->hour >= 18 || Carbon::parse($s->start_time)->hour < 4);
+        };
+        $isWork = fn($j) => $j && $j->status === 'SHIFT';
+
+        $filteredIds = $candidates->filter(function($pId) use ($jadwalsPrev, $jadwalsNext, $isNight, $isWork, $isTargetDay, $isTargetNight) {
+            $jPrev = $jadwalsPrev->get($pId);
+            $jNext = $jadwalsNext->get($pId);
 
             if ($isTargetDay && $isNight($jPrev)) return false;
             if ($isTargetNight && $isWork($jNext) && !$isNight($jNext)) return false;
@@ -217,6 +234,8 @@ new class extends Component
 
             return true;
         });
+
+        return Personnel::whereIn('id', $filteredIds)->get();
     }
 
     public function updatedSwapTargetPersonnelId()
