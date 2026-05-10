@@ -19,7 +19,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public bool $readyToLoad = false;
 
     #[Url]
-    public int $perPage = 50;
+    public int $perPage = 20;
 
     #[Url]
     public string $search = '';
