@@ -78,7 +78,11 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
 
     public function rendered($view)
     {
-        $this->dispatch('devices-updated', devices: $this->devices);
-        $this->dispatch('kantors-updated', kantors: $this->kantors);
+        // Hanya kirim data ke Javascript setelah load() selesai dipanggil
+        // Ini mencegah data kosong dikirim saat halaman pertama dimuat
+        if ($this->readyToLoad) {
+            $this->dispatch('devices-updated', devices: $this->devices);
+            $this->dispatch('kantors-updated', kantors: $this->kantors);
+        }
     }
 };
