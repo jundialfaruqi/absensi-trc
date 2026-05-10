@@ -371,10 +371,10 @@
                         broadcaster: 'pusher',
                         key: '{{ env('REVERB_APP_KEY') }}',
                         cluster: 'mt1',
-                        wsHost: '{{ env('REVERB_HOST') }}',
-                        wsPort: {{ env('REVERB_PORT', 8080) }},
-                        wssPort: {{ env('REVERB_PORT', 443) }},
-                        forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
+                        wsHost: '{{ env('VITE_REVERB_HOST', 'absensitrc.pekanbaru.go.id') }}',
+                        wsPort: {{ env('VITE_REVERB_PORT', 443) }},
+                        wssPort: {{ env('VITE_REVERB_PORT', 443) }},
+                        forceTLS: {{ env('VITE_REVERB_SCHEME', 'https') === 'https' ? 'true' : 'false' }},
                         enabledTransports: ['ws', 'wss'],
                     });
 
