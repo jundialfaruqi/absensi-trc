@@ -76,15 +76,17 @@
                             <th>Logo</th>
                             <th>Nama OPD</th>
                             <th>Singkatan</th>
-                            <th>Pengguna</th>
+                            <th>Admin</th>
                             <th class="text-center w-24">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {{-- ─── Skeleton Loading ────────────────────────── --}}
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
-                            <tr @if($readyToLoad) wire:loading wire:target="perPage, search" @endif>
-                                <td class="text-center font-bold"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                            <tr @if ($readyToLoad) wire:loading wire:target="perPage, search" @endif>
+                                <td class="text-center font-bold">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
                                 <td>
                                     <div class="avatar placeholder">
                                         <div class="skeleton w-12 h-12 rounded"></div>
@@ -94,7 +96,9 @@
                                     <div class="skeleton h-4 w-48 mb-2"></div>
                                     <div class="skeleton h-3 w-32"></div>
                                 </td>
-                                <td><div class="skeleton h-5 w-16 rounded-full"></div></td>
+                                <td>
+                                    <div class="skeleton h-5 w-16 rounded-full"></div>
+                                </td>
                                 <td>
                                     <div class="flex -space-x-2">
                                         <div class="skeleton w-8 h-8 rounded-full"></div>
@@ -102,12 +106,15 @@
                                         <div class="skeleton w-8 h-8 rounded-full"></div>
                                     </div>
                                 </td>
-                                <td class="text-center"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                                <td class="text-center">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
                             </tr>
                         @endfor
 
                         @forelse ($this->opds as $r)
-                            <tr class="hover:bg-base-200/50" @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
+                            <tr class="hover:bg-base-200/50"
+                                @if ($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td class="text-center font-bold">{{ $this->opds->firstItem() + $loop->index }}</td>
                                 <td>
                                     @if ($r->logo_url)
@@ -169,7 +176,8 @@
                                         <ul tabindex="0"
                                             class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
                                             <li>
-                                                <button type="button" wire:click="openEditModal({{ $r->id }})">
+                                                <button type="button"
+                                                    wire:click="openEditModal({{ $r->id }})">
                                                     Edit
                                                 </button>
                                             </li>
@@ -184,7 +192,8 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
+                            <tr
+                                @if ($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td colspan="6" class="text-center text-sm text-base-content/60 py-8">Tidak ada
                                     data OPD</td>
                             </tr>
@@ -290,20 +299,21 @@
                         </div>
                     </div>
 
-                    <div class="divider my-1 text-sm text-base-content/50">Pengaturan Akses Pengguna</div>
+                    <div class="divider my-1 text-sm text-base-content/50">Pengaturan Akses Admin</div>
 
                     {{-- User ID (Multiple selection with Search) --}}
                     <div class="form-control w-full">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-2 gap-2 px-1">
                             <div>
-                                <label class="label p-0 pb-1"><span class="label-text text-sm font-medium">Pengguna
+                                <label class="label p-0 pb-1"><span class="label-text text-sm font-medium">Admin OPD
                                         Terkait</span></label>
-                                <p class="text-xs text-base-content/60">Pilih pengguna. (Otomatis dilepas dari OPD lain
+                                <p class="text-xs text-base-content/60">Pilih Admin OPD. (Otomatis dilepas dari OPD
+                                    lain
                                     jika ditambahkan kesini)</p>
                             </div>
                             <div class="relative w-full sm:w-64">
                                 <input type="text" wire:model.live.debounce.300ms="userSearch"
-                                    placeholder="Cari nama pengguna..."
+                                    placeholder="Cari nama admin..."
                                     class="input input-sm input-bordered placeholder:text-base-content/60 w-full pl-8 focus:input-primary transition-all">
                                 <span
                                     class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-base-content/50">
@@ -339,7 +349,7 @@
                                                     d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                             </svg>
                                             <span
-                                                class="text-sm text-base-content/60">{{ $userSearch ? 'Tidak ada pengguna yang dicari.' : 'Belum ada pengguna.' }}</span>
+                                                class="text-sm text-base-content/60">{{ $userSearch ? 'Tidak ada Admin yang dicari.' : 'Belum ada Admin.' }}</span>
                                         </div>
                                     @endforelse
                                 </div>
@@ -370,7 +380,7 @@
                 Apakah Anda yakin ingin menghapus OPD
                 <span class="font-semibold">{{ $deleteName }}</span>?
             </p>
-            <p class="text-xs text-error mt-2 italic">Pengguna yang terhubung dengan OPD ini tidak akan dihapus, hanya
+            <p class="text-xs text-error mt-2 italic">Admin yang terhubung dengan OPD ini tidak akan dihapus, hanya
                 dilepaskan dari OPD ini.</p>
             <div class="modal-action">
                 <button type="button" class="btn"

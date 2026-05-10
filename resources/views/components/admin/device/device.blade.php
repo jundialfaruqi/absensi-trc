@@ -403,11 +403,17 @@
                         </div>
 
                         @if ($holder_type === 'personnel')
-                            <div class="form-control w-full md:col-span-2" wire:key="field-personnel-id"
+                            <div class="form-control w-full md:col-span-2"
+                                wire:key="field-personnel-id-{{ $deviceId ?? 'new' }}"
                                 x-data="{
                                     open: false,
                                     selectedId: @entangle('personnel_id'),
-                                    selectedName: '{{ $personnel_id ? $this->personnelList->firstWhere('id', $personnel_id)?->name ?? '-- Pilih Personnel --' : '-- Pilih Personnel --' }}'
+                                    selectedName: '-- Pilih Personnel --',
+                                    init() {
+                                        @if($personnel_id)
+                                        this.selectedName = '{{ addslashes($this->personnelList->firstWhere('id', $personnel_id)?->name ?? '-- Pilih Personnel --') }}';
+                                        @endif
+                                    }
                                 }" @click.away="open = false">
                                 <label class="label mb-1 px-1">
                                     <span class="label-text text-sm font-medium text-base-content">Pilih Personnel
