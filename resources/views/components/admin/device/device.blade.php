@@ -5,8 +5,9 @@
             <h2 class="font-black uppercase text-xl">Manajemen Perangkat</h2>
             <p class="text-sm text-base-content/60">Kelola lisensi dan akses perangkat mobile personel TRC</p>
         </div>
-        <button wire:click="openModal" class="btn btn-secondary">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+        <button wire:click="openModal" class="btn btn-secondary" wire:loading.attr="disabled">
+            <span wire:loading wire:target="openModal" class="loading loading-spinner loading-xs"></span>
+            <svg wire:loading.remove wire:target="openModal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
