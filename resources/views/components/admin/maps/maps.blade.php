@@ -1,3 +1,27 @@
+<script>
+    // Trik pamungkas untuk mengelabui Livewire dan menjaga Echo tetap bekerja
+    (function() {
+        Object.defineProperty(window, 'Echo', {
+            get: function() {
+                if (window.EchoConstructor) {
+                    // Tambahkan fallback jika belum ada
+                    if (typeof window.EchoConstructor.socketId !== 'function') {
+                        window.EchoConstructor.socketId = function() { return null; };
+                    }
+                    return window.EchoConstructor;
+                }
+                return { socketId: function() { return null; } };
+            },
+            set: function(val) {
+                window.EchoConstructor = val;
+            },
+            configurable: true
+        });
+    })();
+</script>
+
+<script src="https://js.pusher.com/8.0/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.js"></script>
 <div wire:init="load">
     {{-- ─── Main Content ────────────────────────────────────────────────── --}}
     <div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-12rem)]">
@@ -53,8 +77,8 @@
                             <div class="font-bold truncate">{{ $d->personnel?->name ?? $d->name ?? 'Perangkat Global' }}</div>
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
-                                Aktif: {{ $d->last_seen_human }}
+                                <span id="status-dot-{{ $d->personnel_id ?? 'd'.$d.id }}" class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
+                                <span id="status-text-{{ $d->personnel_id ?? 'd'.$d.id }}">Aktif: {{ $d->last_seen_human }}</span>
                             </div>
                         </div>
                     </div>
@@ -90,6 +114,9 @@
 
                 const mapEl = document.getElementById('map');
                 if (!mapEl) return;
+                
+                // Jika elemen kontainer sudah memiliki peta Leaflet, batalkan inisialisasi ulang
+                if (mapEl._leaflet_id) return;
 
                 if (typeof L === 'undefined') {
                     setTimeout(initMapsHandler, 100);
@@ -235,7 +262,7 @@
                                 </div>
                                 <div class="text-xs mb-1"><strong>Penugasan:</strong> ${penugasan}</div>
                                 <div class="text-xs mb-1" id="address-${d.id}"><strong>Lokasi:</strong> Memuat alamat...</div>
-                                <div class="text-xs opacity-60"><strong>Terakhir Terlihat:</strong> ${d.last_seen_human}</div>
+                                <div class="text-xs opacity-60"><strong>Terakhir Terlihat:</strong> <span id="last-seen-${d.personnel_id || 'd'+d.id}">${d.last_seen_human}</span></div>
                             </div>
                         `;
 
@@ -246,11 +273,59 @@
                         });
 
                         markerCluster.addLayer(marker);
-                        markers[d.id] = marker;
+                        if (d.personnel_id) {
+                            markers['p' + d.personnel_id] = marker;
+                        } else {
+                            markers['d' + d.id] = marker;
+                        }
                     });
 
                     // Auto fit bounds disabled per user request
                 }
+
+                window.updateSingleMarker = function(e) {
+                    const markerKey = 'p' + e.personnel_id;
+                    const marker = markers[markerKey];
+
+                    if (marker) {
+                        marker.setLatLng([e.latitude, e.longitude]);
+                        
+                        // Update last seen in popup if it's open
+                        const lastSeenEl = document.getElementById(`last-seen-${e.personnel_id}`);
+                        if (lastSeenEl) {
+                            lastSeenEl.innerText = e.last_seen;
+                        }
+                    }
+
+                    // Update status dot and text in sidebar
+                    const dotEl = document.getElementById(`status-dot-${e.personnel_id}`);
+                    const textEl = document.getElementById(`status-text-${e.personnel_id}`);
+
+                    if (dotEl) {
+                        dotEl.classList.remove('bg-base-300');
+                        dotEl.classList.add('bg-success');
+                        dotEl.classList.add('animate-pulse');
+                    }
+                    if (textEl) {
+                        textEl.innerText = 'Online';
+                    }
+
+                    // Set timer to clear online status after 15 seconds
+                    if (window[`statusTimer_${e.personnel_id}`]) {
+                        clearTimeout(window[`statusTimer_${e.personnel_id}`]);
+                    }
+
+                    window[`statusTimer_${e.personnel_id}`] = setTimeout(() => {
+                        if (dotEl) {
+                            dotEl.classList.remove('bg-success');
+                            dotEl.classList.remove('animate-pulse');
+                            dotEl.classList.add('bg-base-300');
+                        }
+                        if (textEl) {
+                            textEl.innerText = 'Offline';
+                        }
+                    }, 15000); // 15 seconds
+                };
 
                 function fetchAddress(lat, lng, id) {
                     const el = document.getElementById(`address-${id}`);
@@ -287,8 +362,43 @@
                 updateMarkers(@json($this->devices));
                 updateKantors(@json($this->kantors));
 
-                window.mapsInitialized = true;
-            };
+                // Initialize Echo for Real-time tracking
+                if (typeof Echo !== 'undefined' && !window.EchoInstance) {
+                    // Aktifkan log ke console untuk debugging
+                    Pusher.logToConsole = true;
+
+                    window.EchoInstance = new Echo({
+                        broadcaster: 'pusher',
+                        key: '{{ env('REVERB_APP_KEY') }}',
+                        cluster: 'mt1',
+                        wsHost: '{{ env('REVERB_HOST') }}',
+                        wsPort: {{ env('REVERB_PORT', 8080) }},
+                        wssPort: {{ env('REVERB_PORT', 443) }},
+                        forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
+                        enabledTransports: ['ws', 'wss'],
+                    });
+
+                    window.EchoInstance.channel('personnel-locations')
+                        .listen('PersonnelLocationUpdated', (e) => {
+                            console.log('Location updated via WebSocket:', e);
+                            window.updateSingleMarker(e);
+                        });
+                    }
+
+                    window.mapsInitialized = true;
+
+                    // Putuskan koneksi saat pindah halaman (Livewire Navigation)
+                    if (!window.hasWsDisconnectListener) {
+                        document.addEventListener('livewire:navigating', () => {
+                            if (window.EchoInstance) {
+                                console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
+                                window.EchoInstance.disconnect();
+                                window.EchoInstance = null;
+                            }
+                        });
+                        window.hasWsDisconnectListener = true;
+                    }
+                };
 
             // Initial load
             if (window.Livewire) {
