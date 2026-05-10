@@ -415,6 +415,33 @@ class AttendanceController extends Controller
             $personnel = Personnel::find($request->personnel_id);
         }
 
+        // --- VALIDASI DAN PEMROSESAN GAMBAR ---
+        $imageData = base64_decode($request->foto);
+        
+        // 1. Validasi Ukuran Maksimal 1MB
+        if (strlen($imageData) > 1 * 1024 * 1024) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ukuran foto maksimal 1 MB.'
+            ], 403);
+        }
+        
+        // 2. Gambar Ulang untuk Keamanan (Anti-Polyglot/XSS)
+        $img = @imagecreatefromstring($imageData);
+        if (!$img) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'File yang diupload bukan gambar yang valid.'
+            ], 403);
+        }
+        
+        // Simpan sebagai file JPEG baru ke buffer
+        ob_start();
+        imagejpeg($img, null, 80); // Kualitas 80%
+        $newImageData = ob_get_clean();
+        imagedestroy($img);
+        // ----------------------------------------
+
         // 0. Security Check: Personal Device restriction
         $device = $request->get('device');
         if ($device && $device->personnel_id) {
@@ -654,9 +681,8 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $imageData = base64_decode($request->foto);
             $fileName = 'absensi/in_' . $personnel->id . '_' . time() . '.jpg';
-            Storage::disk('public')->put($fileName, $imageData);
+            Storage::disk('public')->put($fileName, $newImageData);
 
             if (!$existing) {
                 $absensi = Absensi::create([
@@ -736,9 +762,8 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $imageData = base64_decode($request->foto);
             $fileName = 'absensi/out_' . $personnel->id . '_' . time() . '.jpg';
-            Storage::disk('public')->put($fileName, $imageData);
+            Storage::disk('public')->put($fileName, $newImageData);
 
             $existing->update([
                 'status' => 'HADIR',

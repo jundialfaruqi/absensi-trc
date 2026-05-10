@@ -405,8 +405,33 @@ new #[Layout('layouts.absensi.app')] class extends Component
             if ($this->imageData) {
                 $imageData = str_replace('data:image/jpeg;base64,', '', $this->imageData);
                 $imageData = str_replace(' ', '+', $imageData);
+                $decodedData = base64_decode($imageData);
+
+                // 1. Validasi Ukuran Maksimal 1MB
+                if (strlen($decodedData) > 1 * 1024 * 1024) {
+                    $this->isSuccess = false;
+                    $this->message = 'Ukuran foto maksimal 1 MB.';
+                    $this->step = 3;
+                    return;
+                }
+
+                // 2. Gambar Ulang untuk Keamanan (Anti-Polyglot/XSS)
+                $img = @imagecreatefromstring($decodedData);
+                if (!$img) {
+                    $this->isSuccess = false;
+                    $this->message = 'File yang diupload bukan gambar yang valid.';
+                    $this->step = 3;
+                    return;
+                }
+
+                // Simpan sebagai file JPEG baru ke buffer
+                ob_start();
+                imagejpeg($img, null, 80); // Kualitas 80%
+                $newImageData = ob_get_clean();
+                imagedestroy($img);
+
                 $imageName = 'absensi/' . $type . '_' . $this->selectedPersonnel->id . '_' . time() . '.jpg';
-                Storage::disk('public')->put($imageName, base64_decode($imageData));
+                Storage::disk('public')->put($imageName, $newImageData);
                 $imagePath = $imageName;
             }
 
