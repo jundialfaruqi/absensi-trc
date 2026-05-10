@@ -1,33 +1,4 @@
-<script>
-    // Trik pamungkas untuk mengelabui Livewire dan menjaga Echo tetap bekerja
-    (function() {
-        Object.defineProperty(window, 'Echo', {
-            get: function() {
-                if (window.EchoConstructor) {
-                    // Tambahkan fallback jika belum ada
-                    if (typeof window.EchoConstructor.socketId !== 'function') {
-                        window.EchoConstructor.socketId = function() {
-                            return null;
-                        };
-                    }
-                    return window.EchoConstructor;
-                }
-                return {
-                    socketId: function() {
-                        return null;
-                    }
-                };
-            },
-            set: function(val) {
-                window.EchoConstructor = val;
-            },
-            configurable: true
-        });
-    })();
-</script>
 
-<script src="https://js.pusher.com/8.0/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.js"></script>
 <div wire:init="load">
     {{-- ─── Main Content ────────────────────────────────────────────────── --}}
     <div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-12rem)]">
@@ -379,29 +350,20 @@
                 updateKantors(@json($this->kantors));
 
                 // Initialize Echo for Real-time tracking
+                // window.Echo sudah dibuat oleh bundle app.js (laravel-echo + pusher-js)
+                // Gunakan instance yang sudah ada, jangan buat yang baru
                 try {
-                    if (typeof Echo !== 'undefined' && !window.EchoInstance) {
-                        Pusher.logToConsole = true;
-                        const EchoConstructor = typeof window.EchoConstructor === 'function' ? window.EchoConstructor : Echo;
-                        window.EchoInstance = new EchoConstructor({
-                            broadcaster: 'pusher',
-                            key: '{{ env('REVERB_APP_KEY') }}',
-                            cluster: 'mt1',
-                            wsHost: '{{ env('VITE_REVERB_HOST', 'absensitrc.pekanbaru.go.id') }}',
-                            wsPort: {{ env('VITE_REVERB_PORT', 443) }},
-                            wssPort: {{ env('VITE_REVERB_PORT', 443) }},
-                            forceTLS: {{ env('VITE_REVERB_SCHEME', 'https') === 'https' ? 'true' : 'false' }},
-                            enabledTransports: ['ws', 'wss'],
-                        });
-
+                    if (window.Echo && !window.EchoInstance) {
+                        window.EchoInstance = window.Echo;
                         window.EchoInstance.channel('personnel-locations')
                             .listen('PersonnelLocationUpdated', (e) => {
                                 console.log('Location updated via WebSocket:', e);
                                 window.updateSingleMarker(e);
                             });
+                        console.log('WebSocket: Berhasil mendaftarkan listener channel.');
                     }
                 } catch (e) {
-                    console.warn('Echo WebSocket gagal diinisialisasi (normal jika jalur /app belum dibuka):', e.message);
+                    console.warn('Echo WebSocket gagal (normal jika jalur /app belum dibuka):', e.message);
                 }
 
                 window.mapsInitialized = true;
