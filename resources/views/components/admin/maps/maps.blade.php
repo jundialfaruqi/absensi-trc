@@ -379,26 +379,29 @@
                 updateKantors(@json($this->kantors));
 
                 // Initialize Echo for Real-time tracking
-                if (typeof Echo !== 'undefined' && !window.EchoInstance) {
-                    // Aktifkan log ke console untuk debugging
-                    Pusher.logToConsole = true;
-
-                    window.EchoInstance = new Echo({
-                        broadcaster: 'pusher',
-                        key: '{{ env('REVERB_APP_KEY') }}',
-                        cluster: 'mt1',
-                        wsHost: '{{ env('VITE_REVERB_HOST', 'absensitrc.pekanbaru.go.id') }}',
-                        wsPort: {{ env('VITE_REVERB_PORT', 443) }},
-                        wssPort: {{ env('VITE_REVERB_PORT', 443) }},
-                        forceTLS: {{ env('VITE_REVERB_SCHEME', 'https') === 'https' ? 'true' : 'false' }},
-                        enabledTransports: ['ws', 'wss'],
-                    });
-
-                    window.EchoInstance.channel('personnel-locations')
-                        .listen('PersonnelLocationUpdated', (e) => {
-                            console.log('Location updated via WebSocket:', e);
-                            window.updateSingleMarker(e);
+                try {
+                    if (typeof Echo !== 'undefined' && !window.EchoInstance) {
+                        Pusher.logToConsole = true;
+                        const EchoConstructor = typeof window.EchoConstructor === 'function' ? window.EchoConstructor : Echo;
+                        window.EchoInstance = new EchoConstructor({
+                            broadcaster: 'pusher',
+                            key: '{{ env('REVERB_APP_KEY') }}',
+                            cluster: 'mt1',
+                            wsHost: '{{ env('VITE_REVERB_HOST', 'absensitrc.pekanbaru.go.id') }}',
+                            wsPort: {{ env('VITE_REVERB_PORT', 443) }},
+                            wssPort: {{ env('VITE_REVERB_PORT', 443) }},
+                            forceTLS: {{ env('VITE_REVERB_SCHEME', 'https') === 'https' ? 'true' : 'false' }},
+                            enabledTransports: ['ws', 'wss'],
                         });
+
+                        window.EchoInstance.channel('personnel-locations')
+                            .listen('PersonnelLocationUpdated', (e) => {
+                                console.log('Location updated via WebSocket:', e);
+                                window.updateSingleMarker(e);
+                            });
+                    }
+                } catch (e) {
+                    console.warn('Echo WebSocket gagal diinisialisasi (normal jika jalur /app belum dibuka):', e.message);
                 }
 
                 window.mapsInitialized = true;
