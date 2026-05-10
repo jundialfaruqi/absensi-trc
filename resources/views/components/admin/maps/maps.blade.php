@@ -1,4 +1,3 @@
-<?php \Log::info('Debug Devices Maps:', ['count' => count($this->devices), 'data' => $this->devices->toArray()]); ?>
 <script>
     // Trik pamungkas untuk mengelabui Livewire dan menjaga Echo tetap bekerja
     (function() {
@@ -81,7 +80,8 @@
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="font-bold truncate">{{ $d->personnel?->name ?? ($d->name ?? 'Perangkat Global') }}
+                            <div class="font-bold truncate">
+                                {{ $d->personnel?->name ?? ($d->name ?? 'Perangkat Global') }}
                             </div>
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
@@ -237,7 +237,7 @@
                         const iconUrl = d.personnel ?
                             (d.personnel.foto ? '/storage/' + d.personnel.foto :
                                 'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.personnel.name)
-                                ) :
+                            ) :
                             '/assets/logo/trc-logo.webp';
 
                         const icon = L.divIcon({
