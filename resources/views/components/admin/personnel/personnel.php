@@ -19,8 +19,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
 
     public bool $readyToLoad = false;
     #[Url]
-    public int $perPage = 50;
-    
+    public int $perPage = 20;
+
     #[Url]
     public string $search = '';
 

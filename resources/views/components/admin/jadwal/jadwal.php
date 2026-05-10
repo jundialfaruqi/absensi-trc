@@ -16,14 +16,14 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
 
     public bool $readyToLoad = false;
     #[Url]
-    public int $perPage = 50;
-    
+    public int $perPage = 20;
+
     #[Url]
     public string $search = '';
-    
+
     #[Url]
     public string $month = '';
-    
+
     #[Url]
     public string $year = '';
 
@@ -61,9 +61,9 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         }
 
         if ($attendanceType === 'FLEXIBLE') {
-            $this->dispatch('toast', 
-                type: 'warning', 
-                title: 'Informasi', 
+            $this->dispatch('toast',
+                type: 'warning',
+                title: 'Informasi',
                 message: 'Personnel ini memiliki tipe Flexible dan tidak membutuhkan jadwal untuk absensi.'
             );
             return;
