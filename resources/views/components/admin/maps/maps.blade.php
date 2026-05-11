@@ -247,11 +247,9 @@
                         const penugasan = d.personnel && d.personnel.penugasan ? d.personnel.penugasan
                             .name : '-';
 
-                        let statusPopup = d.last_seen_human;
-                        if (d.last_seen_human && d.last_seen_human.includes('detik')) {
-                            statusPopup = 'Online';
-                        } else if (d.last_seen_human) {
-                            statusPopup = `Aktif: ${d.last_seen_human}`;
+                        let popupLastSeenHTML = '';
+                        if (d.last_seen_human && !d.last_seen_human.includes('detik')) {
+                            popupLastSeenHTML = `<div class="text-xs opacity-60"><strong>Terakhir Terlihat:</strong> <span id="last-seen-${d.personnel_id || 'd'+d.id}">${d.last_seen_human}</span></div>`;
                         }
 
                         const popupContent = `
@@ -269,7 +267,7 @@
                                 </div>
                                 <div class="text-xs mb-1"><strong>Penugasan:</strong> ${penugasan}</div>
                                 <div class="text-xs mb-1" id="address-${d.id}"><strong>Lokasi:</strong> Memuat alamat...</div>
-                                <div class="text-xs opacity-60"><strong>Terakhir Terlihat:</strong> <span id="last-seen-${d.personnel_id || 'd'+d.id}">${statusPopup}</span></div>
+                                ${popupLastSeenHTML}
                             </div>
                         `;
 
