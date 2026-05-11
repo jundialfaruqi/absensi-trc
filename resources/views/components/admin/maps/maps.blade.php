@@ -439,6 +439,7 @@
                             console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
                             window.EchoInstance.disconnect();
                             window.EchoInstance = null;
+                            window.CustomEcho = null; // Reset agar bisa membuat koneksi baru saat kembali
                         }
                     });
                     window.hasWsDisconnectListener = true;
