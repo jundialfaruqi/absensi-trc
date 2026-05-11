@@ -304,6 +304,16 @@
                             popupStatusEl.innerText = 'Online';
                             popupStatusEl.className = 'text-xs text-success';
                         }
+                        
+                        // Update the stored popup content so it persists when closed and reopened
+                        if (marker.getPopup()) {
+                            const currentPopupContent = marker.getPopup().getContent();
+                            if (typeof currentPopupContent === 'string') {
+                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${e.personnel_id}">[^<]*</div>`);
+                                const newDiv = `<div class="text-xs text-success" id="popup-status-${e.personnel_id}">Online</div>`;
+                                marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
+                            }
+                        }
                     }
 
                     // Update status dot and text in sidebar
@@ -338,6 +348,16 @@
                         if (popupStatusEl) {
                             popupStatusEl.innerText = 'Aktif: 1 menit yang lalu';
                             popupStatusEl.className = 'text-xs opacity-60';
+                        }
+                        
+                        // Update the stored popup content to Offline too
+                        if (marker.getPopup()) {
+                            const currentPopupContent = marker.getPopup().getContent();
+                            if (typeof currentPopupContent === 'string') {
+                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${e.personnel_id}">[^<]*</div>`);
+                                const newDiv = `<div class="text-xs opacity-60" id="popup-status-${e.personnel_id}">Aktif: 1 menit yang lalu</div>`;
+                                marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
+                            }
                         }
                     }, 70000); // 1 minute 10 seconds
                 };
