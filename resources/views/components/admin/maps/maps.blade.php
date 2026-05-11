@@ -55,9 +55,9 @@
                             </div>
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
-                                <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d . id }}"
+                                <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d->id }}"
                                     class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
-                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d . id }}">Aktif:
+                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}">Aktif:
                                     {{ $d->last_seen_human }}</span>
                             </div>
                         </div>
