@@ -58,7 +58,7 @@
                                 <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d->id }}"
                                     class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1 ? 'bg-success' : 'bg-base-300' }}"></span>
                                 <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}">
-                                    @if($d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1)
+                                    @if ($d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1)
                                         Online
                                     @else
                                         Aktif: {{ $d->last_seen_human }}
@@ -95,36 +95,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js" data-navigate-once></script>
-    <script data-navigate-once>
-        // Simpan instance native Echo (jika ada dari app.js VPS) agar tidak hilang
-        window.NativeEcho = window.Echo;
-        window.Echo = undefined; // Paksa undefined agar script CDN bisa menulis ulang
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
     <script data-navigate-once>
-        // Sekarang window.Echo berisi Constructor dari CDN
-        if (typeof Echo === 'function') {
-            window.Pusher = Pusher;
-            window.CustomEcho = new Echo({
-                broadcaster: 'reverb',
-                key: '{{ env('REVERB_APP_KEY') }}',
-                wsHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
-                wsPort: {{ env('REVERB_PORT', 8080) }},
-                wssPort: {{ env('REVERB_PORT', 8080) }},
-                forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
-                enabledTransports: ['ws', 'wss'],
-            });
-            console.log('WebSocket: CustomEcho berhasil dibuat via CDN.');
-        }
-        
-        // Kembalikan window.Echo ke aslinya (jika ada) demi kebahagiaan Livewire
-        if (window.NativeEcho) {
-            window.Echo = window.NativeEcho;
-        } else {
-            // Jika tidak ada native Echo, pastikan Echo.socketId ada agar Livewire tidak error
-            if (typeof Echo !== 'undefined' && !Echo.socketId) {
-                Echo.socketId = function() { return null; };
-            }
+        // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor Echo
+        if (typeof Echo !== 'undefined' && !Echo.socketId) {
+            Echo.socketId = function() {
+                return null;
+            };
         }
     </script>
     <script>
@@ -392,10 +369,26 @@
                 updateMarkers(@json($this->devices));
                 updateKantors(@json($this->kantors));
 
+                // Initialize Echo if not exists (using CDN fallback for local dev)
+                // Gunakan nama variabel kustom agar tidak bentrok dengan Livewire atau constructor Echo
+                if (!window.CustomEcho && typeof Echo === 'function') {
+                    window.Pusher = Pusher;
+                    window.CustomEcho = new Echo({
+                        broadcaster: 'reverb',
+                        key: '{{ env('REVERB_APP_KEY') }}',
+                        wsHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
+                        wsPort: {{ env('REVERB_PORT', 8080) }},
+                        wssPort: {{ env('REVERB_PORT', 8080) }},
+                        forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
+                        enabledTransports: ['ws', 'wss'],
+                    });
+                }
+
                 try {
-                    // Prioritaskan CustomEcho (hasil racikan CDN yang kuat) agar tidak pakai native Echo VPS yang bug
-                    const echoInstance = window.CustomEcho || window.Echo;
-                    
+                    // Gunakan window.CustomEcho jika ada (hasil CDN), atau window.Echo jika ada (bawaan VPS)
+                    const echoInstance = (window.Echo && typeof window.Echo.channel === 'function') ? window.Echo :
+                        window.CustomEcho;
+
                     if (echoInstance && !window.EchoInstance) {
                         window.EchoInstance = echoInstance;
                         window.EchoInstance.channel('personnel-locations')
