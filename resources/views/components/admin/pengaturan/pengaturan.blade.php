@@ -440,14 +440,14 @@
                                 <span class="label-text text-[10px] font-black uppercase text-base-content">Dari Tanggal</span>
                             </label>
                             
-                            <button type="button" 
-                                    onclick="document.getElementById('input-dari').showPicker()" 
-                                    class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between">
-                                <span>{{ $hapusDariTanggal ? \Carbon\Carbon::parse($hapusDariTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            </button>
-                            
-                            <input type="date" id="input-dari" wire:model="hapusDariTanggal" class="absolute inset-0 opacity-0 -z-10 pointer-events-none">
+                            <div class="relative">
+                                <div class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between cursor-pointer" 
+                                     onclick="document.getElementById('input-dari').showPicker()">
+                                    <span>{{ $hapusDariTanggal ? \Carbon\Carbon::parse($hapusDariTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <input type="date" id="input-dari" wire:model.live="hapusDariTanggal" class="absolute inset-0 opacity-0 -z-10 pointer-events-none">
+                            </div>
                             @error('hapusDariTanggal')
                                 <span class="text-error text-[10px] mt-1">{{ $message }}</span>
                             @enderror
@@ -459,14 +459,14 @@
                                 <span class="label-text text-[10px] font-black uppercase text-base-content">Sampai Tanggal</span>
                             </label>
                             
-                            <button type="button" 
-                                    onclick="document.getElementById('input-sampai').showPicker()" 
-                                    class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between">
-                                <span>{{ $hapusSampaiTanggal ? \Carbon\Carbon::parse($hapusSampaiTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            </button>
-                            
-                            <input type="date" id="input-sampai" wire:model="hapusSampaiTanggal" class="absolute inset-0 opacity-0 -z-10 pointer-events-none">
+                            <div class="relative">
+                                <div class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between cursor-pointer" 
+                                     onclick="document.getElementById('input-sampai').showPicker()">
+                                    <span>{{ $hapusSampaiTanggal ? \Carbon\Carbon::parse($hapusSampaiTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <input type="date" id="input-sampai" wire:model.live="hapusSampaiTanggal" class="absolute inset-0 opacity-0 -z-10 pointer-events-none">
+                            </div>
                             @error('hapusSampaiTanggal')
                                 <span class="text-error text-[10px] mt-1">{{ $message }}</span>
                             @enderror
