@@ -421,14 +421,10 @@
                         window.EchoInstance = echoInstance;
                         window.EchoInstance.channel('personnel-locations')
                             .listen('PersonnelLocationUpdated', (e) => {
-                                if ({{ config('app.debug') ? 'true' : 'false' }}) {
-                                    console.log('Location updated via WebSocket:', e);
-                                }
+                                console.log('Location updated via WebSocket:', e);
                                 window.updateSingleMarker(e);
                             });
-                        if ({{ config('app.debug') ? 'true' : 'false' }}) {
-                            console.log('WebSocket: Berhasil mendaftarkan listener channel.');
-                        }
+                        console.log('WebSocket: Berhasil mendaftarkan listener channel.');
                     }
                 } catch (e) {
                     console.warn('Echo WebSocket gagal:', e.message);
@@ -440,9 +436,7 @@
                 if (!window.hasWsDisconnectListener) {
                     document.addEventListener('livewire:navigating', () => {
                         if (window.EchoInstance) {
-                            if ({{ config('app.debug') ? 'true' : 'false' }}) {
-                                console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
-                            }
+                            console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
                             window.EchoInstance.disconnect();
                             window.EchoInstance = null;
                         }
