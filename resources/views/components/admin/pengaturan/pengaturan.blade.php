@@ -412,6 +412,134 @@
                 @endif
             </div>
         </div>
+
+        {{-- Pembersihan Penyimpanan --}}
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
+            <div class="card-body p-6">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                        </svg>
+                    </div>
+                    <h2 class="text-sm font-black uppercase">Pembersihan Penyimpanan (Storage Cleanup)</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-[10px] text-base-content/50 uppercase font-medium leading-relaxed">
+                        Hapus file foto absensi lama untuk mengosongkan ruang server. Data riwayat absen di database
+                        tidak akan ikut terhapus.
+                    </p>
+
+                    {{-- Script Cally --}}
+                    <script type="module" src="https://unpkg.com/cally"></script>
+
+                    <style>
+                        calendar-date::part(previous),
+                        calendar-date::part(next) {
+                            opacity: 1 !important;
+                        }
+                    </style>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {{-- Dari Tanggal --}}
+                        <div class="form-control w-full relative">
+                            <label class="label py-1">
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Dari
+                                    Tanggal</span>
+                            </label>
+
+                            <button type="button" popovertarget="cally-popover-dari"
+                                class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between"
+                                id="btn-dari" style="anchor-name:--btn-dari">
+                                <span>{{ $hapusDariTanggal ? \Carbon\Carbon::parse($hapusDariTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+
+                            <div popover id="cally-popover-dari"
+                                class="dropdown bg-base-100 rounded-box shadow-lg p-2 z-50"
+                                style="position-anchor:--btn-dari">
+                                <calendar-date class="cally"
+                                    @change="$wire.set('hapusDariTanggal', $event.target.value); document.getElementById('cally-popover-dari').hidePopover()">
+                                    <svg aria-label="Previous" class="fill-current size-4 text-primary"
+                                        slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+                                    </svg>
+                                    <svg aria-label="Next" class="fill-current size-4 text-primary" slot="next"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+                                    </svg>
+                                    <calendar-month></calendar-month>
+                                </calendar-date>
+                            </div>
+                        </div>
+
+                        {{-- Sampai Tanggal --}}
+                        <div class="form-control w-full relative">
+                            <label class="label py-1">
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Sampai
+                                    Tanggal</span>
+                            </label>
+
+                            <button type="button" popovertarget="cally-popover-sampai"
+                                class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between"
+                                id="btn-sampai" style="anchor-name:--btn-sampai">
+                                <span>{{ $hapusSampaiTanggal ? \Carbon\Carbon::parse($hapusSampaiTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+
+                            <div popover id="cally-popover-sampai"
+                                class="dropdown bg-base-100 rounded-box shadow-lg p-2 z-50"
+                                style="position-anchor:--btn-sampai">
+                                <calendar-date class="cally"
+                                    @change="$wire.set('hapusSampaiTanggal', $event.target.value); document.getElementById('cally-popover-sampai').hidePopover()">
+                                    <svg aria-label="Previous" class="fill-current size-4 text-primary"
+                                        slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+                                    </svg>
+                                    <svg aria-label="Next" class="fill-current size-4 text-primary" slot="next"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+                                    </svg>
+                                    <calendar-month></calendar-month>
+                                </calendar-date>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if ($ukuranTerhitung)
+                        <div class="p-3 rounded-lg bg-info/5 border border-info/10">
+                            <p class="text-[10px] text-base-content leading-relaxed font-bold uppercase">
+                                Estimasi Ukuran: <span class="text-primary">{{ $ukuranTerhitung }}</span>
+                            </p>
+                        </div>
+                    @endif
+
+                    <div class="flex flex-col sm:flex-row gap-2 justify-end mt-4">
+                        <button wire:click="hitungUkuran" wire:loading.attr="disabled"
+                            class="btn btn-sm btn-outline btn-neutral gap-1.5 px-4 text-[10px] font-black uppercase">
+                            <span wire:loading wire:target="hitungUkuran"
+                                class="loading loading-spinner loading-xs"></span>
+                            Hitung Ukuran
+                        </button>
+                        <button wire:click="konfirmasiHapus" wire:loading.attr="disabled"
+                            class="btn btn-sm btn-error text-white gap-1.5 px-4 text-[10px] font-black uppercase">
+                            Hapus Permanen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- ─── Modal: Update APK Info ────────────────────────────────────────── --}}
@@ -548,6 +676,69 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </dialog>
+
+    {{-- ─── Modal: Konfirmasi Hapus Foto ────────────────────────────────── --}}
+    <dialog id="delete-photo-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
+        x-on:open-modal.window="$event.detail.id === 'delete-photo-modal' && $el.showModal()"
+        x-on:close-modal.window="$event.detail.id === 'delete-photo-modal' && $el.close()">
+        <div class="modal-box shadow p-0 max-h-[90vh] max-w-md overflow-y-auto relative">
+            <div class="p-6 border-b border-base-200 bg-error/10 flex justify-between items-center sticky top-0 z-50">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-error text-error-content flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-sm uppercase tracking-tight text-error">Konfirmasi Penghapusan</h3>
+                        <p class="text-[10px] text-base-content/50 uppercase font-bold">Tindakan ini tidak bisa
+                            dibatalkan</p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('delete-photo-modal').close()">✕</button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="p-4 rounded-xl bg-warning/5 border border-warning/10 text-xs">
+                    <p class="font-bold text-warning mb-1">PERHATIAN!</p>
+                    <p class="text-base-content/70 leading-relaxed">
+                        Anda akan menghapus file foto absensi dari tanggal
+                        <span
+                            class="font-black text-base-content">{{ $hapusDariTanggal ? \Carbon\Carbon::parse($hapusDariTanggal)->format('d-m-Y') : '-' }}</span>
+                        sampai
+                        <span
+                            class="font-black text-base-content">{{ $hapusSampaiTanggal ? \Carbon\Carbon::parse($hapusSampaiTanggal)->format('d-m-Y') : '-' }}</span>.
+                    </p>
+                    <p class="mt-2 text-base-content/70 leading-relaxed">
+                        Data teks absensi di database tetap aman, hanya file gambar yang akan dihapus dari server.
+                    </p>
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label py-1">
+                        <span class="label-text text-[10px] font-black uppercase text-base-content">Ketik <span
+                                class="text-error">"HAPUS"</span> untuk konfirmasi</span>
+                    </label>
+                    <input type="text" wire:model.live="confirmHapusText"
+                        class="input input-bordered focus:input-error font-bold placeholder:text-base-content/40 w-full transition-all text-xs"
+                        placeholder="Ketik HAPUS di sini">
+                </div>
+            </div>
+
+            <div class="modal-action mt-0 p-6 border-t border-base-200 bg-base-100 sticky bottom-0 z-50">
+                <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="document.getElementById('delete-photo-modal').close()">Batal</button>
+                <button type="button" class="btn btn-error btn-sm text-white px-8" wire:click="hapusPermanen"
+                    @if ($confirmHapusText !== 'HAPUS') disabled @endif>
+                    <span wire:loading wire:target="hapusPermanen" class="loading loading-spinner loading-xs"></span>
+                    <span wire:loading.remove wire:target="hapusPermanen">Ya, Hapus Sekarang</span>
+                </button>
+            </div>
         </div>
     </dialog>
 </div>

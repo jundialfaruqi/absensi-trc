@@ -681,7 +681,8 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $fileName = 'absensi/in_' . $personnel->id . '_' . time() . '.jpg';
+            $folderPath = 'absensi/' . date('Y-m-d');
+            $fileName = $folderPath . '/in_' . $personnel->id . '_' . time() . '.jpg';
             Storage::disk('public')->put($fileName, $newImageData);
 
             if (!$existing) {
@@ -762,7 +763,8 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $fileName = 'absensi/out_' . $personnel->id . '_' . time() . '.jpg';
+            $folderPath = 'absensi/' . date('Y-m-d');
+            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '.jpg';
             Storage::disk('public')->put($fileName, $newImageData);
 
             $existing->update([

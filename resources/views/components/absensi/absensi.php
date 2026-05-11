@@ -430,7 +430,8 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $newImageData = ob_get_clean();
                 imagedestroy($img);
 
-                $imageName = 'absensi/' . $type . '_' . $this->selectedPersonnel->id . '_' . time() . '.jpg';
+                $folderPath = 'absensi/' . date('Y-m-d');
+                $imageName = $folderPath . '/' . $type . '_' . $this->selectedPersonnel->id . '_' . time() . '.jpg';
                 Storage::disk('public')->put($imageName, $newImageData);
                 $imagePath = $imageName;
             }

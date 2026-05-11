@@ -25,6 +25,12 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     public $apkWhatsNew = []; 
     public $apkOptionalMessage;
 
+    // Storage Cleanup Settings
+    public $hapusDariTanggal;
+    public $hapusSampaiTanggal;
+    public $ukuranTerhitung = '';
+    public $confirmHapusText = '';
+
     public function addWhatsNewPoint()
     {
         $this->apkWhatsNew[] = '';
@@ -140,6 +146,88 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
 
         $this->dispatch('toast', type: 'success', message: 'Informasi rilis APK baru berhasil disimpan.');
         $this->dispatch('close-modal', 'apk-modal');
+    }
+
+    public function hitungUkuran()
+    {
+        $this->validate([
+            'hapusDariTanggal' => 'required|date',
+            'hapusSampaiTanggal' => 'required|date|after_or_equal:hapusDariTanggal',
+        ]);
+
+        $start = \Carbon\Carbon::parse($this->hapusDariTanggal);
+        $end = \Carbon\Carbon::parse($this->hapusSampaiTanggal);
+        
+        $totalSize = 0;
+        
+        // Iterate through dates
+        $current = $start->copy();
+        while ($current->lte($end)) {
+            $folderName = 'absensi/' . $current->format('Y-m-d');
+            if (Storage::disk('public')->exists($folderName)) {
+                $files = Storage::disk('public')->allFiles($folderName);
+                foreach ($files as $file) {
+                    $totalSize += Storage::disk('public')->size($file);
+                }
+            }
+            $current->addDay();
+        }
+
+        // Format size
+        if ($totalSize >= 1073741824) {
+            $this->ukuranTerhitung = number_format($totalSize / 1073741824, 2) . ' GB';
+        } elseif ($totalSize >= 1048576) {
+            $this->ukuranTerhitung = number_format($totalSize / 1048576, 2) . ' MB';
+        } elseif ($totalSize >= 1024) {
+            $this->ukuranTerhitung = number_format($totalSize / 1024, 2) . ' KB';
+        } else {
+            $this->ukuranTerhitung = $totalSize . ' bytes';
+        }
+    }
+
+    public function konfirmasiHapus()
+    {
+        $this->validate([
+            'hapusDariTanggal' => 'required|date',
+            'hapusSampaiTanggal' => 'required|date|after_or_equal:hapusDariTanggal',
+        ]);
+        
+        $this->confirmHapusText = '';
+        $this->dispatch('open-modal', id: 'delete-photo-modal');
+    }
+
+    public function hapusPermanen()
+    {
+        if ($this->confirmHapusText !== 'HAPUS') {
+            $this->dispatch('toast', type: 'error', message: 'Konfirmasi teks tidak valid.');
+            return;
+        }
+
+        $this->validate([
+            'hapusDariTanggal' => 'required|date',
+            'hapusSampaiTanggal' => 'required|date|after_or_equal:hapusDariTanggal',
+        ]);
+
+        $start = \Carbon\Carbon::parse($this->hapusDariTanggal);
+        $end = \Carbon\Carbon::parse($this->hapusSampaiTanggal);
+        
+        $deletedCount = 0;
+        
+        // Iterate through dates
+        $current = $start->copy();
+        while ($current->lte($end)) {
+            $folderName = 'absensi/' . $current->format('Y-m-d');
+            if (Storage::disk('public')->exists($folderName)) {
+                Storage::disk('public')->deleteDirectory($folderName);
+                $deletedCount++;
+            }
+            $current->addDay();
+        }
+
+        $this->dispatch('close-modal', id: 'delete-photo-modal');
+        $this->dispatch('toast', type: 'success', message: "Berhasil menghapus folder foto untuk $deletedCount hari.");
+        $this->ukuranTerhitung = '';
+        $this->confirmHapusText = '';
     }
 
     public function with()
