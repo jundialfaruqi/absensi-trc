@@ -95,11 +95,36 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js" data-navigate-once></script>
+    <script data-navigate-once>
+        // Simpan instance native Echo (jika ada dari app.js VPS) agar tidak hilang
+        window.NativeEcho = window.Echo;
+        window.Echo = undefined; // Paksa undefined agar script CDN bisa menulis ulang
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
     <script data-navigate-once>
-        // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor Echo
-        if (typeof Echo !== 'undefined' && !Echo.socketId) {
-            Echo.socketId = function() { return null; };
+        // Sekarang window.Echo berisi Constructor dari CDN
+        if (typeof Echo === 'function') {
+            window.Pusher = Pusher;
+            window.CustomEcho = new Echo({
+                broadcaster: 'reverb',
+                key: '{{ env('REVERB_APP_KEY') }}',
+                wsHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
+                wsPort: {{ env('REVERB_PORT', 8080) }},
+                wssPort: {{ env('REVERB_PORT', 8080) }},
+                forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
+                enabledTransports: ['ws', 'wss'],
+            });
+            console.log('WebSocket: CustomEcho berhasil dibuat via CDN.');
+        }
+        
+        // Kembalikan window.Echo ke aslinya (jika ada) demi kebahagiaan Livewire
+        if (window.NativeEcho) {
+            window.Echo = window.NativeEcho;
+        } else {
+            // Jika tidak ada native Echo, pastikan Echo.socketId ada agar Livewire tidak error
+            if (typeof Echo !== 'undefined' && !Echo.socketId) {
+                Echo.socketId = function() { return null; };
+            }
         }
     </script>
     <script>
@@ -367,24 +392,9 @@
                 updateMarkers(@json($this->devices));
                 updateKantors(@json($this->kantors));
 
-                // Initialize Echo if not exists (using CDN fallback for local dev)
-                // Gunakan nama variabel kustom agar tidak bentrok dengan Livewire atau constructor Echo
-                if (!window.CustomEcho && typeof Echo === 'function') {
-                    window.Pusher = Pusher;
-                    window.CustomEcho = new Echo({
-                        broadcaster: 'reverb',
-                        key: '{{ env('REVERB_APP_KEY') }}',
-                        wsHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
-                        wsPort: {{ env('REVERB_PORT', 8080) }},
-                        wssPort: {{ env('REVERB_PORT', 8080) }},
-                        forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
-                        enabledTransports: ['ws', 'wss'],
-                    });
-                }
-
                 try {
-                    // Gunakan window.CustomEcho jika ada (hasil CDN), atau window.Echo jika ada (bawaan VPS)
-                    const echoInstance = (window.Echo && typeof window.Echo.channel === 'function') ? window.Echo : window.CustomEcho;
+                    // Prioritaskan CustomEcho (hasil racikan CDN yang kuat) agar tidak pakai native Echo VPS yang bug
+                    const echoInstance = window.CustomEcho || window.Echo;
                     
                     if (echoInstance && !window.EchoInstance) {
                         window.EchoInstance = echoInstance;
