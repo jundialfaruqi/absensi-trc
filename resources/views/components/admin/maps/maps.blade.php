@@ -440,8 +440,17 @@
                     const echoInstance = (window.Echo && typeof window.Echo.channel === 'function') ? window.Echo :
                         window.CustomEcho;
 
-                    if (echoInstance && !window.EchoInstance) {
+                    if (echoInstance) {
                         window.EchoInstance = echoInstance;
+                        
+                        // Hubungkan kembali jika terputus (terutama untuk Echo bawaan VPS)
+                        if (typeof window.EchoInstance.connect === 'function') {
+                            window.EchoInstance.connect();
+                        }
+                        
+                        // Tinggalkan channel dulu untuk mencegah duplikasi listener
+                        window.EchoInstance.leave('personnel-locations');
+                        
                         window.EchoInstance.channel('personnel-locations')
                             .listen('PersonnelLocationUpdated', (e) => {
                                 console.log('Location updated via WebSocket:', e);
@@ -460,6 +469,7 @@
                     document.addEventListener('livewire:navigating', () => {
                         if (window.EchoInstance) {
                             console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
+                            window.EchoInstance.leave('personnel-locations');
                             window.EchoInstance.disconnect();
                             window.EchoInstance = null;
                             window.CustomEcho = null; // Reset agar bisa membuat koneksi baru saat kembali
