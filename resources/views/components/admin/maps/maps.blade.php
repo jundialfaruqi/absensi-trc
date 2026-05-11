@@ -362,7 +362,7 @@
 
                 // Initialize Echo if not exists (using CDN fallback for local dev)
                 // Gunakan nama variabel kustom agar tidak bentrok dengan Livewire atau constructor Echo
-                if (!window.CustomEcho && typeof Echo !== 'undefined') {
+                if (!window.CustomEcho && typeof Echo === 'function') {
                     window.Pusher = Pusher;
                     window.CustomEcho = new Echo({
                         broadcaster: 'reverb',
