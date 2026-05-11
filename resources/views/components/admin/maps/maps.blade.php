@@ -56,9 +56,14 @@
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
                                 <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d->id }}"
-                                    class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
-                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}">Aktif:
-                                    {{ $d->last_seen_human }}</span>
+                                    class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1 ? 'bg-success' : 'bg-base-300' }}"></span>
+                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}">
+                                    @if($d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1)
+                                        Online
+                                    @else
+                                        Aktif: {{ $d->last_seen_human }}
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -89,6 +94,14 @@
         data-navigate-once />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js" data-navigate-once></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
+    <script data-navigate-once>
+        // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor Echo
+        if (typeof Echo !== 'undefined' && !Echo.socketId) {
+            Echo.socketId = function() { return null; };
+        }
+    </script>
     <script>
         (function() {
             const initMapsHandler = () => {
@@ -309,7 +322,7 @@
                         if (textEl) {
                             textEl.innerText = 'Offline';
                         }
-                    }, 15000); // 15 seconds
+                    }, 70000); // 1 minute 10 seconds
                 };
 
                 function fetchAddress(lat, lng, id) {
@@ -347,12 +360,27 @@
                 updateMarkers(@json($this->devices));
                 updateKantors(@json($this->kantors));
 
-                // Initialize Echo for Real-time tracking
-                // window.Echo sudah dibuat oleh bundle app.js (laravel-echo + pusher-js)
-                // Gunakan instance yang sudah ada, jangan buat yang baru
+                // Initialize Echo if not exists (using CDN fallback for local dev)
+                // Gunakan nama variabel kustom agar tidak bentrok dengan Livewire atau constructor Echo
+                if (!window.CustomEcho && typeof Echo !== 'undefined') {
+                    window.Pusher = Pusher;
+                    window.CustomEcho = new Echo({
+                        broadcaster: 'reverb',
+                        key: '{{ env('REVERB_APP_KEY') }}',
+                        wsHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
+                        wsPort: {{ env('REVERB_PORT', 8080) }},
+                        wssPort: {{ env('REVERB_PORT', 8080) }},
+                        forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
+                        enabledTransports: ['ws', 'wss'],
+                    });
+                }
+
                 try {
-                    if (window.Echo && !window.EchoInstance) {
-                        window.EchoInstance = window.Echo;
+                    // Gunakan window.CustomEcho jika ada (hasil CDN), atau window.Echo jika ada (bawaan VPS)
+                    const echoInstance = (window.Echo && typeof window.Echo.channel === 'function') ? window.Echo : window.CustomEcho;
+                    
+                    if (echoInstance && !window.EchoInstance) {
+                        window.EchoInstance = echoInstance;
                         window.EchoInstance.channel('personnel-locations')
                             .listen('PersonnelLocationUpdated', (e) => {
                                 console.log('Location updated via WebSocket:', e);
@@ -361,7 +389,7 @@
                         console.log('WebSocket: Berhasil mendaftarkan listener channel.');
                     }
                 } catch (e) {
-                    console.warn('Echo WebSocket gagal (normal jika jalur /app belum dibuka):', e.message);
+                    console.warn('Echo WebSocket gagal:', e.message);
                 }
 
                 window.mapsInitialized = true;
