@@ -371,10 +371,33 @@
                         )
                         .then(response => response.json())
                         .then(data => {
-                            el.innerHTML = `<strong>Lokasi:</strong> ${data.display_name}`;
+                            const address = data.display_name;
+                            el.innerHTML = `<strong>Lokasi:</strong> ${address}`;
+                            
+                            // Update stored popup content to persist address
+                            const marker = markers['p' + id] || markers['d' + id];
+                            if (marker && marker.getPopup()) {
+                                const currentPopupContent = marker.getPopup().getContent();
+                                if (typeof currentPopupContent === 'string') {
+                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[^<]*</div>`);
+                                    const newDiv = `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${address}</div>`;
+                                    marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
+                                }
+                            }
                         })
                         .catch(error => {
-                            el.innerHTML = `<strong>Lokasi:</strong> Gagal memuat alamat.`;
+                            const failText = `Gagal memuat alamat.`;
+                            el.innerHTML = `<strong>Lokasi:</strong> ${failText}`;
+                            
+                            const marker = markers['p' + id] || markers['d' + id];
+                            if (marker && marker.getPopup()) {
+                                const currentPopupContent = marker.getPopup().getContent();
+                                if (typeof currentPopupContent === 'string') {
+                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[^<]*</div>`);
+                                    const newDiv = `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${failText}</div>`;
+                                    marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
+                                }
+                            }
                         });
                 }
 
