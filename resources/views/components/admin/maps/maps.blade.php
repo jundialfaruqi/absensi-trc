@@ -56,7 +56,7 @@
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
                                 <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d->id }}"
-                                    class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1 ? 'bg-success' : 'bg-base-300' }}"></span>
+                                    class="w-2.5 h-2.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1 ? 'bg-emerald-500' : 'bg-base-300' }}"></span>
                                 <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}">
                                     @if ($d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1)
                                         Online
@@ -312,7 +312,7 @@
 
                     if (dotEl) {
                         dotEl.classList.remove('bg-base-300');
-                        dotEl.classList.add('bg-success');
+                        dotEl.classList.add('bg-emerald-500');
                         dotEl.classList.add('animate-pulse');
                     }
                     if (textEl) {
@@ -326,17 +326,17 @@
 
                     window[`statusTimer_${e.personnel_id}`] = setTimeout(() => {
                         if (dotEl) {
-                            dotEl.classList.remove('bg-success');
+                            dotEl.classList.remove('bg-emerald-500');
                             dotEl.classList.remove('animate-pulse');
                             dotEl.classList.add('bg-base-300');
                         }
                         if (textEl) {
-                            textEl.innerText = 'Offline';
+                            textEl.innerText = 'Aktif: 1 menit yang lalu';
                         }
-                        // Update status in popup to Offline too
+                        // Update status in popup too
                         const popupStatusEl = document.getElementById(`popup-status-${e.personnel_id}`);
                         if (popupStatusEl) {
-                            popupStatusEl.innerText = 'Offline';
+                            popupStatusEl.innerText = 'Aktif: 1 menit yang lalu';
                             popupStatusEl.className = 'text-xs opacity-60';
                         }
                     }, 70000); // 1 minute 10 seconds
