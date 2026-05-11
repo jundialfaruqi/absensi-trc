@@ -247,9 +247,12 @@
                         const penugasan = d.personnel && d.personnel.penugasan ? d.personnel.penugasan
                             .name : '-';
 
-                        let popupLastSeenHTML = '';
+                        let statusPopup = 'Online';
+                        let statusColorClass = 'text-success';
+
                         if (d.last_seen_human && !d.last_seen_human.includes('detik')) {
-                            popupLastSeenHTML = `<div class="text-xs opacity-60"><strong>Terakhir Terlihat:</strong> <span id="last-seen-${d.personnel_id || 'd'+d.id}">${d.last_seen_human}</span></div>`;
+                            statusPopup = `Aktif: ${d.last_seen_human}`;
+                            statusColorClass = 'opacity-60';
                         }
 
                         const popupContent = `
@@ -267,7 +270,7 @@
                                 </div>
                                 <div class="text-xs mb-1"><strong>Penugasan:</strong> ${penugasan}</div>
                                 <div class="text-xs mb-1" id="address-${d.id}"><strong>Lokasi:</strong> Memuat alamat...</div>
-                                ${popupLastSeenHTML}
+                                <div class="text-xs ${statusColorClass}" id="popup-status-${d.personnel_id || 'd'+d.id}">${statusPopup}</div>
                             </div>
                         `;
 
@@ -295,10 +298,11 @@
                     if (marker) {
                         marker.setLatLng([e.latitude, e.longitude]);
 
-                        // Update last seen in popup if it's open
-                        const lastSeenEl = document.getElementById(`last-seen-${e.personnel_id}`);
-                        if (lastSeenEl) {
-                            lastSeenEl.innerText = e.last_seen;
+                        // Update status in popup if it's open
+                        const popupStatusEl = document.getElementById(`popup-status-${e.personnel_id}`);
+                        if (popupStatusEl) {
+                            popupStatusEl.innerText = 'Online';
+                            popupStatusEl.className = 'text-xs text-success';
                         }
                     }
 
@@ -315,7 +319,7 @@
                         textEl.innerText = 'Online';
                     }
 
-                    // Set timer to clear online status after 15 seconds
+                    // Set timer to clear online status after 70 seconds
                     if (window[`statusTimer_${e.personnel_id}`]) {
                         clearTimeout(window[`statusTimer_${e.personnel_id}`]);
                     }
@@ -328,6 +332,12 @@
                         }
                         if (textEl) {
                             textEl.innerText = 'Offline';
+                        }
+                        // Update status in popup to Offline too
+                        const popupStatusEl = document.getElementById(`popup-status-${e.personnel_id}`);
+                        if (popupStatusEl) {
+                            popupStatusEl.innerText = 'Offline';
+                            popupStatusEl.className = 'text-xs opacity-60';
                         }
                     }, 70000); // 1 minute 10 seconds
                 };
