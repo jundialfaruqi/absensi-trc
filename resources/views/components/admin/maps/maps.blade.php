@@ -56,9 +56,14 @@
                             <div class="text-xs opacity-60 truncate">{{ $d->opd?->name ?? 'Global (Admin)' }}</div>
                             <div class="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
                                 <span id="status-dot-{{ $d->personnel_id ?? 'd' . $d->id }}"
-                                    class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 30 ? 'bg-success' : 'bg-base-300' }}"></span>
-                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}">Aktif:
-                                    {{ $d->last_seen_human }}</span>
+                                    class="w-1.5 h-1.5 rounded-full {{ $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1 ? 'bg-success' : 'bg-base-300' }}"></span>
+                                <span id="status-text-{{ $d->personnel_id ?? 'd' . $d->id }}" data-timestamp="{{ $d->last_seen_at ? $d->last_seen_at->timestamp : '' }}">
+                                    @if($d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1)
+                                        Online
+                                    @else
+                                        Aktif: {{ $d->last_seen_human }}
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -293,23 +298,8 @@
                     }
                     if (textEl) {
                         textEl.innerText = 'Online';
+                        textEl.setAttribute('data-timestamp', Math.floor(Date.now() / 1000));
                     }
-
-                    // Set timer to clear online status after 15 seconds
-                    if (window[`statusTimer_${e.personnel_id}`]) {
-                        clearTimeout(window[`statusTimer_${e.personnel_id}`]);
-                    }
-
-                    window[`statusTimer_${e.personnel_id}`] = setTimeout(() => {
-                        if (dotEl) {
-                            dotEl.classList.remove('bg-success');
-                            dotEl.classList.remove('animate-pulse');
-                            dotEl.classList.add('bg-base-300');
-                        }
-                        if (textEl) {
-                            textEl.innerText = 'Offline';
-                        }
-                    }, 15000); // 15 seconds
                 };
 
                 function fetchAddress(lat, lng, id) {
@@ -363,6 +353,42 @@
                 } catch (e) {
                     console.warn('Echo WebSocket gagal (normal jika jalur /app belum dibuka):', e.message);
                 }
+
+                // Interval to update "Aktif: X menit yang lalu" in real-time
+                if (window.statusUpdateInterval) {
+                    clearInterval(window.statusUpdateInterval);
+                }
+                
+                window.statusUpdateInterval = setInterval(() => {
+                    const now = Math.floor(Date.now() / 1000);
+                    const spans = document.querySelectorAll('[id^="status-text-"]');
+                    
+                    spans.forEach(span => {
+                        const timestamp = span.getAttribute('data-timestamp');
+                        if (!timestamp) return;
+                        
+                        const diffInSeconds = now - parseInt(timestamp);
+                        const dotId = span.id.replace('status-text-', 'status-dot-');
+                        const dotEl = document.getElementById(dotId);
+                        
+                        if (diffInSeconds < 60) {
+                            span.innerText = 'Online';
+                            if (dotEl) {
+                                dotEl.classList.remove('bg-base-300');
+                                dotEl.classList.add('bg-success');
+                                dotEl.classList.add('animate-pulse');
+                            }
+                        } else {
+                            const minutes = Math.floor(diffInSeconds / 60);
+                            span.innerText = `Aktif: ${minutes} menit yang lalu`;
+                            if (dotEl) {
+                                dotEl.classList.remove('bg-success');
+                                dotEl.classList.remove('animate-pulse');
+                                dotEl.classList.add('bg-base-300');
+                            }
+                        }
+                    });
+                }, 10000); // Check every 10 seconds
 
                 window.mapsInitialized = true;
 
