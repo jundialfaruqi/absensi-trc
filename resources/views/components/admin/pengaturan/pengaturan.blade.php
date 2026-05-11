@@ -433,87 +433,43 @@
                         tidak akan ikut terhapus.
                     </p>
 
-                    {{-- Script Cally --}}
-                    <script type="module" src="https://unpkg.com/cally"></script>
-
-                    <style>
-                        calendar-date::part(previous),
-                        calendar-date::part(next) {
-                            opacity: 1 !important;
-                        }
-                    </style>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Dari Tanggal --}}
                         <div class="form-control w-full relative">
                             <label class="label py-1">
-                                <span class="label-text text-[10px] font-black uppercase text-base-content">Dari
-                                    Tanggal</span>
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Dari Tanggal</span>
                             </label>
-
-                            <button type="button" popovertarget="cally-popover-dari"
-                                class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between"
-                                id="btn-dari" style="anchor-name:--btn-dari">
+                            
+                            <button type="button" 
+                                    onclick="document.getElementById('input-dari').showPicker()" 
+                                    class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between">
                                 <span>{{ $hapusDariTanggal ? \Carbon\Carbon::parse($hapusDariTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </button>
-
-                            <div popover id="cally-popover-dari"
-                                class="dropdown bg-base-100 rounded-box shadow-lg p-2 z-50"
-                                style="position-anchor:--btn-dari">
-                                <calendar-date class="cally"
-                                    @change="$wire.set('hapusDariTanggal', $event.target.value); document.getElementById('cally-popover-dari').hidePopover()">
-                                    <svg aria-label="Previous" class="fill-current size-4 text-primary"
-                                        slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-                                    </svg>
-                                    <svg aria-label="Next" class="fill-current size-4 text-primary" slot="next"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-                                    </svg>
-                                    <calendar-month></calendar-month>
-                                </calendar-date>
-                            </div>
+                            
+                            <input type="date" id="input-dari" wire:model="hapusDariTanggal" class="absolute inset-0 opacity-0 -z-10 pointer-events-none">
+                            @error('hapusDariTanggal')
+                                <span class="text-error text-[10px] mt-1">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         {{-- Sampai Tanggal --}}
                         <div class="form-control w-full relative">
                             <label class="label py-1">
-                                <span class="label-text text-[10px] font-black uppercase text-base-content">Sampai
-                                    Tanggal</span>
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Sampai Tanggal</span>
                             </label>
-
-                            <button type="button" popovertarget="cally-popover-sampai"
-                                class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between"
-                                id="btn-sampai" style="anchor-name:--btn-sampai">
+                            
+                            <button type="button" 
+                                    onclick="document.getElementById('input-sampai').showPicker()" 
+                                    class="input input-bordered w-full text-left font-bold text-xs flex items-center justify-between">
                                 <span>{{ $hapusSampaiTanggal ? \Carbon\Carbon::parse($hapusSampaiTanggal)->format('d-m-Y') : 'Pilih Tanggal' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </button>
-
-                            <div popover id="cally-popover-sampai"
-                                class="dropdown bg-base-100 rounded-box shadow-lg p-2 z-50"
-                                style="position-anchor:--btn-sampai">
-                                <calendar-date class="cally"
-                                    @change="$wire.set('hapusSampaiTanggal', $event.target.value); document.getElementById('cally-popover-sampai').hidePopover()">
-                                    <svg aria-label="Previous" class="fill-current size-4 text-primary"
-                                        slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-                                    </svg>
-                                    <svg aria-label="Next" class="fill-current size-4 text-primary" slot="next"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-                                    </svg>
-                                    <calendar-month></calendar-month>
-                                </calendar-date>
-                            </div>
+                            
+                            <input type="date" id="input-sampai" wire:model="hapusSampaiTanggal" class="absolute inset-0 opacity-0 -z-10 pointer-events-none">
+                            @error('hapusSampaiTanggal')
+                                <span class="text-error text-[10px] mt-1">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
 

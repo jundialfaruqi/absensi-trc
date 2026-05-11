@@ -28,8 +28,17 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     // Storage Cleanup Settings
     public $hapusDariTanggal;
     public $hapusSampaiTanggal;
-    public $ukuranTerhitung = '';
-    public $confirmHapusText = '';
+    public $ukuranTerhitung;
+    public $confirmHapusText;
+
+    protected $messages = [
+        'hapusDariTanggal.required' => 'Tanggal awal harus diisi.',
+        'hapusDariTanggal.date' => 'Format tanggal tidak valid.',
+        'hapusSampaiTanggal.required' => 'Tanggal akhir harus diisi.',
+        'hapusSampaiTanggal.date' => 'Format tanggal tidak valid.',
+        'hapusSampaiTanggal.after_or_equal' => 'Tanggal akhir harus sama atau setelah tanggal awal.',
+    ];
+
 
     public function addWhatsNewPoint()
     {
