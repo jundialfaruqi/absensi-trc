@@ -149,7 +149,7 @@
                             EMERGENCY</span>
                     </div>
 
-                    <div class="mb-10 text-center md:text-left">
+                    <div class="mb-10 text-center md:text-left hidden md:block">
                         <h2 class="text-3xl font-black text-white italic tracking-tighter uppercase mb-2">OTENTIKASI
                         </h2>
                         <p class="text-slate-400 text-xs font-semibold uppercase tracking-widest">Akses Portal
