@@ -420,13 +420,14 @@
                     const reverbHost = '{{ env('REVERB_HOST') }}';
                     const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ? window.location.hostname : reverbHost;
 
+                    const isSecure = window.location.protocol === 'https:';
                     window.CustomEcho = new Echo({
                         broadcaster: 'reverb',
                         key: '{{ env('REVERB_APP_KEY') }}',
                         wsHost: wsHost,
-                        wsPort: {{ env('REVERB_PORT', 8080) }},
-                        wssPort: {{ env('REVERB_PORT', 8080) }},
-                        forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
+                        wsPort: window.location.port || (isSecure ? 443 : 80),
+                        wssPort: window.location.port || (isSecure ? 443 : 80),
+                        forceTLS: isSecure,
                         enabledTransports: ['ws', 'wss'],
                     });
                 }
