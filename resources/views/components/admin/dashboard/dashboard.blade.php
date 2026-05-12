@@ -138,14 +138,20 @@
                     <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                         <div class="flex flex-row gap-2 w-full sm:w-auto">
                             <div class="relative flex-1 sm:flex-none w-full sm:w-auto">
-                                <input type="date" wire:model.live="filterTanggal" class="input input-bordered input-sm pl-8 text-xs font-black uppercase w-full sm:w-auto" onclick="this.showPicker()" />
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <input type="date" wire:model.live="filterTanggal"
+                                    class="input input-bordered input-sm pl-8 text-xs font-black uppercase w-full sm:w-auto"
+                                    onclick="this.showPicker()" />
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            
+
                             <div class="flex-1 sm:flex-none w-full sm:w-auto">
-                                <select wire:model.live="filterKategoriMakan" class="select select-bordered select-sm text-xs font-black uppercase min-w-[120px] w-full sm:w-auto">
+                                <select wire:model.live="filterKategoriMakan"
+                                    class="select select-bordered select-sm text-xs font-black uppercase min-w-[120px] w-full sm:w-auto">
                                     <option value="">Semua Shift</option>
                                     <option value="makan_siang">Makan Siang</option>
                                     <option value="makan_malam">Makan Malam</option>
@@ -153,11 +159,12 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <button wire:click="$refresh" wire:loading.attr="disabled"
                             class="btn btn-ghost btn-sm gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent w-full sm:w-auto justify-center sm:justify-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-4 h-4" wire:loading.class="animate-spin">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" class="w-4 h-4"
+                                wire:loading.class="animate-spin">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
@@ -220,7 +227,9 @@
                                     @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
-                                            <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan, filterTanggal" class="bg-base-200/50">
+                                            <tr wire:loading.remove
+                                                wire:target="$refresh, filterKategoriMakan, filterTanggal"
+                                                class="bg-base-200/50">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
@@ -233,7 +242,8 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan, filterTanggal"
+                                        <tr wire:loading.remove
+                                            wire:target="$refresh, filterKategoriMakan, filterTanggal"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
@@ -266,15 +276,20 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                @if($log->jadwal?->shift)
+                                                @if ($log->jadwal?->shift)
                                                     <div class="flex flex-col">
-                                                        <span class="text-xs font-black text-base-content uppercase">{{ $log->jadwal->shift->name }}</span>
-                                                        <span class="text-[9px] font-bold text-base-content/40 uppercase">
-                                                            {{ \Carbon\Carbon::parse($log->jadwal->shift->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->jadwal->shift->end_time)->format('H:i') }}
+                                                        <span
+                                                            class="text-xs font-black text-base-content uppercase">{{ $log->jadwal->shift->name }}</span>
+                                                        <span
+                                                            class="text-[9px] font-bold text-base-content/40 uppercase">
+                                                            {{ \Carbon\Carbon::parse($log->jadwal->shift->start_time)->format('H:i') }}
+                                                            -
+                                                            {{ \Carbon\Carbon::parse($log->jadwal->shift->end_time)->format('H:i') }}
                                                         </span>
                                                     </div>
                                                 @else
-                                                    <span class="text-[9px] font-bold text-base-content/20">FLEX / BEBAS</span>
+                                                    <span class="text-[9px] font-bold text-base-content/20">FLEX /
+                                                        BEBAS</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -296,84 +311,137 @@
                                                     </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="flex items-center justify-center gap-2">
-                                                    @if ($log->jam_masuk && !is_null($log->is_within_radius))
-                                                        <div class="tooltip tooltip-top" data-tip="{{ $log->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter, 0) }}m)">
-                                                            @if ($log->is_within_radius)
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
-                                                            @else
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
-                                                            @endif
-                                                        </div>
+                                                <div class="flex flex-col items-center gap-1">
+                                                    @if ($log->status_masuk)
+                                                        @php
+                                                            $masukColor = match ($log->status_masuk) {
+                                                                'HADIR', 'TEPAT WAKTU' => 'success',
+                                                                'TELAT' => 'warning',
+                                                                'ALFA' => 'error',
+                                                                default => 'ghost',
+                                                            };
+                                                        @endphp
+                                                        <span
+                                                            class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] text-white tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
+                                                    @else
+                                                        <span
+                                                            class="text-[9px] font-bold text-base-content/20">-</span>
                                                     @endif
 
-                                                    <div class="flex flex-col items-start gap-0.5">
-                                                        @if ($log->status_masuk)
-                                                            @php
-                                                                $masukColor = match ($log->status_masuk) {
-                                                                    'HADIR', 'TEPAT WAKTU' => 'success',
-                                                                    'TELAT' => 'warning',
-                                                                    'ALFA' => 'error',
-                                                                    default => 'ghost',
-                                                                };
-                                                            @endphp
+                                                    @if ($log->jam_masuk)
+                                                        <div class="flex items-center gap-1">
+                                                            @if (!is_null($log->is_within_radius))
+                                                                <div class="tooltip tooltip-top"
+                                                                    data-tip="{{ $log->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter, 0) }}m)">
+                                                                    @if ($log->is_within_radius)
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="w-3.5 h-3.5 text-primary"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                            <path
+                                                                                d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
+                                                                        </svg>
+                                                                    @else
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="w-3.5 h-3.5 text-error"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" />
+                                                                            <path
+                                                                                d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" />
+                                                                            <path d="M3 3l18 18" />
+                                                                        </svg>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
                                                             <span
-                                                                class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] text-white tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
-                                                        @else
-                                                            <span
-                                                                class="text-[9px] font-bold text-base-content/20">-</span>
-                                                        @endif
-
-                                                        @if ($log->jam_masuk)
-                                                            <span class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
-                                                        @else
-                                                            <span
-                                                                class="text-[10px] font-black text-base-content/20">--:--</span>
-                                                        @endif
-                                                    </div>
+                                                                class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
+                                                        </div>
+                                                    @else
+                                                        <span
+                                                            class="text-[10px] font-black text-base-content/20">--:--</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="flex items-center justify-center gap-2">
-                                                    @if ($log->jam_pulang && !is_null($log->is_within_radius_pulang))
-                                                        <div class="tooltip tooltip-top" data-tip="{{ $log->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter_pulang, 0) }}m)">
-                                                            @if ($log->is_within_radius_pulang)
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
-                                                            @else
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
-                                                            @endif
-                                                        </div>
+                                                <div class="flex flex-col items-center gap-1">
+                                                    @if ($log->status_pulang)
+                                                        @php
+                                                            $pulangColor = match ($log->status_pulang) {
+                                                                'HADIR' => 'success',
+                                                                'PC' => 'warning',
+                                                                'ALFA' => 'error',
+                                                                default => 'ghost',
+                                                            };
+                                                        @endphp
+                                                        <span
+                                                            class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] text-white tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
+                                                    @else
+                                                        <span
+                                                            class="text-[9px] font-bold text-base-content/20">-</span>
                                                     @endif
 
-                                                    <div class="flex flex-col items-start gap-0.5">
-                                                        @if ($log->status_pulang)
-                                                            @php
-                                                                $pulangColor = match ($log->status_pulang) {
-                                                                    'HADIR' => 'success',
-                                                                    'PC' => 'warning',
-                                                                    'ALFA' => 'error',
-                                                                    default => 'ghost',
-                                                                };
-                                                            @endphp
+                                                    @if ($log->jam_pulang)
+                                                        <div class="flex items-center gap-1">
+                                                            @if (!is_null($log->is_within_radius_pulang))
+                                                                <div class="tooltip tooltip-top"
+                                                                    data-tip="{{ $log->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter_pulang, 0) }}m)">
+                                                                    @if ($log->is_within_radius_pulang)
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="w-3.5 h-3.5 text-primary"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                                                            <path
+                                                                                d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" />
+                                                                        </svg>
+                                                                    @else
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="w-3.5 h-3.5 text-error"
+                                                                            viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path stroke="none" d="M0 0h24v24H0z"
+                                                                                fill="none" />
+                                                                            <path
+                                                                                d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" />
+                                                                            <path
+                                                                                d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" />
+                                                                            <path d="M3 3l18 18" />
+                                                                        </svg>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
                                                             <span
-                                                                class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] text-white tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
-                                                        @else
-                                                            <span
-                                                                class="text-[9px] font-bold text-base-content/20">-</span>
-                                                        @endif
-
-                                                        @if ($log->jam_pulang)
-                                                            <span class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
-                                                        @else
-                                                            <span
-                                                                class="text-[10px] font-black text-base-content/20">--:--</span>
-                                                        @endif
-                                                    </div>
+                                                                class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
+                                                        </div>
+                                                    @else
+                                                        <span
+                                                            class="text-[10px] font-black text-base-content/20">--:--</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan, filterTanggal">
+                                        <tr wire:loading.remove
+                                            wire:target="$refresh, filterKategoriMakan, filterTanggal">
                                             <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -388,7 +456,7 @@
                                             </td>
                                         </tr>
                                     @endforelse
-                                    
+
                                     {{-- Loading Skeleton during updates --}}
                                     @for ($i = 0; $i < 5; $i++)
                                         <tr wire:loading wire:target="$refresh, filterKategoriMakan, filterTanggal">
