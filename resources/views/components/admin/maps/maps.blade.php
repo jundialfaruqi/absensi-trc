@@ -432,9 +432,8 @@
                 }
 
                 try {
-                    // Gunakan window.CustomEcho jika ada (hasil CDN), atau window.Echo jika ada (bawaan VPS)
-                    const echoInstance = (window.Echo && typeof window.Echo.channel === 'function') ? window.Echo :
-                        window.CustomEcho;
+                    // Utamakan CustomEcho yang kita buat sendiri karena sudah dipastikan konfigurasinya benar
+                    const echoInstance = window.CustomEcho || window.Echo;
 
                     if (echoInstance) {
                         window.EchoInstance = echoInstance;
