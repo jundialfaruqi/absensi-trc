@@ -41,8 +41,9 @@
 
             <div class="flex-1 overflow-y-auto space-y-2">
                 @forelse($this->devices as $d)
+                    @php $markerKey = $d->personnel_id ? ('p' . $d->personnel_id) : ('d' . $d->id); @endphp
                     <div class="p-2 hover:bg-base-200 rounded-lg cursor-pointer flex items-center gap-2"
-                        onclick="focusMarker({{ $d->last_latitude }}, {{ $d->last_longitude }})">
+                        onclick="focusMarker('{{ $markerKey }}', {{ $d->last_latitude }}, {{ $d->last_longitude }})">
                         <div class="avatar">
                             <div class="w-10 rounded-full">
                                 <img
@@ -404,9 +405,15 @@
                         });
                 }
 
-                window.focusMarker = function(lat, lng) {
+                window.focusMarker = function(key, lat, lng) {
                     if (map) {
-                        map.setView([lat, lng], 16);
+                        const marker = markers[key];
+                        if (marker) {
+                            map.setView(marker.getLatLng(), 16);
+                            marker.openPopup(); // Opsi: langsung buka popupnya juga
+                        } else if (lat && lng) {
+                            map.setView([lat, lng], 16);
+                        }
                     }
                 };
 
