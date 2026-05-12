@@ -24,7 +24,7 @@ Route::get('/direct-download-apk/{pin}', function ($pin) {
     $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
     if (!file_exists($filePath)) abort(404);
 
-    return response()->download($filePath, 'TRC-Pekanbaru-Aman-v1.4.1.apk', [
+    return response()->download($filePath, 'TRC-Pekanbaru-Aman-v1.4.2.apk', [
         'Content-Type' => 'application/vnd.android.package-archive',
     ]);
 })->name('apk.download.direct');
@@ -117,7 +117,7 @@ Route::group([
         $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
         if (!file_exists($filePath)) abort(404, 'File aplikasi tidak ditemukan di server.');
 
-        return response()->download($filePath, 'TRC-Pekanbaru-Aman-v1.4.1.apk', [
+        return response()->download($filePath, 'TRC-Pekanbaru-Aman-v1.4.2.apk', [
             'Content-Type' => 'application/vnd.android.package-archive',
         ]);
     })->middleware('permission:manajemen-pengaturan')->name('pengaturan.download-apk');
