@@ -208,7 +208,7 @@
                             @endphp
                             @forelse ($this->personnels as $p)
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
-                                    <tr class="bg-base-200">
+                                    <tr class="bg-base-200" wire:key="opd-header-{{ $p->opd_id }}">
                                         <td colspan="{{ count($this->dates) + 1 }}"
                                             class="sticky left-0 top-12 z-50 p-0 border-b border-base-200 bg-base-200">
                                             <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
@@ -222,7 +222,7 @@
                                     </tr>
                                     @php $currentOpd = $p->opd_id; @endphp
                                 @endif
-                                <tr>
+                                <tr wire:key="personnel-row-{{ $p->id }}">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
                                             <div class="avatar placeholder">
@@ -281,7 +281,7 @@
                                                 }
                                             }
                                         @endphp
-                                        <td class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
+                                        <td wire:key="cell-{{ $p->id }}-{{ $date }}" class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
                                             style="{{ $style }}"
                                             wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}', '{{ $p->attendance_type }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
