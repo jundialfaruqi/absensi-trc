@@ -22,6 +22,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     public string $start_time = '';
     public string $end_time = '';
     public string $color = '#64748b';
+    public string $kategori_makan = 'makan_siang';
 
     // Delete attributes
     public ?int $deleteId = null;
@@ -61,6 +62,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
         $this->start_time = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '';
         $this->end_time = $item->end_time ? \Carbon\Carbon::parse($item->end_time)->format('H:i') : '';
         $this->color = $item->color ?? '#64748b';
+        $this->kategori_makan = $item->kategori_makan ?? 'makan_siang';
 
         $this->dispatch('open-modal', id: 'shift-modal');
     }
@@ -74,6 +76,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             'start_time' => $this->type === 'shift' ? 'required|date_format:H:i' : 'nullable',
             'end_time' => $this->type === 'shift' ? 'required|date_format:H:i' : 'nullable',
             'color' => 'required|string|max:7',
+            'kategori_makan' => 'required|string|in:makan_siang,makan_malam,tanpa_makan',
         ];
 
         $this->validate($rules);
@@ -85,6 +88,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             'start_time' => $this->type === 'shift' ? $this->start_time : null,
             'end_time' => $this->type === 'shift' ? $this->end_time : null,
             'color' => $this->color,
+            'kategori_makan' => $this->kategori_makan,
         ];
 
         if ($this->shiftId) {
@@ -126,6 +130,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
         $this->start_time = '';
         $this->end_time = '';
         $this->color = '#64748b';
+        $this->kategori_makan = 'makan_siang';
         $this->resetErrorBag();
     }
 

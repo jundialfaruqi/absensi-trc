@@ -189,6 +189,10 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                         $this->dispatch('toast', type: 'error', message: 'Silakan pilih shift untuk semua entri SHIFT.');
                         return;
                     }
+                    if ($seq['type'] === 'OFF' && empty($seq['shift_id'])) {
+                        $this->dispatch('toast', type: 'error', message: 'Silakan pilih status OFF terlebih dahulu.');
+                        return;
+                    }
                     if ($seq['duration'] < 1) {
                         $this->dispatch('toast', type: 'error', message: 'Durasi minimal adalah 1 hari.');
                         return;
@@ -203,6 +207,11 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     if ($config['type'] === 'SHIFT' && empty($config['shift_id'])) {
                         $dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][$day];
                         $this->dispatch('toast', type: 'error', message: "Silakan pilih shift untuk hari $dayName.");
+                        return;
+                    }
+                    if ($config['type'] === 'OFF' && empty($config['shift_id'])) {
+                        $dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][$day];
+                        $this->dispatch('toast', type: 'error', message: "Silakan pilih status OFF untuk hari $dayName.");
                         return;
                     }
                 }

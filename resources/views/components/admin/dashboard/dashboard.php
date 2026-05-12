@@ -15,6 +15,7 @@ use App\Models\Setting;
 new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Component
 {
     public bool $readyToLoad = false;
+    public string $filterKategoriMakan = '';
 
     public function load()
     {
@@ -68,6 +69,13 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             })
             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            })
+            ->when($this->filterKategoriMakan, function ($q) {
+                if ($this->filterKategoriMakan === 'flexible') {
+                    $q->whereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+                } else {
+                    $q->whereHas('jadwal.shift', fn($sq) => $sq->where('kategori_makan', $this->filterKategoriMakan));
+                }
             });
 
         // Detailed Stats

@@ -135,16 +135,26 @@
                         <div class="h-8 w-1 bg-primary rounded-full"></div>
                         <h2 class="text-lg font-black text-base-content uppercase">Log Aktifitas Hari Ini</h2>
                     </div>
-                    <button wire:click="$refresh" wire:loading.attr="disabled"
-                        class="btn btn-ghost btn-xs gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="w-3 h-3" wire:loading.class="animate-spin">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                        <span wire:loading.remove>Refresh</span>
-                        <span wire:loading>Memperbarui...</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <select wire:model.live="filterKategoriMakan" class="select select-bordered select-xs text-[10px] font-black uppercase">
+                            <option value="">Semua Shift</option>
+                            <option value="makan_siang">Makan Siang</option>
+                            <option value="makan_malam">Makan Malam</option>
+                            <option value="tanpa_makan">Tanpa Makan</option>
+                            <option value="flexible">Jadwal Bebas (Flex)</option>
+                        </select>
+                        
+                        <button wire:click="$refresh" wire:loading.attr="disabled"
+                            class="btn btn-ghost btn-xs gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-3 h-3" wire:loading.class="animate-spin">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            <span wire:loading.remove>Refresh</span>
+                            <span wire:loading>Memperbarui...</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card bg-base-100 border border-base-200 overflow-hidden">
@@ -153,6 +163,7 @@
                             <thead>
                                 <tr class="bg-base-200/50">
                                     <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang
@@ -188,7 +199,7 @@
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
                                             <tr class="bg-base-200/50">
-                                                <td colspan="4" class="py-2 px-4">
+                                                <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
                                                         <span
@@ -231,6 +242,18 @@
                                                             class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->penugasan->name }}</span>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                @if($log->jadwal?->shift)
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs font-black text-base-content uppercase">{{ $log->jadwal->shift->name }}</span>
+                                                        <span class="text-[9px] font-bold text-base-content/40 uppercase">
+                                                            {{ \Carbon\Carbon::parse($log->jadwal->shift->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->jadwal->shift->end_time)->format('H:i') }}
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <span class="text-[9px] font-bold text-base-content/20">FLEX / BEBAS</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <div class="flex flex-col gap-1">
@@ -311,7 +334,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="py-12 text-center">
+                                            <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"

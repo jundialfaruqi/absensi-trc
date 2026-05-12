@@ -75,6 +75,7 @@
                             <th class="text-center w-16">#</th>
                             <th>Nama Shift</th>
                             <th>Keterangan</th>
+                            <th>Kategori Makan</th>
                             <th class="text-center">Jam Mulai (Masuk)</th>
                             <th class="text-center">Jam Selesai (Pulang)</th>
                             <th class="text-center w-24">Action</th>
@@ -104,6 +105,17 @@
                                 </td>
                                 <td>
                                     <span class="text-xs">{{ $r->keterangan }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-xs uppercase font-semibold">
+                                        @if($r->kategori_makan === 'makan_siang')
+                                            Makan Siang
+                                        @elseif($r->kategori_makan === 'makan_malam')
+                                            Makan Malam
+                                        @else
+                                            Tanpa Makan
+                                        @endif
+                                    </span>
                                 </td>
                                 <td class="text-center">
                                     @if ($r->type === 'shift')
@@ -146,7 +158,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-sm text-base-content/60 py-8">Tidak ada
+                                <td colspan="7" class="text-center text-sm text-base-content/60 py-8">Tidak ada
                                     data
                                     Shift</td>
                             </tr>
@@ -212,6 +224,21 @@
                             class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('keterangan') input-error @enderror"
                             placeholder="Cth: Shift Pagi">
                         @error('keterangan')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label mb-1 px-1">
+                            <span class="label-text text-sm font-medium text-base-content">Kategori Makan <span
+                                    class="text-error">*</span></span>
+                        </label>
+                        <select wire:model="kategori_makan" class="select select-bordered focus:select-primary w-full transition-all @error('kategori_makan') select-error @enderror">
+                            <option value="makan_siang">Makan Siang</option>
+                            <option value="makan_malam">Makan Malam</option>
+                            <option value="tanpa_makan">Tanpa Makan</option>
+                        </select>
+                        @error('kategori_makan')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
                     </div>
