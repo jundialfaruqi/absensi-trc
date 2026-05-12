@@ -518,8 +518,43 @@
         </form>
         @else
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="card bg-base-100 shadow-sm border border-base-200 md:col-span-2 h-[600px] skeleton"></div>
-            <div class="card md:col-span-1 h-[400px] skeleton"></div>
+            {{-- Kiri: Data Profil --}}
+            <div class="card bg-base-100 shadow-sm border border-base-200 md:col-span-2">
+                <div class="card-body">
+                    <div class="skeleton h-6 w-40 mb-4"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-6 md:gap-y-4">
+                        @for ($i = 0; $i < 8; $i++)
+                            <div class="form-control w-full gap-2">
+                                <div class="skeleton h-4 w-24"></div>
+                                <div class="skeleton h-12 w-full"></div>
+                            </div>
+                        @endfor
+                        <div class="form-control w-full md:col-span-2 gap-2 mt-2">
+                            <div class="skeleton h-4 w-32"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="skeleton h-24 w-full rounded-xl"></div>
+                                <div class="skeleton h-24 w-full rounded-xl"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer border-t border-base-200 p-6 flex justify-end gap-3">
+                    <div class="skeleton h-10 w-24 rounded-lg"></div>
+                    <div class="skeleton h-10 w-36 rounded-lg"></div>
+                </div>
+            </div>
+
+            {{-- Kanan: Foto --}}
+            <div class="card bg-base-100 md:col-span-1 h-fit shadow-sm border border-base-200">
+                <div class="card-body p-6 flex flex-col items-center">
+                    <div class="skeleton h-6 w-40 mb-4"></div>
+                    <div class="skeleton w-full max-w-70 aspect-5/6 rounded-lg mb-4"></div>
+                    <div class="flex gap-2 w-full max-w-70">
+                        <div class="skeleton h-8 flex-1 rounded-lg"></div>
+                        <div class="skeleton h-8 flex-1 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
         </div>
         @endif
 
