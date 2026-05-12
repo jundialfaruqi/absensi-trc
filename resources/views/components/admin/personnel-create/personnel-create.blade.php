@@ -8,12 +8,13 @@
                 </h3>
                 <p class="text-sm text-base-content/60 mt-1">Lengkapi data profil dan foto personnel di bawah ini.</p>
             </div>
-            <a wire:navigate href="{{ route('personnel') }}" class="btn btn-ghost btn-sm" @click="stopCamera()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            <a wire:navigate href="{{ route('personnel') }}" class="btn btn-ghost btn-sm" x-data="{ loading: false }" @click="stopCamera(); loading = true" :class="loading ? 'pointer-events-none opacity-50' : ''">
+                <span x-show="loading" class="loading loading-spinner loading-xs mr-1"></span>
+                <svg x-show="!loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor" class="w-4 h-4 mr-1">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
-                Kembali
+                <span x-text="loading ? 'Memuat...' : 'Kembali'"></span>
             </a>
         </div>
         
@@ -266,8 +267,10 @@
                         </div>
                     </div>
                     <div class="card-footer border-t border-base-200 p-6 flex justify-end gap-3">
-                        <a wire:navigate href="{{ route('personnel') }}" class="btn btn-ghost"
-                            @click="stopCamera()">Batal</a>
+                        <a wire:navigate href="{{ route('personnel') }}" class="btn btn-ghost" x-data="{ loading: false }" @click="stopCamera(); loading = true" :class="loading ? 'pointer-events-none opacity-50' : ''">
+                            <span x-show="loading" class="loading loading-spinner loading-xs mr-1"></span>
+                            <span x-text="loading ? 'Memuat...' : 'Batal'"></span>
+                        </a>
                         <button type="submit" class="btn btn-secondary px-8" wire:loading.attr="disabled" wire:target="save">
                             <span wire:loading wire:target="save" class="loading loading-spinner loading-xs"></span>
                             <span wire:loading.remove wire:target="save">Simpan Data</span>
@@ -349,8 +352,10 @@
                                             <button type="button"
                                                 @click="isCameraOpen ? stopCamera() : startCamera()"
                                                 class="btn btn-sm flex-1"
-                                                :class="isCameraOpen ? 'btn-error' : 'btn-neutral'">
-                                                <svg x-show="!isCameraOpen" xmlns="http://www.w3.org/2000/svg"
+                                                :class="isCameraOpen ? 'btn-error' : 'btn-neutral'"
+                                                :disabled="isStartingCamera">
+                                                <span x-show="isStartingCamera" class="loading loading-spinner loading-xs"></span>
+                                                <svg x-show="!isCameraOpen && !isStartingCamera" xmlns="http://www.w3.org/2000/svg"
                                                     fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                                     stroke="currentColor" class="w-4 h-4 hidden sm:block">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -358,7 +363,8 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                                                 </svg>
-                                                <span x-text="isCameraOpen ? 'Tutup' : 'Kamera'"></span>
+                                                <span x-show="!isStartingCamera" x-text="isCameraOpen ? 'Tutup' : 'Kamera'"></span>
+                                                <span x-show="isStartingCamera">Memuat...</span>
                                             </button>
 
                                             {{-- Capture Button --}}
@@ -371,10 +377,11 @@
                                             {{-- File Upload --}}
                                             <div class="relative flex-1" x-show="!isCameraOpen">
                                                 <input type="file" x-ref="fileInput" class="hidden"
-                                                    accept="image/*" @change="handleFileUpload($event)">
+                                                    accept="image/*" @change="handleFileUpload($event)" :disabled="isUploadingFile">
                                                 <button type="button" @click="$refs.fileInput.click()"
-                                                    class="btn btn-sm btn-outline w-full">
-                                                    Upload File
+                                                    class="btn btn-sm btn-outline w-full" :disabled="isUploadingFile">
+                                                    <span x-show="isUploadingFile" class="loading loading-spinner loading-xs"></span>
+                                                    <span x-text="isUploadingFile ? 'Memproses...' : 'Upload File'"></span>
                                                 </button>
                                             </div>
                                         </div>
@@ -425,13 +432,13 @@
                     <div class="skeleton h-6 w-40 mb-4"></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-6 md:gap-y-4">
                         @for ($i = 0; $i < 8; $i++)
-                            <div class="form-control w-full gap-2">
-                                <div class="skeleton h-4 w-24"></div>
+                            <div class="form-control w-full">
+                                <div class="skeleton h-4 w-24 mb-2"></div>
                                 <div class="skeleton h-12 w-full"></div>
                             </div>
                         @endfor
-                        <div class="form-control w-full md:col-span-2 gap-2 mt-2">
-                            <div class="skeleton h-4 w-32"></div>
+                        <div class="form-control w-full md:col-span-2 mt-2">
+                            <div class="skeleton h-4 w-32 mb-2"></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="skeleton h-24 w-full rounded-xl"></div>
                                 <div class="skeleton h-24 w-full rounded-xl"></div>
@@ -468,24 +475,29 @@
                             isCameraOpen: false,
                             isLoadingModels: false,
                             isCapturing: false,
+                            isStartingCamera: false,
+                            isUploadingFile: false,
                             stream: null,
                             faceApiLoaded: false,
 
                             async startCamera() {
-                                this.isCameraOpen = true;
-                                if (!this.faceApiLoaded) {
-                                    await this.loadModels();
-                                }
-
+                                this.isStartingCamera = true;
                                 try {
+                                    if (!this.faceApiLoaded) {
+                                        await this.loadModels();
+                                    }
+
                                     this.stream = await navigator.mediaDevices.getUserMedia({
                                         video: true
                                     });
                                     this.$refs.video.srcObject = this.stream;
+                                    this.isCameraOpen = true;
                                 } catch (err) {
                                     console.error("Error accessing camera: ", err);
                                     alert("Tidak dapat mengakses kamera.");
                                     this.isCameraOpen = false;
+                                } finally {
+                                    this.isStartingCamera = false;
                                 }
                             },
 
@@ -515,25 +527,32 @@
                                 const file = event.target.files[0];
                                 if (!file) return;
 
-                                // Preview & Upload to Livewire
-                                @this.upload('foto', file);
+                                this.isUploadingFile = true;
+                                try {
+                                    // Preview & Upload to Livewire
+                                    @this.upload('foto', file);
 
-                                // Extract descriptor
-                                if (!this.faceApiLoaded) await this.loadModels();
+                                    // Extract descriptor
+                                    if (!this.faceApiLoaded) await this.loadModels();
 
-                                const img = await faceapi.bufferToImage(file);
-                                const detection = await faceapi.detectSingleFace(img, new faceapi
-                                        .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                    .withFaceDescriptor();
+                                    const img = await faceapi.bufferToImage(file);
+                                    const detection = await faceapi.detectSingleFace(img, new faceapi
+                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
+                                        .withFaceDescriptor();
 
-                                if (detection) {
-                                    @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                        .descriptor)));
-                                } else {
-                                    alert(
-                                        "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
-                                    );
-                                    @this.set('face_descriptor', '');
+                                    if (detection) {
+                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
+                                            .descriptor)));
+                                    } else {
+                                        alert(
+                                            "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
+                                        );
+                                        @this.set('face_descriptor', '');
+                                    }
+                                } catch (err) {
+                                    console.error("Error processing file upload: ", err);
+                                } finally {
+                                    this.isUploadingFile = false;
                                 }
                             },
 
