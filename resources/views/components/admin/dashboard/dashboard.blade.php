@@ -183,16 +183,25 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="skeleton h-5 w-20 rounded-full"></div>
+                                                <div class="flex flex-col gap-2">
+                                                    <div class="skeleton h-3 w-12"></div>
+                                                    <div class="skeleton h-2 w-20"></div>
+                                                </div>
                                             </td>
                                             <td>
                                                 <div class="skeleton h-5 w-12 rounded-full"></div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
+                                                    <div class="skeleton h-3 w-10"></div>
+                                                </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
+                                                    <div class="skeleton h-3 w-10"></div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endfor
@@ -364,16 +373,25 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="skeleton h-5 w-20 rounded-full"></div>
+                                                <div class="flex flex-col gap-2">
+                                                    <div class="skeleton h-3 w-12"></div>
+                                                    <div class="skeleton h-2 w-20"></div>
+                                                </div>
                                             </td>
                                             <td>
                                                 <div class="skeleton h-5 w-12 rounded-full"></div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
+                                                    <div class="skeleton h-3 w-10"></div>
+                                                </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
+                                                    <div class="skeleton h-3 w-10"></div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endfor
