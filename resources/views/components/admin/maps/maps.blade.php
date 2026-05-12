@@ -1,8 +1,8 @@
 <div wire:init="load">
     {{-- ─── Main Content ────────────────────────────────────────────────── --}}
-    <div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-12rem)]">
+    <div class="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-12rem)]">
         {{-- Sidebar --}}
-        <div class="w-full lg:w-80 bg-base-100 rounded-box shadow-sm p-4 flex flex-col gap-4">
+        <div class="w-full lg:w-80 bg-base-100 rounded-box shadow-sm p-4 flex flex-col gap-4 lg:overflow-hidden">
             <div class="form-control w-full">
                 <div class="relative">
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama personnel..."
@@ -75,8 +75,8 @@
         </div>
 
         {{-- Map Container --}}
-        <div class="flex-1 bg-base-100 rounded-box shadow-sm overflow-hidden relative" wire:ignore>
-            <div id="map" class="absolute inset-0 w-full h-full"></div>
+        <div class="w-full min-h-[60vh] lg:min-h-0 lg:flex-1 bg-base-100 rounded-box shadow-sm overflow-hidden relative" wire:ignore>
+            <div id="map" class="absolute inset-0 w-full h-full z-0"></div>
         </div>
     </div>
 
