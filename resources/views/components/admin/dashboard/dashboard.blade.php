@@ -296,77 +296,79 @@
                                                     </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    @if ($log->status_masuk)
-                                                        @php
-                                                            $masukColor = match ($log->status_masuk) {
-                                                                'HADIR', 'TEPAT WAKTU' => 'success',
-                                                                'TELAT' => 'warning',
-                                                                'ALFA' => 'error',
-                                                                default => 'ghost',
-                                                            };
-                                                        @endphp
-                                                        <span
-                                                            class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] text-white tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
-                                                    @else
-                                                        <span
-                                                            class="text-[9px] font-bold text-base-content/20">-</span>
+                                                <div class="flex items-center justify-center gap-2">
+                                                    @if ($log->jam_masuk && !is_null($log->is_within_radius))
+                                                        <div class="tooltip tooltip-top" data-tip="{{ $log->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter, 0) }}m)">
+                                                            @if ($log->is_within_radius)
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
+                                                            @else
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
+                                                            @endif
+                                                        </div>
                                                     @endif
 
-                                                    @if ($log->jam_masuk)
-                                                        <div class="flex items-center gap-1">
-                                                            @if (!is_null($log->is_within_radius))
-                                                                <div class="tooltip tooltip-top" data-tip="{{ $log->is_within_radius ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter, 0) }}m)">
-                                                                    @if ($log->is_within_radius)
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
-                                                                    @else
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
-                                                                    @endif
-                                                                </div>
-                                                            @endif
+                                                    <div class="flex flex-col items-start gap-0.5">
+                                                        @if ($log->status_masuk)
+                                                            @php
+                                                                $masukColor = match ($log->status_masuk) {
+                                                                    'HADIR', 'TEPAT WAKTU' => 'success',
+                                                                    'TELAT' => 'warning',
+                                                                    'ALFA' => 'error',
+                                                                    default => 'ghost',
+                                                                };
+                                                            @endphp
+                                                            <span
+                                                                class="badge badge-{{ $masukColor }} badge-xs font-black text-[8px] text-white tracking-widest px-1.5 uppercase">{{ $log->status_masuk }}</span>
+                                                        @else
+                                                            <span
+                                                                class="text-[9px] font-bold text-base-content/20">-</span>
+                                                        @endif
+
+                                                        @if ($log->jam_masuk)
                                                             <span class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
-                                                        </div>
-                                                    @else
-                                                        <span
-                                                            class="text-[10px] font-black text-base-content/20">--:--</span>
-                                                    @endif
+                                                        @else
+                                                            <span
+                                                                class="text-[10px] font-black text-base-content/20">--:--</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    @if ($log->status_pulang)
-                                                        @php
-                                                            $pulangColor = match ($log->status_pulang) {
-                                                                'HADIR' => 'success',
-                                                                'PC' => 'warning',
-                                                                'ALFA' => 'error',
-                                                                default => 'ghost',
-                                                            };
-                                                        @endphp
-                                                        <span
-                                                            class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] text-white tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
-                                                    @else
-                                                        <span
-                                                            class="text-[9px] font-bold text-base-content/20">-</span>
+                                                <div class="flex items-center justify-center gap-2">
+                                                    @if ($log->jam_pulang && !is_null($log->is_within_radius_pulang))
+                                                        <div class="tooltip tooltip-top" data-tip="{{ $log->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter_pulang, 0) }}m)">
+                                                            @if ($log->is_within_radius_pulang)
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
+                                                            @else
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
+                                                            @endif
+                                                        </div>
                                                     @endif
 
-                                                    @if ($log->jam_pulang)
-                                                        <div class="flex items-center gap-1">
-                                                            @if (!is_null($log->is_within_radius_pulang))
-                                                                <div class="tooltip tooltip-top" data-tip="{{ $log->is_within_radius_pulang ? 'Dalam Radius' : 'Luar Radius' }} ({{ number_format($log->jarak_meter_pulang, 0) }}m)">
-                                                                    @if ($log->is_within_radius_pulang)
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
-                                                                    @else
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
-                                                                    @endif
-                                                                </div>
-                                                            @endif
+                                                    <div class="flex flex-col items-start gap-0.5">
+                                                        @if ($log->status_pulang)
+                                                            @php
+                                                                $pulangColor = match ($log->status_pulang) {
+                                                                    'HADIR' => 'success',
+                                                                    'PC' => 'warning',
+                                                                    'ALFA' => 'error',
+                                                                    default => 'ghost',
+                                                                };
+                                                            @endphp
+                                                            <span
+                                                                class="badge badge-{{ $pulangColor }} badge-xs font-black text-[8px] text-white tracking-widest uppercase px-1.5">{{ $log->status_pulang }}</span>
+                                                        @else
+                                                            <span
+                                                                class="text-[9px] font-bold text-base-content/20">-</span>
+                                                        @endif
+
+                                                        @if ($log->jam_pulang)
                                                             <span class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
-                                                        </div>
-                                                    @else
-                                                        <span
-                                                            class="text-[10px] font-black text-base-content/20">--:--</span>
-                                                    @endif
+                                                        @else
+                                                            <span
+                                                                class="text-[10px] font-black text-base-content/20">--:--</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
