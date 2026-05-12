@@ -96,27 +96,7 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js" data-navigate-once></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
-    <script>
-        // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor/instance Echo
-        if (typeof window.Echo === 'undefined') {
-            let actualEcho = null;
-            Object.defineProperty(window, 'Echo', {
-                get() { return actualEcho; },
-                set(val) {
-                    actualEcho = val;
-                    if (actualEcho && typeof actualEcho.socketId !== 'function') {
-                        actualEcho.socketId = function() { return null; };
-                    }
-                },
-                configurable: true
-            });
-        } else {
-            // Jika sudah ada, langsung tambahkan socketId jika belum ada
-            if (typeof window.Echo.socketId !== 'function') {
-                window.Echo.socketId = function() { return null; };
-            }
-        }
-    </script>
+
     <script>
         (function() {
             const initMapsHandler = () => {
@@ -437,10 +417,13 @@
                 // Gunakan nama variabel kustom agar tidak bentrok dengan Livewire atau constructor Echo
                 if (!window.CustomEcho && typeof Echo === 'function') {
                     window.Pusher = Pusher;
+                    const reverbHost = '{{ env('REVERB_HOST') }}';
+                    const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ? window.location.hostname : reverbHost;
+
                     window.CustomEcho = new Echo({
                         broadcaster: 'reverb',
                         key: '{{ env('REVERB_APP_KEY') }}',
-                        wsHost: '{{ env('REVERB_HOST') }}' || window.location.hostname,
+                        wsHost: wsHost,
                         wsPort: {{ env('REVERB_PORT', 8080) }},
                         wssPort: {{ env('REVERB_PORT', 8080) }},
                         forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
