@@ -382,7 +382,7 @@
                             if (marker && marker.getPopup()) {
                                 const currentPopupContent = marker.getPopup().getContent();
                                 if (typeof currentPopupContent === 'string') {
-                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[^<]*</div>`);
+                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[\\s\\S]*?</div>`);
                                     const newDiv = `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${address}</div>`;
                                     marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                                 }
@@ -396,7 +396,7 @@
                             if (marker && marker.getPopup()) {
                                 const currentPopupContent = marker.getPopup().getContent();
                                 if (typeof currentPopupContent === 'string') {
-                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[^<]*</div>`);
+                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[\\s\\S]*?</div>`);
                                     const newDiv = `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${failText}</div>`;
                                     marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                                 }
