@@ -190,10 +190,10 @@ new class extends Component
         $yesterday = Carbon::parse($todayStr)->subDay()->format('Y-m-d');
         $tomorrow = Carbon::parse($todayStr)->addDay()->format('Y-m-d');
 
+        $originPersonnel = Personnel::find($this->quickPersonnelId);
+
         $candidates = Personnel::where('id', '!=', $this->quickPersonnelId)
-            ->when(!$user->hasRole('super-admin'), function($q) use ($user) {
-                $q->where('opd_id', $user->opd()?->id);
-            })
+            ->where('opd_id', $originPersonnel->opd_id)
             ->whereHas('jadwals', function($q) use ($todayStr) {
                 $q->whereDate('tanggal', $todayStr)->where('status', 'LIBUR');
             })
