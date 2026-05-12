@@ -96,12 +96,19 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js" data-navigate-once></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
-    <script data-navigate-once>
-        // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor Echo
-        if (typeof Echo !== 'undefined' && !Echo.socketId) {
-            Echo.socketId = function() {
-                return null;
-            };
+    <script>
+        // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor/instance Echo
+        if (typeof window.Echo !== 'undefined') {
+            if (typeof window.Echo.socketId !== 'function') {
+                window.Echo.socketId = function() {
+                    return null;
+                };
+            }
+            if (window.Echo.prototype && typeof window.Echo.prototype.socketId !== 'function') {
+                window.Echo.prototype.socketId = function() {
+                    return null;
+                };
+            }
         }
     </script>
     <script>
@@ -427,7 +434,7 @@
                     window.CustomEcho = new Echo({
                         broadcaster: 'reverb',
                         key: '{{ env('REVERB_APP_KEY') }}',
-                        wsHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
+                        wsHost: '{{ env('REVERB_HOST') }}' || window.location.hostname,
                         wsPort: {{ env('REVERB_PORT', 8080) }},
                         wssPort: {{ env('REVERB_PORT', 8080) }},
                         forceTLS: {{ env('REVERB_SCHEME') === 'https' ? 'true' : 'false' }},
