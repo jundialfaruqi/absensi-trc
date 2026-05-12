@@ -34,11 +34,15 @@
         if (typeof window.Echo === 'undefined') {
             let actualEcho = null;
             Object.defineProperty(window, 'Echo', {
-                get() { return actualEcho; },
+                get() {
+                    return actualEcho;
+                },
                 set(val) {
                     actualEcho = val;
                     if (actualEcho && typeof actualEcho.socketId !== 'function') {
-                        actualEcho.socketId = function() { return null; };
+                        actualEcho.socketId = function() {
+                            return null;
+                        };
                     }
                 },
                 configurable: true
@@ -46,7 +50,9 @@
         } else {
             // Jika sudah ada, langsung tambahkan socketId jika belum ada
             if (typeof window.Echo.socketId !== 'function') {
-                window.Echo.socketId = function() { return null; };
+                window.Echo.socketId = function() {
+                    return null;
+                };
             }
         }
     </script>
@@ -304,24 +310,26 @@
                 <div class="flex-1 overflow-y-auto no-scrollbar py-4">
                     <ul class="menu w-full px-4 gap-1">
 
-                        <li class="menu-title text-xs font-semibold opacity-50 uppercase mb-1">Overview</li>
+                        @can('lihat-dashboard')
+                            <li class="menu-title text-xs font-semibold opacity-50 uppercase mb-1">Overview</li>
 
-                        <li>
-                            <a wire:navigate href="{{ route('dashboard') }}"
-                                class="{{ request()->routeIs('dashboard*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                                    </svg>
-                                    <span>Dashboard</span>
-                                </div>
-                                <span class="text-[8px] text-base-content opacity-50 ml-7">
-                                    Halaman utama
-                                </span>
-                            </a>
-                        </li>
+                            <li>
+                                <a wire:navigate href="{{ route('dashboard') }}"
+                                    class="{{ request()->routeIs('dashboard*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                        </svg>
+                                        <span>Dashboard</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Halaman utama
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
 
                         @can('manajemen-jadwal')
                             <li>
