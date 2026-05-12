@@ -34,6 +34,12 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     public bool $face_recognition = false;
     public string $attendance_type = 'SCHEDULED';
     public bool $auto_create_device = false;
+    public bool $readyToLoad = false;
+
+    public function load()
+    {
+        $this->readyToLoad = true;
+    }
 
     public function mount()
     {

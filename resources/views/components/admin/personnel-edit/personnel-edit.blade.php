@@ -1,4 +1,4 @@
-<div>
+<div wire:init="load">
     <div x-data="personnelCamera()">
         <div
             class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-base-200">
@@ -16,6 +16,8 @@
                 Kembali
             </a>
         </div>
+        
+        @if ($readyToLoad)
         <form wire:submit="save">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -362,7 +364,7 @@
                     <div class="card-footer border-t border-base-200 p-6 flex justify-end gap-3">
                         <a wire:navigate href="{{ route('personnel') }}" class="btn btn-ghost"
                             @click="stopCamera()">Batal</a>
-                        <button type="submit" class="btn btn-secondary px-8" wire:loading.attr="disabled">
+                        <button type="submit" class="btn btn-secondary px-8" wire:loading.attr="disabled" wire:target="save">
                             <span wire:loading wire:target="save" class="loading loading-spinner loading-xs"></span>
                             <span wire:loading.remove wire:target="save">Simpan Data</span>
                         </button>
@@ -460,8 +462,9 @@
 
                                             {{-- Capture Button --}}
                                             <button x-show="isCameraOpen" type="button" @click="capture()"
-                                                class="btn btn-sm btn-primary flex-1">
-                                                Jepret
+                                                class="btn btn-sm btn-primary flex-1" :disabled="isCapturing">
+                                                <span x-show="isCapturing" class="loading loading-spinner loading-xs"></span>
+                                                <span x-text="isCapturing ? 'Memproses...' : 'Jepret'"></span>
                                             </button>
 
                                             {{-- File Upload --}}
@@ -512,9 +515,14 @@
                     </div>
                 </div>
             </div>
-
-
         </form>
+        @else
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card bg-base-100 shadow-sm border border-base-200 md:col-span-2 h-[600px] skeleton"></div>
+            <div class="card md:col-span-1 h-[400px] skeleton"></div>
+        </div>
+        @endif
+
         <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
         <script>
             (function() {
@@ -523,6 +531,7 @@
                         Alpine.data('personnelCamera', () => ({
                             isCameraOpen: false,
                             isLoadingModels: false,
+                            isCapturing: false,
                             stream: null,
                             faceApiLoaded: false,
 
@@ -593,36 +602,41 @@
                             },
 
                             async capture() {
-                                const video = this.$refs.video;
-                                const canvas = this.$refs.canvas;
-                                canvas.width = video.videoWidth;
-                                canvas.height = video.videoHeight;
+                                this.isCapturing = true;
+                                try {
+                                    const video = this.$refs.video;
+                                    const canvas = this.$refs.canvas;
+                                    canvas.width = video.videoWidth;
+                                    canvas.height = video.videoHeight;
 
-                                const context = canvas.getContext('2d');
-                                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                    const context = canvas.getContext('2d');
+                                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                                // Extract descriptor from canvas
-                                if (!this.faceApiLoaded) await this.loadModels();
-                                const detection = await faceapi.detectSingleFace(canvas, new faceapi
-                                        .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                    .withFaceDescriptor();
+                                    // Extract descriptor from canvas
+                                    if (!this.faceApiLoaded) await this.loadModels();
+                                    const detection = await faceapi.detectSingleFace(canvas, new faceapi
+                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
+                                        .withFaceDescriptor();
 
-                                if (detection) {
-                                    @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                        .descriptor)));
+                                    if (detection) {
+                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
+                                            .descriptor)));
 
-                                    // Convert to Blob and upload
-                                    canvas.toBlob((blob) => {
-                                        const file = new File([blob], "capture.jpg", {
-                                            type: "image/jpeg"
-                                        });
-                                        @this.upload('foto', file);
-                                        this.stopCamera();
-                                    }, 'image/jpeg', 0.9);
-                                } else {
-                                    alert(
-                                        "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
-                                    );
+                                        // Convert to Blob and upload
+                                        canvas.toBlob((blob) => {
+                                            const file = new File([blob], "capture.jpg", {
+                                                type: "image/jpeg"
+                                            });
+                                            @this.upload('foto', file);
+                                            this.stopCamera();
+                                        }, 'image/jpeg', 0.9);
+                                    } else {
+                                        alert(
+                                            "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
+                                        );
+                                    }
+                                } finally {
+                                    this.isCapturing = false;
                                 }
                             }
                         }));

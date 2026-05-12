@@ -41,6 +41,12 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     public bool $auto_create_device = false;
     public bool $has_personal_device = false;
     public string $existing_device_name = '';
+    public bool $readyToLoad = false;
+
+    public function load()
+    {
+        $this->readyToLoad = true;
+    }
 
     public function mount(int $id)
     {
