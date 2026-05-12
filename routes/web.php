@@ -35,6 +35,7 @@ Route::group([
     'prefix' => '/page',
 ], function () {
     Route::livewire('/dashboard', 'admin::dashboard')
+        ->middleware('permission:lihat-dashboard')
         ->name('dashboard');
 
     Route::livewire('/permohonan-cuti', 'admin::permohonan-cuti')
