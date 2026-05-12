@@ -311,20 +311,18 @@
                         }
                     }
 
-                    if (e.personnel_id) {
-                        // Update status dot and text in sidebar
-                        const dotEl = document.getElementById(`status-dot-${e.personnel_id}`);
-                        const textEl = document.getElementById(`status-text-${e.personnel_id}`);
+                    // Update status dot and text in sidebar
+                    const dotEl = document.getElementById(`status-dot-${elementId}`);
+                    const textEl = document.getElementById(`status-text-${elementId}`);
 
-                        if (dotEl) {
-                            dotEl.classList.remove('bg-base-300');
-                            dotEl.classList.add('bg-emerald-500');
-                            dotEl.classList.add('animate-pulse');
-                        }
-                        if (textEl) {
-                            textEl.innerText = 'Aktif (Baru saja)';
-                            textEl.classList.remove('opacity-60');
-                        }
+                    if (dotEl) {
+                        dotEl.classList.remove('bg-base-300');
+                        dotEl.classList.add('bg-emerald-500');
+                        dotEl.classList.add('animate-pulse');
+                    }
+                    if (textEl) {
+                        textEl.innerText = 'Online';
+                        textEl.classList.remove('opacity-60');
                     }
 
                     // Set timer to clear online status after 70 seconds
@@ -334,17 +332,15 @@
                     }
 
                     window[timerKey] = setTimeout(() => {
-                        if (e.personnel_id) {
-                            const dotEl = document.getElementById(`status-dot-${e.personnel_id}`);
-                            const textEl = document.getElementById(`status-text-${e.personnel_id}`);
-                            if (dotEl) {
-                                dotEl.classList.remove('bg-emerald-500');
-                                dotEl.classList.remove('animate-pulse');
-                                dotEl.classList.add('bg-base-300');
-                            }
-                            if (textEl) {
-                                textEl.innerText = 'Aktif: 1 menit yang lalu';
-                            }
+                        const dotEl = document.getElementById(`status-dot-${elementId}`);
+                        const textEl = document.getElementById(`status-text-${elementId}`);
+                        if (dotEl) {
+                            dotEl.classList.remove('bg-emerald-500');
+                            dotEl.classList.remove('animate-pulse');
+                            dotEl.classList.add('bg-base-300');
+                        }
+                        if (textEl) {
+                            textEl.innerText = 'Aktif: 1 menit yang lalu';
                         }
                         
                         // Update status in popup too
