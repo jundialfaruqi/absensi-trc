@@ -228,7 +228,7 @@
                             @endphp
                             @forelse ($this->personnels as $p)
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
-                                    <tr class="bg-base-200" wire:loading.remove
+                                    <tr class="bg-base-200" wire:key="opd-header-{{ $p->opd_id }}" wire:loading.remove
                                         wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
@@ -243,7 +243,7 @@
                                     </tr>
                                     @php $currentOpd = $p->opd_id; @endphp
                                 @endif
-                                <tr class="group" wire:loading.remove
+                                <tr class="group" wire:key="personnel-row-{{ $p->id }}" wire:loading.remove
                                     wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
@@ -326,7 +326,7 @@
                                                     ? "background-color: {$j->shift->color}20;"
                                                     : '';
                                         @endphp
-                                        <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                        <td wire:key="cell-in-{{ $p->id }}-{{ $date }}" wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
                                             wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             class="{{ $cellClassM }}" style="{{ $cellStyleM }}">
@@ -452,7 +452,7 @@
                                                     ? "background-color: {$j->shift->color}20;"
                                                     : '';
                                         @endphp
-                                        <td wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                        <td wire:key="cell-out-{{ $p->id }}-{{ $date }}" wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
                                             wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             class="{{ $cellClassP }}" style="{{ $cellStyleP }}">
