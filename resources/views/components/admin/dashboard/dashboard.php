@@ -16,10 +16,12 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 {
     public bool $readyToLoad = false;
     public string $filterKategoriMakan = '';
+    public string $filterTanggal = '';
 
     public function load()
     {
         $this->readyToLoad = true;
+        $this->filterTanggal = Carbon::today()->format('Y-m-d');
     }
 
     public function with()
@@ -58,7 +60,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ];
         }
 
-        $today = Carbon::today();
+        $today = $this->filterTanggal ?: Carbon::today()->format('Y-m-d');
 
         // Base query for attendance today
         $absensiBase = Absensi::whereDate('tanggal', $today)

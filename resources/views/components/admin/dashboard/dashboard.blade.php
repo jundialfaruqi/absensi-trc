@@ -130,23 +130,34 @@
 
             {{-- Log Aktifitas --}}
             <div class="space-y-4">
-                <div class="flex items-center justify-between px-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
                     <div class="flex items-center gap-2">
                         <div class="h-8 w-1 bg-primary rounded-full"></div>
                         <h2 class="text-lg font-black text-base-content uppercase">Log Aktifitas Hari Ini</h2>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <select wire:model.live="filterKategoriMakan" class="select select-bordered select-xs text-[10px] font-black uppercase">
-                            <option value="">Semua Shift</option>
-                            <option value="makan_siang">Makan Siang</option>
-                            <option value="makan_malam">Makan Malam</option>
-                            <option value="flexible">Jadwal Bebas (Flex)</option>
-                        </select>
+                    <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                        <div class="flex flex-row gap-2 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:flex-none w-full sm:w-auto">
+                                <input type="date" wire:model.live="filterTanggal" class="input input-bordered input-sm pl-8 text-xs font-black uppercase w-full sm:w-auto" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            
+                            <div class="flex-1 sm:flex-none w-full sm:w-auto">
+                                <select wire:model.live="filterKategoriMakan" class="select select-bordered select-sm text-xs font-black uppercase min-w-[120px] w-full sm:w-auto">
+                                    <option value="">Semua Shift</option>
+                                    <option value="makan_siang">Makan Siang</option>
+                                    <option value="makan_malam">Makan Malam</option>
+                                    <option value="flexible">Jadwal Bebas (Flex)</option>
+                                </select>
+                            </div>
+                        </div>
                         
                         <button wire:click="$refresh" wire:loading.attr="disabled"
-                            class="btn btn-ghost btn-xs gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent">
+                            class="btn btn-ghost btn-sm gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent w-full sm:w-auto justify-center sm:justify-start">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-3 h-3" wire:loading.class="animate-spin">
+                                stroke="currentColor" class="w-4 h-4" wire:loading.class="animate-spin">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
@@ -209,7 +220,7 @@
                                     @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
-                                            <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan" class="bg-base-200/50">
+                                            <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan, filterTanggal" class="bg-base-200/50">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
@@ -222,7 +233,7 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan"
+                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan, filterTanggal"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
@@ -344,7 +355,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan">
+                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan, filterTanggal">
                                             <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -362,7 +373,7 @@
                                     
                                     {{-- Loading Skeleton during updates --}}
                                     @for ($i = 0; $i < 5; $i++)
-                                        <tr wire:loading wire:target="$refresh, filterKategoriMakan">
+                                        <tr wire:loading wire:target="$refresh, filterKategoriMakan, filterTanggal">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="skeleton w-10 h-10 mask mask-squircle"></div>
