@@ -443,6 +443,13 @@
                                             <span class="text-[8px] uppercase font-bold tracking-widest">AI
                                                 Engine...</span>
                                         </div>
+
+                                        {{-- Processing Image Overlay --}}
+                                        <div x-show="isCapturing || isUploadingFile"
+                                            class="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex flex-col items-center justify-center text-base-content z-20">
+                                            <span class="loading loading-spinner loading-md mb-2 text-primary"></span>
+                                            <span class="text-[10px] uppercase font-bold tracking-widest">Memproses Wajah...</span>
+                                        </div>
                                     </div>
 
                                     <div class="flex flex-col gap-3 w-full max-w-70">
