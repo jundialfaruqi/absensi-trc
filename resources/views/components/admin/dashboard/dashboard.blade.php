@@ -228,7 +228,7 @@
                                                         <span
                                                             class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
                                                         <span
-                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->opd->singkatan }}</span>
+                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->penugasan->name }}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -334,28 +334,38 @@
                             <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-2">
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-primary/30"></div>
-                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TOTAL:</span>
-                                    <span class="text-[10px] md:text-[10px] font-black text-base-content">{{ $stats['total_required'] }}</span>
+                                    <span
+                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TOTAL:</span>
+                                    <span
+                                        class="text-[10px] md:text-[10px] font-black text-base-content">{{ $stats['total_required'] }}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-success"></div>
-                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">HADIR:</span>
-                                    <span class="text-[10px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
+                                    <span
+                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">HADIR:</span>
+                                    <span
+                                        class="text-[10px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-error"></div>
-                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALFA:</span>
-                                    <span class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
+                                    <span
+                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALFA:</span>
+                                    <span
+                                        class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-primary"></div>
-                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN:</span>
-                                    <span class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
+                                    <span
+                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN:</span>
+                                    <span
+                                        class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-warning"></div>
-                                    <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TELAT:</span>
-                                    <span class="text-[10px] md:text-[10px] font-black text-warning">{{ $stats['total_telat'] }}</span>
+                                    <span
+                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TELAT:</span>
+                                    <span
+                                        class="text-[10px] md:text-[10px] font-black text-warning">{{ $stats['total_telat'] }}</span>
                                 </div>
                             </div>
                             <a href="{{ route('absensi') }}"
