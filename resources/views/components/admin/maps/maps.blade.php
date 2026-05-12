@@ -285,14 +285,15 @@
                 }
 
                 window.updateSingleMarker = function(e) {
-                    const markerKey = 'p' + e.personnel_id;
+                    const markerKey = e.personnel_id ? ('p' + e.personnel_id) : ('d' + e.device_id);
                     const marker = markers[markerKey];
+                    const elementId = e.personnel_id || ('d' + e.device_id);
 
                     if (marker) {
                         marker.setLatLng([e.latitude, e.longitude]);
 
                         // Update status in popup if it's open
-                        const popupStatusEl = document.getElementById(`popup-status-${e.personnel_id}`);
+                        const popupStatusEl = document.getElementById(`popup-status-${elementId}`);
                         if (popupStatusEl) {
                             popupStatusEl.innerText = 'Online';
                             popupStatusEl.className = 'text-xs text-success';
@@ -302,53 +303,62 @@
                         if (marker.getPopup()) {
                             const currentPopupContent = marker.getPopup().getContent();
                             if (typeof currentPopupContent === 'string') {
-                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${e.personnel_id}">[^<]*</div>`);
-                                const newDiv = `<div class="text-xs text-success" id="popup-status-${e.personnel_id}">Online</div>`;
+                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`);
+                                const newDiv = `<div class="text-xs text-success" id="popup-status-${elementId}">Online</div>`;
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                             }
                         }
                     }
 
-                    // Update status dot and text in sidebar
-                    const dotEl = document.getElementById(`status-dot-${e.personnel_id}`);
-                    const textEl = document.getElementById(`status-text-${e.personnel_id}`);
+                    if (e.personnel_id) {
+                        // Update status dot and text in sidebar
+                        const dotEl = document.getElementById(`status-dot-${e.personnel_id}`);
+                        const textEl = document.getElementById(`status-text-${e.personnel_id}`);
 
-                    if (dotEl) {
-                        dotEl.classList.remove('bg-base-300');
-                        dotEl.classList.add('bg-emerald-500');
-                        dotEl.classList.add('animate-pulse');
-                    }
-                    if (textEl) {
-                        textEl.innerText = 'Online';
+                        if (dotEl) {
+                            dotEl.classList.remove('bg-base-300');
+                            dotEl.classList.add('bg-emerald-500');
+                            dotEl.classList.add('animate-pulse');
+                        }
+                        if (textEl) {
+                            textEl.innerText = 'Aktif (Baru saja)';
+                            textEl.classList.remove('opacity-60');
+                        }
                     }
 
                     // Set timer to clear online status after 70 seconds
-                    if (window[`statusTimer_${e.personnel_id}`]) {
-                        clearTimeout(window[`statusTimer_${e.personnel_id}`]);
+                    const timerKey = `statusTimer_${elementId}`;
+                    if (window[timerKey]) {
+                        clearTimeout(window[timerKey]);
                     }
 
-                    window[`statusTimer_${e.personnel_id}`] = setTimeout(() => {
-                        if (dotEl) {
-                            dotEl.classList.remove('bg-emerald-500');
-                            dotEl.classList.remove('animate-pulse');
-                            dotEl.classList.add('bg-base-300');
+                    window[timerKey] = setTimeout(() => {
+                        if (e.personnel_id) {
+                            const dotEl = document.getElementById(`status-dot-${e.personnel_id}`);
+                            const textEl = document.getElementById(`status-text-${e.personnel_id}`);
+                            if (dotEl) {
+                                dotEl.classList.remove('bg-emerald-500');
+                                dotEl.classList.remove('animate-pulse');
+                                dotEl.classList.add('bg-base-300');
+                            }
+                            if (textEl) {
+                                textEl.innerText = 'Aktif: 1 menit yang lalu';
+                            }
                         }
-                        if (textEl) {
-                            textEl.innerText = 'Aktif: 1 menit yang lalu';
-                        }
+                        
                         // Update status in popup too
-                        const popupStatusEl = document.getElementById(`popup-status-${e.personnel_id}`);
+                        const popupStatusEl = document.getElementById(`popup-status-${elementId}`);
                         if (popupStatusEl) {
                             popupStatusEl.innerText = 'Aktif: 1 menit yang lalu';
                             popupStatusEl.className = 'text-xs opacity-60';
                         }
                         
                         // Update the stored popup content to Offline too
-                        if (marker.getPopup()) {
+                        if (marker && marker.getPopup()) {
                             const currentPopupContent = marker.getPopup().getContent();
                             if (typeof currentPopupContent === 'string') {
-                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${e.personnel_id}">[^<]*</div>`);
-                                const newDiv = `<div class="text-xs opacity-60" id="popup-status-${e.personnel_id}">Aktif: 1 menit yang lalu</div>`;
+                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`);
+                                const newDiv = `<div class="text-xs opacity-60" id="popup-status-${elementId}">Aktif: 1 menit yang lalu</div>`;
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                             }
                         }

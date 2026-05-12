@@ -15,6 +15,7 @@ class PersonnelLocationUpdated implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $personnel_id;
+    public $device_id;
     public $latitude;
     public $longitude;
     public $last_seen;
@@ -22,12 +23,13 @@ class PersonnelLocationUpdated implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct($personnel_id, $latitude, $longitude, $last_seen)
+    public function __construct($personnel_id, $latitude, $longitude, $last_seen, $device_id = null)
     {
         $this->personnel_id = $personnel_id;
         $this->latitude = $latitude;
         $this->longitude = $longitude;
         $this->last_seen = $last_seen;
+        $this->device_id = $device_id;
     }
 
     /**
@@ -51,6 +53,7 @@ class PersonnelLocationUpdated implements ShouldBroadcastNow
     {
         return [
             'personnel_id' => $this->personnel_id,
+            'device_id' => $this->device_id,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'last_seen' => $this->last_seen,

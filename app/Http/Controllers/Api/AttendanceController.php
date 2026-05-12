@@ -145,14 +145,13 @@ class AttendanceController extends Controller
             'last_seen_at' => now(),
         ]);
 
-        if ($device->personnel_id) {
-            broadcast(new \App\Events\PersonnelLocationUpdated(
-                $device->personnel_id,
-                $request->latitude,
-                $request->longitude,
-                now()->diffForHumans()
-            ));
-        }
+        broadcast(new \App\Events\PersonnelLocationUpdated(
+            $device->personnel_id,
+            $request->latitude,
+            $request->longitude,
+            now()->diffForHumans(),
+            $device->id
+        ));
 
         return response()->json([
             'status' => 'success',
