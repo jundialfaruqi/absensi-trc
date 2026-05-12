@@ -85,7 +85,7 @@
         <div class="card-body p-0">
             {{-- ─── Skeleton Loading ────────────────────────── --}}
             <div class="overflow-x-auto"
-                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search" @endif>
+                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, gotoPage, nextPage, previousPage" @endif>
                 <table class="table table-zebra w-full">
                     <thead>
                         <tr>
@@ -141,7 +141,7 @@
 
             {{-- ─── Real Table Data ────────────────────────────────────────── --}}
             @if ($readyToLoad)
-                <div class="overflow-x-auto" wire:loading.remove wire:target="perPage, selectedOpd, search">
+                <div class="overflow-x-auto" wire:loading.remove wire:target="perPage, selectedOpd, search, gotoPage, nextPage, previousPage">
                     <table class="table w-full">
                         <thead>
                             <tr>
