@@ -140,7 +140,6 @@
                             <option value="">Semua Shift</option>
                             <option value="makan_siang">Makan Siang</option>
                             <option value="makan_malam">Makan Malam</option>
-                            <option value="tanpa_makan">Tanpa Makan</option>
                             <option value="flexible">Jadwal Bebas (Flex)</option>
                         </select>
                         
@@ -184,6 +183,9 @@
                                                 </div>
                                             </td>
                                             <td>
+                                                <div class="skeleton h-5 w-20 rounded-full"></div>
+                                            </td>
+                                            <td>
                                                 <div class="skeleton h-5 w-12 rounded-full"></div>
                                             </td>
                                             <td class="text-center">
@@ -198,7 +200,7 @@
                                     @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
-                                            <tr class="bg-base-200/50">
+                                            <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan" class="bg-base-200/50">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
@@ -211,7 +213,7 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr
+                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
@@ -333,7 +335,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr>
+                                        <tr wire:loading.remove wire:target="$refresh, filterKategoriMakan">
                                             <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -348,6 +350,33 @@
                                             </td>
                                         </tr>
                                     @endforelse
+                                    
+                                    {{-- Loading Skeleton during updates --}}
+                                    @for ($i = 0; $i < 5; $i++)
+                                        <tr wire:loading wire:target="$refresh, filterKategoriMakan">
+                                            <td>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="skeleton w-10 h-10 mask mask-squircle"></div>
+                                                    <div class="flex flex-col gap-2">
+                                                        <div class="skeleton h-3 w-28"></div>
+                                                        <div class="skeleton h-2 w-20"></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="skeleton h-5 w-20 rounded-full"></div>
+                                            </td>
+                                            <td>
+                                                <div class="skeleton h-5 w-12 rounded-full"></div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="skeleton h-5 w-16 mx-auto rounded-full"></div>
+                                            </td>
+                                        </tr>
+                                    @endfor
                                 @endif
                             </tbody>
                         </table>
