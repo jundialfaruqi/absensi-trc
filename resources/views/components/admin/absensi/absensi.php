@@ -4,6 +4,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Personnel;
@@ -166,9 +167,10 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         $this->resetPage();
     }
 
+    #[Renderless]
     public function editAbsensi($personnelId, $tanggal)
     {
-        $this->dispatch('openEditAbsensi', personnelId: $personnelId, tanggal: $tanggal)->to('admin::absensi-edit-modal');
+        $this->dispatch('openEditAbsensi', personnelId: $personnelId, tanggal: $tanggal);
     }
 
     public function updatedSearch(): void
