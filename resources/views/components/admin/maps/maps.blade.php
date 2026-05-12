@@ -98,16 +98,22 @@
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
     <script>
         // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor/instance Echo
-        if (typeof window.Echo !== 'undefined') {
+        if (typeof window.Echo === 'undefined') {
+            let actualEcho = null;
+            Object.defineProperty(window, 'Echo', {
+                get() { return actualEcho; },
+                set(val) {
+                    actualEcho = val;
+                    if (actualEcho && typeof actualEcho.socketId !== 'function') {
+                        actualEcho.socketId = function() { return null; };
+                    }
+                },
+                configurable: true
+            });
+        } else {
+            // Jika sudah ada, langsung tambahkan socketId jika belum ada
             if (typeof window.Echo.socketId !== 'function') {
-                window.Echo.socketId = function() {
-                    return null;
-                };
-            }
-            if (window.Echo.prototype && typeof window.Echo.prototype.socketId !== 'function') {
-                window.Echo.prototype.socketId = function() {
-                    return null;
-                };
+                window.Echo.socketId = function() { return null; };
             }
         }
     </script>
