@@ -292,11 +292,7 @@
                                                         <span
                                                             class="badge badge-{{ $badgeColor }} badge-sm font-black text-[9px] text-white tracking-widest uppercase">{{ $log->status }}</span>
 
-                                                        @if ($log->is_within_radius === false)
-                                                            <span
-                                                                class="text-[8px] font-black text-error uppercase tracking-tighter">LUAR
-                                                                RADIUS</span>
-                                                        @endif
+
                                                     </div>
                                             </td>
                                             <td class="text-center">
@@ -318,8 +314,18 @@
                                                     @endif
 
                                                     @if ($log->jam_masuk)
-                                                        <span
-                                                            class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_masuk)->format('H:i') }}</span>
+                                                            @if ($log->is_within_radius === false)
+                                                                <div class="tooltip tooltip-top" data-tip="Radius (100m)">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
+                                                                </div>
+                                                            @elseif ($log->is_within_radius === true)
+                                                                <div class="tooltip tooltip-top" data-tip="Radius (100m)">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     @else
                                                         <span
                                                             class="text-[10px] font-black text-base-content/20">--:--</span>
@@ -345,8 +351,18 @@
                                                     @endif
 
                                                     @if ($log->jam_pulang)
-                                                        <span
-                                                            class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="text-[10px] font-black text-base-content/60">{{ \Carbon\Carbon::parse($log->jam_pulang)->format('H:i') }}</span>
+                                                            @if ($log->is_within_radius_pulang === false)
+                                                                <div class="tooltip tooltip-top" data-tip="Radius (100m)">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9.442 9.432a3 3 0 0 0 4.113 4.134m1.445 -2.566a3 3 0 0 0 -3 -3" /><path d="M17.152 17.162l-3.738 3.738a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 0 1 -.476 -10.794m2.18 -1.82a8.003 8.003 0 0 1 10.91 10.912" /><path d="M3 3l18 18" /></svg>
+                                                                </div>
+                                                            @elseif ($log->is_within_radius_pulang === true)
+                                                                <div class="tooltip tooltip-top" data-tip="Radius (100m)">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     @else
                                                         <span
                                                             class="text-[10px] font-black text-base-content/20">--:--</span>
