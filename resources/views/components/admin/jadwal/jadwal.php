@@ -4,6 +4,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Jadwal;
@@ -53,6 +54,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         $this->readyToLoad = true;
     }
 
+    #[Renderless]
     public function openQuickAdd($personnelId, $date, $attendanceType = null): void
     {
         if (!$attendanceType) {
