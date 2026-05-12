@@ -75,7 +75,7 @@
                             <th class="text-center w-16">#</th>
                             <th>Nama Shift</th>
                             <th>Keterangan</th>
-                            <th>Kategori Makan</th>
+                            <th>Konsumsi</th>
                             <th class="text-center">Jam Mulai (Masuk)</th>
                             <th class="text-center">Jam Selesai (Pulang)</th>
                             <th class="text-center w-24">Action</th>
@@ -108,12 +108,12 @@
                                 </td>
                                 <td>
                                     <span class="text-xs uppercase font-semibold">
-                                        @if($r->kategori_makan === 'makan_siang')
-                                            Makan Siang
-                                        @elseif($r->kategori_makan === 'makan_malam')
-                                            Makan Malam
+                                        @if($r->konsumsi === 'siang')
+                                            Siang
+                                        @elseif($r->konsumsi === 'malam')
+                                            Malam
                                         @else
-                                            Tanpa Makan
+                                            None
                                         @endif
                                     </span>
                                 </td>
@@ -230,15 +230,15 @@
 
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium text-base-content">Kategori Makan <span
+                            <span class="label-text text-sm font-medium text-base-content">Konsumsi <span
                                     class="text-error">*</span></span>
                         </label>
-                        <select wire:model="kategori_makan" class="select select-bordered focus:select-primary w-full transition-all @error('kategori_makan') select-error @enderror">
-                            <option value="makan_siang">Makan Siang</option>
-                            <option value="makan_malam">Makan Malam</option>
-                            <option value="tanpa_makan">Tanpa Makan</option>
+                        <select wire:model="konsumsi" class="select select-bordered focus:select-primary w-full transition-all @error('konsumsi') select-error @enderror">
+                            <option value="none">None</option>
+                            <option value="siang">Siang</option>
+                            <option value="malam">Malam</option>
                         </select>
-                        @error('kategori_makan')
+                        @error('konsumsi')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
                     </div>

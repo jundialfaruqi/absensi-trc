@@ -16,7 +16,7 @@ class Shift extends Model
         'start_time',
         'end_time',
         'color',
-        'kategori_makan',
+        'konsumsi',
     ];
 
     protected $casts = [

@@ -150,11 +150,11 @@
                             </div>
 
                             <div class="flex-1 sm:flex-none w-full sm:w-auto">
-                                <select wire:model.live="filterKategoriMakan"
+                                <select wire:model.live="filterKonsumsi"
                                     class="select select-bordered select-sm text-xs font-black uppercase min-w-[120px] w-full sm:w-auto">
                                     <option value="">Semua Shift</option>
-                                    <option value="makan_siang">Makan Siang</option>
-                                    <option value="makan_malam">Makan Malam</option>
+                                    <option value="siang">Siang</option>
+                                    <option value="malam">Malam</option>
                                     <option value="flexible">Jadwal Bebas (Flex)</option>
                                 </select>
                             </div>
@@ -228,7 +228,7 @@
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
                                             <tr wire:loading.remove
-                                                wire:target="$refresh, filterKategoriMakan, filterTanggal"
+                                                wire:target="$refresh, filterKonsumsi, filterTanggal"
                                                 class="bg-base-200/50">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
@@ -243,7 +243,7 @@
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
                                         <tr wire:loading.remove
-                                            wire:target="$refresh, filterKategoriMakan, filterTanggal"
+                                            wire:target="$refresh, filterKonsumsi, filterTanggal"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
@@ -441,7 +441,7 @@
                                         </tr>
                                     @empty
                                         <tr wire:loading.remove
-                                            wire:target="$refresh, filterKategoriMakan, filterTanggal">
+                                            wire:target="$refresh, filterKonsumsi, filterTanggal">
                                             <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -459,7 +459,7 @@
 
                                     {{-- Loading Skeleton during updates --}}
                                     @for ($i = 0; $i < 5; $i++)
-                                        <tr wire:loading wire:target="$refresh, filterKategoriMakan, filterTanggal">
+                                        <tr wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="skeleton w-10 h-10 mask mask-squircle"></div>
