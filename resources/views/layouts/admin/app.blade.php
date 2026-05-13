@@ -581,7 +581,7 @@
                             </li>
                         @endcan
 
-                        @can('manajemen-perangkat')
+                        @canany(['manajemen-perangkat', 'manajemen-user', 'manajemen-role-permission'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Settings</li>
                         @endcan
 
