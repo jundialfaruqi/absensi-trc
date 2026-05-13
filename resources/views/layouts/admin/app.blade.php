@@ -581,9 +581,11 @@
                             </li>
                         @endcan
 
-                        @canany(['manajemen-user', 'manajemen-role-permission', 'manajemen-perangkat'])
+                        @can('manajemen-perangkat')
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Settings</li>
+                        @endcan
 
+                        @canany(['manajemen-user', 'manajemen-role-permission'])
                             <li>
                                 <details open>
                                     <summary class="group font-medium mb-1 hover:bg-base-100">
