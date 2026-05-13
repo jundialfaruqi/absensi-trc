@@ -121,7 +121,7 @@ Route::group([
         return response()->download($filePath, 'TRC-Pekanbaru-Aman-v1.4.2.apk', [
             'Content-Type' => 'application/vnd.android.package-archive',
         ]);
-    })->middleware('permission:manajemen-pengaturan')->name('pengaturan.download-apk');
+    })->middleware('permission:download-apk')->name('pengaturan.download-apk');
 
     Route::livewire('/perangkat', 'admin::device')
         ->middleware('permission:manajemen-perangkat')
