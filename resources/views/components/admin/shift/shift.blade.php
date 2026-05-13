@@ -108,12 +108,10 @@
                                 </td>
                                 <td>
                                     <span class="text-xs uppercase font-semibold">
-                                        @if($r->konsumsi === 'siang')
-                                            Siang
-                                        @elseif($r->konsumsi === 'malam')
-                                            Malam
-                                        @else
+                                        @if($r->konsumsis->isEmpty())
                                             None
+                                        @else
+                                            {{ $r->konsumsis->pluck('nama')->map(fn($n) => ucfirst($n))->implode(', ') }}
                                         @endif
                                     </span>
                                 </td>
@@ -228,20 +226,25 @@
                         @enderror
                     </div>
 
+                    @if ($type === 'shift')
                     <div class="form-control w-full">
                         <label class="label mb-1 px-1">
                             <span class="label-text text-sm font-medium text-base-content">Konsumsi <span
                                     class="text-error">*</span></span>
                         </label>
-                        <select wire:model="konsumsi" class="select select-bordered focus:select-primary w-full transition-all @error('konsumsi') select-error @enderror">
-                            <option value="none">None</option>
-                            <option value="siang">Siang</option>
-                            <option value="malam">Malam</option>
-                        </select>
-                        @error('konsumsi')
+                        <div class="flex flex-wrap gap-4 mt-1">
+                            @foreach($this->availableKonsumsi as $k)
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" wire:model="selectedKonsumsi" value="{{ $k->id }}" class="checkbox checkbox-primary checkbox-sm" />
+                                    <span class="text-sm uppercase font-semibold">{{ ucfirst($k->nama) }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('selectedKonsumsi')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
                     </div>
+                    @endif
 
                     @if ($type === 'shift')
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

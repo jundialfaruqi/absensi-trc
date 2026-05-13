@@ -468,9 +468,11 @@
                             </li>
                         @endcan
 
-                        @can('manajemen-opd')
+                        @canany(['manajemen-opd', 'manajemen-konsumsi'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
+                        @endcanany
 
+                        @can('manajemen-opd')
                             <li>
                                 <a wire:navigate href="{{ route('opd') }}"
                                     class="{{ request()->routeIs('opd*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
@@ -492,6 +494,21 @@
                                     </div>
                                     <span class="text-[8px] text-base-content opacity-50 ml-7">
                                         Data Master OPD
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('manajemen-konsumsi')
+                            <li>
+                                <a wire:navigate href="{{ route('konsumsi') }}"
+                                    class="{{ request()->routeIs('konsumsi*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-tools-kitchen-3"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 4v17m-3 -17v3a3 3 0 1 0 6 0v-3" /><path d="M14 8a3 4 0 1 0 6 0a3 4 0 1 0 -6 0" /><path d="M17 12v9" /></svg>
+                                        <span>Konsumsi</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Manajemen Konsumsi
                                     </span>
                                 </a>
                             </li>

@@ -6,6 +6,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Shift;
+use App\Models\Konsumsi;
 
 new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -22,7 +23,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
     public string $start_time = '';
     public string $end_time = '';
     public string $color = '#64748b';
-    public string $konsumsi = 'none';
+    public array $selectedKonsumsi = [];
 
     // Delete attributes
     public ?int $deleteId = null;
@@ -44,6 +45,12 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             ->paginate($this->perPage);
     }
 
+    #[Computed]
+    public function availableKonsumsi()
+    {
+        return Konsumsi::all();
+    }
+
     public function openAddModal(): void
     {
         $this->resetForm();
@@ -62,7 +69,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
         $this->start_time = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '';
         $this->end_time = $item->end_time ? \Carbon\Carbon::parse($item->end_time)->format('H:i') : '';
         $this->color = $item->color ?? '#64748b';
-        $this->konsumsi = $item->konsumsi ?? 'none';
+        $this->selectedKonsumsi = $item->konsumsis->pluck('id')->toArray();
 
         $this->dispatch('open-modal', id: 'shift-modal');
     }
@@ -76,7 +83,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             'start_time' => $this->type === 'shift' ? 'required|date_format:H:i' : 'nullable',
             'end_time' => $this->type === 'shift' ? 'required|date_format:H:i' : 'nullable',
             'color' => 'required|string|max:7',
-            'konsumsi' => 'required|string|in:none,siang,malam',
+            'selectedKonsumsi' => 'nullable|array',
         ];
 
         $this->validate($rules);
@@ -88,15 +95,20 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
             'start_time' => $this->type === 'shift' ? $this->start_time : null,
             'end_time' => $this->type === 'shift' ? $this->end_time : null,
             'color' => $this->color,
-            'konsumsi' => $this->konsumsi,
         ];
 
         if ($this->shiftId) {
             $shift = Shift::findOrFail($this->shiftId);
             $shift->update($data);
         } else {
-            Shift::create($data);
+            $shift = Shift::create($data);
         }
+        
+        if ($this->type === 'off') {
+            $this->selectedKonsumsi = [];
+        }
+        
+        $shift->konsumsis()->sync($this->selectedKonsumsi);
 
         $this->resetForm();
         $this->dispatch('close-modal', id: 'shift-modal');
@@ -130,7 +142,7 @@ new #[Title('Manajemen Shift')] #[Layout('layouts::admin.app')] class extends Co
         $this->start_time = '';
         $this->end_time = '';
         $this->color = '#64748b';
-        $this->konsumsi = 'none';
+        $this->selectedKonsumsi = [];
         $this->resetErrorBag();
     }
 

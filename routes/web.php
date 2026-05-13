@@ -78,6 +78,10 @@ Route::group([
         ->middleware('permission:manajemen-shift')
         ->name('shift');
 
+    Route::livewire('/konsumsi', 'admin::konsumsi')
+        ->middleware('permission:manajemen-konsumsi')
+        ->name('konsumsi');
+
     Route::livewire('/jadwal', 'admin::jadwal')
         ->middleware('permission:manajemen-jadwal')
         ->name('jadwal');

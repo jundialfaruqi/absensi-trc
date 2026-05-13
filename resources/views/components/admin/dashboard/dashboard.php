@@ -76,7 +76,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 if ($this->filterKonsumsi === 'flexible') {
                     $q->whereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
                 } else {
-                    $q->whereHas('jadwal.shift', fn($sq) => $sq->where('konsumsi', $this->filterKonsumsi));
+                    $q->whereHas('jadwal.shift.konsumsis', fn($sq) => $sq->where('nama', $this->filterKonsumsi));
                 }
             });
 
