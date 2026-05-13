@@ -115,6 +115,10 @@ Route::group([
         ->middleware('permission:manajemen-absensi-anomaly')
         ->name('absensi.anomaly');
 
+    Route::livewire('/absensi/kotak-sampah', 'admin::absensi-trash')
+        ->middleware('permission:manajemen-kotak-sampah-absensi')
+        ->name('absensi.trash');
+
     Route::livewire('/pengaturan', 'admin::pengaturan')
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');

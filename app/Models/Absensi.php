@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Absensi extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'personnel_id',
@@ -47,6 +48,7 @@ class Absensi extends Model
         'unique_device_id_pulang',
         'is_location_anomaly',
         'anomaly_reason',
+        'deleted_by_user_id',
     ];
 
     protected $casts = [
@@ -79,6 +81,11 @@ class Absensi extends Model
     public function editor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'edited_by_user_id');
+    }
+
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by_user_id');
     }
 
     public function cuti(): BelongsTo

@@ -211,21 +211,12 @@ new class extends Component
             return;
         }
 
-        // Hapus file foto masuk
-        if ($absensi->foto_masuk && Storage::disk('public')->exists($absensi->foto_masuk)) {
-            Storage::disk('public')->delete($absensi->foto_masuk);
-        }
-
-        // Hapus file foto pulang
-        if ($absensi->foto_pulang && Storage::disk('public')->exists($absensi->foto_pulang)) {
-            Storage::disk('public')->delete($absensi->foto_pulang);
-        }
-
-        // Hapus record absensi
+        // Catat siapa yang menghapus, lalu soft delete
+        $absensi->update(['deleted_by_user_id' => Auth::id()]);
         $absensi->delete();
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
-        $this->dispatch('toast', message: 'Data absensi berhasil dihapus (termasuk foto)', type: 'success');
+        $this->dispatch('toast', message: 'Data absensi dipindahkan ke kotak sampah', type: 'success');
         $this->dispatch('refreshAbsensi');
     }
 
