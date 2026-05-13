@@ -294,9 +294,9 @@
                                 </button>
                             @endif
                             @can('reset-absen')
-                                @if ($editingAbsensiId)
+                                @if ($editingAbsensiId && ($jamMasuk || $jamPulang || $editingFotoMasuk || $editingFotoPulang))
                                     <button type="button" wire:click="resetAbsensi"
-                                        wire:confirm="PERINGATAN: Seluruh data absensi termasuk foto masuk & pulang akan DIHAPUS PERMANEN. Tindakan ini tidak dapat dibatalkan. Lanjutkan?"
+                                        wire:confirm="Data absensi akan dipindahkan ke Kotak Sampah. Lanjutkan?"
                                         class="btn btn-error btn-sm gap-1 flex-1 md:flex-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="size-4">
