@@ -110,7 +110,7 @@
                 // Jika elemen kontainer sudah memiliki peta Leaflet, batalkan inisialisasi ulang
                 if (mapEl._leaflet_id) return;
 
-                if (typeof L === 'undefined') {
+                if (typeof L === 'undefined' || typeof L.markerClusterGroup !== 'function') {
                     setTimeout(initMapsHandler, 100);
                     return;
                 }
