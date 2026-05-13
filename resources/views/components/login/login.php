@@ -81,7 +81,8 @@ new #[Layout('layouts::login.app')] #[Title('Login')] class extends Component {
                 Session::forget($lockoutKey);
                 Session::regenerate();
 
-                return $this->redirect('/page/dashboard', navigate: true);
+                $intendedUrl = session()->get('url.intended', '/page/dashboard');
+                return $this->redirect($intendedUrl, navigate: true);
             }
 
             // Handle failed login
