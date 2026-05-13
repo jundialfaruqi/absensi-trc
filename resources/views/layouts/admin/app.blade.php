@@ -468,7 +468,7 @@
                             </li>
                         @endcan
 
-                        @canany(['manajemen-opd', 'manajemen-konsumsi'])
+                        @canany(['manajemen-opd', 'manajemen-konsumsi', 'manajemen-penugasan'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
                         @endcanany
 
@@ -581,7 +581,7 @@
                             </li>
                         @endcan
 
-                        @canany(['manajemen-user', 'manajemen-role-permission'])
+                        @canany(['manajemen-user', 'manajemen-role-permission', 'manajemen-perangkat'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Settings</li>
 
                             <li>
@@ -703,8 +703,7 @@
                                         </svg>
                                         <span>Kotak Sampah</span>
                                         @if ($trashCount > 0)
-                                            <span
-                                                class="badge badge-xs badge-warning">{{ $trashCount }}</span>
+                                            <span class="badge badge-xs badge-warning">{{ $trashCount }}</span>
                                         @endif
                                     </div>
                                     <span class="text-[8px] text-base-content opacity-50 ml-7">
