@@ -166,10 +166,9 @@
                             <span wire:loading>Memperbarui...</span>
                         </button>
                     </div>
-                </div>
-
-                <div class="card bg-base-100 border border-base-200 overflow-hidden">
-                    <div class="overflow-x-auto">
+                </div>                <div class="card bg-base-100 border border-base-200 overflow-hidden">
+                    {{-- Skeleton View --}}
+                    <div class="overflow-x-auto" @if ($readyToLoad) wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal" @endif>
                         <table class="table table-md">
                             <thead>
                                 <tr class="bg-base-200/50">
@@ -177,53 +176,66 @@
                                     <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk</th>
-                                    <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang
-                                    </th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (!$readyToLoad)
-                                    @for ($i = 0; $i < 5; $i++)
-                                        <tr>
-                                            <td>
-                                                <div class="flex items-center gap-3">
-                                                    <div class="skeleton w-10 h-10 mask mask-squircle"></div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <div class="skeleton h-3 w-28"></div>
-                                                        <div class="skeleton h-2 w-20"></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
+                                @for ($i = 0; $i < 5; $i++)
+                                    <tr class="animate-pulse">
+                                        <td>
+                                            <div class="flex items-center gap-3">
+                                                <div class="skeleton w-10 h-10 mask mask-squircle"></div>
                                                 <div class="flex flex-col gap-2">
-                                                    <div class="skeleton h-3 w-12"></div>
+                                                    <div class="skeleton h-3 w-28"></div>
                                                     <div class="skeleton h-2 w-20"></div>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <div class="skeleton h-5 w-12 rounded-full"></div>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
-                                                    <div class="skeleton h-3 w-10"></div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
-                                                    <div class="skeleton h-3 w-10"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endfor
-                                @else
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="flex flex-col gap-2">
+                                                <div class="skeleton h-3 w-12"></div>
+                                                <div class="skeleton h-2 w-20"></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton h-5 w-12 rounded-full"></div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="flex flex-col items-center gap-1">
+                                                <div class="skeleton h-4 w-12 rounded-full"></div>
+                                                <div class="skeleton h-3 w-10"></div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="flex flex-col items-center gap-1">
+                                                <div class="skeleton h-4 w-12 rounded-full"></div>
+                                                <div class="skeleton h-3 w-10"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endfor
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{-- Real View --}}
+                    @if ($readyToLoad)
+                        <div class="overflow-x-auto" wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal">
+                            <table class="table table-md">
+                                <thead>
+                                    <tr class="bg-base-200/50">
+                                        <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
+                                        <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
+                                        <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
+                                        <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk</th>
+                                        <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
-                                            <tr wire:loading.remove
-                                                wire:target="$refresh, filterKonsumsi, filterTanggal"
-                                                class="bg-base-200/50">
+                                            <tr class="bg-base-200/50">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
@@ -236,8 +248,7 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal"
-                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
+                                        <tr class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar">
@@ -287,21 +298,18 @@
                                             </td>
                                             <td>
                                                 <div class="flex flex-col gap-1">
-                                                    <div class="flex flex-col gap-1">
-                                                        @php
-                                                            $badgeColor = match ($log->status) {
-                                                                'HADIR' => 'success',
-                                                                'ALFA' => 'error',
-                                                                'LIBUR' => 'neutral',
-                                                                'CUTI', 'IZIN', 'SAKIT' => 'primary',
-                                                                default => 'ghost',
-                                                            };
-                                                        @endphp
-                                                        <span
-                                                            class="badge badge-{{ $badgeColor }} badge-sm font-black text-[9px] text-white tracking-widest uppercase">{{ $log->status }}</span>
-
-
-                                                    </div>
+                                                    @php
+                                                        $badgeColor = match ($log->status) {
+                                                            'HADIR' => 'success',
+                                                            'ALFA' => 'error',
+                                                            'LIBUR' => 'neutral',
+                                                            'CUTI', 'IZIN', 'SAKIT' => 'primary',
+                                                            default => 'ghost',
+                                                        };
+                                                    @endphp
+                                                    <span
+                                                        class="badge badge-{{ $badgeColor }} badge-sm font-black text-[9px] text-white tracking-widest uppercase">{{ $log->status }}</span>
+                                                </div>
                                             </td>
                                             <td class="text-center">
                                                 <div class="flex flex-col items-center gap-1">
@@ -433,7 +441,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal">
+                                        <tr>
                                             <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -448,97 +456,62 @@
                                             </td>
                                         </tr>
                                     @endforelse
-
-                                    {{-- Loading Skeleton during updates --}}
-                                    @for ($i = 0; $i < 5; $i++)
-                                        <tr wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal">
-                                            <td>
-                                                <div class="flex items-center gap-3">
-                                                    <div class="skeleton w-10 h-10 mask mask-squircle"></div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <div class="skeleton h-3 w-28"></div>
-                                                        <div class="skeleton h-2 w-20"></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="flex flex-col gap-2">
-                                                    <div class="skeleton h-3 w-12"></div>
-                                                    <div class="skeleton h-2 w-20"></div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="skeleton h-5 w-12 rounded-full"></div>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
-                                                    <div class="skeleton h-3 w-10"></div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="flex flex-col items-center gap-1">
-                                                    <div class="skeleton h-4 w-12 rounded-full"></div>
-                                                    <div class="skeleton h-3 w-10"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endfor
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
-                    @if ($activities->count() > 0)
-                        <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4">
-                            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-primary/30"></div>
-                                    <span
-                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TOTAL:</span>
-                                    <span
-                                        class="text-[10px] md:text-[10px] font-black text-base-content">{{ $stats['total_required'] }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-success"></div>
-                                    <span
-                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">HADIR:</span>
-                                    <span
-                                        class="text-[10px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-error"></div>
-                                    <span
-                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALFA:</span>
-                                    <span
-                                        class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-primary"></div>
-                                    <span
-                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN:</span>
-                                    <span
-                                        class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-warning"></div>
-                                    <span
-                                        class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TELAT:</span>
-                                    <span
-                                        class="text-[10px] md:text-[10px] font-black text-warning">{{ $stats['total_telat'] }}</span>
-                                </div>
-                            </div>
-                            <a href="{{ route('absensi') }}"
-                                class="btn btn-sm btn-neutral btn-block text-[10px] font-black uppercase tracking-widest gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="2" stroke="currentColor" class="size-3">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Lihat Semua Data Monitoring
-                            </a>
+                                </tbody>
+                            </table>
                         </div>
+                        
+                        @if ($activities->count() > 0)
+                            <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4" wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal">
+                                <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-primary/30"></div>
+                                        <span
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TOTAL:</span>
+                                        <span
+                                            class="text-[10px] md:text-[10px] font-black text-base-content">{{ $stats['total_required'] }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-success"></div>
+                                        <span
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">HADIR:</span>
+                                        <span
+                                            class="text-[10px] md:text-[10px] font-black text-success">{{ $stats['total_hadir'] }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-error"></div>
+                                        <span
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALFA:</span>
+                                        <span
+                                            class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                        <span
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN:</span>
+                                        <span
+                                            class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-warning"></div>
+                                        <span
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">TELAT:</span>
+                                        <span
+                                            class="text-[10px] md:text-[10px] font-black text-warning">{{ $stats['total_telat'] }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ route('absensi') }}"
+                                    class="btn btn-sm btn-neutral btn-block text-[10px] font-black uppercase tracking-widest gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="size-3">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Lihat Semua Data Monitoring
+                                </a>
+                            </div>
+                        @endif
                     @endif
                 </div>
             </div>

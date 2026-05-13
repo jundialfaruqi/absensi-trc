@@ -64,8 +64,14 @@
                 </svg>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="join">
+        <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+            <select wire:model.live="filterStatus" class="select select-bordered w-full sm:w-auto">
+                <option value="">Semua Status</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Menunggu</option>
+                <option value="suspended">Suspended</option>
+            </select>
+            <div class="join w-full sm:w-auto justify-end">
                 <span class="btn btn-disabled join-item text-base-content pointer-events-none">Show</span>
                 <select wire:model.live="perPage" class="select select-bordered join-item w-20">
                     <option value="10">10</option>
@@ -78,8 +84,10 @@
 
     <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body p-0">
-            <div class="min-h-100">
-                {{-- Desktop View --}}
+            {{-- Skeleton View (Desktop + Mobile) --}}
+            <div class="min-h-100"
+                @if ($readyToLoad) wire:loading wire:target="search, perPage, filterStatus, gotoPage, nextPage, previousPage" @endif>
+                {{-- Desktop Skeleton --}}
                 <div class="hidden md:block overflow-x-auto">
                     <table class="table table-md w-full">
                         <thead>
@@ -93,15 +101,97 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (!$readyToLoad)
-                                @for ($i = 0; $i < 5; $i++)
-                                    <tr>
-                                        <td colspan="6">
-                                            <div class="h-12 bg-base-200 animate-pulse rounded-lg"></div>
-                                        </td>
-                                    </tr>
-                                @endfor
-                            @else
+                            @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
+                                <tr class="animate-pulse">
+                                    <td class="text-center">
+                                        <div class="h-4 w-4 bg-base-200 rounded mx-auto"></div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="h-4 w-32 bg-base-200 rounded"></div>
+                                            <div class="h-3 w-20 bg-base-200 rounded"></div>
+                                            <div class="h-3 w-40 bg-base-200 rounded"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="h-4 w-24 bg-base-200 rounded"></div>
+                                            <div class="h-3 w-16 bg-base-200 rounded"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-3 w-3 bg-base-200 rounded-full"></div>
+                                            <div class="h-3 w-12 bg-base-200 rounded"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="h-4 w-24 bg-base-200 rounded"></div>
+                                            <div class="h-3 w-16 bg-base-200 rounded"></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <div class="h-6 w-16 bg-base-200 rounded"></div>
+                                            <div class="h-6 w-12 bg-base-200 rounded"></div>
+                                            <div class="h-6 w-12 bg-base-200 rounded"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+                {{-- Mobile Skeleton --}}
+                <div class="block md:hidden divide-y divide-base-200">
+                    @for ($i = 0; $i < 3; $i++)
+                        <div class="p-4 space-y-4 animate-pulse">
+                            <div class="flex justify-between items-start">
+                                <div class="flex flex-col gap-1">
+                                    <div class="h-5 w-32 bg-base-200 rounded"></div>
+                                    <div class="h-3 w-20 bg-base-200 rounded"></div>
+                                </div>
+                                <div class="h-5 w-16 bg-base-200 rounded"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 bg-base-200/50 p-3 rounded-lg border border-base-200">
+                                <div class="flex flex-col gap-1">
+                                    <div class="h-3 w-16 bg-base-200 rounded"></div>
+                                    <div class="h-4 w-24 bg-base-200 rounded"></div>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <div class="h-3 w-16 bg-base-200 rounded"></div>
+                                    <div class="h-4 w-24 bg-base-200 rounded"></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="h-8 flex-1 bg-base-200 rounded"></div>
+                                <div class="h-8 flex-1 bg-base-200 rounded"></div>
+                                <div class="h-8 flex-1 bg-base-200 rounded"></div>
+                            </div>
+                        </div>
+                    @endfor
+                </div>
+            </div>
+
+            {{-- Real View --}}
+            @if ($readyToLoad)
+                <div class="min-h-100" wire:loading.remove
+                    wire:target="search, perPage, filterStatus, gotoPage, nextPage, previousPage">
+                    {{-- Desktop View --}}
+                    <div class="hidden md:block overflow-x-auto">
+                        <table class="table table-md w-full">
+                            <thead>
+                                <tr class="bg-base-200/50">
+                                    <th class="w-12 text-center">No</th>
+                                    <th>Detail Perangkat</th>
+                                    <th>Lisensi</th>
+                                    <th>Status Perangkat</th>
+                                    <th>Pemegang Perangkat</th>
+                                    <th class="text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 @forelse($this->devices as $index => $device)
                                     <tr class="hover:bg-base-200/30 transition-colors">
                                         <th class="text-center opacity-40 font-normal">
@@ -111,7 +201,7 @@
                                             <div class="flex flex-col">
                                                 <span class="font-bold text-sm">{{ $device->name }}</span>
                                                 <span
-                                                    class="text-[10px] opacity-50 uppercase font-black tracking-widest">{{ $device->opd->name }}</span>
+                                                    class="text-[10px] opacity-50 uppercase font-black tracking-widest">{{ $device->opd->singkatan }}</span>
                                                 @if ($device->unique_device_id)
                                                     <div class="mt-1 flex items-center gap-2">
                                                         <span
@@ -218,26 +308,16 @@
                                 @empty
                                     <tr>
                                         <td colspan="6" class="text-center py-20 opacity-30 italic font-medium">
-                                            Tidak
-                                            ada perangkat ditemukan</td>
+                                            Tidak ada perangkat ditemukan
+                                        </td>
                                     </tr>
                                 @endforelse
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
 
-                {{-- Mobile View --}}
-                <div class="block md:hidden divide-y divide-base-200">
-                    @if (!$readyToLoad)
-                        @for ($i = 0; $i < 3; $i++)
-                            <div class="p-4 space-y-3 animate-pulse">
-                                <div class="h-4 bg-base-200 rounded w-3/4"></div>
-                                <div class="h-3 bg-base-200 rounded w-1/2"></div>
-                                <div class="h-8 bg-base-200 rounded"></div>
-                            </div>
-                        @endfor
-                    @else
+                    {{-- Mobile View --}}
+                    <div class="block md:hidden divide-y divide-base-200">
                         @forelse($this->devices as $device)
                             <div class="p-4 space-y-4">
                                 {{-- Header: Name & Status --}}
@@ -245,7 +325,7 @@
                                     <div class="flex flex-col">
                                         <span class="font-bold text-base">{{ $device->name }}</span>
                                         <span
-                                            class="text-[10px] opacity-50 uppercase font-black tracking-widest">{{ $device->opd->name }}</span>
+                                            class="text-[10px] opacity-50 uppercase font-black tracking-widest">{{ $device->opd->singkatan }}</span>
                                     </div>
                                     @if ($device->status === 'active')
                                         <span
@@ -324,11 +404,10 @@
                             <div class="p-10 text-center opacity-30 italic font-medium">Tidak ada perangkat ditemukan
                             </div>
                         @endforelse
-                    @endif
+                    </div>
                 </div>
-            </div>
 
-            @if ($readyToLoad)
+                {{-- Pagination --}}
                 <div class="p-6 border-t border-base-200 bg-base-200/30">
                     {{ $this->devices->links() }}
                 </div>

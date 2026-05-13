@@ -36,6 +36,9 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     public $status = 'inactive';
     public $notes;
     public $personnelSearch = '';
+    
+    #[Url]
+    public string $filterStatus = '';
 
     // Delete Properties
     public $deleteId;
@@ -90,6 +93,9 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
         return Device::with(['opd', 'user', 'personnel'])
             ->when(!Auth::user()->hasRole('super-admin'), function ($q) {
                 $q->where('opd_id', Auth::user()->opd()?->id);
+            })
+            ->when($this->filterStatus, function ($q) {
+                $q->where('status', $this->filterStatus);
             })
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
@@ -243,6 +249,11 @@ new #[Title('Manajemen Perangkat')] #[Layout('layouts::admin.app')] class extend
     }
 
     public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterStatus()
     {
         $this->resetPage();
     }
