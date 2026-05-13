@@ -165,6 +165,6 @@
     {{-- Pagination --}}
     <div
         class="mt-6 [&_nav]:flex [&_nav]:flex-col [&_nav]:md:flex-row [&_nav]:items-center [&_nav]:justify-between [&_nav]:gap-6 [&_p]:text-[10px] [&_p]:font-black [&_p]:text-slate-500 [&_p]:uppercase [&_p]:tracking-[0.2em] [&_p]:leading-none">
-        {{ $this->riwayat->links() }}
+        {{ $this->riwayat->links('components.admin.pagination') }}
     </div>
 </div>

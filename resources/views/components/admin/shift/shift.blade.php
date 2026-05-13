@@ -165,7 +165,7 @@
                 </table>
             </div>
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
-                <div class="w-full">{{ $this->shifts->links() }}</div>
+                <div class="w-full">{{ $this->shifts->links('components.admin.pagination') }}</div>
             </div>
         </div>
     </div>

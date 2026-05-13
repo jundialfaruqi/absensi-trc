@@ -409,7 +409,7 @@
 
                 {{-- Pagination --}}
                 <div class="p-6 border-t border-base-200 bg-base-200/30">
-                    {{ $this->devices->links() }}
+                        {{ $this->devices->links('components.admin.pagination') }}
                 </div>
             @endif
         </div>

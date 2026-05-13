@@ -119,7 +119,7 @@
                 </table>
             </div>
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
-                <div class="w-full">{{ $this->konsumsis->links() }}</div>
+                <div class="w-full">{{ $this->konsumsis->links('components.admin.pagination') }}</div>
             </div>
         </div>
     </div>

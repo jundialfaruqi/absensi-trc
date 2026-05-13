@@ -117,7 +117,7 @@
                 </table>
             </div>
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
-                <div class="w-full">{{ $this->penugasans->links() }}</div>
+                <div class="w-full">{{ $this->penugasans->links('components.admin.pagination') }}</div>
             </div>
         </div>
     </div>

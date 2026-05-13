@@ -382,7 +382,7 @@
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
                 <div class="w-full">
                     @if ($readyToLoad)
-                        {{ $this->personnels->links() }}
+                        {{ $this->personnels->links('components.admin.pagination') }}
                     @endif
                 </div>
             </div>

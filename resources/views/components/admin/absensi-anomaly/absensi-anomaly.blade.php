@@ -218,7 +218,7 @@
                 </table>
             </div>
             <div class="p-4 border-t border-base-200">
-                {{ $this->anomalies->links() }}
+                {{ $this->anomalies->links('components.admin.pagination') }}
             </div>
         </div>
     </div>

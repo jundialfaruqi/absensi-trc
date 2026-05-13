@@ -581,7 +581,7 @@
 
             <div class="p-4 border-t border-base-200 bg-base-50">
                 @if ($readyToLoad)
-                    {{ $this->personnels->links() }}
+                    {{ $this->personnels->links('components.admin.pagination') }}
                 @endif
             </div>
         </div>

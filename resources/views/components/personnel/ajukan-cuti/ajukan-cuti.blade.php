@@ -76,7 +76,7 @@
                                 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1 italic opacity-70">Mulai
                                 Tanggal</label>
                             <input type="date" wire:model="tanggal_mulai"
-                                class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all [color-scheme:dark]">
+                                class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all scheme-dark">
                             @error('tanggal_mulai')
                                 <span
                                     class="text-[9px] font-bold text-red-400 italic ml-1 tracking-wider uppercase">{{ $message }}</span>
@@ -87,7 +87,7 @@
                                 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1 italic opacity-70">Sampai
                                 Tanggal</label>
                             <input type="date" wire:model="tanggal_selesai"
-                                class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all [color-scheme:dark]">
+                                class="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all scheme-dark">
                             @error('tanggal_selesai')
                                 <span
                                     class="text-[9px] font-bold text-red-400 italic ml-1 tracking-wider uppercase">{{ $message }}</span>
@@ -119,7 +119,7 @@
 
         {{-- History Section --}}
         <div class="lg:col-span-2 space-y-6">
-            <div class="glass-panel p-8 rounded-[2.5rem] border-white/5 relative overflow-hidden min-h-[400px]">
+            <div class="glass-panel p-8 rounded-[2.5rem] border-white/5 relative overflow-hidden min-h-100">
                 <h2 class="text-xl font-black text-white uppercase italic mb-6 relative z-10">Riwayat Pengajuan</h2>
 
                 <div class="space-y-12">
@@ -155,7 +155,7 @@
                                         class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{{ $req->created_at->diffForHumans() }}</time>
                                 </div>
                                 <div
-                                    class="bg-white/5 border border-white/10 text-white min-w-[200px] p-4 rounded-2xl shadow-xl backdrop-blur-md group-hover:border-white/20 transition-all">
+                                    class="bg-white/5 border border-white/10 text-white min-w-50 p-4 rounded-2xl shadow-xl backdrop-blur-md group-hover:border-white/20 transition-all">
                                     <div class="flex items-center gap-2 mb-2">
                                         <span
                                             class="px-2 py-0.5 rounded bg-{{ $statusColor }}-500/10 border border-{{ $statusColor }}-500/20 text-[8px] font-black text-{{ $statusColor }}-500 uppercase italic">
@@ -228,7 +228,7 @@
                         <div
                             class="flex flex-col items-center justify-center py-24 bg-white/2 rounded-[2.5rem] border border-dashed border-white/10">
                             <div
-                                class="h-20 w-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-slate-600 mb-6 scale-110">
+                                class="h-20 w-20 rounded-4xl bg-white/5 flex items-center justify-center text-slate-600 mb-6 scale-110">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

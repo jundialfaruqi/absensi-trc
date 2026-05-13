@@ -126,7 +126,7 @@
             </div>
 
             <div class="card-actions justify-between items-center p-4 border-t border-base-200">
-                {{ $this->cutis->links() }}
+                {{ $this->cutis->links('components.admin.pagination') }}
             </div>
 
         </div>
