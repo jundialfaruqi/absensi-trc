@@ -32,7 +32,7 @@
                     </select>
                 </div>
                 <div class="relative w-full sm:w-auto">
-                    <input type="text" placeholder="Cari nama konsumsi..." wire:model.live.debounce.400ms="search"
+                    <input type="text" placeholder="Nama konsumsi..." wire:model.live.debounce.400ms="search"
                         class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
@@ -80,7 +80,8 @@
                     <tbody>
                         @forelse ($this->konsumsis as $r)
                             <tr class="hover:bg-base-200/50">
-                                <td class="text-center font-bold">{{ $this->konsumsis->firstItem() + $loop->index }}</td>
+                                <td class="text-center font-bold">{{ $this->konsumsis->firstItem() + $loop->index }}
+                                </td>
                                 <td class="font-bold">
                                     <span class="text-sm uppercase">{{ $r->nama }}</span>
                                 </td>

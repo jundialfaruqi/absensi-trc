@@ -9,12 +9,12 @@
             <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/20 blur-[100px] -ml-32 -mb-32"></div>
 
             <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-10" style="animation: floating 5s ease-in-out infinite;">
+                <div class="flex items-center gap-1 mb-10">
                     <img src="{{ asset('assets/logo/trc-logo.webp') }}" class="w-12 h-12 object-contain" alt="Logo">
-                    <div class="h-8 w-px bg-white/20"></div>
                     <div class="flex flex-col leading-none">
-                        <span class="text-lg font-black uppercase tracking-tighter italic">Personnel Portal</span>
-                        <span class="text-[8px] font-bold text-blue-400 tracking-[0.2em] uppercase">Emergency 112</span>
+                        <span class="text-lg font-black uppercase tracking-tighter italic">Registrasi Akun</span>
+                        <span class="text-[8px] font-bold text-blue-400 tracking-[0.2em] uppercase">TRC Pekanbaru
+                            AMAN 112</span>
                     </div>
                 </div>
 
@@ -51,8 +51,8 @@
                                 d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                         </svg>
                     </div>
-                    <span class="text-sm font-bold uppercase tracking-wide italic text-slate-300">Enkripsi PIN
-                        4-Digit</span>
+                    <span class="text-sm font-bold uppercase tracking-wide italic text-slate-300">Enkripsi Data
+                        Pengguna</span>
                 </div>
                 <div class="mt-8 text-[10px] font-black text-slate-500 uppercase tracking-widest leading-loose">
                     &copy; {{ date('Y') }} DISKOMINFOTIKSAN Pekanbaru.<br>Developed by DISKOMINFOTIKSAN Pekanbaru

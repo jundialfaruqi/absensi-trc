@@ -8,8 +8,7 @@
 
         {{-- Digital Plexus Cluster --}}
         <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-            <svg class="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] text-blue-400 animate-float"
-                viewBox="0 0 100 100">
+            <svg class="absolute top-[-10%] right-[-10%] w-200 h-200 text-blue-400 animate-float" viewBox="0 0 100 100">
                 <circle cx="20" cy="20" r="1" fill="currentColor" />
                 <circle cx="50" cy="10" r="1.2" fill="currentColor" />
                 <circle cx="80" cy="30" r="1" fill="currentColor" />
@@ -30,10 +29,10 @@
 
         {{-- Neon Tech Lines --}}
         <div
-            class="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent rotate-6">
+            class="absolute top-1/4 left-0 w-full h-px bg-linear-to-r from-transparent via-blue-500/20 to-transparent rotate-6">
         </div>
         <div
-            class="absolute bottom-1/3 right-0 w-full h-px bg-gradient-to-r from-transparent via-red-500/10 to-transparent -rotate-12">
+            class="absolute bottom-1/3 right-0 w-full h-px bg-linear-to-r from-transparent via-red-500/10 to-transparent -rotate-12">
         </div>
     </div>
 
@@ -80,15 +79,15 @@
 
     @if ($ready)
         <div
-            class="relative z-10 w-full max-w-6xl glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+            class="relative z-10 w-full max-w-6xl glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-150">
 
             {{-- Left Side: Illustration & Branding --}}
             <div
                 class="hidden md:flex md:w-1/2 p-16 flex-col justify-between relative overflow-hidden border-r border-white/5">
 
                 <div class="relative z-10 space-y-12">
-                    <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 p-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
+                    <div class="flex items-center gap-1">
+                        <div class="h-12 w-12 p-0 rounded-xl">
                             <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
                                 class="h-full w-full object-contain">
                         </div>
@@ -96,8 +95,7 @@
                             <span
                                 class="text-xl font-black tracking-tighter text-white uppercase leading-none italic">TRC
                                 PEKANBARU</span>
-                            <span class="text-[9px] font-bold text-blue-400 uppercase tracking-[0.3em]">Emergency 112
-                                Center</span>
+                            <span class="text-[9px] font-bold text-blue-400 uppercase tracking-[0.3em]">AMAN 112</span>
                         </div>
                     </div>
 
@@ -105,7 +103,7 @@
                         <h1 class="text-5xl font-black text-white leading-[1.1] tracking-tighter uppercase text-wrap">
                             SISTEM <br />
                             <span
-                                class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 italic">REAKSI
+                                class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300 italic">REAKSI
                                 CEPAT</span> <br />
                             TERINTEGRASI.
                         </h1>
@@ -145,8 +143,7 @@
                     <div class="md:hidden flex flex-col items-center mb-12 text-center">
                         <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo" class="h-16 w-16 mb-4">
                         <h3 class="text-2xl font-black tracking-tighter text-white uppercase italic">TRC PEKANBARU</h3>
-                        <span class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">112
-                            EMERGENCY</span>
+                        <span class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">AMAN 112</span>
                     </div>
 
                     <div class="mb-10 text-center md:text-left hidden md:block">
@@ -245,7 +242,7 @@
                         <button type="submit" wire:loading.attr="disabled"
                             class="relative w-full h-14 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl transition-all transform hover:scale-[1.01] active:scale-[0.98] neon-glow-red grid place-items-center overflow-hidden group">
                             <div
-                                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
+                                class="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                             </div>
 
                             <span wire:loading.remove class="col-start-1 row-start-1">Masuk Sekarang</span>

@@ -139,19 +139,13 @@
                         <div class="flex flex-row gap-2 w-full sm:w-auto">
                             <div class="relative flex-1 sm:flex-none w-full sm:w-auto">
                                 <input type="date" wire:model.live="filterTanggal"
-                                    class="input input-bordered input-sm pl-8 text-xs font-black uppercase w-full sm:w-auto"
+                                    class="input input-bordered input-sm pl-4 text-xs font-black uppercase w-full sm:w-auto text-base-content scheme-light dark:text-base-content"
                                     onclick="this.showPicker()" />
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
                             </div>
 
                             <div class="flex-1 sm:flex-none w-full sm:w-auto">
                                 <select wire:model.live="filterKonsumsi"
-                                    class="select select-bordered select-sm text-xs font-black uppercase min-w-[120px] w-full sm:w-auto">
+                                    class="select select-bordered select-sm text-xs font-black uppercase min-w-30 w-full sm:w-auto">
                                     <option value="">Semua Shift</option>
                                     <option value="siang">Siang</option>
                                     <option value="malam">Malam</option>
@@ -242,8 +236,7 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr wire:loading.remove
-                                            wire:target="$refresh, filterKonsumsi, filterTanggal"
+                                        <tr wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
@@ -440,8 +433,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr wire:loading.remove
-                                            wire:target="$refresh, filterKonsumsi, filterTanggal">
+                                        <tr wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal">
                                             <td colspan="5" class="py-12 text-center">
                                                 <div class="flex flex-col items-center opacity-20">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"

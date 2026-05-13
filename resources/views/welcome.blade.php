@@ -669,7 +669,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {{-- Absensi Menu --}}
             <a href="{{ route('absensi-web') }}"
-                class="glass-panel p-8 rounded-4xl hover:border-blue-500/30 transition-all group overflow-hidden relative flex flex-col items-center justify-center text-center gap-4">
+                class="p-8 rounded-4xl hover:border-blue-500/30 transition-all group overflow-hidden relative flex flex-col items-center justify-center text-center gap-4">
                 <div
                     class="h-16 w-16 rounded-full bg-red-500/10 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                     <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
@@ -683,7 +683,7 @@
 
             {{-- Personil Login Menu --}}
             <a href="{{ route('personnel.login') }}"
-                class="glass-panel p-8 rounded-4xl hover:border-emerald-500/30 transition-all group overflow-hidden relative flex flex-col items-center justify-center text-center gap-4">
+                class="p-8 rounded-4xl hover:border-emerald-500/30 transition-all group overflow-hidden relative flex flex-col items-center justify-center text-center gap-4">
                 <div
                     class="h-16 w-16 rounded-full bg-purple-500/10 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                     <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"
@@ -697,7 +697,7 @@
 
             {{-- Admin Login Menu --}}
             <a href="{{ route('login') }}"
-                class="glass-panel p-8 rounded-4xl hover:border-purple-500/30 transition-all group overflow-hidden relative flex flex-col items-center justify-center text-center gap-4">
+                class="p-8 rounded-4xl hover:border-purple-500/30 transition-all group overflow-hidden relative flex flex-col items-center justify-center text-center gap-4">
                 <div
                     class="h-16 w-16 rounded-full bg-blue-500/10 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                     <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo TRC"

@@ -10,13 +10,12 @@
         <div class="w-full max-w-md relative z-10">
             {{-- Branding --}}
             <div class="text-center mb-10 space-y-4">
-                <div
-                    class="inline-flex p-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl animate-pulse">
+                <div class="inline-flex p-0">
                     <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="TRC Logo" class="h-16 w-16 object-contain">
                 </div>
                 <div class="space-y-1">
                     <h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">Portal Personnel</h1>
-                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.4em]">Emergency 112 Ecosystem
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.4em]">TRC PEKANBARU AMAN 112
                     </p>
                 </div>
             </div>

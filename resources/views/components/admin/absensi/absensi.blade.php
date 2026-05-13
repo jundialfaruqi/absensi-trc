@@ -38,7 +38,7 @@
     <div class="flex flex-col gap-4 mb-6">
         {{-- Search Input --}}
         <div class="relative w-full sm:w-64">
-            <input type="text" placeholder="Cari nama personnel..." wire:model.live.debounce.400ms="search"
+            <input type="text" placeholder="Nama personnel..." wire:model.live.debounce.400ms="search"
                 class="input input-bordered w-full pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg class="w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,7 +228,8 @@
                             @endphp
                             @forelse ($this->personnels as $p)
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
-                                    <tr class="bg-base-200" wire:key="opd-header-{{ $p->opd_id }}" wire:loading.remove
+                                    <tr class="bg-base-200" wire:key="opd-header-{{ $p->opd_id }}"
+                                        wire:loading.remove
                                         wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
@@ -326,7 +327,8 @@
                                                     ? "background-color: {$j->shift->color}20;"
                                                     : '';
                                         @endphp
-                                        <td wire:key="cell-in-{{ $p->id }}-{{ $date }}" wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                        <td wire:key="cell-in-{{ $p->id }}-{{ $date }}"
+                                            wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
                                             wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             class="{{ $cellClassM }}" style="{{ $cellStyleM }}">
@@ -452,7 +454,8 @@
                                                     ? "background-color: {$j->shift->color}20;"
                                                     : '';
                                         @endphp
-                                        <td wire:key="cell-out-{{ $p->id }}-{{ $date }}" wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                        <td wire:key="cell-out-{{ $p->id }}-{{ $date }}"
+                                            wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             wire:loading.class="opacity-40 pointer-events-none"
                                             wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
                                             class="{{ $cellClassP }}" style="{{ $cellStyleP }}">

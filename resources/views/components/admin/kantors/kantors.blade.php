@@ -32,7 +32,7 @@
             </div>
 
             <div class="relative w-full sm:w-64">
-                <input type="text" placeholder="Cari nama kantor..." wire:model.live.debounce.400ms="search"
+                <input type="text" placeholder="Nama kantor..." wire:model.live.debounce.400ms="search"
                     class="input input-bordered w-full pl-10 pr-10 bg-base-100 placeholder:text-base-content/60" />
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,34 +83,46 @@
                     <tbody>
                         {{-- ─── Skeleton Loading ────────────────────────── --}}
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
-                            <tr @if($readyToLoad) wire:loading wire:target="perPage, search, filterOpd" @endif>
-                                <td class="text-center font-bold"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                            <tr
+                                @if ($readyToLoad) wire:loading wire:target="perPage, search, filterOpd" @endif>
+                                <td class="text-center font-bold">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
                                 <td>
                                     <div class="skeleton h-5 w-32 mb-1"></div>
                                     <div class="skeleton h-3 w-48 mb-1"></div>
                                     <div class="skeleton h-3 w-24"></div>
                                 </td>
-                                <td><div class="skeleton h-4 w-24"></div></td>
-                                <td><div class="skeleton h-4 w-12"></div></td>
+                                <td>
+                                    <div class="skeleton h-4 w-24"></div>
+                                </td>
+                                <td>
+                                    <div class="skeleton h-4 w-12"></div>
+                                </td>
                                 <td>
                                     <div class="flex items-center gap-1">
                                         <div class="skeleton h-4 w-4 rounded-full"></div>
                                         <div class="skeleton h-4 w-8"></div>
                                     </div>
                                 </td>
-                                <td><div class="skeleton h-5 w-16 rounded-full"></div></td>
-                                <td class="text-center"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                                <td>
+                                    <div class="skeleton h-5 w-16 rounded-full"></div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
                             </tr>
                         @endfor
 
                         @forelse ($this->kantors as $r)
-                            <tr class="hover:bg-base-200/50" @if($readyToLoad) wire:loading.remove wire:target="perPage, search, filterOpd" @endif>
+                            <tr class="hover:bg-base-200/50"
+                                @if ($readyToLoad) wire:loading.remove wire:target="perPage, search, filterOpd" @endif>
                                 <td class="text-center font-bold">{{ $this->kantors->firstItem() + $loop->index }}</td>
                                 <td>
                                     <div class="font-bold">{{ $r->name }}</div>
                                     <div class="text-xs opacity-50 truncate max-w-xs">{{ $r->alamat }}</div>
                                     <div class="text-[10px] text-primary font-mono mt-1">{{ $r->latitude }},
-                                         {{ $r->longitude }}</div>
+                                        {{ $r->longitude }}</div>
                                 </td>
                                 <td>
                                     <div class="text-xs font-medium">{{ $r->opd->name }}</div>
@@ -156,8 +168,10 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr @if($readyToLoad) wire:loading.remove wire:target="perPage, search, filterOpd" @endif>
-                                <td colspan="7" class="text-center text-sm text-base-content/60 py-8">Tidak ada data
+                            <tr
+                                @if ($readyToLoad) wire:loading.remove wire:target="perPage, search, filterOpd" @endif>
+                                <td colspan="7" class="text-center text-sm text-base-content/60 py-8">Tidak ada
+                                    data
                                     Kantor</td>
                             </tr>
                         @endforelse

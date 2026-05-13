@@ -32,7 +32,7 @@
                     </select>
                 </div>
                 <div class="relative w-full sm:w-auto">
-                    <input type="text" placeholder="Cari nama shift..." wire:model.live.debounce.400ms="search"
+                    <input type="text" placeholder="Nama shift..." wire:model.live.debounce.400ms="search"
                         class="input input-bordered w-full sm:max-w-xs pl-10 pr-10 bg-base-100 placeholder:text-base-content/40" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
@@ -108,7 +108,7 @@
                                 </td>
                                 <td>
                                     <span class="text-xs uppercase font-semibold">
-                                        @if($r->konsumsis->isEmpty())
+                                        @if ($r->konsumsis->isEmpty())
                                             None
                                         @else
                                             {{ $r->konsumsis->pluck('nama')->map(fn($n) => ucfirst($n))->implode(', ') }}
@@ -227,23 +227,25 @@
                     </div>
 
                     @if ($type === 'shift')
-                    <div class="form-control w-full">
-                        <label class="label mb-1 px-1">
-                            <span class="label-text text-sm font-medium text-base-content">Konsumsi <span
-                                    class="text-error">*</span></span>
-                        </label>
-                        <div class="flex flex-wrap gap-4 mt-1">
-                            @foreach($this->availableKonsumsi as $k)
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" wire:model="selectedKonsumsi" value="{{ $k->id }}" class="checkbox checkbox-primary checkbox-sm" />
-                                    <span class="text-sm uppercase font-semibold">{{ ucfirst($k->nama) }}</span>
-                                </label>
-                            @endforeach
+                        <div class="form-control w-full">
+                            <label class="label mb-1 px-1">
+                                <span class="label-text text-sm font-medium text-base-content">Konsumsi <span
+                                        class="text-error">*</span></span>
+                            </label>
+                            <div class="flex flex-wrap gap-4 mt-1">
+                                @foreach ($this->availableKonsumsi as $k)
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" wire:model="selectedKonsumsi"
+                                            value="{{ $k->id }}"
+                                            class="checkbox checkbox-primary checkbox-sm" />
+                                        <span class="text-sm uppercase font-semibold">{{ ucfirst($k->nama) }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('selectedKonsumsi')
+                                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                            @enderror
                         </div>
-                        @error('selectedKonsumsi')
-                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                        @enderror
-                    </div>
                     @endif
 
                     @if ($type === 'shift')

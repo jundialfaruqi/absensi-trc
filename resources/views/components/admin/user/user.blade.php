@@ -32,7 +32,7 @@
                     </select>
                 </div>
                 <div class="relative w-full sm:w-auto">
-                    <input type="text" placeholder="Cari nama/email..." wire:model.live.debounce.400ms="search"
+                    <input type="text" placeholder="Nama, email..." wire:model.live.debounce.400ms="search"
                         class="input input-bordered w-full placeholder:text-base-content/60 sm:max-w-xs pl-10 pr-10 bg-base-100" />
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-5 h-5 text-base-content/50" fill="none" stroke="currentColor"
@@ -82,8 +82,10 @@
                     <tbody>
                         {{-- ─── Skeleton Loading ────────────────────────── --}}
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
-                            <tr @if($readyToLoad) wire:loading wire:target="perPage, search" @endif>
-                                <td class="text-center font-bold"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                            <tr @if ($readyToLoad) wire:loading wire:target="perPage, search" @endif>
+                                <td class="text-center font-bold">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
                                 <td>
                                     <div class="flex items-center gap-3">
                                         <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
@@ -93,17 +95,22 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td><div class="skeleton h-4 w-24"></div></td>
+                                <td>
+                                    <div class="skeleton h-4 w-24"></div>
+                                </td>
                                 <td>
                                     <div class="skeleton h-4 w-32 mb-1"></div>
                                     <div class="skeleton h-6 w-16 rounded-full"></div>
                                 </td>
-                                <td class="text-center"><div class="skeleton h-4 w-4 mx-auto"></div></td>
+                                <td class="text-center">
+                                    <div class="skeleton h-4 w-4 mx-auto"></div>
+                                </td>
                             </tr>
                         @endfor
 
                         @forelse ($this->users as $r)
-                            <tr class="hover:bg-base-200/50" @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
+                            <tr class="hover:bg-base-200/50"
+                                @if ($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td class="text-center font-bold">{{ $this->users->firstItem() + $loop->index }}</td>
                                 <td>
                                     <div class="flex items-center gap-3">
@@ -171,7 +178,8 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr @if($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
+                            <tr
+                                @if ($readyToLoad) wire:loading.remove wire:target="perPage, search" @endif>
                                 <td colspan="5" class="text-center text-sm text-base-content/60 py-8">Tidak ada
                                     data Admin</td>
                             </tr>

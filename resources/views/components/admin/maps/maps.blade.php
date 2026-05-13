@@ -5,7 +5,7 @@
         <div class="w-full lg:w-80 bg-base-100 rounded-box shadow-sm p-4 flex flex-col gap-4 lg:overflow-hidden">
             <div class="form-control w-full">
                 <div class="relative">
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama personnel..."
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Nama personnel..."
                         class="input input-bordered w-full ps-10" />
                     <div class="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-base-content/40" fill="none"
@@ -75,7 +75,8 @@
         </div>
 
         {{-- Map Container --}}
-        <div class="w-full min-h-[60vh] lg:min-h-0 lg:flex-1 bg-base-100 rounded-box shadow-sm overflow-hidden relative" wire:ignore>
+        <div class="w-full min-h-[60vh] lg:min-h-0 lg:flex-1 bg-base-100 rounded-box shadow-sm overflow-hidden relative"
+            wire:ignore>
             <div id="map" class="absolute inset-0 w-full h-full z-0"></div>
         </div>
     </div>
@@ -299,13 +300,15 @@
                             popupStatusEl.innerText = 'Online';
                             popupStatusEl.className = 'text-xs text-success';
                         }
-                        
+
                         // Update the stored popup content so it persists when closed and reopened
                         if (marker.getPopup()) {
                             const currentPopupContent = marker.getPopup().getContent();
                             if (typeof currentPopupContent === 'string') {
-                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`);
-                                const newDiv = `<div class="text-xs text-success" id="popup-status-${elementId}">Online</div>`;
+                                const regex = new RegExp(
+                                    `<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`);
+                                const newDiv =
+                                    `<div class="text-xs text-success" id="popup-status-${elementId}">Online</div>`;
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                             }
                         }
@@ -342,20 +345,23 @@
                         if (textEl) {
                             textEl.innerText = 'Aktif: 1 menit yang lalu';
                         }
-                        
+
                         // Update status in popup too
                         const popupStatusEl = document.getElementById(`popup-status-${elementId}`);
                         if (popupStatusEl) {
                             popupStatusEl.innerText = 'Aktif: 1 menit yang lalu';
                             popupStatusEl.className = 'text-xs opacity-60';
                         }
-                        
+
                         // Update the stored popup content to Offline too
                         if (marker && marker.getPopup()) {
                             const currentPopupContent = marker.getPopup().getContent();
                             if (typeof currentPopupContent === 'string') {
-                                const regex = new RegExp(`<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`);
-                                const newDiv = `<div class="text-xs opacity-60" id="popup-status-${elementId}">Aktif: 1 menit yang lalu</div>`;
+                                const regex = new RegExp(
+                                    `<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`
+                                    );
+                                const newDiv =
+                                    `<div class="text-xs opacity-60" id="popup-status-${elementId}">Aktif: 1 menit yang lalu</div>`;
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                             }
                         }
@@ -373,14 +379,16 @@
                         .then(data => {
                             const address = data.display_name;
                             el.innerHTML = `<strong>Lokasi:</strong> ${address}`;
-                            
+
                             // Update stored popup content to persist address
                             const marker = markers['p' + id] || markers['d' + id];
                             if (marker && marker.getPopup()) {
                                 const currentPopupContent = marker.getPopup().getContent();
                                 if (typeof currentPopupContent === 'string') {
-                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[\\s\\S]*?</div>`);
-                                    const newDiv = `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${address}</div>`;
+                                    const regex = new RegExp(
+                                        `<div class="text-xs mb-1" id="address-${id}">[\\s\\S]*?</div>`);
+                                    const newDiv =
+                                        `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${address}</div>`;
                                     marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                                 }
                             }
@@ -388,13 +396,15 @@
                         .catch(error => {
                             const failText = `Gagal memuat alamat.`;
                             el.innerHTML = `<strong>Lokasi:</strong> ${failText}`;
-                            
+
                             const marker = markers['p' + id] || markers['d' + id];
                             if (marker && marker.getPopup()) {
                                 const currentPopupContent = marker.getPopup().getContent();
                                 if (typeof currentPopupContent === 'string') {
-                                    const regex = new RegExp(`<div class="text-xs mb-1" id="address-${id}">[\\s\\S]*?</div>`);
-                                    const newDiv = `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${failText}</div>`;
+                                    const regex = new RegExp(
+                                        `<div class="text-xs mb-1" id="address-${id}">[\\s\\S]*?</div>`);
+                                    const newDiv =
+                                        `<div class="text-xs mb-1" id="address-${id}"><strong>Lokasi:</strong> ${failText}</div>`;
                                     marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                                 }
                             }
@@ -431,7 +441,8 @@
                 if (!window.CustomEcho && typeof Echo === 'function') {
                     window.Pusher = Pusher;
                     const reverbHost = '{{ env('REVERB_HOST') }}';
-                    const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ? window.location.hostname : reverbHost;
+                    const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
+                        window.location.hostname : reverbHost;
 
                     const isSecure = window.location.protocol === 'https:';
                     window.CustomEcho = new Echo({
@@ -451,12 +462,12 @@
 
                     if (echoInstance) {
                         window.EchoInstance = echoInstance;
-                        
+
                         // Hubungkan kembali jika terputus (terutama untuk Echo bawaan VPS)
                         if (typeof window.EchoInstance.connect === 'function') {
                             window.EchoInstance.connect();
                         }
-                        
+
                         window.EchoInstance.channel('personnel-locations')
                             .stopListening('PersonnelLocationUpdated')
                             .listen('PersonnelLocationUpdated', (e) => {

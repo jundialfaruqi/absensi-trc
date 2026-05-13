@@ -7,8 +7,8 @@
         </div>
         <button wire:click="openModal" class="btn btn-secondary" wire:loading.attr="disabled">
             <span wire:loading wire:target="openModal" class="loading loading-spinner loading-xs"></span>
-            <svg wire:loading.remove wire:target="openModal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                stroke="currentColor" class="size-5">
+            <svg wire:loading.remove wire:target="openModal" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             Tambah Perangkat
@@ -54,7 +54,7 @@
 
     <div class="border-b border-base-200 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div class="relative w-full md:w-80">
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama, lisensi, atau ID..."
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Nama, lisensi, atau ID..."
                 class="input input-bordered w-full placeholder:text-base-content/60 pl-10 pr-10 bg-base-100" />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -405,17 +405,15 @@
 
                         @if ($holder_type === 'personnel')
                             <div class="form-control w-full md:col-span-2"
-                                wire:key="field-personnel-id-{{ $modalKey }}"
-                                x-data="{
+                                wire:key="field-personnel-id-{{ $modalKey }}" x-data="{
                                     open: false,
                                     selectedId: @entangle('personnel_id'),
                                     selectedName: '-- Pilih Personnel --',
                                     init() {
-                                        @if($personnel_id)
-                                        this.selectedName = '{{ addslashes($this->personnelList->firstWhere('id', $personnel_id)?->name ?? '-- Pilih Personnel --') }}';
-                                        @endif
+                                        @if ($personnel_id) this.selectedName = '{{ addslashes($this->personnelList->firstWhere('id', $personnel_id)?->name ?? '-- Pilih Personnel --') }}'; @endif
                                     }
-                                }" @click.away="open = false">
+                                }"
+                                @click.away="open = false">
                                 <label class="label mb-1 px-1">
                                     <span class="label-text text-sm font-medium text-base-content">Pilih Personnel
                                         <span class="text-error">*</span></span>
