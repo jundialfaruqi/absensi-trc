@@ -11,9 +11,6 @@ Route::get('/', function () {
 Route::livewire('/login', 'login')
     ->name('login');
 
-Route::livewire('/absensi-web', 'absensi')
-    ->name('absensi-web');
-
 Route::livewire('/download-app', 'public::download-app')
     ->name('download-app');
 
@@ -37,6 +34,10 @@ Route::group([
     Route::livewire('/dashboard', 'admin::dashboard')
         ->middleware('permission:lihat-dashboard')
         ->name('dashboard');
+
+    Route::livewire('/absensi-web', 'absensi')
+        ->middleware('permission:halaman-absensi')
+        ->name('absensi-web');
 
     Route::livewire('/permohonan-cuti', 'admin::permohonan-cuti')
         ->middleware('permission:manajemen-permohonan-cuti')
