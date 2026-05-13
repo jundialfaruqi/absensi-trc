@@ -133,7 +133,7 @@ Route::group([
         ->name('perangkat');
 
     Route::livewire('/maps', 'admin::maps')
-        ->middleware('permission:manajemen-absensi')
+        ->middleware('permission:manajemen-maps')
         ->name('maps');
 
     Route::livewire('/profil-saya', 'admin::profile-saya')

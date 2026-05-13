@@ -443,7 +443,7 @@
                             </li>
                         @endcan
 
-                        @can('maps-personnel')
+                        @can('manajemen-maps')
                             <li>
                                 <a wire:navigate href="{{ route('maps') }}"
                                     class="{{ request()->routeIs('maps*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
@@ -655,6 +655,9 @@
                                     </span>
                                 </a>
                             </li>
+                        @endcan
+
+                        @can('manajemen-absensi-anomaly')
                             @php
                                 $anomalyCount = \App\Models\Absensi::where('is_location_anomaly', true)
                                     ->when(!auth()->user()->hasRole('super-admin'), function ($q) {
