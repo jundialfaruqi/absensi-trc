@@ -211,9 +211,32 @@ new class extends Component
             return;
         }
 
+        $personnelId = $absensi->personnel_id;
+        $tanggal = $absensi->tanggal;
+
         // Catat siapa yang menghapus, lalu soft delete
         $absensi->update(['deleted_by_user_id' => Auth::id()]);
         $absensi->delete();
+
+        // Buat ulang record absensi default berdasarkan jadwal
+        $jadwal = \App\Models\Jadwal::where('personnel_id', $personnelId)
+            ->where('tanggal', $tanggal)
+            ->first();
+
+        if ($jadwal) {
+            $shift = $jadwal->shift;
+            $isOff = $shift && $shift->type === 'off';
+            $defaultStatus = $isOff ? ($shift->keterangan ?? 'OFF') : 'ALFA';
+
+            Absensi::create([
+                'personnel_id' => $personnelId,
+                'tanggal' => $tanggal,
+                'jadwal_id' => $jadwal->id,
+                'status' => $defaultStatus,
+                'status_masuk' => $defaultStatus,
+                'status_pulang' => $defaultStatus,
+            ]);
+        }
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
         $this->dispatch('toast', message: 'Data absensi dipindahkan ke kotak sampah', type: 'success');

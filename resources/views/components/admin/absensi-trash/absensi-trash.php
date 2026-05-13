@@ -70,13 +70,18 @@ new #[Title('Kotak Sampah Absensi')] #[Layout('layouts::admin.app')] class exten
         $absensi = Absensi::onlyTrashed()->findOrFail($id);
 
         // Cek apakah sudah ada data absensi aktif untuk personnel + tanggal yang sama
-        $exists = Absensi::where('personnel_id', $absensi->personnel_id)
+        $existing = Absensi::where('personnel_id', $absensi->personnel_id)
             ->where('tanggal', $absensi->tanggal)
-            ->exists();
+            ->first();
 
-        if ($exists) {
-            $this->dispatch('toast', type: 'error', message: 'Gagal mengembalikan: sudah ada data absensi baru untuk personnel ini pada tanggal yang sama.');
-            return;
+        if ($existing) {
+            // Jika record yang ada masih default (belum diisi), hapus lalu restore yang lama
+            if (!$existing->jam_masuk && !$existing->jam_pulang && !$existing->foto_masuk && !$existing->foto_pulang) {
+                $existing->forceDelete();
+            } else {
+                $this->dispatch('toast', type: 'error', message: 'Gagal mengembalikan: sudah ada data absensi yang sudah diisi untuk personnel ini pada tanggal yang sama.');
+                return;
+            }
         }
 
         $absensi->update(['deleted_by_user_id' => null]);
