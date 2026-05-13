@@ -110,26 +110,10 @@ new class extends Component
             ->first();
 
         if ($jadwal) {
-            // Find related absensi
-            $absensis = Absensi::where('personnel_id', $this->quickPersonnelId)
-                ->where('tanggal', $this->quickDate)
-                ->get();
-
-            foreach ($absensis as $absensi) {
-                // Delete photos if exist
-                if ($absensi->foto_masuk) {
-                    Storage::disk('public')->delete($absensi->foto_masuk);
-                }
-                if ($absensi->foto_pulang) {
-                    Storage::disk('public')->delete($absensi->foto_pulang);
-                }
-                $absensi->delete();
-            }
-
             $jadwal->delete();
 
             $this->dispatch('close-modal', id: 'quick-add-modal');
-            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal dan Absensi berhasil dihapus.');
+            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil dihapus.');
             $this->dispatch('refreshJadwal');
         } else {
             $this->dispatch('toast', type: 'warning', title: 'Info', message: 'Tidak ada jadwal untuk dihapus.');

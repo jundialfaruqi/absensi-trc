@@ -39,27 +39,7 @@ class JadwalImport implements ToCollection
 
     protected function resetExistingData()
     {
-        // 1. Get all attendance records to delete photos
-        $absensis = \App\Models\Absensi::whereYear('tanggal', $this->year)
-            ->whereMonth('tanggal', $this->month)
-            ->whereHas('personnel', function($q) {
-                if ($this->opdId) {
-                    $q->where('opd_id', $this->opdId);
-                }
-            })
-            ->get();
-
-        foreach ($absensis as $absensi) {
-            if ($absensi->foto_masuk) {
-                Storage::disk('public')->delete($absensi->foto_masuk);
-            }
-            if ($absensi->foto_pulang) {
-                Storage::disk('public')->delete($absensi->foto_pulang);
-            }
-            $absensi->delete();
-        }
-
-        // 2. Delete schedules
+        // Delete existing schedules only (preserve absensi data)
         \App\Models\Jadwal::whereYear('tanggal', $this->year)
             ->whereMonth('tanggal', $this->month)
             ->whereHas('personnel', function($q) {
