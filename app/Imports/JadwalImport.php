@@ -39,13 +39,40 @@ class JadwalImport implements ToCollection
 
     protected function resetExistingData()
     {
-        // Delete existing schedules only (preserve absensi data)
+        // Soft-delete absensi default (belum terisi) agar masuk kotak sampah
+        $defaultAbsensis = \App\Models\Absensi::whereYear('tanggal', $this->year)
+            ->whereMonth('tanggal', $this->month)
+            ->whereHas('personnel', function($q) {
+                if ($this->opdId) {
+                    $q->where('opd_id', $this->opdId);
+                }
+            })
+            ->whereNull('jam_masuk')
+            ->whereNull('jam_pulang')
+            ->whereNull('foto_masuk')
+            ->whereNull('foto_pulang')
+            ->get();
+
+        foreach ($defaultAbsensis as $absensi) {
+            $absensi->update(['deleted_by_user_id' => auth()->id()]);
+            $absensi->delete();
+        }
+
+        // Delete existing schedules (hanya jadwal yang absensinya default/sudah di-soft-delete)
         \App\Models\Jadwal::whereYear('tanggal', $this->year)
             ->whereMonth('tanggal', $this->month)
             ->whereHas('personnel', function($q) {
                 if ($this->opdId) {
                     $q->where('opd_id', $this->opdId);
                 }
+            })
+            ->whereDoesntHave('absensis', function($q) {
+                $q->where(function($q2) {
+                    $q2->whereNotNull('jam_masuk')
+                        ->orWhereNotNull('jam_pulang')
+                        ->orWhereNotNull('foto_masuk')
+                        ->orWhereNotNull('foto_pulang');
+                });
             })
             ->delete();
     }

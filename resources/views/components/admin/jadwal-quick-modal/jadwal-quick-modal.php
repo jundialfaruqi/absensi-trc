@@ -130,10 +130,16 @@ new class extends Component
                 return;
             }
 
+            // Soft-delete absensi default terkait agar masuk kotak sampah
+            if ($absensi) {
+                $absensi->update(['deleted_by_user_id' => Auth::id()]);
+                $absensi->delete();
+            }
+
             $jadwal->delete();
 
             $this->dispatch('close-modal', id: 'quick-add-modal');
-            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil dihapus.');
+            $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal dan data absensi default berhasil dihapus.');
             $this->dispatch('refreshJadwal');
         } else {
             $this->dispatch('toast', type: 'warning', title: 'Info', message: 'Tidak ada jadwal untuk dihapus.');
