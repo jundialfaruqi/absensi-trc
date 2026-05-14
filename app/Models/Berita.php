@@ -22,6 +22,39 @@ class Berita extends Model
         'is_banner_active',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($berita) {
+            $activeBanners = static::where('is_banner_active', true)->get();
+            $bannerData = $activeBanners->map(function($b) {
+                return [
+                    'id' => $b->id,
+                    'judul' => $b->judul,
+                    'deskripsi' => $b->deskripsi,
+                    'gambar' => $b->gambar ? asset('storage/' . $b->gambar) : null,
+                ];
+            })->toArray();
+
+            event(new \App\Events\BannerUpdated($bannerData));
+        });
+
+        static::deleted(function ($berita) {
+            if ($berita->is_banner_active) {
+                $activeBanners = static::where('is_banner_active', true)->get();
+                $bannerData = $activeBanners->map(function($b) {
+                    return [
+                        'id' => $b->id,
+                        'judul' => $b->judul,
+                        'deskripsi' => $b->deskripsi,
+                        'gambar' => $b->gambar ? asset('storage/' . $b->gambar) : null,
+                    ];
+                })->toArray();
+
+                event(new \App\Events\BannerUpdated($bannerData));
+            }
+        });
+    }
+
     public function creator()
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');
