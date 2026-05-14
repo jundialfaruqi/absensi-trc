@@ -468,7 +468,7 @@
                             </li>
                         @endcan
 
-                        @canany(['manajemen-opd', 'manajemen-konsumsi', 'manajemen-penugasan'])
+                        @canany(['manajemen-opd', 'manajemen-konsumsi', 'manajemen-penugasan', 'manajemen-kantor'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mt-4 mb-1">Data</li>
                         @endcanany
 
