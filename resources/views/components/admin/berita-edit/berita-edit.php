@@ -106,7 +106,10 @@ new #[Title('Edit Berita')] #[Layout('layouts::admin.app')] class extends Compon
             'deskripsi' => $this->deskripsi ?: null,
         ]);
 
-        session()->flash('toast', ['type' => 'success', 'message' => 'Berita berhasil diperbarui.']);
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'message' => 'Berita berhasil diperbarui.'
+        ]);
         $this->redirect(route('berita'), navigate: true);
     }
 };

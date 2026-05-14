@@ -61,7 +61,10 @@ new #[Title('Buat Berita')] #[Layout('layouts::admin.app')] class extends Compon
             'created_by' => Auth::id(),
         ]);
 
-        session()->flash('toast', ['type' => 'success', 'message' => 'Berita berhasil dibuat.']);
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'message' => 'Berita berhasil dibuat.'
+        ]);
         $this->redirect(route('berita'), navigate: true);
     }
 };
