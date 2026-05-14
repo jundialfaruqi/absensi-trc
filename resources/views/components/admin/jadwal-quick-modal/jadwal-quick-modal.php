@@ -78,6 +78,16 @@ new class extends Component
 
         $selectedShift = \App\Models\Shift::find($this->quickShiftId);
 
+        // Cek apakah absensi terkait sudah memiliki data yang bukan default
+        $existingAbsensi = Absensi::where('personnel_id', $this->quickPersonnelId)
+            ->where('tanggal', $this->quickDate)
+            ->first();
+
+        if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
+            $this->dispatch('toast', type: 'error', title: 'Gagal', message: 'Jadwal tidak bisa diubah karena sudah memiliki data absensi yang terisi.');
+            return;
+        }
+
         $jadwal = Jadwal::updateOrCreate(
             ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
             [
@@ -110,6 +120,16 @@ new class extends Component
             ->first();
 
         if ($jadwal) {
+            // Cek apakah absensi terkait sudah memiliki data yang bukan default
+            $absensi = Absensi::where('personnel_id', $this->quickPersonnelId)
+                ->where('tanggal', $this->quickDate)
+                ->first();
+
+            if ($absensi && ($absensi->jam_masuk || $absensi->jam_pulang || $absensi->foto_masuk || $absensi->foto_pulang)) {
+                $this->dispatch('toast', type: 'error', title: 'Gagal', message: 'Jadwal tidak bisa dihapus karena sudah memiliki data absensi yang terisi.');
+                return;
+            }
+
             $jadwal->delete();
 
             $this->dispatch('close-modal', id: 'quick-add-modal');

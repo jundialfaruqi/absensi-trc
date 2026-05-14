@@ -92,6 +92,12 @@ class JadwalImport implements ToCollection
                         $status = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
                         $absensiStatus = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
 
+                        // Skip jika absensi sudah terisi (bukan default)
+                        $existingAbsensi = \App\Models\Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
+                        if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
+                            continue;
+                        }
+
                         $jadwal = Jadwal::updateOrCreate(
                             [
                                 'personnel_id' => $personnel->id,
@@ -120,6 +126,12 @@ class JadwalImport implements ToCollection
                     } else {
                         // Fallback logic for literal "LIBUR" if no shift matches
                         if (strtoupper($shiftValue) === 'LIBUR') {
+                            // Skip jika absensi sudah terisi (bukan default)
+                            $existingAbsensi = \App\Models\Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
+                            if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
+                                continue;
+                            }
+
                             $jadwal = Jadwal::updateOrCreate(
                                 [
                                     'personnel_id' => $personnel->id,

@@ -327,6 +327,13 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $cycleIndex = ($dayCounter + $startOffset) % $cycleLength;
                     $config = $dailyCycle[$cycleIndex];
 
+                    // Skip jika absensi sudah terisi (bukan default)
+                    $existingAbsensi = Absensi::where('personnel_id', $pId)->where('tanggal', $dateStr)->first();
+                    if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
+                        $dayCounter++;
+                        continue;
+                    }
+
                     $sObj = Shift::find($config['shift_id']);
                     $finalStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
                     $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
@@ -365,6 +372,12 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $dateStr = $date->format('Y-m-d');
                     $dayOfWeek = $date->dayOfWeek; // 0 (Sun) to 6 (Sat)
                     $config = $this->weeklyConfig[$dayOfWeek];
+
+                    // Skip jika absensi sudah terisi (bukan default)
+                    $existingAbsensi = Absensi::where('personnel_id', $pId)->where('tanggal', $dateStr)->first();
+                    if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
+                        continue;
+                    }
 
                     $sObj = Shift::find($config['shift_id']);
                     $finalStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
@@ -476,6 +489,23 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $finalStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
                     $absensiStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
                     $shiftId = $sObj->id ?? null;
+
+                    // Skip jika absensi sudah terisi (bukan default)
+                    $existingAbsensi = Absensi::where('personnel_id', $pId)->where('tanggal', $dateStr)->first();
+                    if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
+                        // Update stats even when skipping to keep quota algorithm accurate
+                        $s = &$stats[$pId];
+                        if ($status === 'SHIFT') {
+                            $s['work_days']++;
+                            $s['consecutive_work']++;
+                        } else {
+                            $s['consecutive_work'] = 0;
+                            if ($isWeekend) $s['weekend_offs']++;
+                        }
+                        $s['last_shift_id'] = $shiftId;
+                        $s['last_status'] = $status;
+                        continue;
+                    }
 
                     $jadwal = Jadwal::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
