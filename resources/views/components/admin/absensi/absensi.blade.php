@@ -200,7 +200,7 @@
                     <tbody>
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
                             <tr
-                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate" @endif>
+                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage" @endif>
                                 <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
@@ -230,7 +230,7 @@
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
                                     <tr class="bg-base-200" wire:key="opd-header-{{ $p->opd_id }}"
                                         wire:loading.remove
-                                        wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
+                                        wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
                                             <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
@@ -245,7 +245,7 @@
                                     @php $currentOpd = $p->opd_id; @endphp
                                 @endif
                                 <tr class="group" wire:key="personnel-row-{{ $p->id }}" wire:loading.remove
-                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
+                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
                                             <div class="avatar placeholder">
@@ -559,7 +559,7 @@
                                 </tr>
                             @empty
                                 <tr wire:loading.remove
-                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate">
+                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage">
                                     <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                         class="text-center py-12 text-sm text-base-content/60">
                                         <div class="flex flex-col items-center justify-center">
