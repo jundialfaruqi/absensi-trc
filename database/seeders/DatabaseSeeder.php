@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'manajemen-role-permission', 'group' => "Role & Permission"],
             ['name' => 'manajemen-perangkat', 'group' => 'Perangkat'],
             ['name' => 'manajemen-pengaturan', 'group' => 'Pengaturan'],
+            ['name' => 'manajemen-berita', 'group' => 'Berita'],
         ];
 
         foreach ($permissions as $permission) {

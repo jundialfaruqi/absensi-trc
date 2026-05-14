@@ -119,6 +119,18 @@ Route::group([
         ->middleware('permission:manajemen-kotak-sampah-absensi')
         ->name('absensi.trash');
 
+    Route::livewire('/berita', 'admin::berita')
+        ->middleware('permission:manajemen-berita')
+        ->name('berita');
+
+    Route::livewire('/berita/create', 'admin::berita-create')
+        ->middleware('permission:manajemen-berita')
+        ->name('berita.create');
+
+    Route::livewire('/berita/{id}/edit', 'admin::berita-edit')
+        ->middleware('permission:manajemen-berita')
+        ->name('berita.edit');
+
     Route::livewire('/pengaturan', 'admin::pengaturan')
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');
