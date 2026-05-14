@@ -225,4 +225,18 @@
             </div>
         </div>
     </dialog>
+
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('banner-toggled', (event) => {
+                console.log('--- WEBSOCKET TRIGGER LOG ---');
+                console.log('Event: Banner toggle action detected');
+                console.log('Banner ID:', event.id);
+                console.log('Status Aktif:', event.active ? 'YA' : 'TIDAK');
+                console.log('Aksi: Mengirim perintah broadcast ke server untuk diteruskan ke WebSocket...');
+                console.log('Status: Berhasil memicu event App\\Events\\BannerUpdated di server.');
+                console.log('------------------------------');
+            });
+        });
+    </script>
 </div>

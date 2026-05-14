@@ -83,6 +83,7 @@ new #[Title('Manajemen Berita')] #[Layout('layouts::admin.app')] class extends C
         $berita->is_banner_active = !$berita->is_banner_active;
         $berita->save();
 
+        $this->dispatch('banner-toggled', id: $id, active: $berita->is_banner_active);
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Status banner berhasil diubah.');
     }
 
