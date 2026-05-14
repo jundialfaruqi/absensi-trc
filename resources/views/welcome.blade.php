@@ -236,7 +236,7 @@
         </div>
 
         <div class="flex items-center gap-2 md:gap-4 shrink-0">
-            <a href="{{ url('/absensi-web') }}"
+            <a href="{{ route('absensi-web') }}"
                 class="px-2 md:px-4 py-2 text-xs md:text-sm font-semibold text-slate-300 hover:text-white transition-colors whitespace-nowrap">Absensi</a>
 
             <a href="tel:112"
