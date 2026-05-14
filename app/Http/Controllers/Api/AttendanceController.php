@@ -223,6 +223,26 @@ class AttendanceController extends Controller
         ]);
     }
 
+    public function getBanners(Request $request)
+    {
+        $banners = \App\Models\Berita::where('is_banner_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($b) {
+                return [
+                    'id' => $b->id,
+                    'judul' => $b->judul,
+                    'deskripsi' => $b->deskripsi,
+                    'gambar' => $b->gambar ? asset('storage/' . $b->gambar) : null,
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $banners
+        ]);
+    }
+
     public function checkStatus($id)
     {
         $now = Carbon::now();
