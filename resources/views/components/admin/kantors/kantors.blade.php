@@ -326,115 +326,93 @@
     {{-- ─── Scripts ─────────────────────────────────────────────────────── --}}
     <script>
         (function() {
-            const initMapHandler = () => {
-                if (window.kantorMapInitialized) return;
-
-                let map = null;
+            const setupKantorMap = () => {
+                if (window._kantorMapUnsubscribe) window._kantorMapUnsubscribe();
+                
                 let marker = null;
                 let circle = null;
 
-                Livewire.on('init-map', (data) => {
+                window._kantorMapUnsubscribe = Livewire.on('init-map', (data) => {
                     const { lat, lng, radius } = data;
 
                     setTimeout(() => {
                         const container = document.getElementById('map-selection');
                         if (!container) return;
 
-                        // Pastikan map lama benar-benar dihapus dari memori dan DOM
-                        if (container._leaflet_id) {
-                            // Mencoba mencari instance map dari elemen
-                            // Leaflet tidak menyimpan instance di elemen secara langsung, 
-                            // tapi kita menyimpan variable 'map' di scope luar.
+                        if (window.kantorMapInstance) {
+                            window.kantorMapInstance.remove();
+                            window.kantorMapInstance = null;
                         }
+                        
+                        if (container._leaflet_id) container._leaflet_id = null;
 
-                        if (map) {
-                            map.remove();
-                            map = null;
-                        }
-
-                        // Inisialisasi Map baru
-                        map = L.map('map-selection').setView([lat, lng], 15);
+                        window.kantorMapInstance = L.map('map-selection').setView([lat, lng], 15);
                         
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors'
-                        }).addTo(map);
+                        }).addTo(window.kantorMapInstance);
 
-                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(window.kantorMapInstance);
                         circle = L.circle([lat, lng], {
                             radius: radius,
                             color: '#1d4ed8',
                             fillColor: '#3b82f6',
                             fillOpacity: 0.2
-                        }).addTo(map);
+                        }).addTo(window.kantorMapInstance);
+
+                        const safeUpdate = (newLat, newLng) => {
+                            const componentId = container.closest('[wire\\:id]').getAttribute('wire:id');
+                            const component = Livewire.find(componentId);
+                            if (component) {
+                                component.set('latitude', newLat);
+                                component.set('longitude', newLng);
+                            }
+                        };
 
                         marker.on('dragend', function(e) {
-                            const position = marker.getLatLng();
-                            updateCoords(position.lat, position.lng);
-                            circle.setLatLng(position);
+                            const pos = marker.getLatLng();
+                            safeUpdate(pos.lat, pos.lng);
+                            circle.setLatLng(pos);
                         });
 
-                        map.on('click', function(e) {
+                        window.kantorMapInstance.on('click', function(e) {
                             marker.setLatLng(e.latlng);
                             circle.setLatLng(e.latlng);
-                            updateCoords(e.latlng.lat, e.latlng.lng);
+                            safeUpdate(e.latlng.lat, e.latlng.lng);
                         });
 
-                        // Add Search Control (Using window.GeoSearch from app.js)
                         if (window.GeoSearch) {
                             const searchControl = new window.GeoSearch.GeoSearchControl({
                                 provider: new window.GeoSearch.OpenStreetMapProvider({
-                                    params: {
-                                        'accept-language': 'id',
-                                        countrycodes: 'id'
-                                    }
+                                    params: { 'accept-language': 'id', countrycodes: 'id' }
                                 }),
-                                style: 'bar',
-                                showMarker: false,
-                                showPopup: false,
-                                autoClose: true,
-                                retainZoomLevel: false,
-                                animateZoom: true,
-                                keepResult: true,
-                                searchLabel: 'Cari alamat atau tempat...'
+                                style: 'bar', showMarker: false, autoClose: true, searchLabel: 'Cari alamat...'
                             });
-                            map.addControl(searchControl);
-
-                            map.on('geosearch/showlocation', (result) => {
+                            window.kantorMapInstance.addControl(searchControl);
+                            window.kantorMapInstance.on('geosearch/showlocation', (result) => {
                                 const { x, y } = result.location;
-                                updateCoords(y, x);
+                                safeUpdate(y, x);
                                 marker.setLatLng([y, x]);
                                 circle.setLatLng([y, x]);
                             });
                         }
-
-                        map.invalidateSize();
+                        window.kantorMapInstance.invalidateSize();
                     }, 400);
                 });
 
-                const handleInput = (e) => {
-                    if (e.target.id === 'radius-slider' && circle) {
-                        circle.setRadius(parseInt(e.target.value));
-                    }
-                };
-                document.addEventListener('input', handleInput);
-
-                function updateCoords(lat, lng) {
-                    @this.set('latitude', lat);
-                    @this.set('longitude', lng);
-                }
-
-                Livewire.hook('commit', ({ succeed, component }) => {
-                    // Pastikan hanya memproses komponen kantor ini saja
-                    if (component.name !== 'admin.kantors.kantors') return;
-
-                    succeed(({ snapshot }) => {
-                        // Tambahkan pengecekan keamanan (null-safety)
-                        if (!snapshot || !snapshot.memo || !snapshot.memo.data) return;
+                // Sync dari Livewire ke Peta (jika input diketik manual)
+                if (!window._kantorMapCommitHookRegistered) {
+                    Livewire.hook('commit', ({ succeed, component }) => {
+                        const container = document.getElementById('map-selection');
+                        if (!container || !window.kantorMapInstance || !marker || !circle) return;
                         
-                        const snap = snapshot.memo.data;
-                        
-                        // Jika peta dan elemen belum siap, jangan diproses
-                        if (map && marker && circle) {
+                        const componentId = container.closest('[wire\\:id]').getAttribute('wire:id');
+                        if (component.id !== componentId) return;
+
+                        succeed(({ snapshot }) => {
+                            if (!snapshot || !snapshot.memo || !snapshot.memo.data) return;
+                            const snap = snapshot.memo.data;
+                            
                             const newLat = parseFloat(snap.latitude);
                             const newLng = parseFloat(snap.longitude);
                             const newRad = parseInt(snap.radius_meter);
@@ -444,23 +422,23 @@
                                 if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !== newLng) {
                                     marker.setLatLng(newPos);
                                     circle.setLatLng(newPos);
-                                    map.panTo(newPos);
+                                    window.kantorMapInstance.panTo(newPos);
                                 }
                             }
-                            if (!isNaN(newRad)) {
-                                circle.setRadius(newRad);
-                            }
-                        }
+                            if (!isNaN(newRad)) circle.setRadius(newRad);
+                        });
                     });
-                });
-
-                window.kantorMapInitialized = true;
+                    window._kantorMapCommitHookRegistered = true;
+                }
             };
 
-            if (window.Livewire) initMapHandler();
-            document.addEventListener('livewire:navigated', () => {
-                window.kantorMapInitialized = false;
-                initMapHandler();
+            setupKantorMap();
+            document.addEventListener('livewire:navigated', setupKantorMap);
+            document.addEventListener('livewire:navigating', () => {
+                if (window.kantorMapInstance) {
+                    window.kantorMapInstance.remove();
+                    window.kantorMapInstance = null;
+                }
             });
         })();
     </script>
