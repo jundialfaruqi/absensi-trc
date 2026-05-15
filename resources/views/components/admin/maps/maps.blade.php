@@ -82,7 +82,6 @@
     </div>
 
     {{-- ─── Styles & Scripts ────────────────────────────────────────────── --}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" data-navigate-once />
     <style>
         .custom-div-icon {
             background: none;
@@ -90,14 +89,6 @@
         }
     </style>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
-        data-navigate-once />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
-        data-navigate-once />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" data-navigate-once></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js" data-navigate-once></script>
-    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js" data-navigate-once></script>
 
     <script>
         (function() {
@@ -359,7 +350,7 @@
                             if (typeof currentPopupContent === 'string') {
                                 const regex = new RegExp(
                                     `<div class="text-xs [^"]*" id="popup-status-${elementId}">[^<]*</div>`
-                                    );
+                                );
                                 const newDiv =
                                     `<div class="text-xs opacity-60" id="popup-status-${elementId}">Aktif: 1 menit yang lalu</div>`;
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
@@ -439,7 +430,7 @@
                 // Initialize Echo if not exists (using CDN fallback for local dev)
                 // Gunakan _EchoHandler (Constructor) yang ditangkap oleh shim di app.blade.php
                 const EchoConstructor = window._EchoHandler || window.Echo;
-                
+
                 if (!window.CustomEcho && typeof EchoConstructor === 'function') {
                     window.Pusher = Pusher;
                     const reverbHost = '{{ env('REVERB_HOST') }}';
@@ -456,8 +447,8 @@
                         forceTLS: isSecure,
                         enabledTransports: ['ws', 'wss'],
                     });
-                    
-                    // Set ke global Echo agar Livewire bisa mendeteksi jika diperlukan, 
+
+                    // Set ke global Echo agar Livewire bisa mendeteksi jika diperlukan,
                     // tapi shim kita akan menjamin socketId() ada.
                     window.Echo = window.CustomEcho;
                 }
@@ -496,7 +487,8 @@
                             }
                             window.EchoInstance = null;
                             window.CustomEcho = null;
-                            window.Echo = null; // Penting: Set null agar shim mengosongkan actualEcho dan tidak mengganggu Livewire di halaman lain
+                            window.Echo =
+                            null; // Penting: Set null agar shim mengosongkan actualEcho dan tidak mengganggu Livewire di halaman lain
                         }
                     });
                     window.hasWsDisconnectListener = true;

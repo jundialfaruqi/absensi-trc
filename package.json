@@ -14,5 +14,11 @@
         "laravel-vite-plugin": "^3.0.0",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
+    },
+    "dependencies": {
+        "laravel-echo": "^2.3.4",
+        "leaflet": "^1.9.4",
+        "leaflet.markercluster": "^1.5.3",
+        "pusher-js": "^8.5.0"
     }
 }
