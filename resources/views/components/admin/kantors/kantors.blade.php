@@ -324,44 +324,42 @@
     </dialog>
 
     {{-- ─── Scripts ─────────────────────────────────────────────────────── --}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" data-navigate-once />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" data-navigate-once />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" data-navigate-once></script>
-    <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js" data-navigate-once></script>
-
     <script>
         (function() {
             const initMapHandler = () => {
-                // Prevent multiple listeners if navigated back/forth
                 if (window.kantorMapInitialized) return;
 
-                let map, marker, circle;
+                let map = null;
+                let marker = null;
+                let circle = null;
 
                 Livewire.on('init-map', (data) => {
-                    const {
-                        lat,
-                        lng,
-                        radius
-                    } = data;
+                    const { lat, lng, radius } = data;
 
                     setTimeout(() => {
-                        // Cleanup existing map if any to prevent "already initialized" errors
                         const container = document.getElementById('map-selection');
                         if (!container) return;
+
+                        // Pastikan map lama benar-benar dihapus dari memori dan DOM
+                        if (container._leaflet_id) {
+                            // Mencoba mencari instance map dari elemen
+                            // Leaflet tidak menyimpan instance di elemen secara langsung, 
+                            // tapi kita menyimpan variable 'map' di scope luar.
+                        }
 
                         if (map) {
                             map.remove();
                             map = null;
                         }
 
+                        // Inisialisasi Map baru
                         map = L.map('map-selection').setView([lat, lng], 15);
+                        
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors'
                         }).addTo(map);
 
-                        marker = L.marker([lat, lng], {
-                            draggable: true
-                        }).addTo(map);
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
                         circle = L.circle([lat, lng], {
                             radius: radius,
                             color: '#1d4ed8',
@@ -381,40 +379,38 @@
                             updateCoords(e.latlng.lat, e.latlng.lng);
                         });
 
-                        // Add Search Control
-                        const searchControl = new GeoSearch.GeoSearchControl({
-                            provider: new GeoSearch.OpenStreetMapProvider({
-                                params: {
-                                    'accept-language': 'id',
-                                    countrycodes: 'id'
-                                }
-                            }),
-                            style: 'bar',
-                            showMarker: false,
-                            showPopup: false,
-                            autoClose: true,
-                            retainZoomLevel: false,
-                            animateZoom: true,
-                            keepResult: true,
-                            searchLabel: 'Cari alamat atau tempat...'
-                        });
-                        map.addControl(searchControl);
+                        // Add Search Control (Using window.GeoSearch from app.js)
+                        if (window.GeoSearch) {
+                            const searchControl = new window.GeoSearch.GeoSearchControl({
+                                provider: new window.GeoSearch.OpenStreetMapProvider({
+                                    params: {
+                                        'accept-language': 'id',
+                                        countrycodes: 'id'
+                                    }
+                                }),
+                                style: 'bar',
+                                showMarker: false,
+                                showPopup: false,
+                                autoClose: true,
+                                retainZoomLevel: false,
+                                animateZoom: true,
+                                keepResult: true,
+                                searchLabel: 'Cari alamat atau tempat...'
+                            });
+                            map.addControl(searchControl);
 
-                        map.on('geosearch/showlocation', (result) => {
-                            const {
-                                x,
-                                y
-                            } = result.location;
-                            updateCoords(y, x);
-                            marker.setLatLng([y, x]);
-                            circle.setLatLng([y, x]);
-                        });
+                            map.on('geosearch/showlocation', (result) => {
+                                const { x, y } = result.location;
+                                updateCoords(y, x);
+                                marker.setLatLng([y, x]);
+                                circle.setLatLng([y, x]);
+                            });
+                        }
 
                         map.invalidateSize();
                     }, 400);
                 });
 
-                // Instant Radius Update
                 const handleInput = (e) => {
                     if (e.target.id === 'radius-slider' && circle) {
                         circle.setRadius(parseInt(e.target.value));
@@ -427,13 +423,17 @@
                     @this.set('longitude', lng);
                 }
 
-                Livewire.hook('commit', ({
-                    succeed
-                }) => {
-                    succeed(({
-                        snapshot
-                    }) => {
+                Livewire.hook('commit', ({ succeed, component }) => {
+                    // Pastikan hanya memproses komponen kantor ini saja
+                    if (component.name !== 'admin.kantors.kantors') return;
+
+                    succeed(({ snapshot }) => {
+                        // Tambahkan pengecekan keamanan (null-safety)
+                        if (!snapshot || !snapshot.memo || !snapshot.memo.data) return;
+                        
                         const snap = snapshot.memo.data;
+                        
+                        // Jika peta dan elemen belum siap, jangan diproses
                         if (map && marker && circle) {
                             const newLat = parseFloat(snap.latitude);
                             const newLng = parseFloat(snap.longitude);
@@ -441,8 +441,7 @@
 
                             if (!isNaN(newLat) && !isNaN(newLng)) {
                                 const newPos = [newLat, newLng];
-                                if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !==
-                                    newLng) {
+                                if (marker.getLatLng().lat !== newLat || marker.getLatLng().lng !== newLng) {
                                     marker.setLatLng(newPos);
                                     circle.setLatLng(newPos);
                                     map.panTo(newPos);
@@ -458,17 +457,10 @@
                 window.kantorMapInitialized = true;
             };
 
-            // Initial load
-            if (window.Livewire) {
-                initMapHandler();
-            }
-
-            // On navigation
+            if (window.Livewire) initMapHandler();
             document.addEventListener('livewire:navigated', () => {
-                window.kantorMapInitialized = false; // Allow re-init for new DOM
+                window.kantorMapInitialized = false;
                 initMapHandler();
-            }, {
-                once: true
             });
         })();
     </script>

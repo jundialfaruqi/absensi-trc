@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 
 // Fix Leaflet icon issue with Vite
+
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -28,3 +29,7 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 window._EchoHandler = Echo; // Provide the constructor safely for the shim or manual initialization.
+
+import * as GeoSearch from 'leaflet-geosearch';
+window.GeoSearch = GeoSearch;
+
