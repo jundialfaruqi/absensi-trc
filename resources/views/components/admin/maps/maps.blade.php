@@ -437,15 +437,17 @@
                 updateKantors(@json($this->kantors));
 
                 // Initialize Echo if not exists (using CDN fallback for local dev)
-                // Gunakan nama variabel kustom agar tidak bentrok dengan Livewire atau constructor Echo
-                if (!window.CustomEcho && typeof Echo === 'function') {
+                // Gunakan _EchoHandler (Constructor) yang ditangkap oleh shim di app.blade.php
+                const EchoConstructor = window._EchoHandler || window.Echo;
+                
+                if (!window.CustomEcho && typeof EchoConstructor === 'function') {
                     window.Pusher = Pusher;
                     const reverbHost = '{{ env('REVERB_HOST') }}';
                     const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
                         window.location.hostname : reverbHost;
 
                     const isSecure = window.location.protocol === 'https:';
-                    window.CustomEcho = new Echo({
+                    window.CustomEcho = new EchoConstructor({
                         broadcaster: 'reverb',
                         key: '{{ env('REVERB_APP_KEY') }}',
                         wsHost: wsHost,
@@ -454,16 +456,18 @@
                         forceTLS: isSecure,
                         enabledTransports: ['ws', 'wss'],
                     });
+                    
+                    // Set ke global Echo agar Livewire bisa mendeteksi jika diperlukan, 
+                    // tapi shim kita akan menjamin socketId() ada.
+                    window.Echo = window.CustomEcho;
                 }
 
                 try {
-                    // Utamakan CustomEcho yang kita buat sendiri karena sudah dipastikan konfigurasinya benar
                     const echoInstance = window.CustomEcho || window.Echo;
 
                     if (echoInstance) {
                         window.EchoInstance = echoInstance;
 
-                        // Hubungkan kembali jika terputus (terutama untuk Echo bawaan VPS)
                         if (typeof window.EchoInstance.connect === 'function') {
                             window.EchoInstance.connect();
                         }
@@ -487,9 +491,12 @@
                     document.addEventListener('livewire:navigating', () => {
                         if (window.EchoInstance) {
                             console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
-                            window.EchoInstance.disconnect();
+                            if (typeof window.EchoInstance.disconnect === 'function') {
+                                window.EchoInstance.disconnect();
+                            }
                             window.EchoInstance = null;
-                            window.CustomEcho = null; // Reset agar bisa membuat koneksi baru saat kembali
+                            window.CustomEcho = null;
+                            window.Echo = null; // Penting: Set null agar shim mengosongkan actualEcho dan tidak mengganggu Livewire di halaman lain
                         }
                     });
                     window.hasWsDisconnectListener = true;

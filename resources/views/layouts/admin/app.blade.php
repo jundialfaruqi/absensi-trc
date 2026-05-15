@@ -31,14 +31,21 @@
 
     <script>
         // Hack untuk mencegah Livewire 3 error karena mendeteksi global constructor/instance Echo
-        if (typeof window.Echo === 'undefined') {
+        if (typeof window.Echo === 'undefined' || !window._echoShimApplied) {
             let actualEcho = null;
             Object.defineProperty(window, 'Echo', {
                 get() {
                     return actualEcho;
                 },
                 set(val) {
+                    // Jika yang diset adalah fungsi (constructor dari CDN), simpan di variable lain
+                    if (typeof val === 'function') {
+                        window._EchoHandler = val;
+                    }
+                    
                     actualEcho = val;
+                    
+                    // Pastikan socketId selalu ada jika actualEcho adalah object/function
                     if (actualEcho && typeof actualEcho.socketId !== 'function') {
                         actualEcho.socketId = function() {
                             return null;
@@ -47,13 +54,14 @@
                 },
                 configurable: true
             });
-        } else {
-            // Jika sudah ada, langsung tambahkan socketId jika belum ada
-            if (typeof window.Echo.socketId !== 'function') {
-                window.Echo.socketId = function() {
-                    return null;
-                };
-            }
+            window._echoShimApplied = true;
+        }
+
+        // Pastikan jika Echo sudah ada (misal dari script lain), ia punya socketId
+        if (window.Echo && typeof window.Echo.socketId !== 'function') {
+            window.Echo.socketId = function() {
+                return null;
+            };
         }
     </script>
 
