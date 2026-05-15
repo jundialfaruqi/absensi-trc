@@ -17,35 +17,35 @@
         </div>
     </div>
 
-    <form x-data x-on:submit.prevent="@this.set('isi', document.querySelector('#quill-editor .ql-editor').innerHTML); @this.save()">
+    <form x-data
+        x-on:submit.prevent="@this.set('isi', document.querySelector('#quill-editor .ql-editor').innerHTML); @this.save()">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- ─── Main Content ───────────────────────────────────────────── --}}
             <div class="lg:col-span-2 space-y-6">
 
-                {{-- Isi Berita (Summernote) --}}
-                <div class="card bg-base-100 shadow-sm">
-                    <div class="card-body">
+                {{-- Isi Berita (QuillJS) --}}
+                <div class="card">
+                    {{-- <div class="card-body"> --}}
 
-                        {{-- Judul --}}
-                        <div class="form-control mb-6">
-                            <label class="label mb-1"><span
-                                    class="label-text text-sm font-medium text-base-content">Judul
-                                    Berita</span></label>
-                            <input type="text" wire:model="judul"
-                                class="input input-bordered w-full bg-base-100 placeholder:text-base-content/40"
-                                placeholder="Masukkan judul berita..." />
-                            @error('judul')
-                                <span class="text-error text-xs mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div wire:ignore>
-                            <div id="quill-editor">{!! $isi !!}</div>
-                        </div>
-                        @error('isi')
+                    {{-- Judul --}}
+                    <div class="form-control mb-6">
+                        <label class="label mb-1"><span class="label-text font-bold text-base-content">Judul
+                                Berita</span></label>
+                        <input type="text" wire:model="judul"
+                            class="input input-lg input-bordered w-full bg-base-100 placeholder:text-base-content/40 font-semibold"
+                            placeholder="Masukkan judul berita..." />
+                        @error('judul')
                             <span class="text-error text-xs mt-1">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <div class="card bg-base-100" wire:ignore>
+                        <div id="quill-editor">{!! $isi !!}</div>
+                    </div>
+                    @error('isi')
+                        <span class="text-error text-xs mt-1">{{ $message }}</span>
+                    @enderror
+                    {{-- </div> --}}
                 </div>
             </div>
 
@@ -63,7 +63,7 @@
                                 <label class="label-text text-xs text-base-content/60">Pilih dari yang sudah
                                     ada:</label>
                                 <select wire:model.live="selectedKategori"
-                                    class="select select-bordered select-sm w-full bg-base-100">
+                                    class="select select-bordered w-full bg-base-100 mt-1">
                                     <option value="">-- Pilih --</option>
                                     @foreach ($this->existingKategoris as $k)
                                         <option value="{{ $k }}">{{ $k }}</option>
@@ -77,7 +77,7 @@
                                     <label class="label-text text-xs text-base-content/60">Atau ketik kategori
                                         baru:</label>
                                     <input type="text" wire:model.live.debounce.300ms="newKategori"
-                                        class="input input-bordered input-sm w-full bg-base-100 placeholder:text-base-content/40"
+                                        class="input input-bordered w-full bg-base-100 placeholder:text-base-content/40 mt-1"
                                         placeholder="Ketik kategori..." />
 
                                     @if ($newKategori && in_array(trim($newKategori), $this->existingKategoris->toArray()))
@@ -229,19 +229,29 @@
 
     <style>
         #quill-editor {
-            height: 350px;
+            min-height: 350px;
+            height: auto;
             background-color: oklch(var(--b1));
             border-bottom-left-radius: 0.5rem;
             border-bottom-right-radius: 0.5rem;
         }
+
         .ql-toolbar.ql-snow {
             background-color: oklch(var(--b2));
-            border-color: oklch(var(--bc) / 0.2) !important;
+            border-color: #d1d5db !important;
             border-top-left-radius: 0.5rem;
             border-top-right-radius: 0.5rem;
         }
+
         .ql-container.ql-snow {
-            border-color: oklch(var(--bc) / 0.2) !important;
+            border-color: #d1d5db !important;
+            height: auto;
+        }
+
+        .ql-editor {
+            min-height: 350px;
+            height: auto;
+            overflow-y: hidden;
         }
     </style>
 
@@ -264,7 +274,7 @@
             async function initQuill() {
                 const el = document.getElementById('quill-editor');
                 if (!el) return;
-                
+
                 if (el.classList.contains('ql-container')) return;
 
                 if (typeof Quill === 'undefined') {
@@ -275,15 +285,21 @@
                     theme: 'snow',
                     modules: {
                         toolbar: [
-                            [{ 'header': [1, 2, false] }],
+                            [{
+                                'header': [1, 2, false]
+                            }],
                             ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{
+                                'list': 'ordered'
+                            }, {
+                                'list': 'bullet'
+                            }],
                             ['link', 'image'],
                             ['clean']
                         ]
                     }
                 });
-                
+
                 quill.root.classList.add('prose', 'max-w-none');
             }
 
