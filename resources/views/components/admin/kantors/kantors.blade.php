@@ -241,8 +241,9 @@
                         <div class="form-control">
                             <label class="label"><span
                                     class="label-text font-bold text-[10px] uppercase text-base-content">Latitude</span></label>
-                            <input type="number" step="any" wire:model.live.debounce.500ms="latitude"
-                                class="input input-bordered input-sm font-mono">
+                            <input type="number" step="any" id="lat-input" wire:model.live.debounce.500ms="latitude"
+                                class="input input-bordered input-sm font-mono"
+                                oninput="if(window.kantorMarkerInstance && window.kantorCircleInstance) { const lat = parseFloat(this.value); const lng = parseFloat(document.getElementById('lng-input').value); if(!isNaN(lat) && !isNaN(lng)) { const pos = [lat, lng]; window.kantorMarkerInstance.setLatLng(pos); window.kantorCircleInstance.setLatLng(pos); window.kantorMapInstance.panTo(pos); } }">
                             @error('latitude')
                                 <span class="text-error text-xs mt-1">{{ $message }}</span>
                             @enderror
@@ -250,8 +251,9 @@
                         <div class="form-control">
                             <label class="label"><span
                                     class="label-text font-bold text-[10px] uppercase text-base-content">Longitude</span></label>
-                            <input type="number" step="any" wire:model.live.debounce.500ms="longitude"
-                                class="input input-bordered input-sm font-mono">
+                            <input type="number" step="any" id="lng-input" wire:model.live.debounce.500ms="longitude"
+                                class="input input-bordered input-sm font-mono"
+                                oninput="if(window.kantorMarkerInstance && window.kantorCircleInstance) { const lng = parseFloat(this.value); const lat = parseFloat(document.getElementById('lat-input').value); if(!isNaN(lat) && !isNaN(lng)) { const pos = [lat, lng]; window.kantorMarkerInstance.setLatLng(pos); window.kantorCircleInstance.setLatLng(pos); window.kantorMapInstance.panTo(pos); } }">
                             @error('longitude')
                                 <span class="text-error text-xs mt-1">{{ $message }}</span>
                             @enderror
@@ -266,7 +268,7 @@
                         </label>
                         <input type="range" id="radius-slider" min="50" max="1000" step="10"
                             wire:model.live="radius_meter" class="range range-primary range-xs"
-                            oninput="document.getElementById('radius-label').innerText = this.value + ' Meter'">
+                            oninput="document.getElementById('radius-label').innerText = this.value + ' Meter'; if(window.kantorCircleInstance) window.kantorCircleInstance.setRadius(this.value);">
                         <div class="w-full flex justify-between text-[10px] px-2 mt-1 opacity-50 uppercase font-bold">
                             <span>50m</span>
                             <span>1km</span>
@@ -329,8 +331,8 @@
             const setupKantorMap = () => {
                 if (window._kantorMapUnsubscribe) window._kantorMapUnsubscribe();
                 
-                let marker = null;
-                let circle = null;
+                // Variabel marker dan circle sekarang dikelola secara global di window
+                // untuk menghindari masalah sinkronisasi antar sesi navigasi.
 
                 window._kantorMapUnsubscribe = Livewire.on('init-map', (data) => {
                     const { lat, lng, radius } = data;
@@ -352,8 +354,8 @@
                             attribution: '&copy; OpenStreetMap contributors'
                         }).addTo(window.kantorMapInstance);
 
-                        marker = L.marker([lat, lng], { draggable: true }).addTo(window.kantorMapInstance);
-                        circle = L.circle([lat, lng], {
+                        window.kantorMarkerInstance = L.marker([lat, lng], { draggable: true }).addTo(window.kantorMapInstance);
+                        window.kantorCircleInstance = L.circle([lat, lng], {
                             radius: radius,
                             color: '#1d4ed8',
                             fillColor: '#3b82f6',
@@ -369,15 +371,15 @@
                             }
                         };
 
-                        marker.on('dragend', function(e) {
-                            const pos = marker.getLatLng();
+                        window.kantorMarkerInstance.on('dragend', function(e) {
+                            const pos = window.kantorMarkerInstance.getLatLng();
                             safeUpdate(pos.lat, pos.lng);
-                            circle.setLatLng(pos);
+                            window.kantorCircleInstance.setLatLng(pos);
                         });
 
                         window.kantorMapInstance.on('click', function(e) {
-                            marker.setLatLng(e.latlng);
-                            circle.setLatLng(e.latlng);
+                            window.kantorMarkerInstance.setLatLng(e.latlng);
+                            window.kantorCircleInstance.setLatLng(e.latlng);
                             safeUpdate(e.latlng.lat, e.latlng.lng);
                         });
 
@@ -392,8 +394,8 @@
                             window.kantorMapInstance.on('geosearch/showlocation', (result) => {
                                 const { x, y } = result.location;
                                 safeUpdate(y, x);
-                                marker.setLatLng([y, x]);
-                                circle.setLatLng([y, x]);
+                                window.kantorMarkerInstance.setLatLng([y, x]);
+                                window.kantorCircleInstance.setLatLng([y, x]);
                             });
                         }
                         window.kantorMapInstance.invalidateSize();
@@ -404,6 +406,8 @@
                 if (!window._kantorMapCommitHookRegistered) {
                     Livewire.hook('commit', ({ succeed, component }) => {
                         const container = document.getElementById('map-selection');
+                        const marker = window.kantorMarkerInstance;
+                        const circle = window.kantorCircleInstance;
                         if (!container || !window.kantorMapInstance || !marker || !circle) return;
                         
                         const componentId = container.closest('[wire\\:id]').getAttribute('wire:id');
@@ -432,7 +436,11 @@
                 }
             };
 
-            setupKantorMap();
+            if (typeof Livewire !== 'undefined') {
+                setupKantorMap();
+            } else {
+                document.addEventListener('livewire:init', setupKantorMap);
+            }
             document.addEventListener('livewire:navigated', setupKantorMap);
             document.addEventListener('livewire:navigating', () => {
                 if (window.kantorMapInstance) {

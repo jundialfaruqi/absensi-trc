@@ -498,6 +498,8 @@
             // Initial load
             if (window.Livewire) {
                 initMapsHandler();
+            } else {
+                document.addEventListener('livewire:init', initMapsHandler);
             }
 
             // On navigation
