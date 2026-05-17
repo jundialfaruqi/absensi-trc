@@ -525,16 +525,16 @@ class AttendanceController extends Controller
         $jadwal = null;
         $activeDate = $today;
 
-        // Buffer: 00:00 to 09:00 AM
-        if ($nowTime < '09:00:00') {
+        // Buffer: 00:00 to 10:00 AM
+        if ($nowTime < '10:00:00') {
             $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $yesterday)
                 ->with('shift')
                 ->first();
 
             if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time > $yesterdayJadwal->shift->end_time) {
-                // If now is before EndTime + 2 hours buffer, use yesterday
-                $endTimePlusBuffer = Carbon::parse($yesterdayJadwal->shift->end_time)->addHours(2)->format('H:i:s');
+                // If now is before EndTime + 3 hours buffer, use yesterday (matching checkStatus)
+                $endTimePlusBuffer = Carbon::parse($yesterdayJadwal->shift->end_time)->addHours(3)->format('H:i:s');
                 if ($nowTime < $endTimePlusBuffer) {
                     $jadwal = $yesterdayJadwal;
                     $activeDate = $yesterday;
