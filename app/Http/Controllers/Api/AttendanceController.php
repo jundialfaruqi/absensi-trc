@@ -73,6 +73,8 @@ class AttendanceController extends Controller
                 'holder_type' => $device->personnel_id ? 'personnel' : 'user',
                 'target_personnel_id' => $device->personnel_id,
                 'status' => $device->status,
+                'holder_name' => $device->holder_name ?? ($device->personnel ? $device->personnel->name : ($device->opd ? $device->opd->name : 'OPD Kantor')),
+                'activated_at' => $device->activated_at ? $device->activated_at->toIso8601String() : null,
             ]
         ]);
     }
@@ -119,6 +121,8 @@ class AttendanceController extends Controller
                 'holder_type' => $device->personnel_id ? 'personnel' : 'user',
                 'target_personnel_id' => $device->personnel_id,
                 'status' => $device->status,
+                'holder_name' => $device->holder_name ?? ($device->personnel ? $device->personnel->name : ($device->opd ? $device->opd->name : 'OPD Kantor')),
+                'activated_at' => $device->activated_at ? $device->activated_at->toIso8601String() : null,
             ]
         ]);
     }
