@@ -990,18 +990,16 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        $opdId = $device->opd_id;
         $today = $request->get('tanggal', Carbon::today()->format('Y-m-d'));
         $filterKonsumsi = $request->get('konsumsi'); // 'siang', 'malam', 'flexible', or empty
 
-        // Base query for attendance of the OPD today
+        // Base query for attendance today (no OPD filter for global devices)
         $absensiBase = Absensi::whereDate('tanggal', $today)
             ->where(function($q) {
                 // Count records that are NOT 'LIBUR'
                 $q->whereHas('jadwal.shift', fn($sq) => $sq->where('type', 'shift'))
                   ->orWhereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
             })
-            ->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId))
             ->when($filterKonsumsi, function ($q) use ($filterKonsumsi) {
                 if ($filterKonsumsi === 'flexible') {
                     $q->whereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
