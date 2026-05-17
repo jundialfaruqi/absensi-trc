@@ -375,30 +375,49 @@ class AttendanceController extends Controller
         $isInWindow = $now->between($windowInStart, $windowInEnd);
         $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
 
-        if (!$isInWindow && !$isOutWindow) {
-            // Check if too early for everything
-            if ($now->lessThan($windowInStart)) {
-                $diff = $windowInStart->diffForHumans($now, true);
+        $isAttemptingCheckOut = $existing && $existing->jam_masuk && !$existing->jam_pulang;
+
+        if ($isAttemptingCheckOut) {
+            if (!$isOutWindow) {
+                if ($now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, true);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi."
+                    ], 403);
+                }
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
+                    'message' => "Batas waktu Absen Pulang sudah berakhir."
                 ], 403);
             }
+        } else {
+            // Attempting check-in or direct check-out (no jam_masuk yet)
+            if (!$isInWindow && !$isOutWindow) {
+                // Check if too early for everything
+                if ($now->lessThan($windowInStart)) {
+                    $diff = $windowInStart->diffForHumans($now, true);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
+                    ], 403);
+                }
 
-            // Check if in gap between IN and OUT
-            if ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
-                $diff = $windowOutStart->diffForHumans($now, true);
+                // Check if in gap between IN and OUT
+                if ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, true);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang."
+                    ], 403);
+                }
+
+                // Default: past everything
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang."
+                    'message' => "Batas waktu Absen hari ini sudah berakhir."
                 ], 403);
             }
-
-            // Default: past everything
-            return response()->json([
-                'status' => 'error',
-                'message' => "Batas waktu Absen hari ini sudah berakhir."
-            ], 403);
         }
 
         return response()->json([
@@ -671,7 +690,117 @@ class AttendanceController extends Controller
             ->where('tanggal', $activeDate)
             ->first();
 
-        if (!$existing || !$existing->jam_masuk) {
+        $isDirectCheckOut = false;
+        if ((!$existing || !$existing->jam_masuk) && $jadwal) {
+            if ($now->between($windowOutStart, $windowOutEnd)) {
+                $isDirectCheckOut = true;
+            }
+        }
+
+        if ($isDirectCheckOut) {
+            // DIRECT CHECK OUT LOGIC (Auto-Masuk ALFA + Simpan Pulang)
+            $status_pulang = 'HADIR';
+
+            if ($jadwal) {
+                $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
+                $isNextDay = ($activeDate !== $today);
+                $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
+
+                if ($isNightShift) {
+                    if (!$isNextDay) {
+                        $status_pulang = 'PC';
+                    } else {
+                        if ($nowTime < $endTime) {
+                            $status_pulang = 'PC';
+                        }
+                    }
+                } else {
+                    if ($nowTime < $endTime) {
+                        $status_pulang = 'PC';
+                    }
+                }
+            }
+
+            // Store photo
+            $folderPath = 'absensi/' . date('Y-m-d');
+            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '.jpg';
+            Storage::disk('public')->put($fileName, $newImageData);
+
+            $recordTime = $now->format('H:i:s');
+
+            if (!$existing) {
+                $absensi = Absensi::create([
+                    'personnel_id' => $personnel->id,
+                    'jadwal_id' => $jadwal ? $jadwal->id : null,
+                    'kantor_id' => $lokasiResult['kantor_id'],
+                    'tanggal' => $activeDate,
+                    'status' => 'HADIR',
+                    'jam_masuk' => $recordTime,
+                    'status_masuk' => 'ALFA',
+                    'foto_masuk' => $fileName,
+                    'lat_masuk' => $request->lat,
+                    'lng_masuk' => $request->lng,
+                    'is_within_radius' => $lokasiResult['is_within_radius'],
+                    'jarak_meter' => $lokasiResult['jarak_meter'],
+                    'platform_masuk' => $request->platform,
+                    'device_name_masuk' => $request->device_name,
+                    'unique_device_id_masuk' => $request->unique_device_id,
+                    'is_location_anomaly' => $isAnomaly,
+                    'anomaly_reason' => $anomalyReason,
+
+                    // Check-out fields:
+                    'jam_pulang' => $recordTime,
+                    'status_pulang' => $status_pulang,
+                    'foto_pulang' => $fileName,
+                    'lat_pulang' => $request->lat,
+                    'lng_pulang' => $request->lng,
+                    'kantor_id_pulang' => $lokasiResult['kantor_id'],
+                    'is_within_radius_pulang' => $lokasiResult['is_within_radius'],
+                    'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
+                    'platform_pulang' => $request->platform,
+                    'device_name_pulang' => $request->device_name,
+                    'unique_device_id_pulang' => $request->unique_device_id,
+                ]);
+            } else {
+                $existing->update([
+                    'jadwal_id' => $jadwal ? $jadwal->id : null,
+                    'kantor_id' => $lokasiResult['kantor_id'],
+                    'status' => 'HADIR',
+                    'jam_masuk' => $recordTime,
+                    'status_masuk' => 'ALFA',
+                    'foto_masuk' => $fileName,
+                    'lat_masuk' => $request->lat,
+                    'lng_masuk' => $request->lng,
+                    'is_within_radius' => $lokasiResult['is_within_radius'],
+                    'jarak_meter' => $lokasiResult['jarak_meter'],
+                    'platform_masuk' => $request->platform,
+                    'device_name_masuk' => $request->device_name,
+                    'unique_device_id_masuk' => $request->unique_device_id,
+                    'is_location_anomaly' => $isAnomaly,
+                    'anomaly_reason' => $anomalyReason,
+
+                    // Check-out fields:
+                    'jam_pulang' => $recordTime,
+                    'status_pulang' => $status_pulang,
+                    'foto_pulang' => $fileName,
+                    'lat_pulang' => $request->lat,
+                    'lng_pulang' => $request->lng,
+                    'kantor_id_pulang' => $lokasiResult['kantor_id'],
+                    'is_within_radius_pulang' => $lokasiResult['is_within_radius'],
+                    'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
+                    'platform_pulang' => $request->platform,
+                    'device_name_pulang' => $request->device_name,
+                    'unique_device_id_pulang' => $request->unique_device_id,
+                ]);
+                $absensi = $existing;
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Absen Pulang (Tanpa Masuk) berhasil. Status Masuk: ALFA, Pulang: ' . $status_pulang,
+                'data' => $absensi
+            ]);
+        } else if (!$existing || !$existing->jam_masuk) {
             // CHECK IN LOGIC
             $status_masuk = 'HADIR';
 
