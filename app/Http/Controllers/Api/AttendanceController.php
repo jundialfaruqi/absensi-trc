@@ -192,6 +192,15 @@ class AttendanceController extends Controller
             $query->where('id', '>', $request->last_id);
         }
 
+        if ($request->has('last_sync')) {
+            try {
+                $lastSync = \Carbon\Carbon::parse($request->last_sync);
+                $query->where('updated_at', '>', $lastSync);
+            } catch (\Exception $e) {
+                $query->where('updated_at', '>', $request->last_sync);
+            }
+        }
+
         if ($device->personnel_id) {
             $query->where('id', $device->personnel_id);
         }
@@ -212,9 +221,22 @@ class AttendanceController extends Controller
         // Get OPD Settings for Geofencing (Fallback)
         $opd = $device->opd;
         $name = $opd ? $opd->name : 'OPD Kantor';
-        $lat = $opd ? $opd->lat : null;
-        $lng = $opd ? $opd->lng : null;
-        $radius = $opd ? $opd->radius : 100;
+        $lat = null;
+        $lng = null;
+        $radius = 100;
+
+        // Coba cari Kantor aktif pertama di bawah OPD ini (terutama berguna untuk perangkat Global)
+        if ($opd) {
+            $kantorDefault = \App\Models\Kantor::where('opd_id', $opd->id)
+                ->where('is_active', true)
+                ->first();
+            if ($kantorDefault) {
+                $name = $kantorDefault->name;
+                $lat = $kantorDefault->latitude;
+                $lng = $kantorDefault->longitude;
+                $radius = $kantorDefault->radius_meter;
+            }
+        }
 
         // Prioritaskan mengambil data spesifik Kantor tempat Personel ditugaskan (jika berlisensi Personel)
         if ($device->personnel_id && $device->personnel && $device->personnel->kantor) {
