@@ -309,7 +309,8 @@ class AttendanceController extends Controller
                 if ($existing && $existing->jam_masuk && $existing->jam_pulang) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Anda sudah melakukan absen masuk dan pulang hari ini."
+                        'message' => "Anda sudah melakukan absen masuk dan pulang hari ini.",
+                        'absensi' => $existing
                     ], 403);
                 }
 
@@ -321,13 +322,15 @@ class AttendanceController extends Controller
                         'personnel_id' => $id,
                         'tanggal' => $today,
                         'is_flexible' => true,
-                    ]
+                    ],
+                    'absensi' => $existing
                 ]);
             }
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Maaf, Anda tidak memiliki jadwal shift hari ini.'
+                'message' => 'Maaf, Anda tidak memiliki jadwal shift hari ini.',
+                'absensi' => null
             ], 404);
         }
 
@@ -335,7 +338,8 @@ class AttendanceController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Maaf, status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.',
-                'data' => $jadwal
+                'data' => $jadwal,
+                'absensi' => $existing
             ], 403);
         }
 
@@ -343,7 +347,8 @@ class AttendanceController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Maaf, Anda sedang LIBUR hari ini.',
-                'data' => $jadwal
+                'data' => $jadwal,
+                'absensi' => $existing
             ], 403);
         }
 
@@ -360,7 +365,8 @@ class AttendanceController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => "Maaf, status absensi Anda hari ini adalah {$existing->status}. Anda tidak dapat melakukan absensi.",
-                    'data' => $jadwal
+                    'data' => $jadwal,
+                    'absensi' => $existing
                 ], 403);
             }
 
@@ -369,7 +375,8 @@ class AttendanceController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => "Anda sudah melakukan absen masuk dan pulang hari ini.",
-                    'data' => $jadwal
+                    'data' => $jadwal,
+                    'absensi' => $existing
                 ], 403);
             }
         }
@@ -405,13 +412,15 @@ class AttendanceController extends Controller
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.",
-                        'data' => $jadwal
+                        'data' => $jadwal,
+                        'absensi' => $existing
                     ], 403);
                 }
                 return response()->json([
                     'status' => 'error',
                     'message' => "Batas waktu Absen Pulang sudah berakhir.",
-                    'data' => $jadwal
+                    'data' => $jadwal,
+                    'absensi' => $existing
                 ], 403);
             }
         } else {
@@ -423,7 +432,8 @@ class AttendanceController extends Controller
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.",
-                        'data' => $jadwal
+                        'data' => $jadwal,
+                        'absensi' => $existing
                     ], 403);
                 }
 
@@ -433,7 +443,8 @@ class AttendanceController extends Controller
                     return response()->json([
                         'status' => 'error',
                         'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
-                        'data' => $jadwal
+                        'data' => $jadwal,
+                        'absensi' => $existing
                     ], 403);
                 }
 
@@ -441,7 +452,8 @@ class AttendanceController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => "Batas waktu Absen hari ini sudah berakhir.",
-                    'data' => $jadwal
+                    'data' => $jadwal,
+                    'absensi' => $existing
                 ], 403);
             }
         }
@@ -449,7 +461,8 @@ class AttendanceController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Jadwal ditemukan',
-            'data' => $jadwal
+            'data' => $jadwal,
+            'absensi' => $existing
         ]);
     }
 
