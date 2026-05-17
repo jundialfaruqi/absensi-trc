@@ -285,9 +285,31 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         $period = CarbonPeriod::create($this->startDate, $this->endDate);
 
         // ─── Reset Data ───
-        // Delete existing Jadwal for the same range to ensure clean slate
+        // Soft-delete absensi default (belum terisi) agar masuk kotak sampah
+        $defaultAbsensis = Absensi::whereIn('personnel_id', $this->selectedPersonnelIds)
+            ->whereBetween('tanggal', [$this->startDate, $this->endDate])
+            ->whereNull('jam_masuk')
+            ->whereNull('jam_pulang')
+            ->whereNull('foto_masuk')
+            ->whereNull('foto_pulang')
+            ->get();
+
+        foreach ($defaultAbsensis as $absensi) {
+            $absensi->update(['deleted_by_user_id' => auth()->id()]);
+            $absensi->delete();
+        }
+
+        // Delete existing Jadwal for the same range, but only if they don't have filled absensi to prevent relation breakage
         Jadwal::whereIn('personnel_id', $this->selectedPersonnelIds)
             ->whereBetween('tanggal', [$this->startDate, $this->endDate])
+            ->whereDoesntHave('absensis', function ($q) {
+                $q->where(function ($q2) {
+                    $q2->whereNotNull('jam_masuk')
+                        ->orWhereNotNull('jam_pulang')
+                        ->orWhereNotNull('foto_masuk')
+                        ->orWhereNotNull('foto_pulang');
+                });
+            })
             ->delete();
 
         // Logic for Rolling Cycle

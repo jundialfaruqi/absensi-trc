@@ -28,6 +28,10 @@ new #[Title('Kotak Sampah Absensi')] #[Layout('layouts::admin.app')] class exten
     public ?int $deleteId = null;
     public string $deleteName = '';
 
+    // For bulk selection (Opsi B)
+    public array $selectedIds = [];
+    public bool $selectAll = false;
+
     public function load()
     {
         $this->readyToLoad = true;
@@ -120,23 +124,111 @@ new #[Title('Kotak Sampah Absensi')] #[Layout('layouts::admin.app')] class exten
         $this->dispatch('toast', type: 'success', message: 'Data absensi dan foto berhasil dihapus permanen.');
     }
 
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedIds = $this->trashedAbsensis->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        } else {
+            $this->selectedIds = [];
+        }
+    }
+
+    public function updatedSelectedIds()
+    {
+        $currentIds = $this->trashedAbsensis->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        if (count($currentIds) > 0 && count(array_intersect($this->selectedIds, $currentIds)) === count($currentIds)) {
+            $this->selectAll = true;
+        } else {
+            $this->selectAll = false;
+        }
+    }
+
+    public function resetSelection()
+    {
+        $this->selectedIds = [];
+        $this->selectAll = false;
+    }
+
+    public function confirmBulkForceDelete()
+    {
+        if (empty($this->selectedIds)) {
+            $this->dispatch('toast', type: 'error', message: 'Silakan pilih data absensi yang ingin dihapus.');
+            return;
+        }
+        $this->dispatch('open-modal', id: 'bulk-force-delete-modal');
+    }
+
+    public function executeBulkForceDelete()
+    {
+        if (empty($this->selectedIds)) return;
+
+        $absensis = Absensi::onlyTrashed()->whereIn('id', $this->selectedIds)->get();
+
+        foreach ($absensis as $absensi) {
+            if ($absensi->foto_masuk && Storage::disk('public')->exists($absensi->foto_masuk)) {
+                Storage::disk('public')->delete($absensi->foto_masuk);
+            }
+            if ($absensi->foto_pulang && Storage::disk('public')->exists($absensi->foto_pulang)) {
+                Storage::disk('public')->delete($absensi->foto_pulang);
+            }
+            $absensi->forceDelete();
+        }
+
+        $this->resetSelection();
+        $this->dispatch('close-modal', id: 'bulk-force-delete-modal');
+        $this->dispatch('toast', type: 'success', message: 'Data absensi terpilih berhasil dihapus permanen.');
+    }
+
+    public function confirmEmptyTrash()
+    {
+        $count = Absensi::onlyTrashed()->count();
+        if ($count === 0) {
+            $this->dispatch('toast', type: 'error', message: 'Kotak sampah sudah kosong.');
+            return;
+        }
+        $this->dispatch('open-modal', id: 'empty-trash-modal');
+    }
+
+    public function executeEmptyTrash()
+    {
+        $absensis = Absensi::onlyTrashed()->get();
+
+        foreach ($absensis as $absensi) {
+            if ($absensi->foto_masuk && Storage::disk('public')->exists($absensi->foto_masuk)) {
+                Storage::disk('public')->delete($absensi->foto_masuk);
+            }
+            if ($absensi->foto_pulang && Storage::disk('public')->exists($absensi->foto_pulang)) {
+                Storage::disk('public')->delete($absensi->foto_pulang);
+            }
+            $absensi->forceDelete();
+        }
+
+        $this->resetSelection();
+        $this->dispatch('close-modal', id: 'empty-trash-modal');
+        $this->dispatch('toast', type: 'success', message: 'Semua data absensi di kotak sampah berhasil dihapus permanen.');
+    }
+
     public function updatedSearch()
     {
         $this->resetPage();
+        $this->resetSelection();
     }
 
     public function updatedPerPage()
     {
         $this->resetPage();
+        $this->resetSelection();
     }
 
     public function updatedFilterOpd()
     {
         $this->resetPage();
+        $this->resetSelection();
     }
 
     public function updatedFilterDate()
     {
         $this->resetPage();
+        $this->resetSelection();
     }
 };
