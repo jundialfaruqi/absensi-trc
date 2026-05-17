@@ -39,7 +39,7 @@ class JadwalImport implements ToCollection
 
     protected function resetExistingData()
     {
-        // Soft-delete absensi default (belum terisi) agar masuk kotak sampah
+        // Hapus permanen absensi default (belum terisi) agar tidak memenuhi kotak sampah
         $defaultAbsensis = \App\Models\Absensi::whereYear('tanggal', $this->year)
             ->whereMonth('tanggal', $this->month)
             ->whereHas('personnel', function($q) {
@@ -54,8 +54,7 @@ class JadwalImport implements ToCollection
             ->get();
 
         foreach ($defaultAbsensis as $absensi) {
-            $absensi->update(['deleted_by_user_id' => auth()->id()]);
-            $absensi->delete();
+            $absensi->forceDelete();
         }
 
         // Delete existing schedules (hanya jadwal yang absensinya default/sudah di-soft-delete)
