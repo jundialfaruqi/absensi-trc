@@ -361,7 +361,7 @@ class AttendanceController extends Controller
                 'status' => 'error',
                 'message' => 'Maaf, status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.',
                 'data' => $jadwal,
-                'absensi' => $existing
+                'absensi' => null
             ], 403);
         }
 
@@ -370,7 +370,7 @@ class AttendanceController extends Controller
                 'status' => 'error',
                 'message' => 'Maaf, Anda sedang LIBUR hari ini.',
                 'data' => $jadwal,
-                'absensi' => $existing
+                'absensi' => null
             ], 403);
         }
 
