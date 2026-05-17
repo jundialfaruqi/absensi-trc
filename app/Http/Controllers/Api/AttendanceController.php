@@ -966,6 +966,146 @@ class AttendanceController extends Controller
         }
     }
 
+    public function globalDashboard(Request $request)
+    {
+        $device = $request->get('device');
+
+        if (!$device) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Informasi perangkat tidak ditemukan.'
+            ], 403);
+        }
+
+        $opdId = $device->opd_id;
+        $today = $request->get('tanggal', Carbon::today()->format('Y-m-d'));
+        $filterKonsumsi = $request->get('konsumsi'); // 'siang', 'malam', 'flexible', or empty
+
+        // Base query for attendance of the OPD today
+        $absensiBase = Absensi::whereDate('tanggal', $today)
+            ->where(function($q) {
+                // Count records that are NOT 'LIBUR'
+                $q->whereHas('jadwal.shift', fn($sq) => $sq->where('type', 'shift'))
+                  ->orWhereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+            })
+            ->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId))
+            ->when($filterKonsumsi, function ($q) use ($filterKonsumsi) {
+                if ($filterKonsumsi === 'flexible') {
+                    $q->whereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+                } else {
+                    $q->whereHas('jadwal.shift.konsumsis', fn($sq) => $sq->where('nama', $filterKonsumsi));
+                }
+            });
+
+        // Detailed Stats
+        $totalRequired = (clone $absensiBase)->count();
+        $totalHadir = (clone $absensiBase)->where('status', 'HADIR')->count();
+        $totalAlfa = (clone $absensiBase)->where('status', 'ALFA')->count();
+        $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT'])->count();
+        
+        $totalMasuk = (clone $absensiBase)->whereNotNull('jam_masuk')->count();
+        $totalPulang = (clone $absensiBase)->whereNotNull('jam_pulang')->count();
+        $totalTelat = (clone $absensiBase)->where('status_masuk', 'TELAT')->count();
+
+        $hadirPercentage = $totalRequired > 0 
+            ? round((($totalHadir + $totalIzin) / $totalRequired) * 100) 
+            : 0;
+
+        // Activities list
+        $activities = (clone $absensiBase)
+            ->with(['personnel.penugasan', 'jadwal.shift'])
+            ->latest('absensis.updated_at')
+            ->get()
+            ->map(function ($log) {
+                $shiftName = 'FLEX / BEBAS';
+                $startTime = null;
+                $endTime = null;
+
+                if ($log->jadwal && $log->jadwal->shift) {
+                    $shiftName = $log->jadwal->shift->name;
+                    $startTime = $log->jadwal->shift->start_time;
+                    $endTime = $log->jadwal->shift->end_time;
+                    
+                    // Format Carbon ISO date if returned as datetime cast
+                    if ($startTime instanceof Carbon || $startTime instanceof \DateTime) {
+                        $startTime = $startTime->format('H:i');
+                    } else if (is_string($startTime) && str_contains($startTime, 'T')) {
+                        $tParts = explode('T', $startTime);
+                        if (count($tParts) >= 2) {
+                            $startTime = substr($tParts[1], 0, 5);
+                        }
+                    }
+                    if ($endTime instanceof Carbon || $endTime instanceof \DateTime) {
+                        $endTime = $endTime->format('H:i');
+                    } else if (is_string($endTime) && str_contains($endTime, 'T')) {
+                        $tParts = explode('T', $endTime);
+                        if (count($tParts) >= 2) {
+                            $endTime = substr($tParts[1], 0, 5);
+                        }
+                    }
+                }
+
+                $jamMasuk = $log->jam_masuk;
+                if ($jamMasuk instanceof Carbon || $jamMasuk instanceof \DateTime) {
+                    $jamMasuk = $jamMasuk->format('H:i');
+                } else if (is_string($jamMasuk)) {
+                    $jamMasuk = substr($jamMasuk, 0, 5);
+                }
+
+                $jamPulang = $log->jam_pulang;
+                if ($jamPulang instanceof Carbon || $jamPulang instanceof \DateTime) {
+                    $jamPulang = $jamPulang->format('H:i');
+                } else if (is_string($jamPulang)) {
+                    $jamPulang = substr($jamPulang, 0, 5);
+                }
+
+                return [
+                    'id' => $log->id,
+                    'personnel' => [
+                        'id' => $log->personnel->id,
+                        'name' => $log->personnel->name,
+                        'foto' => $log->personnel->foto,
+                        'penugasan_name' => $log->personnel->penugasan ? $log->personnel->penugasan->name : '-'
+                    ],
+                    'shift' => [
+                        'name' => $shiftName,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime
+                    ],
+                    'status' => $log->status,
+                    'masuk' => [
+                        'status_masuk' => $log->status_masuk,
+                        'jam_masuk' => $jamMasuk,
+                        'is_within_radius' => $log->is_within_radius !== null ? (bool) $log->is_within_radius : null,
+                        'jarak_meter' => $log->jarak_meter !== null ? (int) $log->jarak_meter : null
+                    ],
+                    'pulang' => [
+                        'status_pulang' => $log->status_pulang,
+                        'jam_pulang' => $jamPulang,
+                        'is_within_radius_pulang' => $log->is_within_radius_pulang !== null ? (bool) $log->is_within_radius_pulang : null,
+                        'jarak_meter_pulang' => $log->jarak_meter_pulang !== null ? (int) $log->jarak_meter_pulang : null
+                    ]
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'stats' => [
+                    'total_required' => $totalRequired,
+                    'total_hadir' => $totalHadir,
+                    'total_alfa' => $totalAlfa,
+                    'total_izin' => $totalIzin,
+                    'total_telat' => $totalTelat,
+                    'total_masuk' => $totalMasuk,
+                    'total_pulang' => $totalPulang,
+                    'hadir_percentage' => (int) $hadirPercentage
+                ],
+                'activities' => $activities
+            ]
+        ]);
+    }
+
     /**
      * Hitung jarak antara dua koordinat GPS menggunakan formula Haversine.
      * @return float Jarak dalam kilometer
