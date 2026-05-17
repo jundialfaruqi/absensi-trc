@@ -209,18 +209,31 @@ class AttendanceController extends Controller
                 ];
             });
 
-        // Get OPD Settings for Geofencing
+        // Get OPD Settings for Geofencing (Fallback)
         $opd = $device->opd;
+        $name = $opd ? $opd->name : 'OPD Kantor';
+        $lat = $opd ? $opd->lat : null;
+        $lng = $opd ? $opd->lng : null;
+        $radius = $opd ? $opd->radius : 100;
+
+        // Prioritaskan mengambil data spesifik Kantor tempat Personel ditugaskan (jika berlisensi Personel)
+        if ($device->personnel_id && $device->personnel && $device->personnel->kantor) {
+            $kantor = $device->personnel->kantor;
+            $name = $kantor->name;
+            $lat = $kantor->latitude;
+            $lng = $kantor->longitude;
+            $radius = $kantor->radius_meter;
+        }
 
         return response()->json([
             'status' => 'success',
             'data' => [
                 'personnels' => $personnels,
                 'settings' => [
-                    'opd_name' => $opd->name,
-                    'lat' => $opd->lat,
-                    'lng' => $opd->lng,
-                    'radius' => $opd->radius,
+                    'opd_name' => $name,
+                    'lat' => $lat,
+                    'lng' => $lng,
+                    'radius' => $radius,
                     'is_face_recognition_enabled' => (bool) \App\Models\Setting::get('face_recognition_enabled', true),
                 ]
             ]
@@ -321,14 +334,16 @@ class AttendanceController extends Controller
         if ($jadwal->shift && $jadwal->shift->type === 'off') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Maaf, status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.'
+                'message' => 'Maaf, status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.',
+                'data' => $jadwal
             ], 403);
         }
 
         if ($jadwal->status === 'LIBUR') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Maaf, Anda sedang LIBUR hari ini.'
+                'message' => 'Maaf, Anda sedang LIBUR hari ini.',
+                'data' => $jadwal
             ], 403);
         }
 
@@ -344,7 +359,8 @@ class AttendanceController extends Controller
             if ($existing->status !== 'ALFA' && $existing->status !== 'HADIR') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Maaf, status absensi Anda hari ini adalah {$existing->status}. Anda tidak dapat melakukan absensi."
+                    'message' => "Maaf, status absensi Anda hari ini adalah {$existing->status}. Anda tidak dapat melakukan absensi.",
+                    'data' => $jadwal
                 ], 403);
             }
 
@@ -352,7 +368,8 @@ class AttendanceController extends Controller
             if ($existing->status === 'HADIR' && $existing->jam_pulang) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Anda sudah melakukan absen masuk dan pulang hari ini."
+                    'message' => "Anda sudah melakukan absen masuk dan pulang hari ini.",
+                    'data' => $jadwal
                 ], 403);
             }
         }
@@ -387,12 +404,14 @@ class AttendanceController extends Controller
                     $diff = $windowOutStart->diffForHumans($now, true);
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi."
+                        'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.",
+                        'data' => $jadwal
                     ], 403);
                 }
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Batas waktu Absen Pulang sudah berakhir."
+                    'message' => "Batas waktu Absen Pulang sudah berakhir.",
+                    'data' => $jadwal
                 ], 403);
             }
         } else {
@@ -403,7 +422,8 @@ class AttendanceController extends Controller
                     $diff = $windowInStart->diffForHumans($now, true);
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
+                        'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.",
+                        'data' => $jadwal
                     ], 403);
                 }
 
@@ -412,14 +432,16 @@ class AttendanceController extends Controller
                     $diff = $windowOutStart->diffForHumans($now, true);
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang."
+                        'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
+                        'data' => $jadwal
                     ], 403);
                 }
 
                 // Default: past everything
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Batas waktu Absen hari ini sudah berakhir."
+                    'message' => "Batas waktu Absen hari ini sudah berakhir.",
+                    'data' => $jadwal
                 ], 403);
             }
         }
