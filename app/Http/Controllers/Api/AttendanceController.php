@@ -839,7 +839,7 @@ class AttendanceController extends Controller
 
                 if ($isNightShift) {
                     // If arrived between 00:00 and EndTime, late relative to Day 1 StartTime
-                    if ($nowTime <= $jadwal->shift->end_time) {
+                    if ($nowTime <= Carbon::parse($jadwal->shift->end_time)->format('H:i:s')) {
                         $status_masuk = 'TELAT';
                     } else {
                         // Between StartTime and Midnight
