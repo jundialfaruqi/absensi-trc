@@ -57,6 +57,7 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public')] class extends
                 return;
             }
 
+            session()->put('apk_download_allowed', $this->pin);
             return redirect()->route('apk.download.direct', ['pin' => $this->pin]);
         }
 

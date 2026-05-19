@@ -51,6 +51,14 @@ class ApkController extends Controller
      */
     public function directDownload(string $pin)
     {
+        // Pastikan pengguna melewati halaman download resmi (memiliki session token valid)
+        if (session()->get('apk_download_allowed') !== $pin) {
+            abort(403, 'Akses ditolak. Silakan gunakan halaman resmi untuk mengunduh.');
+        }
+
+        // Hapus token session agar tautan tidak dapat digunakan kembali secara langsung
+        session()->forget('apk_download_allowed');
+
         $personnel = Personnel::where('pin', $pin)->first();
         if (!$personnel) {
             abort(403, 'Akses tidak sah.');
