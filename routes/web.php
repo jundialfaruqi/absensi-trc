@@ -22,7 +22,7 @@ Route::get('/direct-download-apk/{pin}', [ApkController::class, 'directDownload'
 
 // Admin Route
 Route::group([
-    'middleware' => ['auth'],
+    'middleware' => ['auth','noindex'],
     'prefix' => '/page',
 ], function () {
     Route::livewire('/dashboard', 'admin::dashboard')
@@ -169,7 +169,7 @@ Route::livewire('/personnel/panduan', 'personnel::panduan')
     ->middleware('noindex');
 
 Route::group([
-    'middleware' => ['auth:personnel'],
+    'middleware' => ['auth:personnel','noindex'],
     'prefix' => '/personnel',
 ], function () {
     Route::livewire('/dashboard', 'personnel::dashboard')

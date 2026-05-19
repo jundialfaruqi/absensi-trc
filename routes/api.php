@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AttendanceController;
 
-Route::middleware('mobile_auth')->group(function () {
+Route::middleware(['mobile_auth','noindex'])->group(function () {
     // Public Mobile Routes (Only need API Key) — Longgar: 20 request per menit (mencegah terblokir saat testing)
     Route::middleware('throttle:20,1')->group(function () {
         Route::post('/license/activate', [AttendanceController::class, 'activateLicense']);
