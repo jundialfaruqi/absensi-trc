@@ -163,6 +163,11 @@
         </div>
     </div>
 
+    {{-- Perbaikan Poin 4: Cache variable dates agar tidak panggil method Computed berkali-kali --}}
+    @php
+        $dates = $this->dates;
+    @endphp
+
     {{-- ─── Absensi Matrix ────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
         <div class="card-body p-0">

@@ -64,7 +64,6 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             $start = Carbon::parse($this->startDate);
             $end = Carbon::parse($this->endDate);
 
-            // Safety cap: max 31 days
             if ($start->diffInDays($end) > 31) {
                 $end = $start->copy()->addDays(31);
             }
@@ -129,13 +128,20 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                 $q->where('personnels.name', 'like', '%' . $this->search . '%');
             })
             ->join('opds', 'personnels.opd_id', '=', 'opds.id')
-            ->select('personnels.*')
+            ->select([
+                'personnels.id',
+                'personnels.name',
+                'personnels.foto',
+                'personnels.regu',
+                'personnels.attendance_type',
+                'personnels.opd_id',
+                'personnels.penugasan_id',
+            ])
             ->orderBy('opds.name')
             ->orderByRaw('LENGTH(personnels.regu) ASC, personnels.regu ASC')
             ->orderBy('personnels.name')
             ->paginate($this->perPage);
 
-        // Key their data by date for easy lookup in the view
         $paginator->getCollection()->transform(function ($personnel) {
             $personnel->absensi_map = $personnel->absensis->keyBy(fn($a) => $a->tanggal->format('Y-m-d'));
             $personnel->jadwal_map = $personnel->jadwals->keyBy(fn($j) => $j->tanggal->format('Y-m-d'));
@@ -196,6 +202,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     #[Computed]
     public function opds()
     {
-        return \App\Models\Opd::orderBy('name')->get();
+        // Perbaikan Poin 5: Optimasi select tabel referensi
+        return \App\Models\Opd::select('id', 'name')->orderBy('name')->get();
     }
 };
