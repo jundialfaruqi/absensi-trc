@@ -205,7 +205,7 @@
                     <tbody>
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
                             <tr
-                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage" @endif>
+                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage, resetFilters" @endif>
                                 <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
