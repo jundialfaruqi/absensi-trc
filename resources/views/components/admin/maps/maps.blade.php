@@ -215,8 +215,8 @@
                             className: 'custom-div-icon',
                             html: `<div class="relative w-10 h-10">
                                         <div class="avatar">
-                                            <div class="w-10 rounded-full border-2 border-primary shadow-lg">
-                                                <img src="${iconUrl}" />
+                                            <div class="w-10 h-10 rounded-full border-2 border-primary shadow-lg overflow-hidden">
+                                                <img src="${iconUrl}" class="w-full h-full object-cover rounded-full" style="width: 100%; height: 100%; object-fit: cover;" />
                                             </div>
                                         </div>
                                    </div>`,
@@ -245,8 +245,8 @@
                             <div class="p-2 max-w-sm">
                                 <div class="flex items-center gap-2 mb-2">
                                     <div class="avatar">
-                                        <div class="w-12 rounded-full">
-                                            <img src="${iconUrl}" />
+                                        <div class="w-12 h-12 rounded-full overflow-hidden">
+                                            <img src="${iconUrl}" class="w-full h-full object-cover" style="width: 100%; height: 100%; object-fit: cover;" />
                                         </div>
                                     </div>
                                     <div>
