@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApkController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,17 +15,7 @@ Route::livewire('/login', 'login')
 Route::livewire('/download-app', 'public::download-app')
     ->name('download-app');
 
-Route::get('/direct-download-apk/{pin}', function ($pin) {
-    $personnel = \App\Models\Personnel::where('pin', $pin)->first();
-    if (!$personnel) abort(403);
-
-    $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
-    if (!file_exists($filePath)) abort(404);
-
-    return response()->download($filePath, 'TRC-Pekanbaru-Aman-v2.1.0.apk', [
-        'Content-Type' => 'application/vnd.android.package-archive',
-    ]);
-})->name('apk.download.direct');
+Route::get('/direct-download-apk/{pin}', [ApkController::class, 'directDownload'])->name('apk.download.direct');
 
 // Admin Route
 Route::group([
@@ -135,14 +126,7 @@ Route::group([
         ->middleware('permission:manajemen-pengaturan')
         ->name('pengaturan');
 
-    Route::get('/pengaturan/download-apk', function () {
-        $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
-        if (!file_exists($filePath)) abort(404, 'File aplikasi tidak ditemukan di server.');
-
-        return response()->download($filePath, 'TRC-Pekanbaru-Aman-v2.1.0.apk', [
-            'Content-Type' => 'application/vnd.android.package-archive',
-        ]);
-    })->middleware('permission:download-apk')->name('pengaturan.download-apk');
+    Route::get('/pengaturan/download-apk', [ApkController::class, 'download'])->middleware('permission:download-apk')->name('pengaturan.download-apk');
 
     Route::livewire('/perangkat', 'admin::device')
         ->middleware('permission:manajemen-perangkat')
