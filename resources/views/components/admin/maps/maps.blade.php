@@ -221,7 +221,7 @@
                                         </div>
                                    </div>`,
                             iconSize: [40, 40],
-                            iconAnchor: [20, 40]
+                            iconAnchor: [20, 20]
                         });
 
                         const marker = L.marker([d.last_latitude, d.last_longitude], {
@@ -488,7 +488,7 @@
                             window.EchoInstance = null;
                             window.CustomEcho = null;
                             window.Echo =
-                            null; // Penting: Set null agar shim mengosongkan actualEcho dan tidak mengganggu Livewire di halaman lain
+                                null; // Penting: Set null agar shim mengosongkan actualEcho dan tidak mengganggu Livewire di halaman lain
                         }
                     });
                     window.hasWsDisconnectListener = true;
