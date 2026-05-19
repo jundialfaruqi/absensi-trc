@@ -48,8 +48,27 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
     public function mount(): void
     {
-        if (!$this->month) $this->month = Carbon::now()->format('m');
-        if (!$this->year) $this->year = Carbon::now()->format('Y');
+        // Set default 7 hari: dari kemarin sampai 5 hari ke depan
+        if (!$this->startDate) {
+            $this->startDate = Carbon::yesterday()->format('Y-m-d');
+        }
+
+        if (!$this->endDate) {
+            $this->endDate = Carbon::yesterday()->addDays(10)->format('Y-m-d');
+        }
+
+        // Sinkronkan filter dropdown bulan/tahun bawaan
+        if (!$this->month) $this->month = Carbon::parse($this->startDate)->format('m');
+        if (!$this->year) $this->year = Carbon::parse($this->startDate)->format('Y');
+    }
+
+    #[Computed]
+    public function isDefaultDateFilter(): bool
+    {
+        $defaultStart = Carbon::yesterday()->format('Y-m-d');
+        $defaultEnd = Carbon::yesterday()->addDays(10)->format('Y-m-d');
+
+        return $this->startDate === $defaultStart && $this->endDate === $defaultEnd;
     }
 
     public function load()
@@ -168,8 +187,10 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
     public function resetFilters()
     {
-        $this->startDate = '';
-        $this->endDate = '';
+        // Kembalikan ke default 7 hari
+        $this->startDate = Carbon::yesterday()->format('Y-m-d');
+        $this->endDate = Carbon::yesterday()->addDays(10)->format('Y-m-d');
+
         $this->resetPage();
     }
 

@@ -129,7 +129,7 @@
                         <input type="date" id="endDate" wire:model.live="endDate"
                             class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
 
-                        @if ($startDate || $endDate)
+                        @if (!$this->isDefaultDateFilter)
                             <button type="button" wire:click="resetFilters"
                                 class="btn join-item px-3 text-error btn-bordered">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
