@@ -10,12 +10,15 @@ Route::get('/', function () {
 
 // Public Route
 Route::livewire('/login', 'login')
-    ->name('login');
+    ->name('login')
+    ->middleware('noindex');
 
 Route::livewire('/download-app', 'public::download-app')
-    ->name('download-app');
+    ->name('download-app')
+    ->middleware('noindex');
 
-Route::get('/direct-download-apk/{pin}', [ApkController::class, 'directDownload'])->name('apk.download.direct');
+Route::get('/direct-download-apk/{pin}', [ApkController::class, 'directDownload'])->name('apk.download.direct')
+    ->middleware('noindex');
 
 // Admin Route
 Route::group([
@@ -154,13 +157,16 @@ Route::group([
 
 // --- Personnel Portal Routes ---
 Route::livewire('/personnel/login', 'personnel::login')
-    ->name('personnel.login');
+    ->name('personnel.login')
+    ->middleware('noindex');
 
 Route::livewire('/personnel/register', 'personnel::register')
-    ->name('personnel.register');
+    ->name('personnel.register')
+    ->middleware('noindex');
 
 Route::livewire('/personnel/panduan', 'personnel::panduan')
-    ->name('personnel.panduan');
+    ->name('personnel.panduan')
+    ->middleware('noindex');
 
 Route::group([
     'middleware' => ['auth:personnel'],

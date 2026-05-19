@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'mobile_auth' => \App\Http\Middleware\CheckMobileApiKey::class,
             'device_auth' => \App\Http\Middleware\CheckDeviceLicense::class,
+            'noindex' => \App\Http\Middleware\NoIndexMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
