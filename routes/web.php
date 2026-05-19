@@ -4,11 +4,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApkController;
 
+// Public Route
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome')->middleware('noindex');
 
-// Public Route
 Route::livewire('/login', 'login')
     ->name('login')
     ->middleware('noindex');
