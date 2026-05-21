@@ -313,7 +313,6 @@
                                                     </h4>
                                                 </div>
                                             </div>
-                                            <div class="mt-6 pt-6 border-t border-white/5"></div>
                                         @else
                                             {{-- Standard Items --}}
                                             <div class="flex gap-4">

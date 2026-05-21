@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class Berita extends Model
 {
@@ -71,14 +70,13 @@ class Berita extends Model
     }
 
     /**
-     * Generate slug dari tanggal + judul.
-     * Format: 2026-05-14-judul-berita
-     * Jika sudah ada: 2026-05-14-judul-berita-1
+     * Generate slug dari judul.
+     * Format: judul-berita
+     * Jika sudah ada: judul-berita-1
      */
-    public static function generateSlug(string $judul, ?string $date = null, ?string $excludeId = null): string
+    public static function generateSlug(string $judul, ?string $excludeId = null): string
     {
-        $datePrefix = $date ? Carbon::parse($date)->format('Y-m-d') : now()->format('Y-m-d');
-        $baseSlug = $datePrefix . '-' . Str::slug($judul);
+        $baseSlug = Str::slug($judul);
 
         $query = static::where('slug', $baseSlug);
         if ($excludeId) {

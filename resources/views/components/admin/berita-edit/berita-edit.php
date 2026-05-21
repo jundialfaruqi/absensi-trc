@@ -91,15 +91,8 @@ new #[Title('Edit Berita')] #[Layout('layouts::admin.app')] class extends Compon
             $gambarPath = null;
         }
 
-        // Regenerate slug jika judul berubah
-        $slug = $berita->slug;
-        if ($berita->judul !== $this->judul) {
-            $slug = Berita::generateSlug($this->judul, $berita->created_at, $berita->id);
-        }
-
         $berita->update([
             'judul' => $this->judul,
-            'slug' => $slug,
             'isi' => $this->isi,
             'gambar' => $gambarPath,
             'kategori' => $this->kategori,
