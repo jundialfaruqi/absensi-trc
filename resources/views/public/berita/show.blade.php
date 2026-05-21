@@ -83,7 +83,7 @@
         .berita-content a { color: #60a5fa; text-decoration: underline; }
         .berita-content a:hover { color: #93c5fd; }
         .berita-content strong, .berita-content b { color: white; font-weight: bold; }
-        .berita-content img {
+        .berita-isi img {
             border-radius: 1rem;
             margin-top: 1rem;
             margin-bottom: 1rem;
@@ -176,17 +176,17 @@
                     </div>
 
                     {{-- Article Content --}}
-                    <article class="berita-content overflow-hidden" style="background-color: rgba(255,255,255,0.05); padding: 2rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <article class="berita-content overflow-hidden rounded-2xl" style="background-color: rgba(255,255,255,0.05); padding: 2rem;  solid rgba(255,255,255,0.1);">
 
                         {{-- Featured Image --}}
                         @if($berita->gambar)
-                            <div class="-mx-8 -mt-8 mb-6 overflow-hidden relative">
+                            <div class="-mx-8 -mt-8 mb-8 overflow-hidden relative rounded-t-2xl rounded-b-none">
                                 <img src="{{ asset('storage/' . $berita->gambar) }}" alt="{{ $berita->judul }}" class="w-full h-auto object-cover max-h-[600px]">
                                 <div class="absolute inset-0 bg-linear-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none"></div>
                             </div>
                         @endif
 
-                        <div style="color: #cbd5e1; font-size: 1.125rem; line-height: 1.8;">
+                        <div class="berita-isi" style="color: #cbd5e1; font-size: 1.125rem; line-height: 1.8;">
                             {!! $berita->isi !!}
                         </div>
 
@@ -240,7 +240,7 @@
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 @foreach($beritaTerkait as $terkait)
-                                    <a href="{{ route('public.berita.show', $terkait->slug) }}" class="group block glass-panel p-4 rounded-3xl border border-white/5 hover:border-blue-500/30 transition-all">
+                                    <a href="{{ route('public.berita.show', $terkait->slug) }}" class="group block glass-panel p-4 rounded-3xl transition-all">
                                         <div class="flex items-center gap-4">
                                             @if($terkait->gambar)
                                                 <div class="shrink-0 w-16 h-16 rounded-2xl overflow-hidden border border-white/10">
@@ -289,7 +289,7 @@
                             </div>
                         </div>
                         {{-- Latest News Widget --}}
-                        <div class="glass-panel p-6 rounded-3xl border border-white/10">
+                        <div class="glass-panel p-6 rounded-3xl">
                             <h3 class="text-xl font-black text-white mb-6 flex items-center gap-2">
                                 BERITA TERKINI
                             </h3>
@@ -300,7 +300,7 @@
                                             {{-- Featured First Item --}}
                                             <div class="space-y-4">
                                                 @if($item->gambar)
-                                                    <div class="w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+                                                    <div class="w-full aspect-video rounded-2xl overflow-hidden shadow-lg">
                                                         <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                                     </div>
                                                 @endif
@@ -318,7 +318,7 @@
                                             {{-- Standard Items --}}
                                             <div class="flex gap-4">
                                                 @if($item->gambar)
-                                                    <div class="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-white/5">
+                                                    <div class="shrink-0 w-20 h-20 rounded-xl overflow-hidden">
                                                         <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                                     </div>
                                                 @endif
