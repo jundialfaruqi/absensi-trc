@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -709,6 +709,16 @@
                 </div>
             </a>
         </div>
+    </section>
+
+    {{-- ─── Berita Section ─────────────────────────────────────────────────── --}}
+    <section id="berita" class="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-24 border-t border-white/5">
+        <div class="text-center mb-16 max-w-2xl mx-auto">
+            <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight uppercase">BERITA TERBARU</h2>
+            <p class="text-slate-400 font-medium italic">Informasi dan pembaruan terkini seputar TRC Pekanbaru Aman 112.</p>
+        </div>
+
+        <livewire:public-berita />
     </section>
 
     {{-- ─── Lintas Sektoral Section ────────────────────────────────────────── --}}

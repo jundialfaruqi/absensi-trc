@@ -61,6 +61,16 @@ class Berita extends Model
     }
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    /**
      * Generate slug dari tanggal + judul.
      * Format: 2026-05-14-judul-berita
      * Jika sudah ada: 2026-05-14-judul-berita-1

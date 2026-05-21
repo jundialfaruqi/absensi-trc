@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApkController;
+use App\Http\Controllers\BeritaController;
 
 // Public Route
 Route::get('/', function () {
@@ -12,6 +13,8 @@ Route::get('/', function () {
 Route::livewire('/login', 'login')
     ->name('login')
     ->middleware('noindex');
+
+Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('public.berita.show')->middleware('noindex');
 
 Route::livewire('/download-app', 'public::download-app')
     ->name('download-app')
