@@ -22,7 +22,13 @@ new class extends \Livewire\Component {
     }
 }; ?>
 
-<div class="space-y-8">
+<section id="berita" class="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-24 border-t border-white/5">
+        <div class="text-center mb-16 max-w-2xl mx-auto">
+            <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight uppercase">BERITA TERBARU</h2>
+            <p class="text-slate-400 font-medium italic">Informasi dan pembaruan terkini seputar TRC Pekanbaru Aman 112.</p>
+        </div>
+
+        <div class="space-y-8">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @forelse($beritas as $berita)
             <div class="glass-panel rounded-4xl hover:border-blue-500/30 transition-all group overflow-hidden relative flex flex-col h-full border border-white/5">
@@ -113,3 +119,4 @@ new class extends \Livewire\Component {
         </div>
     @endif
 </div>
+    </section>
