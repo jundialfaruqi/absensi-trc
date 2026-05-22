@@ -4,13 +4,13 @@ use Livewire\Volt\Component;
 use App\Models\Berita;
 
 new class extends \Livewire\Component {
-    public int $amount = 6;
+    public int $amount = 3;
 
     public function loadMore()
     {
         // Simulasi delay untuk melihat skeleton (opsional, bisa dihapus di production)
         // sleep(1);
-        $this->amount += 6;
+        $this->amount += 3;
     }
 
     public function with(): array
