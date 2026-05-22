@@ -14,7 +14,11 @@ Route::livewire('/login', 'login')
     ->name('login')
     ->middleware('noindex');
 
-Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('public.berita.show')->middleware('noindex');
+Route::livewire('/berita/{berita:slug}', 'public::berita')
+    ->name('public.berita.show')
+    ->middleware('noindex');
+
+// Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('public.berita.show')->middleware('noindex');
 
 Route::livewire('/download-app', 'public::download-app')
     ->name('download-app')

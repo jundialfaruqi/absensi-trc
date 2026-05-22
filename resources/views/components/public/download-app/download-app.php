@@ -8,7 +8,7 @@ use Livewire\Component;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\Response;
 
-new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public')] class extends Component
+new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class extends Component
 {
     public string $pin = '';
     public ?string $recaptchaToken = null;
@@ -51,7 +51,7 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public')] class extends
         if ($personnel) {
             \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
-            
+
             if (!file_exists($filePath)) {
                 $this->addError('pin', 'Maaf, file aplikasi tidak ditemukan di server.');
                 return;

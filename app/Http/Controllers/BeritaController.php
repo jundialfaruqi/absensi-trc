@@ -26,6 +26,6 @@ class BeritaController extends Controller
             ->take(2)
             ->get();
 
-        return view('public.berita.show', compact('berita', 'beritaTerbaru', 'beritaTerkait'));
+        return view('public.app', compact('berita', 'beritaTerbaru', 'beritaTerkait'));
     }
 }
