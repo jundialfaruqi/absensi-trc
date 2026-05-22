@@ -6,8 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @php
         $pageTitle = $title ?? ($berita->judul ?? 'Layanan Darurat Terintegrasi');
-        $pageDescription = $description ?? (isset($berita) ? Str::limit(strip_tags($berita->isi), 160) : 'TRC Pekanbaru Aman 112');
-        $pageImage = $image ?? (isset($berita) && $berita->gambar ? asset('storage/' . $berita->gambar) : asset('assets/logo/trc-logo.webp'));
+        $pageDescription =
+            $description ?? (isset($berita) ? Str::limit(strip_tags($berita->isi), 160) : 'TRC Pekanbaru Aman 112');
+        $pageImage =
+            $image ??
+            (isset($berita) && $berita->gambar
+                ? asset('storage/' . $berita->gambar)
+                : asset('assets/logo/trc-logo.webp'));
     @endphp
     <title>{{ $pageTitle }} | TRC Pekanbaru Aman 112</title>
     <meta name="description" content="{{ $pageDescription }}">
@@ -38,8 +43,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(10px, 15px) rotate(2deg); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(10px, 15px) rotate(2deg);
+            }
         }
 
         .animate-float {
@@ -63,31 +75,61 @@
             line-height: 1.8;
             color: #cbd5e1;
         }
-        .berita-content h1, .berita-content h2, .berita-content h3 {
+
+        .berita-content h1,
+        .berita-content h2,
+        .berita-content h3 {
             color: white;
             font-weight: 900;
             margin-top: 2rem;
             margin-bottom: 1rem;
         }
-        .berita-content h1 { font-size: 2rem; }
-        .berita-content h2 { font-size: 1.75rem; }
-        .berita-content h3 { font-size: 1.5rem; }
+
+        .berita-content h1 {
+            font-size: 2rem;
+        }
+
+        .berita-content h2 {
+            font-size: 1.75rem;
+        }
+
+        .berita-content h3 {
+            font-size: 1.5rem;
+        }
+
         .berita-content ul {
             list-style-type: disc;
             padding-left: 2rem;
             margin-bottom: 1.5rem;
             color: #cbd5e1;
         }
+
         .berita-content ol {
             list-style-type: decimal;
             padding-left: 2rem;
             margin-bottom: 1.5rem;
             color: #cbd5e1;
         }
-        .berita-content li { margin-bottom: 0.5rem; }
-        .berita-content a { color: #60a5fa; text-decoration: underline; }
-        .berita-content a:hover { color: #93c5fd; }
-        .berita-content strong, .berita-content b { color: white; font-weight: bold; }
+
+        .berita-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .berita-content a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        .berita-content a:hover {
+            color: #93c5fd;
+        }
+
+        .berita-content strong,
+        .berita-content b {
+            color: white;
+            font-weight: bold;
+        }
+
         .berita-isi img {
             border-radius: 1rem;
             margin-top: 1rem;
@@ -108,8 +150,10 @@
                 <circle cx="10" cy="10" r="1" fill="currentColor" />
                 <circle cx="30" cy="20" r="1.2" fill="currentColor" />
                 <circle cx="50" cy="15" r="1.5" fill="currentColor" />
-                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor" stroke-width="0.3" />
-                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor" stroke-width="0.3" />
+                <line x1="10" y1="10" x2="30" y2="20" stroke="currentColor"
+                    stroke-width="0.3" />
+                <line x1="30" y1="20" x2="50" y2="15" stroke="currentColor"
+                    stroke-width="0.3" />
             </svg>
         </div>
     </div>
@@ -119,7 +163,7 @@
 
     {{-- Main Content --}}
     <main class="relative z-10">
-       {{ $slot }}
+        {{ $slot }}
     </main>
 
     {{-- Footer --}}
