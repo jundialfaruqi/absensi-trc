@@ -6,53 +6,10 @@
         {{-- Base Gradient --}}
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#1a3a8a_0%,#0a192f_70%)]"></div>
 
-        {{-- Digital Plexus Cluster --}}
-        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-            <svg class="absolute top-[-10%] right-[-10%] w-200 h-200 text-blue-400 animate-float" viewBox="0 0 100 100">
-                <circle cx="20" cy="20" r="1" fill="currentColor" />
-                <circle cx="50" cy="10" r="1.2" fill="currentColor" />
-                <circle cx="80" cy="30" r="1" fill="currentColor" />
-                <circle cx="40" cy="40" r="1.5" fill="currentColor" />
-                <circle cx="90" cy="60" r="1" fill="currentColor" />
-                <line x1="20" y1="20" x2="50" y2="10" stroke="currentColor"
-                    stroke-width="0.3" />
-                <line x1="50" y1="10" x2="80" y2="30" stroke="currentColor"
-                    stroke-width="0.3" />
-                <line x1="80" y1="30" x2="40" y2="40" stroke="currentColor"
-                    stroke-width="0.3" />
-                <line x1="40" y1="40" x2="20" y2="20" stroke="currentColor"
-                    stroke-width="0.3" />
-                <line x1="90" y1="60" x2="80" y2="30" stroke="currentColor"
-                    stroke-width="0.3" />
-            </svg>
-        </div>
 
-        {{-- Neon Tech Lines --}}
-        <div
-            class="absolute top-1/4 left-0 w-full h-px bg-linear-to-r from-transparent via-blue-500/20 to-transparent rotate-6">
-        </div>
-        <div
-            class="absolute bottom-1/3 right-0 w-full h-px bg-linear-to-r from-transparent via-red-500/10 to-transparent -rotate-12">
-        </div>
     </div>
 
     <style>
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            50% {
-                transform: translate(15px, 20px) rotate(3deg);
-            }
-        }
-
-        .animate-float {
-            animation: float 20s ease-in-out infinite;
-        }
-
         .glass-panel {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(20px);
