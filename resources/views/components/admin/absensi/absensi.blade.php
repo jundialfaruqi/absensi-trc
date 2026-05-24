@@ -297,7 +297,7 @@
 
                                             $cellClass = '';
                                             if ($a) {
-                                                if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) {
+                                                if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALPA', 'CUTI'])) {
                                                     $cellClass = 'bg-neutral/10';
                                                 } elseif ($a->status_masuk === 'HADIR') {
                                                     $cellClass = 'bg-success/20';
@@ -313,7 +313,7 @@
                                             $cellClassM =
                                                 'border-r border-base-200 cursor-pointer hover:bg-base-200/50 transition-all text-center p-1 min-w-16 h-12 relative';
                                             if ($a) {
-                                                if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) {
+                                                if (in_array($a->status_masuk, ['SAKIT', 'IZIN', 'ALPA', 'CUTI'])) {
                                                     $cellClassM .= ' bg-neutral/10';
                                                 } elseif ($a->status_masuk === 'HADIR') {
                                                     $cellClassM .= ' bg-success/10';
@@ -424,10 +424,10 @@
                                                         </div>
                                                     @else
                                                         <span
-                                                            class="text-[9px] font-black {{ $a->status_masuk === 'ALFA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_masuk ?: $a->status }}</span>
+                                                            class="text-[9px] font-black {{ $a->status_masuk === 'ALPA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_masuk ?: $a->status }}</span>
                                                     @endif
                                                 @elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
-                                                    <span class="text-[10px] font-black text-error">ALFA</span>
+                                                    <span class="text-[10px] font-black text-error">ALPA</span>
                                                 @elseif ($j)
                                                     <div class="opacity-20 text-[8px] font-black">
                                                         {{ $j->shift?->name ?? $j->status }}</div>
@@ -440,7 +440,7 @@
                                             $cellClassP =
                                                 'border-r border-base-200 cursor-pointer hover:bg-base-200/50 transition-all text-center p-1 min-w-16 h-12 relative';
                                             if ($a) {
-                                                if (in_array($a->status_pulang, ['SAKIT', 'IZIN', 'ALFA', 'CUTI'])) {
+                                                if (in_array($a->status_pulang, ['SAKIT', 'IZIN', 'ALPA', 'CUTI'])) {
                                                     $cellClassP .= ' bg-neutral/10';
                                                 } elseif ($a->status_pulang === 'HADIR') {
                                                     $cellClassP .= ' bg-success/10';
@@ -550,10 +550,10 @@
                                                         </div>
                                                     @else
                                                         <span
-                                                            class="text-[9px] font-black {{ $a->status_pulang === 'ALFA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_pulang ?: $a->status }}</span>
+                                                            class="text-[9px] font-black {{ $a->status_pulang === 'ALPA' ? 'text-error' : 'text-neutral' }}">{{ $a->status_pulang ?: $a->status }}</span>
                                                     @endif
                                                 @elseif ($j && \Carbon\Carbon::parse($date)->isPast() && !$isToday)
-                                                    <span class="text-[10px] font-black text-error">ALFA</span>
+                                                    <span class="text-[10px] font-black text-error">ALPA</span>
                                                 @elseif ($j)
                                                     <div class="opacity-20 text-[8px] font-black">
                                                         {{ $j->shift?->name ?? $j->status }}</div>

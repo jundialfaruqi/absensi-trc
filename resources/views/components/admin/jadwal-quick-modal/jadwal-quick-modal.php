@@ -17,7 +17,7 @@ new class extends Component
     public $quickShiftId;
     public $quickStatus = 'SHIFT'; // 'SHIFT' or 'OFF'
     public $quickKeterangan = '';
-    
+
     // Substitution Properties
     public string $swapTargetPersonnelId = '';
     public string $swapWarning = '';
@@ -37,7 +37,7 @@ new class extends Component
             ->first();
 
         $this->quickShiftId = $jadwal ? $jadwal->shift_id : '';
-        
+
         if ($jadwal) {
             if ($jadwal->shift) {
                 $this->quickStatus = strtoupper($jadwal->shift->type); // 'SHIFT' or 'OFF'
@@ -47,7 +47,7 @@ new class extends Component
         } else {
             $this->quickStatus = 'SHIFT';
         }
-        
+
         $this->quickKeterangan = $jadwal ? $jadwal->keterangan : '';
 
         // Reset Swap
@@ -102,9 +102,9 @@ new class extends Component
             ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
             [
                 'jadwal_id' => $jadwal->id,
-                'status' => $this->quickStatus === 'SHIFT' ? 'ALFA' : ($selectedShift->keterangan ?? 'OFF'),
-                'status_masuk' => $this->quickStatus === 'SHIFT' ? 'ALFA' : ($selectedShift->keterangan ?? 'OFF'),
-                'status_pulang' => $this->quickStatus === 'SHIFT' ? 'ALFA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status_masuk' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status_pulang' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
             ]
         );
 
@@ -190,7 +190,7 @@ new class extends Component
 
         $originJadwal = Jadwal::with('shift')->where('personnel_id', $this->quickPersonnelId)->where('tanggal', $this->quickDate)->first();
         if (!$originJadwal || $originJadwal->status !== 'SHIFT' || !$originJadwal->shift) return collect();
-        
+
         $targetShift = $originJadwal->shift;
         $isTargetNight = stripos($targetShift->name, 'malam') !== false || (Carbon::parse($targetShift->start_time)->hour >= 18 || Carbon::parse($targetShift->start_time)->hour < 4);
         $isTargetDay = !$isTargetNight;
@@ -304,7 +304,7 @@ new class extends Component
 
         $jadwalA->update(['status' => 'LIBUR', 'shift_id' => null, 'is_manual' => true, 'keterangan' => 'Digantikan oleh ' . Personnel::find($this->swapTargetPersonnelId)->name]);
 
-        \App\Models\Absensi::updateOrCreate(['personnel_id' => $this->swapTargetPersonnelId, 'tanggal' => $this->quickDate], ['jadwal_id' => $targetJadwal->id, 'status' => 'ALFA', 'status_masuk' => 'ALFA', 'status_pulang' => 'ALFA']);
+        \App\Models\Absensi::updateOrCreate(['personnel_id' => $this->swapTargetPersonnelId, 'tanggal' => $this->quickDate], ['jadwal_id' => $targetJadwal->id, 'status' => 'ALPA', 'status_masuk' => 'ALPA', 'status_pulang' => 'ALPA']);
         \App\Models\Absensi::updateOrCreate(['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate], ['jadwal_id' => $jadwalA->id, 'status' => 'LIBUR', 'status_masuk' => 'LIBUR', 'status_pulang' => 'LIBUR']);
 
         $this->dispatch('close-modal', id: 'quick-add-modal');

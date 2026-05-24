@@ -55,9 +55,9 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse ($this->riwayat as $item)
                         @php
-                            $isAlfa = $item->status === 'ALFA' && !$item->jam_masuk;
+                            $isAlpa = $item->status === 'ALPA' && !$item->jam_masuk;
                             $isLibur = $item->status === 'LIBUR';
-                            $rowClass = $isAlfa ? 'bg-red-500/5' : ($isLibur ? 'bg-blue-500/5' : '');
+                            $rowClass = $isAlpa ? 'bg-red-500/5' : ($isLibur ? 'bg-blue-500/5' : '');
                         @endphp
                         <tr class="group hover:bg-white/2 transition-colors {{ $rowClass }}">
                             <td class="px-6 py-6">
@@ -88,9 +88,9 @@
                                                 class="text-[8px] font-bold uppercase tracking-widest {{ in_array($item->status_masuk, ['HADIR', 'DINAS']) ? 'text-emerald-500' : 'text-amber-500' }}">
                                                 {{ $item->status_masuk }}
                                             </span>
-                                        @elseif($isAlfa)
+                                        @elseif($isAlpa)
                                             <span
-                                                class="text-[10px] font-black text-red-500 uppercase tracking-widest italic">ALFA</span>
+                                                class="text-[10px] font-black text-red-500 uppercase tracking-widest italic">ALPA</span>
                                         @elseif($isLibur)
                                             <span
                                                 class="text-[10px] font-black text-blue-400 uppercase tracking-widest italic">LIBUR</span>

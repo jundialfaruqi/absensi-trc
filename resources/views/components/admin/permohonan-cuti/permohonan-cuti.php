@@ -75,7 +75,7 @@ new #[Layout('layouts::admin.app')] #[Title('Permohonan Cuti')] class extends Co
     public function process()
     {
         $request = LeaveRequest::findOrFail($this->processingId);
-        
+
         // Authorization check
         $user = Auth::user();
         if (!$user->hasRole('super-admin') && $request->personnel->opd_id !== $user->opd()?->id) {
@@ -95,14 +95,14 @@ new #[Layout('layouts::admin.app')] #[Title('Permohonan Cuti')] class extends Co
             $period = CarbonPeriod::create($request->tanggal_mulai, $request->tanggal_selesai);
             foreach ($period as $date) {
                 $dateStr = $date->format('Y-m-d');
-                
+
                 // Get existing original status if editing
                 $existing = Absensi::where('personnel_id', $request->personnel_id)
                     ->whereDate('tanggal', $dateStr)
                     ->first();
-                
-                $originalMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALFA';
-                $originalPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALFA';
+
+                $originalMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
+                $originalPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
 
                 Absensi::updateOrCreate(
                     [

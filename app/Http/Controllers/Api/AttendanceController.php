@@ -382,8 +382,8 @@ class AttendanceController extends Controller
             ->first();
 
         if ($existing) {
-            // Rule: If status is not ALFA and not HADIR (e.g. CUTI, IZIN, SAKIT), REJECT
-            if ($existing->status !== 'ALFA' && $existing->status !== 'HADIR') {
+            // Rule: If status is not ALPA and not HADIR (e.g. CUTI, IZIN, SAKIT), REJECT
+            if ($existing->status !== 'ALPA' && $existing->status !== 'HADIR') {
                 return response()->json([
                     'status' => 'error',
                     'message' => "Maaf, status absensi Anda hari ini adalah {$existing->status}. Anda tidak dapat melakukan absensi.",
@@ -516,7 +516,7 @@ class AttendanceController extends Controller
 
         // --- VALIDASI DAN PEMROSESAN GAMBAR ---
         $imageData = base64_decode($request->foto);
-        
+
         // 1. Validasi Ukuran Maksimal 1MB
         if (strlen($imageData) > 1 * 1024 * 1024) {
             return response()->json([
@@ -524,7 +524,7 @@ class AttendanceController extends Controller
                 'message' => 'Ukuran foto maksimal 1 MB.'
             ], 403);
         }
-        
+
         // 2. Gambar Ulang untuk Keamanan (Anti-Polyglot/XSS)
         $img = @imagecreatefromstring($imageData);
         if (!$img) {
@@ -533,7 +533,7 @@ class AttendanceController extends Controller
                 'message' => 'File yang diupload bukan gambar yang valid.'
             ], 403);
         }
-        
+
         // Simpan sebagai file JPEG baru ke buffer
         ob_start();
         imagejpeg($img, null, 80); // Kualitas 80%
@@ -759,7 +759,7 @@ class AttendanceController extends Controller
         }
 
         if ($isDirectCheckOut) {
-            // DIRECT CHECK OUT LOGIC (Auto-Masuk ALFA + Simpan Pulang)
+            // DIRECT CHECK OUT LOGIC (Auto-Masuk ALPA + Simpan Pulang)
             $status_pulang = 'HADIR';
 
             if ($jadwal) {
@@ -797,7 +797,7 @@ class AttendanceController extends Controller
                     'tanggal' => $activeDate,
                     'status' => 'HADIR',
                     'jam_masuk' => $recordTime,
-                    'status_masuk' => 'ALFA',
+                    'status_masuk' => 'ALPA',
                     'foto_masuk' => null,
                     'lat_masuk' => $request->lat,
                     'lng_masuk' => $request->lng,
@@ -828,7 +828,7 @@ class AttendanceController extends Controller
                     'kantor_id' => $lokasiResult['kantor_id'],
                     'status' => 'HADIR',
                     'jam_masuk' => $recordTime,
-                    'status_masuk' => 'ALFA',
+                    'status_masuk' => 'ALPA',
                     'foto_masuk' => null,
                     'lat_masuk' => $request->lat,
                     'lng_masuk' => $request->lng,
@@ -858,7 +858,7 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Absen Pulang (Tanpa Masuk) berhasil. Status Masuk: ALFA, Pulang: ' . $status_pulang,
+                'message' => 'Absen Pulang (Tanpa Masuk) berhasil. Status Masuk: ALPA, Pulang: ' . $status_pulang,
                 'data' => $absensi
             ]);
         } else if (!$existing || !$existing->jam_masuk) {
@@ -1033,15 +1033,15 @@ class AttendanceController extends Controller
         // Detailed Stats
         $totalRequired = (clone $absensiBase)->count();
         $totalHadir = (clone $absensiBase)->where('status', 'HADIR')->count();
-        $totalAlfa = (clone $absensiBase)->where('status', 'ALFA')->count();
+        $totalAlpa = (clone $absensiBase)->where('status', 'ALPA')->count();
         $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT'])->count();
-        
+
         $totalMasuk = (clone $absensiBase)->whereNotNull('jam_masuk')->count();
         $totalPulang = (clone $absensiBase)->whereNotNull('jam_pulang')->count();
         $totalTelat = (clone $absensiBase)->where('status_masuk', 'TELAT')->count();
 
-        $hadirPercentage = $totalRequired > 0 
-            ? round((($totalHadir + $totalIzin) / $totalRequired) * 100) 
+        $hadirPercentage = $totalRequired > 0
+            ? round((($totalHadir + $totalIzin) / $totalRequired) * 100)
             : 0;
 
         // Activities list
@@ -1058,7 +1058,7 @@ class AttendanceController extends Controller
                     $shiftName = $log->jadwal->shift->name;
                     $startTime = $log->jadwal->shift->start_time;
                     $endTime = $log->jadwal->shift->end_time;
-                    
+
                     // Format Carbon ISO date if returned as datetime cast
                     if ($startTime instanceof Carbon || $startTime instanceof \DateTime) {
                         $startTime = $startTime->format('H:i');
@@ -1127,7 +1127,7 @@ class AttendanceController extends Controller
                 'stats' => [
                     'total_required' => $totalRequired,
                     'total_hadir' => $totalHadir,
-                    'total_alfa' => $totalAlfa,
+                    'total_alpa' => $totalAlpa,
                     'total_izin' => $totalIzin,
                     'total_telat' => $totalTelat,
                     'total_masuk' => $totalMasuk,

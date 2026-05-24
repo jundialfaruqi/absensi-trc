@@ -114,8 +114,8 @@ new class extends Component
             ->first();
 
         // Capture original status ONLY if it's the first edit
-        $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALFA';
-        $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALFA';
+        $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
+        $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
 
         $absensi = Absensi::updateOrCreate(
             [
@@ -155,11 +155,11 @@ new class extends Component
             return;
         }
 
-        if ($absensi->original_status_masuk === 'ALFA' && $absensi->original_status_pulang === 'ALFA') {
-            // It was originally a placeholder (ALFA/LIBUR), so restore that state
+        if ($absensi->original_status_masuk === 'ALPA' && $absensi->original_status_pulang === 'ALPA') {
+            // It was originally a placeholder (ALPA/LIBUR), so restore that state
             $jadwal = $absensi->jadwal;
-            $placeholderStatus = ($jadwal && $jadwal->status === 'LIBUR') ? 'LIBUR' : 'ALFA';
-            
+            $placeholderStatus = ($jadwal && $jadwal->status === 'LIBUR') ? 'LIBUR' : 'ALPA';
+
             $absensi->update([
                 'status' => $placeholderStatus,
                 'status_masuk' => null,
@@ -226,7 +226,7 @@ new class extends Component
         if ($jadwal) {
             $shift = $jadwal->shift;
             $isOff = $shift && $shift->type === 'off';
-            $defaultStatus = $isOff ? ($shift->keterangan ?? 'OFF') : 'ALFA';
+            $defaultStatus = $isOff ? ($shift->keterangan ?? 'OFF') : 'ALPA';
 
             Absensi::create([
                 'personnel_id' => $personnelId,

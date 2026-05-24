@@ -1,7 +1,7 @@
 <?php
- 
+
 namespace App\Imports;
- 
+
 use App\Models\Jadwal;
 use App\Models\Personnel;
 use App\Models\Shift;
@@ -9,9 +9,9 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
- 
+
 use Illuminate\Support\Facades\Storage;
- 
+
 class JadwalImport implements ToCollection
 {
     protected $month;
@@ -19,14 +19,14 @@ class JadwalImport implements ToCollection
     protected $opdId;
     protected $shifts;
     protected $shouldReset;
- 
+
     public function __construct($month = null, $year = null, $opdId = null, $shouldReset = false)
     {
         $this->month = $month ?: date('m');
         $this->year = $year ?: date('Y');
         $this->opdId = $opdId;
         $this->shouldReset = $shouldReset;
-        
+
         if ($this->shouldReset) {
             $this->resetExistingData();
         }
@@ -75,19 +75,19 @@ class JadwalImport implements ToCollection
             })
             ->delete();
     }
- 
+
     public function collection(Collection $rows)
     {
         // Skip branding, instructions, and double header rows (Rows 1-6)
         $dataRows = $rows->slice(6);
- 
+
         foreach ($dataRows as $row) {
             // Convert row to array to ensure we can use numeric indices reliably
             $rowData = $row instanceof Collection ? $row->toArray() : $row;
-            
+
             $personnelId = $rowData[0] ?? null; // ID Personnel is in first column
             if (is_null($personnelId) || trim($personnelId) === '') continue;
- 
+
             $personnel = Personnel::when($this->opdId, function($q) {
                     $q->where('opd_id', $this->opdId);
                 })
@@ -97,26 +97,26 @@ class JadwalImport implements ToCollection
                 Log::warning("JadwalImport: Personnel with ID {$personnelId} not found or unauthorized for current OPD context.");
                 continue;
             }
- 
+
             // Iterate through date columns starting from index 2 (Day 1)
             $dayCount = Carbon::create($this->year, $this->month, 1)->daysInMonth;
-            
+
             for ($day = 1; $day <= $dayCount; $day++) {
                 $colIndex = $day + 1; // Col 0=ID, 1=Name, 2=Day 1...
                 $shiftValue = $rowData[$colIndex] ?? null;
-                
+
                 // Trimming and checking if it's actually filled
                 $shiftValue = trim((string)$shiftValue);
- 
+
                 if ($shiftValue !== '') {
                     $tanggal = Carbon::create($this->year, $this->month, $day)->format('Y-m-d');
-                    
+
                     $shiftId = $this->lookupShiftId($shiftValue);
                     $sObj = $shiftId ? Shift::find($shiftId) : null;
 
                     if ($sObj) {
                         $status = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
-                        $absensiStatus = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+                        $absensiStatus = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'ALPA';
 
                         // Skip jika absensi sudah terisi (bukan default)
                         $existingAbsensi = \App\Models\Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
@@ -190,7 +190,7 @@ class JadwalImport implements ToCollection
             }
         }
     }
- 
+
     protected function lookupShiftId($value)
     {
         // 1. Try direct ID first if it's numeric
@@ -198,23 +198,23 @@ class JadwalImport implements ToCollection
             $shift = Shift::find($value);
             if ($shift) return $shift->id;
         }
- 
+
         // 2. Try exact slug match (e.g. "pagi" -> "pagi", "shift pagi" -> "shiftpagi")
         $slug = $this->slugify($value);
         if ($this->shifts->has($slug)) {
             return $this->shifts->get($slug);
         }
- 
+
         // 3. Try partial match (e.g. user typed "pagi", database has "shiftpagi")
         foreach ($this->shifts as $shiftSlug => $id) {
             if (str_contains($shiftSlug, $slug) || str_contains($slug, $shiftSlug)) {
                 return $id;
             }
         }
- 
+
         return null;
     }
-    
+
     protected function slugify($text)
     {
         // Simple slugify: lowercase and remove all non-alphanumeric

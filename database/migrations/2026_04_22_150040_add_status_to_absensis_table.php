@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('absensis', function (Blueprint $table) {
-            $table->string('status')->nullable()->after('tanggal'); // ALFA, HADIR, TELAT, LIBUR, etc.
+            $table->string('status')->nullable()->after('tanggal'); // ALPA, HADIR, TELAT, LIBUR, etc.
         });
     }
 

@@ -357,12 +357,12 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
                     $sObj = Shift::find($config['shift_id']);
                     $finalStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
-                    $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+                    $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALPA';
 
                     $jadwal = Jadwal::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
-                            'status' => $finalStatus, 
+                            'status' => $finalStatus,
                             'shift_id' => $config['shift_id'],
                             'is_manual' => false,
                             'keterangan' => null
@@ -382,7 +382,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $dayCounter++;
                 }
             }
-        } 
+        }
         // Logic for Fixed Weekly
         elseif ($this->generateMode === 'weekly') {
             foreach ($this->selectedPersonnelIds as $pId) {
@@ -402,12 +402,12 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
                     $sObj = Shift::find($config['shift_id']);
                     $finalStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
-                    $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+                    $absensiStatus = $config['type'] === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALPA';
 
                     $jadwal = Jadwal::updateOrCreate(
                         ['personnel_id' => $pId, 'tanggal' => $dateStr],
                         [
-                            'status' => $finalStatus, 
+                            'status' => $finalStatus,
                             'shift_id' => $config['shift_id'],
                             'is_manual' => false,
                             'keterangan' => null
@@ -425,7 +425,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     );
                 }
             }
-        } 
+        }
         // Logic for Smart Quota (Fairness + Weekend Balance)
         else {
             $pIds = $this->selectedPersonnelIds;
@@ -441,13 +441,13 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             }
 
             // Get Night Shift IDs for recovery rule
-            $nightShiftIds = $this->shifts->filter(fn($s) => 
-                stripos($s->name, 'malam') !== false || 
+            $nightShiftIds = $this->shifts->filter(fn($s) =>
+                stripos($s->name, 'malam') !== false ||
                 (Carbon::parse($s->start_time)->hour >= 18 || Carbon::parse($s->start_time)->hour < 4)
             )->pluck('id')->toArray();
 
             // Find default OFF shift for quota mode (e.g. LIBUR)
-            $defaultOffShift = Shift::where('type', 'off')->where('name', 'L')->first() 
+            $defaultOffShift = Shift::where('type', 'off')->where('name', 'L')->first()
                 ?? Shift::where('type', 'off')->first();
 
             foreach ($period as $date) {
@@ -506,9 +506,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 foreach ($pIds as $pId) {
                     $sObj = isset($assignedToday[$pId]) ? Shift::find($assignedToday[$pId]) : $defaultOffShift;
                     $status = isset($assignedToday[$pId]) ? 'SHIFT' : 'OFF';
-                    
+
                     $finalStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'SHIFT';
-                    $absensiStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALFA';
+                    $absensiStatus = $status === 'OFF' ? ($sObj->keterangan ?? 'OFF') : 'ALPA';
                     $shiftId = $sObj->id ?? null;
 
                     // Skip jika absensi sudah terisi (bukan default)
@@ -555,7 +555,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $s['last_status'] = $status;
                 }
             }
-            
+
             // Clear regu in Quota mode
             Personnel::whereIn('id', $pIds)->update(['regu' => null]);
         }

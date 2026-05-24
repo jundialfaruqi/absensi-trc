@@ -166,9 +166,11 @@
                             <span wire:loading>Memperbarui...</span>
                         </button>
                     </div>
-                </div>                <div class="card bg-base-100 border border-base-200 overflow-hidden">
+                </div>
+                <div class="card bg-base-100 border border-base-200 overflow-hidden">
                     {{-- Skeleton View --}}
-                    <div class="overflow-x-auto" @if ($readyToLoad) wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal" @endif>
+                    <div class="overflow-x-auto"
+                        @if ($readyToLoad) wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal" @endif>
                         <table class="table table-md">
                             <thead>
                                 <tr class="bg-base-200/50">
@@ -176,7 +178,8 @@
                                     <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk</th>
-                                    <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang</th>
+                                    <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -220,15 +223,18 @@
 
                     {{-- Real View --}}
                     @if ($readyToLoad)
-                        <div class="overflow-x-auto" wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal">
+                        <div class="overflow-x-auto" wire:loading.remove
+                            wire:target="$refresh, filterKonsumsi, filterTanggal">
                             <table class="table table-md">
                                 <thead>
                                     <tr class="bg-base-200/50">
                                         <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
                                         <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
                                         <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
-                                        <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk</th>
-                                        <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang</th>
+                                        <th class="text-[10px] font-black uppercase tracking-widest text-center">Masuk
+                                        </th>
+                                        <th class="text-[10px] font-black uppercase tracking-widest text-center">Pulang
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -248,7 +254,8 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
+                                        <tr
+                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar">
@@ -301,7 +308,7 @@
                                                     @php
                                                         $badgeColor = match ($log->status) {
                                                             'HADIR' => 'success',
-                                                            'ALFA' => 'error',
+                                                            'ALPA' => 'error',
                                                             'LIBUR' => 'neutral',
                                                             'CUTI', 'IZIN', 'SAKIT' => 'primary',
                                                             default => 'ghost',
@@ -318,7 +325,7 @@
                                                             $masukColor = match ($log->status_masuk) {
                                                                 'HADIR', 'TEPAT WAKTU' => 'success',
                                                                 'TELAT' => 'warning',
-                                                                'ALFA' => 'error',
+                                                                'ALPA' => 'error',
                                                                 default => 'ghost',
                                                             };
                                                         @endphp
@@ -382,7 +389,7 @@
                                                             $pulangColor = match ($log->status_pulang) {
                                                                 'HADIR' => 'success',
                                                                 'PC' => 'warning',
-                                                                'ALFA' => 'error',
+                                                                'ALPA' => 'error',
                                                                 default => 'ghost',
                                                             };
                                                         @endphp
@@ -459,9 +466,10 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         @if ($activities->count() > 0)
-                            <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4" wire:loading.remove wire:target="$refresh, filterKonsumsi, filterTanggal">
+                            <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4" wire:loading.remove
+                                wire:target="$refresh, filterKonsumsi, filterTanggal">
                                 <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-2">
                                     <div class="flex items-center gap-2">
                                         <div class="w-2 h-2 rounded-full bg-primary/30"></div>
@@ -480,9 +488,9 @@
                                     <div class="flex items-center gap-2">
                                         <div class="w-2 h-2 rounded-full bg-error"></div>
                                         <span
-                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALFA:</span>
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">ALPA:</span>
                                         <span
-                                            class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alfa'] }}</span>
+                                            class="text-[10px] md:text-[10px] font-black text-error">{{ $stats['total_alpa'] }}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <div class="w-2 h-2 rounded-full bg-primary"></div>
@@ -520,8 +528,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Pegawai Terlambat --}}
                 <div class="card bg-base-100 border border-base-200 overflow-hidden">
-                    <div class="p-4 bg-error/5 border-b border-base-200 flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-error">
+                    <div class="p-4 bg-warning/5 border-b border-base-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-warning">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -530,7 +538,7 @@
                             <h3 class="text-xs font-black uppercase tracking-widest">Terlambat Hari Ini</h3>
                         </div>
                         <span
-                            class="badge badge-error badge-sm font-black text-[10px]">{{ $latePersonnel->count() }}</span>
+                            class="badge badge-warning badge-sm font-black text-[10px]">{{ $latePersonnel->count() }}</span>
                     </div>
                     <div class="max-h-100 overflow-y-auto divide-y divide-base-200">
                         @forelse($latePersonnel as $late)
@@ -730,8 +738,8 @@
                     </div>
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Alfa</span>
-                        <span class="text-lg font-black text-error">{{ $stats['total_alfa'] }}</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Alpa</span>
+                        <span class="text-lg font-black text-error">{{ $stats['total_alpa'] }}</span>
                     </div>
                 </div>
             </div> {{-- APK Info Card --}}

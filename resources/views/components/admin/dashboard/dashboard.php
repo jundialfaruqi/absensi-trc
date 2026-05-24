@@ -37,7 +37,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                     'total_masuk' => 0,
                     'total_pulang' => 0,
                     'total_terlambat' => 0,
-                    'total_alfa' => 0,
+                    'total_alpa' => 0,
                     'total_hadir' => 0,
                     'total_izin' => 0,
                     'total_telat' => 0,
@@ -83,15 +83,15 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         // Detailed Stats
         $totalRequired = (clone $absensiBase)->count();
         $totalHadir = (clone $absensiBase)->where('status', 'HADIR')->count();
-        $totalAlfa = (clone $absensiBase)->where('status', 'ALFA')->count();
+        $totalAlpa = (clone $absensiBase)->where('status', 'ALPA')->count();
         $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT'])->count();
-        
+
         $totalMasuk = (clone $absensiBase)->whereNotNull('jam_masuk')->count();
         $totalPulang = (clone $absensiBase)->whereNotNull('jam_pulang')->count();
         $totalTelat = (clone $absensiBase)->where('status_masuk', 'TELAT')->count();
 
-        $hadirPercentage = $totalRequired > 0 
-            ? round((($totalHadir + $totalIzin) / $totalRequired) * 100) 
+        $hadirPercentage = $totalRequired > 0
+            ? round((($totalHadir + $totalIzin) / $totalRequired) * 100)
             : 0;
 
         // Activities
@@ -112,7 +112,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // --- Monitoring lists ---
         $latePersonnel = (clone $absensiBase)->where('status_masuk', 'TELAT')->with(['personnel.opd'])->latest('jam_masuk')->get();
-        $absentPersonnel = (clone $absensiBase)->where('status', 'ALFA')->with(['personnel.opd', 'jadwal.shift'])->get();
+        $absentPersonnel = (clone $absensiBase)->where('status', 'ALPA')->with(['personnel.opd', 'jadwal.shift'])->get();
 
         // Total Registered Personnel (All in DB, filtered by OPD)
         $totalRegistered = Personnel::when(!$isSuperAdmin, fn($q) => $q->where('opd_id', $opdId))->count();
@@ -126,7 +126,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'total_masuk' => $totalMasuk,
                 'total_pulang' => $totalPulang,
                 'total_terlambat' => $totalTelat,
-                'total_alfa' => $totalAlfa,
+                'total_alpa' => $totalAlpa,
                 'total_hadir' => $totalHadir,
                 'total_izin' => $totalIzin,
                 'total_telat' => $totalTelat,
@@ -177,8 +177,8 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 ->whereDate('tanggal', $dateStr)
                 ->first();
 
-            $originalMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALFA';
-            $originalPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALFA';
+            $originalMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
+            $originalPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
 
             Absensi::updateOrCreate(
                 ['personnel_id' => $request->personnel_id, 'tanggal' => $dateStr],

@@ -84,7 +84,7 @@
             color: #854d0e;
         }
 
-        .status-alfa {
+        .status-alpa {
             background-color: #fee2e2;
             color: #991b1b;
         }
@@ -201,7 +201,7 @@
                         @php
                             $jmlHari = 0;
                             $hadir = 0;
-                            $alfa = 0;
+                            $alpa = 0;
                         @endphp
                         <tr>
                             <td class="name-column">
@@ -226,9 +226,9 @@
                                         if (in_array($a->status, ['HADIR', 'SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
                                             $hadir++;
                                             $class = $a->status === 'HADIR' ? 'status-hadir' : 'status-izin';
-                                        } elseif ($a->status === 'ALFA') {
-                                            $alfa++;
-                                            $class = 'status-alfa';
+                                        } elseif ($a->status === 'alpa') {
+                                            $alpa++;
+                                            $class = 'status-alpa';
                                         }
                                     } elseif ($j) {
                                         $display = '.';
@@ -241,7 +241,7 @@
 
                             <td class="summary-column">{{ $jmlHari }}</td>
                             <td class="summary-column">{{ $hadir }}</td>
-                            <td class="summary-column">{{ $alfa }}</td>
+                            <td class="summary-column">{{ $alpa }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -254,7 +254,7 @@
     @endforeach
 
     <div class="summary-info">
-        <strong>Keterangan:</strong> H: Hadir | T: Telat | A: Alfa | S: Sakit | I: Izin | C: Cuti | L: Libur | -: Lepas
+        <strong>Keterangan:</strong> H: Hadir | T: Telat | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur | -: Lepas
         Jadwal
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id
