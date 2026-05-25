@@ -478,9 +478,14 @@ class AttendanceController extends Controller
                     $isNightShift = $shift->start_time >= $shift->end_time;
                     $isNextDay = ($activeDate !== $today);
 
-                    if ($isNightShift && $isNextDay) {
-                        // User is in the next day, and we are within the shift window
-                        // We should allow them to proceed to clock-out
+                    if ($isNightShift) {
+                        $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
+                            'data' => $jadwal,
+                            'absensi' => $existing,
+                        ], 403);
                     } else {
                         $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
 
@@ -494,6 +499,16 @@ class AttendanceController extends Controller
                 }
 
                 // Default: past everything
+                $isNightShift = $shift->start_time >= $shift->end_time;
+                if ($isNightShift && $now->isAfter($windowOutEnd)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Batas waktu Absen Pulang sudah berakhir.',
+                        'data' => $jadwal,
+                        'absensi' => $existing,
+                    ], 403);
+                }
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Batas waktu Absen hari ini sudah berakhir.',
