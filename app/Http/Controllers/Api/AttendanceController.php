@@ -307,8 +307,8 @@ class AttendanceController extends Controller
                 $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
                 $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
 
-                // It's a night shift if start_time > end_time
-                if ($sTime->format('H:i:s') > $eTime->format('H:i:s')) {
+                // It's a night shift if start_time >= end_time
+                if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
                     $endTimePlusBuffer = $eTime->copy()->addHours(3)->format('H:i:s');
                     if ($nowTime < $endTimePlusBuffer) {
                         $jadwal = $yesterdayJadwal;
@@ -774,7 +774,7 @@ class AttendanceController extends Controller
             $status_pulang = 'HADIR';
 
             if ($jadwal) {
-                $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
+                $isNightShift = $jadwal->shift->start_time >= $jadwal->shift->end_time;
                 $isNextDay = ($activeDate !== $today);
                 $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
 
@@ -872,7 +872,7 @@ class AttendanceController extends Controller
 
             if ($jadwal) {
                 // Night Shift Status Logic
-                $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
+                $isNightShift = $jadwal->shift->start_time >= $jadwal->shift->end_time;
 
                 // Tolerance: 1 minute
                 $startTimeWithBuffer = Carbon::parse($jadwal->shift->start_time)->addMinute()->format('H:i:s');
@@ -957,7 +957,7 @@ class AttendanceController extends Controller
             $status_pulang = 'HADIR';
 
             if ($jadwal) {
-                $isNightShift = $jadwal->shift->start_time > $jadwal->shift->end_time;
+                $isNightShift = $jadwal->shift->start_time >= $jadwal->shift->end_time;
                 $isNextDay = ($activeDate !== $today);
                 $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
 

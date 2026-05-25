@@ -246,7 +246,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time->format('H:i:s') > $yesterdayJadwal->shift->end_time->format('H:i:s')) {
+            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time->format('H:i:s') >= $yesterdayJadwal->shift->end_time->format('H:i:s')) {
                 $endTimePlusBuffer = $yesterdayJadwal->shift->end_time->copy()->addHours(4)->format('H:i:s');
                 if ($nowTime < $endTimePlusBuffer) {
                     $this->activeJadwal = $yesterdayJadwal;
@@ -324,7 +324,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
         $pulangDate = $this->activeDate;
-        if ($shift->start_time->format('H:i:s') > $shift->end_time->format('H:i:s')) {
+        if ($shift->start_time->format('H:i:s') >= $shift->end_time->format('H:i:s')) {
             $pulangDate = Carbon::parse($this->activeDate)->addDay()->format('Y-m-d');
         }
         $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
@@ -441,7 +441,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
         $startTime = $this->activeJadwal ? $this->activeJadwal->shift->start_time->format('H:i:s') : null;
         $endTime = $this->activeJadwal ? $this->activeJadwal->shift->end_time->format('H:i:s') : null;
-        $isNightShift = $startTime && $endTime ? ($startTime > $endTime) : false;
+        $isNightShift = $startTime && $endTime ? ($startTime >= $endTime) : false;
 
         try {
             $imagePath = null;
