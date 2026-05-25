@@ -72,7 +72,10 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
                 return;
             }
 
-            session()->put('apk_download_allowed', $this->pin);
+            session()->put('apk_download_allowed', [
+                'pin' => $this->pin,
+                'expired_at' => now()->addMinutes(15)->timestamp,
+            ]);
 
             $this->dispatch('trigger-download', url: route('apk.download.direct', ['pin' => $this->pin]));
 
@@ -86,6 +89,6 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
     public function render()
     {
-        return view('public::download-app.download-app');
+        return view('public.download-app');
     }
 };

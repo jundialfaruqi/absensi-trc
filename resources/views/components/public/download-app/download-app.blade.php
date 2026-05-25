@@ -65,7 +65,12 @@
                             });
 
                             window.addEventListener('trigger-download', (event) => {
-                                window.location.href = event.detail.url;
+                                const link = document.createElement('a');
+                                link.href = event.detail.url;
+                                link.download = '';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
                             });
                         </script>
                     @endif
