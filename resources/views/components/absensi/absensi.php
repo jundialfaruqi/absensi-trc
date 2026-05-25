@@ -384,9 +384,18 @@ new #[Layout('layouts.absensi.app')] class extends Component
             } elseif ($now->between($windowOutStart, $windowOutEnd)) {
                 $this->isTooLateToIn = true;
             } else {
-                $this->isSuccess = false;
-                $this->message = 'Batas waktu Absen hari ini sudah berakhir.';
-                $this->step = 3;
+                // FIX: If it's a night shift, the "gap" is a valid waiting period for clock-out on the next day
+                $isNightShift = $shift->start_time->format('H:i:s') >= $shift->end_time->format('H:i:s');
+                if ($isNightShift) {
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+                    $this->isSuccess = false;
+                    $this->message = "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.";
+                    $this->step = 3;
+                } else {
+                    $this->isSuccess = false;
+                    $this->message = 'Batas waktu Absen hari ini sudah berakhir.';
+                    $this->step = 3;
+                }
 
                 return;
             }
