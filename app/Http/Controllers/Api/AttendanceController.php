@@ -419,7 +419,7 @@ class AttendanceController extends Controller
         $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
         $pulangDate = $activeDate;
-        if ($shift->start_time > $shift->end_time) {
+        if ($shift->start_time >= $shift->end_time) {
             $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
         }
         $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
@@ -467,16 +467,25 @@ class AttendanceController extends Controller
                     ], 403);
                 }
 
-                // Check if in gap between IN and OUT
+                        // Check if in gap between IN and OUT
                 if ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
-                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+                    // FIX: If it's a night shift, the "gap" might actually be a valid time for clock-out on the next day
+                    $isNightShift = $shift->start_time >= $shift->end_time;
+                    $isNextDay = ($activeDate !== $today);
 
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
-                        'data' => $jadwal,
-                        'absensi' => $existing,
-                    ], 403);
+                    if ($isNightShift && $isNextDay) {
+                        // User is in the next day, and we are within the shift window
+                        // We should allow them to proceed to clock-out
+                    } else {
+                        $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
+                            'data' => $jadwal,
+                            'absensi' => $existing,
+                        ], 403);
+                    }
                 }
 
                 // Default: past everything
