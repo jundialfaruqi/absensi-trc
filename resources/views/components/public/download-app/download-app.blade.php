@@ -63,6 +63,10 @@
                                     grecaptcha.reset();
                                 }
                             });
+
+                            window.addEventListener('trigger-download', (event) => {
+                                window.location.href = event.detail.url;
+                            });
                         </script>
                     @endif
 

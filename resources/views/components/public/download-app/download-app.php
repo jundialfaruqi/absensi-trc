@@ -71,7 +71,9 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
             session()->put('apk_download_allowed', $this->pin);
 
-            return redirect()->route('apk.download.direct', ['pin' => $this->pin]);
+            $this->dispatch('trigger-download', url: route('apk.download.direct', ['pin' => $this->pin]));
+
+            return;
         }
 
         RateLimiter::hit($throttleKey, 60);
