@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Device;
+use App\Events\PersonnelLocationUpdated;
 use App\Http\Controllers\Controller;
-use App\Models\Personnel;
 use App\Models\Absensi;
+use App\Models\Berita;
+use App\Models\Device;
 use App\Models\Jadwal;
+use App\Models\Kantor;
+use App\Models\Personnel;
+use App\Models\Setting;
+use App\Services\AbsensiLokasiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
@@ -26,17 +30,17 @@ class AttendanceController extends Controller
 
         $device = Device::where('license_key', $request->license_key)->first();
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Lisensi tidak ditemukan. Silakan hubungi Admin.'
+                'message' => 'Lisensi tidak ditemukan. Silakan hubungi Admin.',
             ], 404);
         }
 
         if ($device->status === 'suspended') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Lisensi ini telah ditangguhkan.'
+                'message' => 'Lisensi ini telah ditangguhkan.',
             ], 403);
         }
 
@@ -44,7 +48,7 @@ class AttendanceController extends Controller
         if ($device->unique_device_id && $device->unique_device_id !== $request->unique_device_id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Lisensi ini sudah digunakan di perangkat lain.'
+                'message' => 'Lisensi ini sudah digunakan di perangkat lain.',
             ], 403);
         }
 
@@ -75,7 +79,7 @@ class AttendanceController extends Controller
                 'status' => $device->status,
                 'holder_name' => $device->holder_name ?? ($device->personnel ? $device->personnel->name : ($device->opd ? $device->opd->name : 'OPD Kantor')),
                 'activated_at' => $device->activated_at ? $device->activated_at->toIso8601String() : null,
-            ]
+            ],
         ]);
     }
 
@@ -90,18 +94,19 @@ class AttendanceController extends Controller
             ->where('unique_device_id', $request->unique_device_id)
             ->first();
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Perangkat tidak terdaftar.'
+                'message' => 'Perangkat tidak terdaftar.',
             ], 404);
         }
 
         if ($device->status !== 'active') {
             $msg = $device->status === 'suspended' ? 'Akses perangkat ditangguhkan oleh Admin.' : 'Perangkat belum aktif.';
+
             return response()->json([
                 'status' => 'error',
-                'message' => $msg
+                'message' => $msg,
             ], 403);
         }
 
@@ -123,7 +128,7 @@ class AttendanceController extends Controller
                 'status' => $device->status,
                 'holder_name' => $device->holder_name ?? ($device->personnel ? $device->personnel->name : ($device->opd ? $device->opd->name : 'OPD Kantor')),
                 'activated_at' => $device->activated_at ? $device->activated_at->toIso8601String() : null,
-            ]
+            ],
         ]);
     }
 
@@ -136,10 +141,10 @@ class AttendanceController extends Controller
 
         $device = $request->get('device');
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Informasi perangkat tidak ditemukan.'
+                'message' => 'Informasi perangkat tidak ditemukan.',
             ], 403);
         }
 
@@ -149,7 +154,7 @@ class AttendanceController extends Controller
             'last_seen_at' => now(),
         ]);
 
-        broadcast(new \App\Events\PersonnelLocationUpdated(
+        broadcast(new PersonnelLocationUpdated(
             $device->personnel_id,
             $request->latitude,
             $request->longitude,
@@ -159,7 +164,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Lokasi perangkat berhasil diperbarui.'
+            'message' => 'Lokasi perangkat berhasil diperbarui.',
         ]);
     }
 
@@ -167,10 +172,10 @@ class AttendanceController extends Controller
     {
         $device = $request->get('device');
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Informasi perangkat tidak ditemukan.'
+                'message' => 'Informasi perangkat tidak ditemukan.',
             ], 403);
         }
 
@@ -179,8 +184,8 @@ class AttendanceController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    'ids' => Personnel::pluck('id')
-                ]
+                    'ids' => Personnel::pluck('id'),
+                ],
             ]);
         }
 
@@ -194,7 +199,7 @@ class AttendanceController extends Controller
 
         if ($request->has('last_sync')) {
             try {
-                $lastSync = \Carbon\Carbon::parse($request->last_sync);
+                $lastSync = Carbon::parse($request->last_sync);
                 $query->where('updated_at', '>', $lastSync);
             } catch (\Exception $e) {
                 $query->where('updated_at', '>', $request->last_sync);
@@ -207,14 +212,14 @@ class AttendanceController extends Controller
 
         $personnels = $query->orderBy('name')
             ->get()
-            ->map(function($p) {
+            ->map(function ($p) {
                 return [
                     'id' => $p->id,
                     'name' => $p->name,
                     'foto' => $p->foto,
                     'face_descriptor' => $p->face_descriptor,
                     'face_recognition' => $p->face_recognition,
-                    'opd_name' => $p->opd ? $p->opd->name : '-'
+                    'opd_name' => $p->opd ? $p->opd->name : '-',
                 ];
             });
 
@@ -227,7 +232,7 @@ class AttendanceController extends Controller
 
         // Coba cari Kantor aktif pertama di bawah OPD ini (terutama berguna untuk perangkat Global)
         if ($opd) {
-            $kantorDefault = \App\Models\Kantor::where('opd_id', $opd->id)
+            $kantorDefault = Kantor::where('opd_id', $opd->id)
                 ->where('is_active', true)
                 ->first();
             if ($kantorDefault) {
@@ -256,29 +261,29 @@ class AttendanceController extends Controller
                     'lat' => $lat,
                     'lng' => $lng,
                     'radius' => $radius,
-                    'is_face_recognition_enabled' => (bool) \App\Models\Setting::get('face_recognition_enabled', true),
-                ]
-            ]
+                    'is_face_recognition_enabled' => (bool) Setting::get('face_recognition_enabled', true),
+                ],
+            ],
         ]);
     }
 
     public function getBanners(Request $request)
     {
-        $banners = \App\Models\Berita::where('is_banner_active', true)
+        $banners = Berita::where('is_banner_active', true)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function($b) {
+            ->map(function ($b) {
                 return [
                     'id' => $b->id,
                     'judul' => $b->judul,
                     'deskripsi' => $b->deskripsi,
-                    'gambar' => $b->gambar ? asset('storage/' . $b->gambar) : null,
+                    'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
                 ];
             });
 
         return response()->json([
             'status' => 'success',
-            'data' => $banners
+            'data' => $banners,
         ]);
     }
 
@@ -312,14 +317,14 @@ class AttendanceController extends Controller
             }
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             $jadwal = Jadwal::where('personnel_id', $id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
                 ->first();
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             // Check if personnel is FLEXIBLE
             $personnel = Personnel::find($id);
             if ($personnel && $personnel->attendance_type === 'FLEXIBLE') {
@@ -331,8 +336,8 @@ class AttendanceController extends Controller
                 if ($existing && $existing->jam_masuk && $existing->jam_pulang) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Anda sudah melakukan absen masuk dan pulang hari ini.",
-                        'absensi' => $existing
+                        'message' => 'Anda sudah melakukan absen masuk dan pulang hari ini.',
+                        'absensi' => $existing,
                     ], 403);
                 }
 
@@ -345,23 +350,23 @@ class AttendanceController extends Controller
                         'tanggal' => $today,
                         'is_flexible' => true,
                     ],
-                    'absensi' => $existing
+                    'absensi' => $existing,
                 ]);
             }
 
             return response()->json([
                 'status' => 'error',
                 'message' => 'Maaf, Anda tidak memiliki jadwal shift hari ini.',
-                'absensi' => null
+                'absensi' => null,
             ], 404);
         }
 
         if ($jadwal->shift && $jadwal->shift->type === 'off') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Maaf, status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.',
+                'message' => 'Maaf, status Anda hari ini adalah '.strtoupper($jadwal->shift->keterangan ?? 'OFF').'.',
                 'data' => $jadwal,
-                'absensi' => null
+                'absensi' => null,
             ], 403);
         }
 
@@ -370,7 +375,7 @@ class AttendanceController extends Controller
                 'status' => 'error',
                 'message' => 'Maaf, Anda sedang LIBUR hari ini.',
                 'data' => $jadwal,
-                'absensi' => null
+                'absensi' => null,
             ], 403);
         }
 
@@ -388,7 +393,7 @@ class AttendanceController extends Controller
                     'status' => 'error',
                     'message' => "Maaf, status absensi Anda hari ini adalah {$existing->status}. Anda tidak dapat melakukan absensi.",
                     'data' => $jadwal,
-                    'absensi' => $existing
+                    'absensi' => $existing,
                 ], 403);
             }
 
@@ -396,18 +401,18 @@ class AttendanceController extends Controller
             if ($existing->status === 'HADIR' && $existing->jam_pulang) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Anda sudah melakukan absen masuk dan pulang hari ini.",
+                    'message' => 'Anda sudah melakukan absen masuk dan pulang hari ini.',
                     'data' => $jadwal,
-                    'absensi' => $existing
+                    'absensi' => $existing,
                 ], 403);
             }
         }
 
         // ─── TIME WINDOW VALIDATION (BEFORE PIN) ───
-        $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
-        $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
-        $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
-        $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+        $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
+        $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
+        $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
         $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
         $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
@@ -425,57 +430,61 @@ class AttendanceController extends Controller
         $isInWindow = $now->between($windowInStart, $windowInEnd);
         $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
 
-        $isAttemptingCheckOut = $existing && $existing->jam_masuk && !$existing->jam_pulang;
+        $isAttemptingCheckOut = $existing && $existing->jam_masuk && ! $existing->jam_pulang;
 
         if ($isAttemptingCheckOut) {
-            if (!$isOutWindow) {
+            if (! $isOutWindow) {
                 if ($now->lessThan($windowOutStart)) {
-                    $diff = $windowOutStart->diffForHumans($now, true);
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.",
                         'data' => $jadwal,
-                        'absensi' => $existing
+                        'absensi' => $existing,
                     ], 403);
                 }
+
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Batas waktu Absen Pulang sudah berakhir.",
+                    'message' => 'Batas waktu Absen Pulang sudah berakhir.',
                     'data' => $jadwal,
-                    'absensi' => $existing
+                    'absensi' => $existing,
                 ], 403);
             }
         } else {
             // Attempting check-in or direct check-out (no jam_masuk yet)
-            if (!$isInWindow && !$isOutWindow) {
+            if (! $isInWindow && ! $isOutWindow) {
                 // Check if too early for everything
                 if ($now->lessThan($windowInStart)) {
-                    $diff = $windowInStart->diffForHumans($now, true);
+                    $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.",
                         'data' => $jadwal,
-                        'absensi' => $existing
+                        'absensi' => $existing,
                     ], 403);
                 }
 
                 // Check if in gap between IN and OUT
                 if ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
-                    $diff = $windowOutStart->diffForHumans($now, true);
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
                         'data' => $jadwal,
-                        'absensi' => $existing
+                        'absensi' => $existing,
                     ], 403);
                 }
 
                 // Default: past everything
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Batas waktu Absen hari ini sudah berakhir.",
+                    'message' => 'Batas waktu Absen hari ini sudah berakhir.',
                     'data' => $jadwal,
-                    'absensi' => $existing
+                    'absensi' => $existing,
                 ], 403);
             }
         }
@@ -484,7 +493,7 @@ class AttendanceController extends Controller
             'status' => 'success',
             'message' => 'Jadwal ditemukan',
             'data' => $jadwal,
-            'absensi' => $existing
+            'absensi' => $existing,
         ]);
     }
 
@@ -492,7 +501,7 @@ class AttendanceController extends Controller
     {
         return response()->json([
             'status' => 'error',
-            'message' => 'Fitur Login PIN sudah tidak didukung pada versi ini.'
+            'message' => 'Fitur Login PIN sudah tidak didukung pada versi ini.',
         ], 403);
     }
 
@@ -510,7 +519,7 @@ class AttendanceController extends Controller
         $personnel = $request->user();
 
         // If not authenticated via Sanctum (Proses 3), get from personnel_id
-        if (!$personnel) {
+        if (! $personnel) {
             $personnel = Personnel::find($request->personnel_id);
         }
 
@@ -521,16 +530,16 @@ class AttendanceController extends Controller
         if (strlen($imageData) > 1 * 1024 * 1024) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ukuran foto maksimal 1 MB.'
+                'message' => 'Ukuran foto maksimal 1 MB.',
             ], 403);
         }
 
         // 2. Gambar Ulang untuk Keamanan (Anti-Polyglot/XSS)
         $img = @imagecreatefromstring($imageData);
-        if (!$img) {
+        if (! $img) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'File yang diupload bukan gambar yang valid.'
+                'message' => 'File yang diupload bukan gambar yang valid.',
             ], 403);
         }
 
@@ -547,7 +556,7 @@ class AttendanceController extends Controller
             if ($personnel->id != $device->personnel_id) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Perangkat ini hanya diizinkan untuk absensi pemilik perangkat.'
+                    'message' => 'Perangkat ini hanya diizinkan untuk absensi pemilik perangkat.',
                 ], 403);
             }
         }
@@ -577,20 +586,20 @@ class AttendanceController extends Controller
             }
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             $jadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
                 ->first();
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             if ($personnel->attendance_type === 'FLEXIBLE') {
                 $jadwal = null;
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Anda tidak memiliki jadwal shift hari ini.'
+                    'message' => 'Anda tidak memiliki jadwal shift hari ini.',
                 ], 404);
             }
         }
@@ -599,14 +608,14 @@ class AttendanceController extends Controller
             if ($jadwal->shift && $jadwal->shift->type === 'off') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Status Anda hari ini adalah ' . strtoupper($jadwal->shift->keterangan ?? 'OFF') . '.'
+                    'message' => 'Status Anda hari ini adalah '.strtoupper($jadwal->shift->keterangan ?? 'OFF').'.',
                 ], 403);
             }
 
             if ($jadwal->status === 'LIBUR') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Anda sedang LIBUR hari ini.'
+                    'message' => 'Anda sedang LIBUR hari ini.',
                 ], 403);
             }
         }
@@ -614,10 +623,10 @@ class AttendanceController extends Controller
         // ─── TIME WINDOW VALIDATION (SYCHRONIZED WITH WEB) ───
         if ($jadwal) {
             $shift = $jadwal->shift;
-            $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
-            $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
-            $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
-            $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+            $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
+            $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
+            $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
+            $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
             // Windows Calculation
             $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
@@ -638,21 +647,22 @@ class AttendanceController extends Controller
             ->first();
 
         // VALIDATION LOGIC
-        if (!$existing || !$existing->jam_masuk) {
+        if (! $existing || ! $existing->jam_masuk) {
             // MODE: ATTEMPT CHECK IN
             if ($jadwal) {
                 if ($now->lessThan($windowInStart)) {
-                    $diff = $windowInStart->diffForHumans($now, true);
+                    $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi."
+                        'message' => "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.",
                     ], 403);
                 }
                 if ($now->greaterThan($windowInEnd)) {
-                    if (!$now->between($windowOutStart, $windowOutEnd)) {
+                    if (! $now->between($windowOutStart, $windowOutEnd)) {
                         return response()->json([
                             'status' => 'error',
-                            'message' => "Batas waktu Absen Masuk sudah berakhir."
+                            'message' => 'Batas waktu Absen Masuk sudah berakhir.',
                         ], 403);
                     }
                 }
@@ -661,33 +671,34 @@ class AttendanceController extends Controller
             // MODE: ATTEMPT CHECK OUT
             if ($jadwal) {
                 if ($now->lessThan($windowOutStart)) {
-                    $diff = $windowOutStart->diffForHumans($now, true);
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi."
+                        'message' => "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.",
                     ], 403);
                 }
                 if ($now->greaterThan($windowOutEnd)) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Batas waktu Absen Pulang sudah berakhir."
+                        'message' => 'Batas waktu Absen Pulang sudah berakhir.',
                     ], 403);
                 }
             }
         }
 
         // 1. Validasi Lokasi (Geofencing)
-        $lokasiService = app(\App\Services\AbsensiLokasiService::class);
+        $lokasiService = app(AbsensiLokasiService::class);
         $lokasiResult = $lokasiService->validasiLokasi(
             $personnel,
             (float) $request->lat,
             (float) $request->lng
         );
 
-        if (!$lokasiResult['boleh']) {
+        if (! $lokasiResult['boleh']) {
             return response()->json([
                 'status' => 'error',
-                'message' => $lokasiResult['pesan']
+                'message' => $lokasiResult['pesan'],
             ], 403);
         }
 
@@ -705,7 +716,7 @@ class AttendanceController extends Controller
         }
 
         // Check 2: Presisi terlalu bulat — indikasi input manual
-        if (!$isAnomaly) {
+        if (! $isAnomaly) {
             $latDecimals = strlen(substr(strrchr(number_format($incomingLat, 10, '.', ''), '.'), 1));
             $lngDecimals = strlen(substr(strrchr(number_format($incomingLng, 10, '.', ''), '.'), 1));
             // GPS asli biasanya punya 6+ digit desimal signifikan
@@ -720,7 +731,7 @@ class AttendanceController extends Controller
         }
 
         // Check 3: Kecepatan tidak wajar — bandingkan dengan absensi terakhir
-        if (!$isAnomaly) {
+        if (! $isAnomaly) {
             $lastAbsensi = Absensi::where('personnel_id', $personnel->id)
                 ->where(function ($q) {
                     $q->whereNotNull('lat_masuk')->orWhereNotNull('lat_pulang');
@@ -741,7 +752,7 @@ class AttendanceController extends Controller
                     // Kecepatan >200 km/jam dan jarak >50km = anomali
                     if ($waktuJam > 0 && $jarakKm > 50 && ($jarakKm / $waktuJam) > 200) {
                         $isAnomaly = true;
-                        $anomalyReason = 'Perpindahan tidak wajar: ' . round($jarakKm) . 'km dalam ' . round($waktuJam * 60) . ' menit';
+                        $anomalyReason = 'Perpindahan tidak wajar: '.round($jarakKm).'km dalam '.round($waktuJam * 60).' menit';
                     }
                 }
             }
@@ -752,7 +763,7 @@ class AttendanceController extends Controller
             ->first();
 
         $isDirectCheckOut = false;
-        if ((!$existing || !$existing->jam_masuk) && $jadwal) {
+        if ((! $existing || ! $existing->jam_masuk) && $jadwal) {
             if ($now->between($windowOutStart, $windowOutEnd)) {
                 $isDirectCheckOut = true;
             }
@@ -768,7 +779,7 @@ class AttendanceController extends Controller
                 $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
 
                 if ($isNightShift) {
-                    if (!$isNextDay) {
+                    if (! $isNextDay) {
                         $status_pulang = 'PC';
                     } else {
                         if ($nowTime < $endTime) {
@@ -783,13 +794,13 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $folderPath = 'absensi/' . date('Y-m-d');
-            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '.jpg';
+            $folderPath = 'absensi/'.date('Y-m-d');
+            $fileName = $folderPath.'/out_'.$personnel->id.'_'.time().'.jpg';
             Storage::disk('public')->put($fileName, $newImageData);
 
             $recordTime = $now->format('H:i:s');
 
-            if (!$existing) {
+            if (! $existing) {
                 $absensi = Absensi::create([
                     'personnel_id' => $personnel->id,
                     'jadwal_id' => $jadwal ? $jadwal->id : null,
@@ -858,10 +869,10 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Absen Pulang (Tanpa Masuk) berhasil. Status Masuk: ALPA, Pulang: ' . $status_pulang,
-                'data' => $absensi
+                'message' => 'Absen Pulang (Tanpa Masuk) berhasil. Status Masuk: ALPA, Pulang: '.$status_pulang,
+                'data' => $absensi,
             ]);
-        } else if (!$existing || !$existing->jam_masuk) {
+        } elseif (! $existing || ! $existing->jam_masuk) {
             // CHECK IN LOGIC
             $status_masuk = 'HADIR';
 
@@ -890,11 +901,11 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $folderPath = 'absensi/' . date('Y-m-d');
-            $fileName = $folderPath . '/in_' . $personnel->id . '_' . time() . '.jpg';
+            $folderPath = 'absensi/'.date('Y-m-d');
+            $fileName = $folderPath.'/in_'.$personnel->id.'_'.time().'.jpg';
             Storage::disk('public')->put($fileName, $newImageData);
 
-            if (!$existing) {
+            if (! $existing) {
                 $absensi = Absensi::create([
                     'personnel_id' => $personnel->id,
                     'jadwal_id' => $jadwal ? $jadwal->id : null,
@@ -937,15 +948,15 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Absen Masuk berhasil. Status: ' . $status_masuk,
-                'data' => $absensi
+                'message' => 'Absen Masuk berhasil. Status: '.$status_masuk,
+                'data' => $absensi,
             ]);
         } else {
             // CHECK OUT LOGIC
             if ($existing->jam_pulang) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Anda sudah melakukan absen pulang hari ini.'
+                    'message' => 'Anda sudah melakukan absen pulang hari ini.',
                 ], 400);
             }
 
@@ -957,7 +968,7 @@ class AttendanceController extends Controller
                 $endTime = Carbon::parse($jadwal->shift->end_time)->format('H:i:s');
 
                 if ($isNightShift) {
-                    if (!$isNextDay) {
+                    if (! $isNextDay) {
                         $status_pulang = 'PC';
                     } else {
                         if ($nowTime < $endTime) {
@@ -972,8 +983,8 @@ class AttendanceController extends Controller
             }
 
             // Store photo
-            $folderPath = 'absensi/' . date('Y-m-d');
-            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '.jpg';
+            $folderPath = 'absensi/'.date('Y-m-d');
+            $fileName = $folderPath.'/out_'.$personnel->id.'_'.time().'.jpg';
             Storage::disk('public')->put($fileName, $newImageData);
 
             $existing->update([
@@ -995,8 +1006,8 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Absen Pulang berhasil. Status: ' . $status_pulang,
-                'data' => $existing
+                'message' => 'Absen Pulang berhasil. Status: '.$status_pulang,
+                'data' => $existing,
             ]);
         }
     }
@@ -1005,10 +1016,10 @@ class AttendanceController extends Controller
     {
         $device = $request->get('device');
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Informasi perangkat tidak ditemukan.'
+                'message' => 'Informasi perangkat tidak ditemukan.',
             ], 403);
         }
 
@@ -1017,16 +1028,16 @@ class AttendanceController extends Controller
 
         // Base query for attendance today (no OPD filter for global devices)
         $absensiBase = Absensi::whereDate('tanggal', $today)
-            ->where(function($q) {
+            ->where(function ($q) {
                 // Count records that are NOT 'LIBUR'
-                $q->whereHas('jadwal.shift', fn($sq) => $sq->where('type', 'shift'))
-                  ->orWhereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+                $q->whereHas('jadwal.shift', fn ($sq) => $sq->where('type', 'shift'))
+                    ->orWhereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
             })
             ->when($filterKonsumsi, function ($q) use ($filterKonsumsi) {
                 if ($filterKonsumsi === 'flexible') {
-                    $q->whereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+                    $q->whereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
                 } else {
-                    $q->whereHas('jadwal.shift.konsumsis', fn($sq) => $sq->where('nama', $filterKonsumsi));
+                    $q->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $filterKonsumsi));
                 }
             });
 
@@ -1062,7 +1073,7 @@ class AttendanceController extends Controller
                     // Format Carbon ISO date if returned as datetime cast
                     if ($startTime instanceof Carbon || $startTime instanceof \DateTime) {
                         $startTime = $startTime->format('H:i');
-                    } else if (is_string($startTime) && str_contains($startTime, 'T')) {
+                    } elseif (is_string($startTime) && str_contains($startTime, 'T')) {
                         $tParts = explode('T', $startTime);
                         if (count($tParts) >= 2) {
                             $startTime = substr($tParts[1], 0, 5);
@@ -1070,7 +1081,7 @@ class AttendanceController extends Controller
                     }
                     if ($endTime instanceof Carbon || $endTime instanceof \DateTime) {
                         $endTime = $endTime->format('H:i');
-                    } else if (is_string($endTime) && str_contains($endTime, 'T')) {
+                    } elseif (is_string($endTime) && str_contains($endTime, 'T')) {
                         $tParts = explode('T', $endTime);
                         if (count($tParts) >= 2) {
                             $endTime = substr($tParts[1], 0, 5);
@@ -1081,14 +1092,14 @@ class AttendanceController extends Controller
                 $jamMasuk = $log->jam_masuk;
                 if ($jamMasuk instanceof Carbon || $jamMasuk instanceof \DateTime) {
                     $jamMasuk = $jamMasuk->format('H:i');
-                } else if (is_string($jamMasuk)) {
+                } elseif (is_string($jamMasuk)) {
                     $jamMasuk = substr($jamMasuk, 0, 5);
                 }
 
                 $jamPulang = $log->jam_pulang;
                 if ($jamPulang instanceof Carbon || $jamPulang instanceof \DateTime) {
                     $jamPulang = $jamPulang->format('H:i');
-                } else if (is_string($jamPulang)) {
+                } elseif (is_string($jamPulang)) {
                     $jamPulang = substr($jamPulang, 0, 5);
                 }
 
@@ -1098,26 +1109,26 @@ class AttendanceController extends Controller
                         'id' => $log->personnel->id,
                         'name' => $log->personnel->name,
                         'foto' => $log->personnel->foto,
-                        'penugasan_name' => $log->personnel->penugasan ? $log->personnel->penugasan->name : '-'
+                        'penugasan_name' => $log->personnel->penugasan ? $log->personnel->penugasan->name : '-',
                     ],
                     'shift' => [
                         'name' => $shiftName,
                         'start_time' => $startTime,
-                        'end_time' => $endTime
+                        'end_time' => $endTime,
                     ],
                     'status' => $log->status,
                     'masuk' => [
                         'status_masuk' => $log->status_masuk,
                         'jam_masuk' => $jamMasuk,
                         'is_within_radius' => $log->is_within_radius !== null ? (bool) $log->is_within_radius : null,
-                        'jarak_meter' => $log->jarak_meter !== null ? (int) $log->jarak_meter : null
+                        'jarak_meter' => $log->jarak_meter !== null ? (int) $log->jarak_meter : null,
                     ],
                     'pulang' => [
                         'status_pulang' => $log->status_pulang,
                         'jam_pulang' => $jamPulang,
                         'is_within_radius_pulang' => $log->is_within_radius_pulang !== null ? (bool) $log->is_within_radius_pulang : null,
-                        'jarak_meter_pulang' => $log->jarak_meter_pulang !== null ? (int) $log->jarak_meter_pulang : null
-                    ]
+                        'jarak_meter_pulang' => $log->jarak_meter_pulang !== null ? (int) $log->jarak_meter_pulang : null,
+                    ],
                 ];
             });
 
@@ -1132,15 +1143,16 @@ class AttendanceController extends Controller
                     'total_telat' => $totalTelat,
                     'total_masuk' => $totalMasuk,
                     'total_pulang' => $totalPulang,
-                    'hadir_percentage' => (int) $hadirPercentage
+                    'hadir_percentage' => (int) $hadirPercentage,
                 ],
-                'activities' => $activities
-            ]
+                'activities' => $activities,
+            ],
         ]);
     }
 
     /**
      * Hitung jarak antara dua koordinat GPS menggunakan formula Haversine.
+     *
      * @return float Jarak dalam kilometer
      */
     private function haversineDistance($lat1, $lng1, $lat2, $lng2): float

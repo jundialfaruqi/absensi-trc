@@ -1,32 +1,39 @@
 <?php
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use App\Models\Personnel;
 use App\Models\Absensi;
 use App\Models\Jadwal;
+use App\Models\Personnel;
+use App\Models\PinAttemptLog;
+use App\Models\Setting;
+use App\Services\AbsensiLokasiService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 new #[Layout('layouts.absensi.app')] class extends Component
 {
     // Stepper state: 1: PIN Identification, 2: Action (In/Out), 3: Result, 4: Portal Closed
     public int $step = 1;
-    
+
     // Step 1: PIN Identification
     public string $pin = '';
+
     public ?Personnel $selectedPersonnel = null;
 
     // Step 2: Action state
     public ?Jadwal $activeJadwal = null;
+
     public ?Absensi $activeAbsensi = null;
+
     public string $activeDate = '';
 
     // Step 3: Result
     public bool $isSuccess = false;
+
     public string $message = '';
+
     public ?Absensi $lastAbsensi = null;
 
     // Location info for Step 2
@@ -34,22 +41,30 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     // GPS & Image Data (Sent from Client)
     public string $lat = '';
+
     public string $lng = '';
+
     public string $imageData = ''; // Base64 selfie
 
     // Server Time Sync
     public $serverTime;
+
     public $serverTimestamp;
+
     public $apiSource = 'local';
+
     public $fetchTime;
+
     public bool $isTimeSynced = false;
+
     public bool $isTooLateToIn = false;
 
     public function mount()
     {
-        if (!\App\Models\Setting::get('web_absensi_active', true)) {
+        if (! Setting::get('web_absensi_active', true)) {
             $this->step = 4;
             $this->message = 'Maaf, Portal Absensi Web sedang dinonaktifkan oleh Administrator.';
+
             return;
         }
 
@@ -59,12 +74,13 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     public function fetchServerTime($force = false)
     {
-        if (!$force && $this->isTimeSynced && $this->fetchTime) {
+        if (! $force && $this->isTimeSynced && $this->fetchTime) {
             try {
                 if (Carbon::parse($this->fetchTime)->diffInSeconds(Carbon::now()) < 30) {
                     return;
                 }
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         }
 
         try {
@@ -72,7 +88,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
             $this->serverTimestamp = Carbon::now('Asia/Jakarta')->timestamp * 1000;
             $this->apiSource = 'server';
             $this->isTimeSynced = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             try {
                 $response = Http::timeout(6)->get('https://timeapi.io/api/time/current/zone?timeZone=Asia/Jakarta');
                 if ($response->successful()) {
@@ -82,8 +98,10 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     $this->serverTimestamp = $serverNow->timestamp * 1000;
                     $this->apiSource = 'timeapi';
                     $this->isTimeSynced = true;
-                } else { throw new \Exception("TimeAPI Failed"); }
-            } catch (\Exception $ex) {
+                } else {
+                    throw new Exception('TimeAPI Failed');
+                }
+            } catch (Exception $ex) {
                 try {
                     $response = Http::timeout(6)->get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
                     if ($response->successful()) {
@@ -93,8 +111,10 @@ new #[Layout('layouts.absensi.app')] class extends Component
                         $this->serverTimestamp = $serverNow->timestamp * 1000;
                         $this->apiSource = 'worldtimeapi';
                         $this->isTimeSynced = true;
-                    } else { throw new \Exception("WorldTimeAPI Failed"); }
-                } catch (\Exception $ex2) {
+                    } else {
+                        throw new Exception('WorldTimeAPI Failed');
+                    }
+                } catch (Exception $ex2) {
                     $this->isTimeSynced = false;
                     $this->apiSource = 'failed';
                 }
@@ -105,10 +125,11 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
     private function getCorrectedNow()
     {
-        if (!$this->serverTime || !$this->fetchTime) {
+        if (! $this->serverTime || ! $this->fetchTime) {
             return Carbon::now('Asia/Jakarta');
         }
         $elapsedSeconds = (int) Carbon::now()->diffInSeconds($this->fetchTime, false);
+
         return Carbon::parse($this->serverTime)->addSeconds($elapsedSeconds);
     }
 
@@ -135,11 +156,11 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $userAgent = request()->userAgent();
 
         // 1. Check Global IP Lockout (Prevent brute-force across different PINs)
-        $maxAttempts = (int) \App\Models\Setting::get('pin_max_attempts', 5);
-        $lock5 = (int) \App\Models\Setting::get('pin_lock_duration_5', 5);
-        $lock15 = (int) \App\Models\Setting::get('pin_lock_duration_15', 15);
+        $maxAttempts = (int) Setting::get('pin_max_attempts', 5);
+        $lock5 = (int) Setting::get('pin_lock_duration_5', 5);
+        $lock15 = (int) Setting::get('pin_lock_duration_15', 15);
 
-        $globalFailureQuery = \App\Models\PinAttemptLog::where('ip_address', $ip)
+        $globalFailureQuery = PinAttemptLog::where('ip_address', $ip)
             ->where('status', 'fail')
             ->where('created_at', '>', now()->subMinutes(60));
 
@@ -154,28 +175,30 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $remaining = ceil(now()->diffInSeconds($unlockAt) / 60);
                 $this->addError('pin', "Terlalu banyak percobaan dari perangkat ini. Silakan coba lagi dalam $remaining menit.");
                 $this->pin = '';
+
                 return;
             }
         }
 
         $this->selectedPersonnel = Personnel::where('pin', $this->pin)->first();
 
-        if (!$this->selectedPersonnel) {
+        if (! $this->selectedPersonnel) {
             // Log failed attempt for this IP
-            \App\Models\PinAttemptLog::create([
+            PinAttemptLog::create([
                 'personnel_id' => null,
                 'ip_address' => $ip,
                 'user_agent' => $userAgent,
-                'status' => 'fail'
+                'status' => 'fail',
             ]);
 
             $this->addError('pin', 'PIN tidak ditemukan atau salah.');
             $this->pin = '';
+
             return;
         }
 
         // 2. Check Specific Personnel Lockout (Prevent brute-force targeting specific personnel)
-        $failureQuery = \App\Models\PinAttemptLog::where('personnel_id', $this->selectedPersonnel->id)
+        $failureQuery = PinAttemptLog::where('personnel_id', $this->selectedPersonnel->id)
             ->where('status', 'fail')
             ->where('created_at', '>', now()->subMinutes(60));
 
@@ -190,16 +213,17 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $remaining = ceil(now()->diffInSeconds($unlockAt) / 60);
                 $this->addError('pin', "Terlalu banyak percobaan. Akun terkunci sementara. Silakan coba lagi dalam $remaining menit.");
                 $this->pin = '';
+
                 return;
             }
         }
 
         // Pin is verified (since it matched exactly in our identification-by-pin model)
-        \App\Models\PinAttemptLog::create([
+        PinAttemptLog::create([
             'personnel_id' => $this->selectedPersonnel->id,
             'ip_address' => $ip,
             'user_agent' => $userAgent,
-            'status' => 'success'
+            'status' => 'success',
         ]);
 
         $this->fetchServerTime(true);
@@ -231,7 +255,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
             }
         }
 
-        if (!$this->activeJadwal) {
+        if (! $this->activeJadwal) {
             $this->activeJadwal = Jadwal::where('personnel_id', $this->selectedPersonnel->id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
@@ -239,37 +263,41 @@ new #[Layout('layouts.absensi.app')] class extends Component
             $this->activeDate = $today;
         }
 
-        if (!$this->activeJadwal) {
+        if (! $this->activeJadwal) {
             if ($this->selectedPersonnel->attendance_type === 'FLEXIBLE') {
                 $this->activeDate = $today;
                 $this->activeAbsensi = Absensi::where('personnel_id', $this->selectedPersonnel->id)
                     ->where('tanggal', $this->activeDate)
                     ->first();
-                
+
                 if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk && $this->activeAbsensi->jam_pulang) {
                     $this->isSuccess = false;
-                    $this->message = "Anda sudah melakukan absen masuk dan pulang hari ini.";
+                    $this->message = 'Anda sudah melakukan absen masuk dan pulang hari ini.';
                     $this->step = 3;
+
                     return;
                 }
-                
+
                 $this->isTooLateToIn = false; // Flexible is never too late
-                if (!$checkWindowOnly) {
+                if (! $checkWindowOnly) {
                     $this->step = 2;
                 }
+
                 return;
             }
 
             $this->isSuccess = false;
             $this->message = 'Anda tidak memiliki jadwal shift hari ini.';
             $this->step = 3;
+
             return;
         }
 
         if ($this->activeJadwal->shift && $this->activeJadwal->shift->type === 'off') {
             $this->isSuccess = false;
-            $this->message = "Status Anda hari ini: " . strtoupper($this->activeJadwal->shift->keterangan ?? 'OFF');
+            $this->message = 'Status Anda hari ini: '.strtoupper($this->activeJadwal->shift->keterangan ?? 'OFF');
             $this->step = 3;
+
             return;
         }
 
@@ -277,6 +305,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
             $this->isSuccess = false;
             $this->message = 'Anda sedang LIBUR hari ini.';
             $this->step = 3;
+
             return;
         }
 
@@ -285,10 +314,10 @@ new #[Layout('layouts.absensi.app')] class extends Component
             ->first();
 
         $shift = $this->activeJadwal->shift;
-        $mulaiIn = (int) \App\Models\Setting::get('absensi_masuk_mulai', 30);
-        $selesaiIn = (int) \App\Models\Setting::get('absensi_masuk_selesai', 120);
-        $mulaiOut = (int) \App\Models\Setting::get('absensi_pulang_mulai', 30);
-        $selesaiOut = (int) \App\Models\Setting::get('absensi_pulang_selesai', 120);
+        $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
+        $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
+        $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
         $startTime = Carbon::parse($this->activeDate)->setTimeFrom($shift->start_time);
         $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
@@ -304,52 +333,58 @@ new #[Layout('layouts.absensi.app')] class extends Component
 
         if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk && $this->activeAbsensi->jam_pulang) {
             $this->isSuccess = false;
-            $this->message = "Anda sudah melakukan absen masuk dan pulang hari ini.";
+            $this->message = 'Anda sudah melakukan absen masuk dan pulang hari ini.';
             $this->step = 3;
+
             return;
         }
 
         if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk) {
             if ($now->lessThan($windowOutStart)) {
                 $this->isSuccess = false;
-                $diff = $windowOutStart->diffForHumans($now, true);
+                $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
                 $this->message = "Belum waktunya Absen Pulang. Silakan kembali $diff lagi.";
                 $this->step = 3;
+
                 return;
             }
             if ($now->greaterThan($windowOutEnd)) {
                 $this->isSuccess = false;
-                $this->message = "Batas waktu Absen Pulang sudah berakhir.";
+                $this->message = 'Batas waktu Absen Pulang sudah berakhir.';
                 $this->step = 3;
+
                 return;
             }
             $this->isTooLateToIn = true;
         } else {
             if ($now->lessThan($windowInStart)) {
                 $this->isSuccess = false;
-                $diff = $windowInStart->diffForHumans($now, true);
+                $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
                 $this->message = "Belum waktunya Absen Masuk. Silakan kembali $diff lagi.";
                 $this->step = 3;
+
                 return;
             } elseif ($now->between($windowInStart, $windowInEnd)) {
                 $this->isTooLateToIn = false;
             } elseif ($now->between($windowInEnd, $windowOutStart)) {
                 $this->isSuccess = false;
-                $diff = $windowOutStart->diffForHumans($now, true);
+                $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
                 $this->message = "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.";
                 $this->step = 3;
+
                 return;
             } elseif ($now->between($windowOutStart, $windowOutEnd)) {
                 $this->isTooLateToIn = true;
             } else {
                 $this->isSuccess = false;
-                $this->message = "Batas waktu Absen hari ini sudah berakhir.";
+                $this->message = 'Batas waktu Absen hari ini sudah berakhir.';
                 $this->step = 3;
+
                 return;
             }
         }
 
-        if (!$checkWindowOnly) {
+        if (! $checkWindowOnly) {
             $this->step = 2;
         }
     }
@@ -360,7 +395,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $this->lng = (string) $lng;
 
         if ($this->selectedPersonnel && $this->step === 2) {
-            $service = app(\App\Services\AbsensiLokasiService::class);
+            $service = app(AbsensiLokasiService::class);
             $this->infoLokasi = $service->validasiLokasi($this->selectedPersonnel, $lat, $lng);
         }
     }
@@ -369,33 +404,41 @@ new #[Layout('layouts.absensi.app')] class extends Component
     {
         $this->fetchServerTime(true);
 
-        if ($clientLat) $this->lat = $clientLat;
-        if ($clientLng) $this->lng = $clientLng;
-        if ($clientImage) $this->imageData = $clientImage;
+        if ($clientLat) {
+            $this->lat = $clientLat;
+        }
+        if ($clientLng) {
+            $this->lng = $clientLng;
+        }
+        if ($clientImage) {
+            $this->imageData = $clientImage;
+        }
 
-        $lokasiService = app(\App\Services\AbsensiLokasiService::class);
+        $lokasiService = app(AbsensiLokasiService::class);
         $lokasiResult = $lokasiService->validasiLokasi($this->selectedPersonnel, (float) $this->lat, (float) $this->lng);
 
-        if (!$lokasiResult['boleh']) {
+        if (! $lokasiResult['boleh']) {
             $this->isSuccess = false;
             $this->message = $lokasiResult['pesan'];
             $this->step = 3;
+
             return;
         }
 
         if (
-            !$this->selectedPersonnel || 
-            ($this->selectedPersonnel->attendance_type === 'SCHEDULED' && (!$this->activeJadwal || $this->activeJadwal->status === 'LIBUR' || !$this->activeJadwal->shift || $this->activeJadwal->shift->type === 'off'))
+            ! $this->selectedPersonnel ||
+            ($this->selectedPersonnel->attendance_type === 'SCHEDULED' && (! $this->activeJadwal || $this->activeJadwal->status === 'LIBUR' || ! $this->activeJadwal->shift || $this->activeJadwal->shift->type === 'off'))
         ) {
             $this->isSuccess = false;
             $this->message = 'Data jadwal tidak valid atau Anda sedang tidak bertugas.';
             $this->step = 3;
+
             return;
         }
 
         $now = $this->getCorrectedNow();
         $nowTime = $now->format('H:i:s');
-        
+
         $startTime = $this->activeJadwal ? $this->activeJadwal->shift->start_time->format('H:i:s') : null;
         $endTime = $this->activeJadwal ? $this->activeJadwal->shift->end_time->format('H:i:s') : null;
         $isNightShift = $startTime && $endTime ? ($startTime > $endTime) : false;
@@ -412,15 +455,17 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     $this->isSuccess = false;
                     $this->message = 'Ukuran foto maksimal 1 MB.';
                     $this->step = 3;
+
                     return;
                 }
 
                 // 2. Gambar Ulang untuk Keamanan (Anti-Polyglot/XSS)
                 $img = @imagecreatefromstring($decodedData);
-                if (!$img) {
+                if (! $img) {
                     $this->isSuccess = false;
                     $this->message = 'File yang diupload bukan gambar yang valid.';
                     $this->step = 3;
+
                     return;
                 }
 
@@ -430,19 +475,19 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $newImageData = ob_get_clean();
                 imagedestroy($img);
 
-                $folderPath = 'absensi/' . date('Y-m-d');
-                $imageName = $folderPath . '/' . $type . '_' . $this->selectedPersonnel->id . '_' . time() . '.jpg';
+                $folderPath = 'absensi/'.date('Y-m-d');
+                $imageName = $folderPath.'/'.$type.'_'.$this->selectedPersonnel->id.'_'.time().'.jpg';
                 Storage::disk('public')->put($imageName, $newImageData);
                 $imagePath = $imageName;
             }
 
             if ($type === 'in') {
                 $status_masuk = 'HADIR';
-                
+
                 if ($this->activeJadwal) {
                     $startTimeWithBuffer = $this->activeJadwal->shift->start_time->copy()->addMinute()->format('H:i:s');
 
-                    if (($isNightShift && ($nowTime <= $endTime || $nowTime > $startTimeWithBuffer)) || (!$isNightShift && $nowTime > $startTimeWithBuffer)) {
+                    if (($isNightShift && ($nowTime <= $endTime || $nowTime > $startTimeWithBuffer)) || (! $isNightShift && $nowTime > $startTimeWithBuffer)) {
                         $status_masuk = 'TELAT';
                     }
                 }
@@ -471,7 +516,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $isNextDay = ($this->activeDate !== $now->format('Y-m-d'));
 
                 if ($this->activeJadwal) {
-                    if (($isNightShift && (!$isNextDay || $nowTime < $endTime)) || (!$isNightShift && $nowTime < $endTime)) {
+                    if (($isNightShift && (! $isNextDay || $nowTime < $endTime)) || (! $isNightShift && $nowTime < $endTime)) {
                         $status_pulang = 'PC';
                     }
                 }
@@ -492,9 +537,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $this->isSuccess = true;
                 $this->message = "Absen Pulang Berhasil ($status_pulang)";
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->isSuccess = false;
-            $this->message = 'Terjadi kesalahan: ' . $e->getMessage();
+            $this->message = 'Terjadi kesalahan: '.$e->getMessage();
         }
         $this->step = 3;
     }
