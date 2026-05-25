@@ -430,6 +430,11 @@ class AttendanceController extends Controller
         $isInWindow = $now->between($windowInStart, $windowInEnd);
         $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
 
+        // FIX: If it's a night shift and we are on the next day, check if we're within the closing window
+        if ($shift->start_time >= $shift->end_time && $now->isAfter(Carbon::parse($activeDate))) {
+            $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
+        }
+
         $isAttemptingCheckOut = $existing && $existing->jam_masuk && ! $existing->jam_pulang;
 
         if ($isAttemptingCheckOut) {

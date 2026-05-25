@@ -331,6 +331,14 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
         $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
+        // FIX: If it's a night shift and we are on the next day, check if we're within the closing window
+        $isNightShift = $shift->start_time->format('H:i:s') >= $shift->end_time->format('H:i:s');
+        $isNextDay = $now->isAfter(Carbon::parse($this->activeDate));
+        
+        if ($isNightShift && $isNextDay) {
+            $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
+        }
+
         if ($this->activeAbsensi && $this->activeAbsensi->jam_masuk && $this->activeAbsensi->jam_pulang) {
             $this->isSuccess = false;
             $this->message = 'Anda sudah melakukan absen masuk dan pulang hari ini.';
