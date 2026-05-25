@@ -21,6 +21,9 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
         $this->validate([
             'pin' => 'required|string|size:6',
+        ], [
+            'pin.required' => 'PIN Wajib diisi.',
+            'pin.size' => 'PIN harus 6 digit.',
         ]);
 
         // Verify reCAPTCHA only in Production
