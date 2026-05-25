@@ -318,7 +318,7 @@
                                                 } elseif ($a->status_masuk === 'HADIR') {
                                                     $cellClassM .= ' bg-success/10';
                                                 } elseif ($a->status_masuk === 'TELAT') {
-                                                    $cellClassM .= ' bg-warning/10';
+                                                    $cellClassM .= ' bg-error/10';
                                                 } elseif ($j && $j->shift && $j->shift->type === 'off') {
                                                     // Handled below via inline style for dynamic color
                                                 } elseif ($a->status === 'LIBUR') {
