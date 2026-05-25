@@ -89,6 +89,6 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
     public function render()
     {
-        return view('public.download-app');
+        return view('public::download-app.download-app');
     }
 };
