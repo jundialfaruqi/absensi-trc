@@ -291,7 +291,7 @@
                                                         $waText .= "PIN: *{$r->pin}*\n";
                                                         $waText .= "License Key: *{$licenseKey}*\n\n";
                                                         $waText .=
-                                                            "Silakan download aplikasi TRC melalui link berikut:\n";
+                                                            "Silakan download aplikasi TRC (Android) melalui link berikut:\n";
                                                         $waText .= route('download-app') . "\n\n";
                                                         $waText .= '*(Gunakan PIN Anda untuk mengunduh APK)*';
 
