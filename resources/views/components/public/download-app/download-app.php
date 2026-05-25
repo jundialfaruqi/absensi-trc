@@ -17,6 +17,8 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
     public function download()
     {
+        $this->resetErrorBag();
+
         $this->validate([
             'pin' => 'required|string|size:6',
         ]);
