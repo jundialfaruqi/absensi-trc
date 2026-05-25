@@ -57,6 +57,12 @@
                             function onRecaptchaSuccess(token) {
                                 @this.set('recaptchaToken', token);
                             }
+
+                            window.addEventListener('reset-captcha', () => {
+                                if (typeof grecaptcha !== 'undefined') {
+                                    grecaptcha.reset();
+                                }
+                            });
                         </script>
                     @endif
 
