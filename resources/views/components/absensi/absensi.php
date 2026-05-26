@@ -504,9 +504,14 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 $status_masuk = 'HADIR';
 
                 if ($this->activeJadwal) {
-                    $startTimeWithBuffer = $this->activeJadwal->shift->start_time->copy()->addMinute()->format('H:i:s');
+                    // Hitung waktu mulai shift sebagai datetime lengkap (tanggal + jam)
+                    $shiftStartDatetime = Carbon::parse($this->activeDate)->setTimeFrom($this->activeJadwal->shift->start_time);
 
-                    if (($isNightShift && ($nowTime <= $endTime || $nowTime > $startTimeWithBuffer)) || (! $isNightShift && $nowTime > $startTimeWithBuffer)) {
+                    // Toleransi: 1 menit setelah jam masuk shift
+                    $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinute();
+
+                    // Jika absen masuk SETELAH jam masuk + 1 menit toleransi → TELAT
+                    if ($now->greaterThan($shiftStartWithBuffer)) {
                         $status_masuk = 'TELAT';
                     }
                 }

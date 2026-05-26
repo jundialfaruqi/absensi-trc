@@ -894,26 +894,15 @@ class AttendanceController extends Controller
             $status_masuk = 'HADIR';
 
             if ($jadwal) {
-                // Night Shift Status Logic
-                $isNightShift = $jadwal->shift->start_time >= $jadwal->shift->end_time;
+                // Hitung waktu mulai shift sebagai datetime lengkap (tanggal + jam)
+                $shiftStartDatetime = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
 
-                // Tolerance: 1 minute
-                $startTimeWithBuffer = Carbon::parse($jadwal->shift->start_time)->addMinute()->format('H:i:s');
+                // Toleransi: 1 menit setelah jam masuk shift
+                $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinute();
 
-                if ($isNightShift) {
-                    // If arrived between 00:00 and EndTime, late relative to Day 1 StartTime
-                    if ($nowTime <= Carbon::parse($jadwal->shift->end_time)->format('H:i:s')) {
-                        $status_masuk = 'TELAT';
-                    } else {
-                        // Between StartTime and Midnight
-                        if ($nowTime > $startTimeWithBuffer) {
-                            $status_masuk = 'TELAT';
-                        }
-                    }
-                } else {
-                    if ($nowTime > $startTimeWithBuffer) {
-                        $status_masuk = 'TELAT';
-                    }
+                // Jika absen masuk SETELAH jam masuk + 1 menit toleransi → TELAT
+                if ($now->greaterThan($shiftStartWithBuffer)) {
+                    $status_masuk = 'TELAT';
                 }
             }
 
