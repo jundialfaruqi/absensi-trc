@@ -299,3 +299,98 @@ test('absen pulang berhasil saat hari ini LIBUR tapi shift kemarin adalah 24 jam
     // Harus mengembalikan jadwal kemarin, bukan jadwal hari ini (LIBUR)
     expect($data['data']['shift_id'])->toBe($shift24->id);
 });
+
+test('direct checkout berhasil untuk shift 24 jam saat start_time sama dengan end_time', function () {
+    // Mereplikasi bug: store() pakai > bukan >= sehingga window pulang jatuh di hari yang salah
+    // Shift 24R: masuk 02:30, pulang 02:30 (start == end)
+    Setting::set('absensi_masuk_mulai', 60, 'integer');
+    Setting::set('absensi_masuk_selesai', 120, 'integer');
+    Setting::set('absensi_pulang_mulai', 0, 'integer');
+    Setting::set('absensi_pulang_selesai', 120, 'integer');
+
+    $opd = Opd::create(['name' => 'Test OPD']);
+
+    $personnel = Personnel::create([
+        'id' => 1,
+        'name' => 'Personnel 1',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'foto.jpg',
+        'email' => 'personnel@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $kantor = Kantor::create([
+        'opd_id' => $opd->id,
+        'name' => 'Kantor Test',
+        'latitude' => -6.2,
+        'longitude' => 106.8,
+        'radius_meter' => 10000,
+        'is_active' => true,
+    ]);
+    $personnel->update(['kantor_id' => $kantor->id]);
+
+    $device = Device::create([
+        'opd_id' => $opd->id,
+        'personnel_id' => $personnel->id,
+        'name' => 'Test Device',
+        'license_key' => 'LIC-123456',
+        'unique_device_id' => 'DEVICE-123456',
+        'status' => 'active',
+    ]);
+
+    // Shift 24R: masuk 02:30 tanggal 26, pulang 02:30 tanggal 27
+    $shift24r = Shift::create([
+        'name' => '24R',
+        'type' => 'shift',
+        'start_time' => '02:30:00',
+        'end_time' => '02:30:00',
+    ]);
+
+    $yesterdayDate = '2026-05-26';
+    $todayDate = '2026-05-27';
+
+    Jadwal::create([
+        'personnel_id' => $personnel->id,
+        'shift_id' => $shift24r->id,
+        'tanggal' => $yesterdayDate,
+        'status' => 'SHIFT',
+    ]);
+
+    // Mock jam 02:37 hari ini (dalam window pulang 02:30–04:30)
+    Carbon::setTestNow(Carbon::parse("$todayDate 02:37:00"));
+
+    $token = $device->createToken('device-token')->plainTextToken;
+
+    ob_start();
+    $img = imagecreatetruecolor(1, 1);
+    imagejpeg($img);
+    $dummyImage = ob_get_clean();
+    imagedestroy($img);
+    $base64Image = base64_encode($dummyImage);
+
+    // Belum ada absensi sama sekali → harus berhasil sebagai direct check-out
+    $response = $this->withHeaders([
+        'X-API-KEY' => 'TEST-API-KEY',
+        'X-LICENSE-KEY' => 'LIC-123456',
+        'X-DEVICE-ID' => 'DEVICE-123456',
+        'Authorization' => "Bearer $token",
+    ])->postJson('/api/absensi', [
+        'personnel_id' => $personnel->id,
+        'foto' => $base64Image,
+        'lat' => -6.2,
+        'lng' => 106.8,
+        'platform' => 'test',
+        'device_name' => 'Test Device',
+        'unique_device_id' => 'DEVICE-123456',
+    ]);
+
+    $response->assertSuccessful();
+
+    $data = $response->json();
+    expect($data['status'])->toBe('success');
+    // Harus direct check-out (bukan error "Batas waktu Absen Masuk sudah berakhir")
+    expect($data['message'])->toContain('Pulang');
+});

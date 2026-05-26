@@ -663,7 +663,7 @@ class AttendanceController extends Controller
             $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
             $pulangDate = $activeDate;
-            if ($shift->start_time > $shift->end_time) {
+            if ($shift->start_time >= $shift->end_time) {
                 $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
             }
             $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
