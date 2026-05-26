@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Absensi;
 use App\Models\Device;
 use App\Models\Jadwal;
 use App\Models\Kantor;
@@ -196,4 +197,105 @@ test('clock in before shift start should be HADIR not TELAT for 24-hour shift', 
     expect($data['status'])->toBe('success');
     // Status masuk harus HADIR (tepat waktu), bukan TELAT
     expect($data['data']['status_masuk'])->toBe('HADIR');
+});
+
+test('absen pulang berhasil saat hari ini LIBUR tapi shift kemarin adalah 24 jam yang berakhir hari ini', function () {
+    // Settings: batas tutup absen pulang = 120 menit
+    Setting::set('absensi_masuk_mulai', 60, 'integer');
+    Setting::set('absensi_masuk_selesai', 120, 'integer');
+    Setting::set('absensi_pulang_mulai', 0, 'integer');
+    Setting::set('absensi_pulang_selesai', 120, 'integer');
+
+    $opd = Opd::create(['name' => 'Test OPD']);
+
+    $personnel = Personnel::create([
+        'id' => 1,
+        'name' => 'Personnel 1',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'foto.jpg',
+        'email' => 'personnel@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $kantor = Kantor::create([
+        'opd_id' => $opd->id,
+        'name' => 'Kantor Test',
+        'latitude' => -6.2,
+        'longitude' => 106.8,
+        'radius_meter' => 10000,
+        'is_active' => true,
+    ]);
+    $personnel->update(['kantor_id' => $kantor->id]);
+
+    $device = Device::create([
+        'opd_id' => $opd->id,
+        'personnel_id' => $personnel->id,
+        'name' => 'Test Device',
+        'license_key' => 'LIC-123456',
+        'unique_device_id' => 'DEVICE-123456',
+        'status' => 'active',
+    ]);
+
+    $todayDate = '2026-05-26';
+    $yesterdayDate = '2026-05-25';
+
+    // Mock waktu: hari ini 16:28 (masih dalam window pulang shift kemarin yg berakhir 16:15 + 120 menit = 18:15)
+    Carbon::setTestNow(Carbon::parse("$todayDate 16:28:00"));
+
+    // Shift 24 jam: mulai 16:15 kemarin, berakhir 16:15 hari ini
+    $shift24 = Shift::create([
+        'name' => '24S',
+        'type' => 'shift',
+        'start_time' => '16:15:00',
+        'end_time' => '16:15:00',
+    ]);
+
+    // Jadwal kemarin: shift 24 jam
+    Jadwal::create([
+        'personnel_id' => $personnel->id,
+        'shift_id' => $shift24->id,
+        'tanggal' => $yesterdayDate,
+        'status' => 'SHIFT',
+    ]);
+
+    // Jadwal hari ini: LIBUR
+    $offShift = Shift::create([
+        'name' => 'OFF',
+        'type' => 'off',
+        'keterangan' => 'LIBUR',
+        'start_time' => null,
+        'end_time' => null,
+    ]);
+
+    Jadwal::create([
+        'personnel_id' => $personnel->id,
+        'shift_id' => $offShift->id,
+        'tanggal' => $todayDate,
+        'status' => 'LIBUR',
+    ]);
+
+    // Sudah absen masuk kemarin (saat shift dimulai)
+    Absensi::create([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $yesterdayDate,
+        'status' => 'HADIR',
+        'jam_masuk' => '16:20:00',
+        'status_masuk' => 'TELAT',
+    ]);
+
+    // Cek status via API — harus berhasil, bukan LIBUR
+    $response = $this->withHeaders([
+        'X-API-KEY' => 'TEST-API-KEY',
+        'X-LICENSE-KEY' => 'LIC-123456',
+        'X-DEVICE-ID' => 'DEVICE-123456',
+    ])->getJson("/api/personnels/check-status/{$personnel->id}");
+
+    $response->assertSuccessful();
+    $data = $response->json();
+    expect($data['status'])->toBe('success');
+    // Harus mengembalikan jadwal kemarin, bukan jadwal hari ini (LIBUR)
+    expect($data['data']['shift_id'])->toBe($shift24->id);
 });

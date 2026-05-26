@@ -240,19 +240,23 @@ new #[Layout('layouts.absensi.app')] class extends Component
         $this->activeJadwal = null;
         $this->activeDate = '';
 
-        if ($nowTime < '09:00:00') {
-            $yesterdayJadwal = Jadwal::where('personnel_id', $this->selectedPersonnel->id)
-                ->whereDate('tanggal', $yesterday)
-                ->with('shift')
-                ->first();
+        // Night Shift Buffer: Cek apakah user masih dalam window absen pulang shift malam kemarin
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
-                if ($yesterdayJadwal->shift->start_time->format('H:i:s') >= $yesterdayJadwal->shift->end_time->format('H:i:s')) {
-                    $endTimePlusBuffer = $yesterdayJadwal->shift->end_time->copy()->addHours(4)->format('H:i:s');
-                    if ($nowTime < $endTimePlusBuffer) {
-                        $this->activeJadwal = $yesterdayJadwal;
-                        $this->activeDate = $yesterday;
-                    }
+        $yesterdayJadwal = Jadwal::where('personnel_id', $this->selectedPersonnel->id)
+            ->whereDate('tanggal', $yesterday)
+            ->with('shift')
+            ->first();
+
+        if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
+            if ($yesterdayJadwal->shift->start_time->format('H:i:s') >= $yesterdayJadwal->shift->end_time->format('H:i:s')) {
+                // End time jatuh pada hari ini
+                $endDatetime = Carbon::parse($today)->setTimeFrom($yesterdayJadwal->shift->end_time);
+                $windowOutEnd = $endDatetime->copy()->addMinutes($selesaiOut);
+
+                if ($now->lessThanOrEqualTo($windowOutEnd)) {
+                    $this->activeJadwal = $yesterdayJadwal;
+                    $this->activeDate = $yesterday;
                 }
             }
         }

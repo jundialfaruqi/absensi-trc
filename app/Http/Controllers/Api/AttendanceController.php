@@ -296,23 +296,26 @@ class AttendanceController extends Controller
 
         $jadwal = null;
 
-        // Night Shift Buffer: Check if user is still in the "OUT" window of yesterday's night shift
-        if ($nowTime < '10:00:00') {
-            $yesterdayJadwal = Jadwal::where('personnel_id', $id)
-                ->whereDate('tanggal', $yesterday)
-                ->with('shift')
-                ->first();
+        // Night Shift Buffer: Cek apakah user masih dalam window absen pulang shift malam kemarin
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
-                $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
-                $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+        $yesterdayJadwal = Jadwal::where('personnel_id', $id)
+            ->whereDate('tanggal', $yesterday)
+            ->with('shift')
+            ->first();
 
-                // It's a night shift if start_time >= end_time
-                if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
-                    $endTimePlusBuffer = $eTime->copy()->addHours(3)->format('H:i:s');
-                    if ($nowTime < $endTimePlusBuffer) {
-                        $jadwal = $yesterdayJadwal;
-                    }
+        if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
+            $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
+            $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+
+            // Shift malam: start_time >= end_time (termasuk shift 24 jam start == end)
+            if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
+                // End time jatuh pada hari ini (yesterday + 1 hari = today)
+                $endDatetime = Carbon::parse($today)->setTimeFrom($eTime);
+                $windowOutEnd = $endDatetime->copy()->addMinutes($selesaiOut);
+
+                if ($now->lessThanOrEqualTo($windowOutEnd)) {
+                    $jadwal = $yesterdayJadwal;
                 }
             }
         }
@@ -584,27 +587,30 @@ class AttendanceController extends Controller
         $yesterday = $now->copy()->subDay()->format('Y-m-d');
         $nowTime = $now->format('H:i:s');
 
-        // SMART LOOKUP: Check if we should use yesterday's night shift
+        // SMART LOOKUP: Cek apakah user masih dalam window absen pulang shift malam kemarin
         $jadwal = null;
         $activeDate = $today;
 
-        // Buffer: 00:00 to 10:00 AM
-        if ($nowTime < '10:00:00') {
-            $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
-                ->whereDate('tanggal', $yesterday)
-                ->with('shift')
-                ->first();
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
-                $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
-                $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
-                if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
-                    // If now is before EndTime + 3 hours buffer, use yesterday (matching checkStatus)
-                    $endTimePlusBuffer = $eTime->copy()->addHours(3)->format('H:i:s');
-                    if ($nowTime < $endTimePlusBuffer) {
-                        $jadwal = $yesterdayJadwal;
-                        $activeDate = $yesterday;
-                    }
+        $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $yesterday)
+            ->with('shift')
+            ->first();
+
+        if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
+            $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
+            $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+
+            // Shift malam: start_time >= end_time (termasuk shift 24 jam start == end)
+            if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
+                // End time jatuh pada hari ini
+                $endDatetime = Carbon::parse($today)->setTimeFrom($eTime);
+                $windowOutEnd = $endDatetime->copy()->addMinutes($selesaiOut);
+
+                if ($now->lessThanOrEqualTo($windowOutEnd)) {
+                    $jadwal = $yesterdayJadwal;
+                    $activeDate = $yesterday;
                 }
             }
         }
