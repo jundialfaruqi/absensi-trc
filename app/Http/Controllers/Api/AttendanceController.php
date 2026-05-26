@@ -303,7 +303,7 @@ class AttendanceController extends Controller
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift) {
+            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
                 $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
                 $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
 
@@ -472,14 +472,14 @@ class AttendanceController extends Controller
                     ], 403);
                 }
 
-                        // Check if in gap between IN and OUT
+                // Check if in gap between IN and OUT
                 if ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
                     $isNightShift = $shift->start_time >= $shift->end_time;
-                    
+
                     // For night shift, the gap is between windowInEnd (Day 1) and windowOutStart (Day 2)
                     // If it's a night shift, the windowOutStart is on Day 2.
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
-                    
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Batas waktu Absen Masuk sudah berakhir. Silakan kembali $diff lagi untuk Absen Pulang.",
@@ -595,12 +595,16 @@ class AttendanceController extends Controller
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time > $yesterdayJadwal->shift->end_time) {
-                // If now is before EndTime + 3 hours buffer, use yesterday (matching checkStatus)
-                $endTimePlusBuffer = Carbon::parse($yesterdayJadwal->shift->end_time)->addHours(3)->format('H:i:s');
-                if ($nowTime < $endTimePlusBuffer) {
-                    $jadwal = $yesterdayJadwal;
-                    $activeDate = $yesterday;
+            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
+                $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
+                $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+                if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
+                    // If now is before EndTime + 3 hours buffer, use yesterday (matching checkStatus)
+                    $endTimePlusBuffer = $eTime->copy()->addHours(3)->format('H:i:s');
+                    if ($nowTime < $endTimePlusBuffer) {
+                        $jadwal = $yesterdayJadwal;
+                        $activeDate = $yesterday;
+                    }
                 }
             }
         }

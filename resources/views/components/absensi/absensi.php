@@ -246,11 +246,13 @@ new #[Layout('layouts.absensi.app')] class extends Component
                 ->with('shift')
                 ->first();
 
-            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->start_time->format('H:i:s') >= $yesterdayJadwal->shift->end_time->format('H:i:s')) {
-                $endTimePlusBuffer = $yesterdayJadwal->shift->end_time->copy()->addHours(4)->format('H:i:s');
-                if ($nowTime < $endTimePlusBuffer) {
-                    $this->activeJadwal = $yesterdayJadwal;
-                    $this->activeDate = $yesterday;
+            if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
+                if ($yesterdayJadwal->shift->start_time->format('H:i:s') >= $yesterdayJadwal->shift->end_time->format('H:i:s')) {
+                    $endTimePlusBuffer = $yesterdayJadwal->shift->end_time->copy()->addHours(4)->format('H:i:s');
+                    if ($nowTime < $endTimePlusBuffer) {
+                        $this->activeJadwal = $yesterdayJadwal;
+                        $this->activeDate = $yesterday;
+                    }
                 }
             }
         }
@@ -334,7 +336,7 @@ new #[Layout('layouts.absensi.app')] class extends Component
         // FIX: If it's a night shift and we are on the next day, check if we're within the closing window
         $isNightShift = $shift->start_time->format('H:i:s') >= $shift->end_time->format('H:i:s');
         $isNextDay = $now->isAfter(Carbon::parse($this->activeDate));
-        
+
         if ($isNightShift && $isNextDay) {
             $isOutWindow = $now->between($windowOutStart, $windowOutEnd);
         }
