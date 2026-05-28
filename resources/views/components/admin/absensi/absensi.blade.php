@@ -149,7 +149,7 @@
                         <option value="f4">Kertas F4 / Folio</option>
                         <option value="legal">Kertas Legal</option>
                     </select>
-                    <a href="{{ route('absensi.export-pdf', ['month' => $month, 'year' => $year, 'search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize]) }}"
+                    <a href="{{ route('absensi.export-pdf', ['month' => $month, 'year' => $year, 'search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize, 'opd_id' => $selectedOpd]) }}"
                         target="_blank" class="btn btn-neutral join-item gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-5">

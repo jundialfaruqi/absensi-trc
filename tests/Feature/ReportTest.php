@@ -54,7 +54,7 @@ test('authenticated super-admin can export PDF with default parameters', functio
 
     $response->assertSuccessful();
     $response->assertHeader('content-type', 'application/pdf');
-    expect($response->headers->get('content-disposition'))->toContain('attachment; filename=rekap_absensi_05_2026.pdf');
+    expect($response->headers->get('content-disposition'))->toContain('attachment; filename=rekap_absensi_5_2026.pdf');
 });
 
 test('handles f4 custom paper size correctly', function () {
@@ -86,6 +86,49 @@ test('restricts date range to maximum 31 days to prevent memory exhaustion', fun
         'startDate' => '2026-05-01',
         'endDate' => '2026-06-30', // 60 days range
         'paperSize' => 'a4',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+});
+
+test('super-admin filters by opd_id when selected', function () {
+    $opd1 = Opd::create(['name' => 'OPD Satu']);
+    $opd2 = Opd::create(['name' => 'OPD Dua']);
+
+    Personnel::create([
+        'name' => 'John Doe',
+        'opd_id' => $opd1->id,
+        'penugasan_id' => 1,
+        'foto' => 'john.jpg',
+        'email' => 'john@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    Personnel::create([
+        'name' => 'Jane Doe',
+        'opd_id' => $opd2->id,
+        'penugasan_id' => 1,
+        'foto' => 'jane.jpg',
+        'email' => 'jane@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123457',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    // Export with opd_id filter pointing to opd1
+    $response = $this->actingAs($user)->get(route('absensi.export-pdf', [
+        'month' => '05',
+        'year' => '2026',
+        'startDate' => '2026-05-01',
+        'endDate' => '2026-05-31',
+        'paperSize' => 'a4',
+        'opd_id' => $opd1->id,
     ]));
 
     $response->assertSuccessful();

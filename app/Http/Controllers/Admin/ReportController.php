@@ -26,7 +26,7 @@ class ReportController extends Controller
             $search = $request->get('search');
             $paperSize = $request->get('paperSize', 'a4');
 
-            $opdId = Auth::user()->hasRole('super-admin') ? null : Auth::user()->opd()?->id;
+            $opdId = Auth::user()->hasRole('super-admin') ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
 
             $dates = [];
             if ($startDate && $endDate) {
