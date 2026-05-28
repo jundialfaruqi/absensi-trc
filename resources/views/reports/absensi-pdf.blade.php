@@ -33,7 +33,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            table-layout: fixed;
+            table-layout: auto;
         }
 
         th,
@@ -155,7 +155,7 @@
 
     @foreach ($personnels->groupBy('opd_id') as $opdId => $group)
         @php
-            $currentOpdName = $group->first()->opd?->name ?? 'TANPA OPD';
+            $currentOpdName = $group->first()->opd->name ?? 'TANPA OPD';
         @endphp
 
         <div class="opd-title">OPD: {{ $currentOpdName }}</div>
