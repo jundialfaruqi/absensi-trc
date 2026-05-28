@@ -9,11 +9,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
 class ReportController extends Controller
 {
-    public function exportAbsensiPdf(Request $request): Response
+    public function exportAbsensiPdf(Request $request)
     {
         try {
             // Increase memory limit and execution time to prevent crashes on large PDF reports
@@ -33,11 +32,6 @@ class ReportController extends Controller
             if ($startDate && $endDate) {
                 $start = Carbon::parse($startDate);
                 $end = Carbon::parse($endDate);
-
-                // Restrict date range to maximum 31 days to prevent memory exhaustion and match on-screen limit
-                if ($start->diffInDays($end) > 31) {
-                    $end = $start->copy()->addDays(31);
-                }
 
                 while ($start <= $end) {
                     $dates[] = $start->format('Y-m-d');
@@ -73,8 +67,8 @@ class ReportController extends Controller
                 $p->jadwal_map = $p->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
             }
 
-            $opdName = $opdId ? (Opd::find($opdId)?->name ?? 'OPD Tidak Ditemukan') : 'Semua OPD';
-            $monthName = Carbon::createFromDate($year, $month, 1)->translatedFormat('F');
+            $opdName = $opdId ? Opd::find($opdId)->name : 'Semua OPD';
+            $monthName = Carbon::create()->month($month)->translatedFormat('F');
 
             $data = [
                 'personnels' => $personnels,
@@ -97,9 +91,7 @@ class ReportController extends Controller
             $pdf = Pdf::loadView('reports.absensi-pdf', $data)
                 ->setPaper($paperFormat, 'landscape');
 
-            $paddedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
-
-            return $pdf->download("rekap_absensi_{$paddedMonth}_{$year}.pdf");
+            return $pdf->download("rekap_absensi_{$month}_{$year}.pdf");
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => true,
