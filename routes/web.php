@@ -33,7 +33,7 @@ Route::group([
     'prefix' => '/page',
 ], function () {
     Route::livewire('/dashboard', 'admin::dashboard')
-        ->middleware('permission:lihat-dashboard')
+        ->middleware('permission:lihat-dashboard|lihat-dashboard-opd')
         ->name('dashboard');
 
     Route::livewire('/absensi-web', 'absensi')

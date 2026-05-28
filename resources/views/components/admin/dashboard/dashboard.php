@@ -1,21 +1,23 @@
 <?php
 
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Component;
 use App\Models\Absensi;
-use App\Models\Personnel;
+use App\Models\ApkRelease;
 use App\Models\LeaveRequest;
+use App\Models\Personnel;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\Setting;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
 new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Component
 {
     public bool $readyToLoad = false;
+
     public string $filterKonsumsi = '';
+
     public string $filterTanggal = '';
 
     public function load()
@@ -27,10 +29,10 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
     public function with()
     {
         $user = Auth::user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $user->can('lihat-dashboard');
         $opdId = $user->opd()?->id;
 
-        if (!$this->readyToLoad) {
+        if (! $this->readyToLoad) {
             return [
                 'stats' => [
                     'total_personnel' => 0,
@@ -50,13 +52,13 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'latePersonnel' => collect(),
                 'absentPersonnel' => collect(),
                 'isSuperAdmin' => $isSuperAdmin,
-                'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+                'opdName' => ! $isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
                 'apkInfo' => [
                     'version' => '',
                     'description' => '',
                     'whats_new' => '',
                     'optional_message' => '',
-                ]
+                ],
             ];
         }
 
@@ -64,19 +66,19 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // Base query for attendance today
         $absensiBase = Absensi::whereDate('tanggal', $today)
-            ->where(function($q) {
+            ->where(function ($q) {
                 // Count records that are NOT 'LIBUR'
-                $q->whereHas('jadwal.shift', fn($sq) => $sq->where('type', 'shift'))
-                  ->orWhereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+                $q->whereHas('jadwal.shift', fn ($sq) => $sq->where('type', 'shift'))
+                    ->orWhereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
             })
-            ->when(!$isSuperAdmin, function ($q) use ($opdId) {
-                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            ->when(! $isSuperAdmin, function ($q) use ($opdId) {
+                $q->whereHas('personnel', fn ($pq) => $pq->where('opd_id', $opdId));
             })
             ->when($this->filterKonsumsi, function ($q) {
                 if ($this->filterKonsumsi === 'flexible') {
-                    $q->whereHas('personnel', fn($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
+                    $q->whereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
                 } else {
-                    $q->whereHas('jadwal.shift.konsumsis', fn($sq) => $sq->where('nama', $this->filterKonsumsi));
+                    $q->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $this->filterKonsumsi));
                 }
             });
 
@@ -102,8 +104,8 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // Pending Leave Requests
         $pendingLeaves = LeaveRequest::where('status', 'PENDING')
-            ->when(!$isSuperAdmin, function ($q) use ($opdId) {
-                $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId));
+            ->when(! $isSuperAdmin, function ($q) use ($opdId) {
+                $q->whereHas('personnel', fn ($pq) => $pq->where('opd_id', $opdId));
             })
             ->with(['personnel.opd', 'cuti'])
             ->latest()
@@ -115,10 +117,10 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $absentPersonnel = (clone $absensiBase)->where('status', 'ALPA')->with(['personnel.opd', 'jadwal.shift'])->get();
 
         // Total Registered Personnel (All in DB, filtered by OPD)
-        $totalRegistered = Personnel::when(!$isSuperAdmin, fn($q) => $q->where('opd_id', $opdId))->count();
+        $totalRegistered = Personnel::when(! $isSuperAdmin, fn ($q) => $q->where('opd_id', $opdId))->count();
 
         // APK Info from latest release
-        $latestApk = \App\Models\ApkRelease::latestRelease();
+        $latestApk = ApkRelease::latestRelease();
 
         return [
             'stats' => [
@@ -130,7 +132,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'total_hadir' => $totalHadir,
                 'total_izin' => $totalIzin,
                 'total_telat' => $totalTelat,
-                'pending_leaves_count' => LeaveRequest::where('status', 'PENDING')->when(!$isSuperAdmin, fn($q) => $q->whereHas('personnel', fn($pq) => $pq->where('opd_id', $opdId)))->count(),
+                'pending_leaves_count' => LeaveRequest::where('status', 'PENDING')->when(! $isSuperAdmin, fn ($q) => $q->whereHas('personnel', fn ($pq) => $pq->where('opd_id', $opdId)))->count(),
                 'total_required' => $totalRequired,
                 'hadir_percentage' => $hadirPercentage,
             ],
@@ -139,14 +141,14 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             'latePersonnel' => $latePersonnel,
             'absentPersonnel' => $absentPersonnel,
             'isSuperAdmin' => $isSuperAdmin,
-            'opdName' => !$isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+            'opdName' => ! $isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
             'apkInfo' => [
                 'version' => $latestApk?->version ?? 'v1.2.0',
                 'description' => $latestApk?->description ?? 'Rilis terbaru dengan penguatan sistem keamanan perangkat.',
                 'whats_new' => $latestApk?->whats_new ?? [],
                 'optional_message' => $latestApk?->optional_message ?? '',
                 'release_date' => $latestApk?->release_date?->format('d/m/Y'),
-            ]
+            ],
         ];
     }
 
@@ -156,8 +158,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $user = Auth::user();
 
         // Security check
-        if (!$user->hasRole('super-admin') && $request->personnel->opd_id !== $user->opd()?->id) {
+        if (! $user->can('lihat-dashboard') && $request->personnel->opd_id !== $user->opd()?->id) {
             $this->dispatch('toast', type: 'error', message: 'Anda tidak memiliki akses.');
+
             return;
         }
 
@@ -205,8 +208,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $request = LeaveRequest::findOrFail($id);
         $user = Auth::user();
 
-        if (!$user->hasRole('super-admin') && $request->personnel->opd_id !== $user->opd()?->id) {
+        if (! $user->can('lihat-dashboard') && $request->personnel->opd_id !== $user->opd()?->id) {
             $this->dispatch('toast', type: 'error', message: 'Anda tidak memiliki akses.');
+
             return;
         }
 
