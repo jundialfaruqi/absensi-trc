@@ -204,6 +204,7 @@
                     .catch(e => console.error('Failed to load boundary', e));
 
                 let markers = {};
+                let onlineSince = {}; // tracks last WebSocket event time per elementId
 
                 function updateMarkers(devices) {
                     // Clear existing markers from cluster
@@ -334,36 +335,44 @@
                         listContainer.prepend(listItem);
                     }
 
+                    // Record last-seen timestamp (replaces per-user setTimeout)
+                    onlineSince[elementId] = Date.now();
+
                     // Update online counter
                     updateOnlineCount();
+                };
 
-                    // Set timer to clear online status after 70 seconds
-                    const timerKey = `statusTimer_${elementId}`;
-                    if (window[timerKey]) {
-                        clearTimeout(window[timerKey]);
+                /**
+                 * Mark a single user as offline in the sidebar and map popup.
+                 * Called by the central setInterval below.
+                 */
+                function markOffline(elementId) {
+                    delete onlineSince[elementId];
+
+                    const dotEl = document.getElementById(`status-dot-${elementId}`);
+                    const textEl = document.getElementById(`status-text-${elementId}`);
+
+                    if (dotEl) {
+                        dotEl.classList.remove('bg-emerald-500');
+                        dotEl.classList.remove('animate-pulse');
+                        dotEl.classList.add('bg-base-300');
+                    }
+                    if (textEl) {
+                        textEl.innerText = 'Aktif: 1 menit yang lalu';
                     }
 
-                    window[timerKey] = setTimeout(() => {
-                        const dotEl = document.getElementById(`status-dot-${elementId}`);
-                        const textEl = document.getElementById(`status-text-${elementId}`);
-                        if (dotEl) {
-                            dotEl.classList.remove('bg-emerald-500');
-                            dotEl.classList.remove('animate-pulse');
-                            dotEl.classList.add('bg-base-300');
-                        }
-                        if (textEl) {
-                            textEl.innerText = 'Aktif: 1 menit yang lalu';
-                        }
+                    const popupStatusEl = document.getElementById(`popup-status-${elementId}`);
+                    if (popupStatusEl) {
+                        popupStatusEl.innerText = 'Aktif: 1 menit yang lalu';
+                        popupStatusEl.className = 'text-xs opacity-60';
+                    }
 
-                        // Update status in popup too
-                        const popupStatusEl = document.getElementById(`popup-status-${elementId}`);
-                        if (popupStatusEl) {
-                            popupStatusEl.innerText = 'Aktif: 1 menit yang lalu';
-                            popupStatusEl.className = 'text-xs opacity-60';
-                        }
+                    // Reconstruct marker key: personnel IDs are numeric, device IDs start with 'd'
+                    const markerKey = String(elementId).startsWith('d') ? elementId : 'p' + elementId;
+                    const marker = markers[markerKey];
 
-                        // Update the stored popup content to Offline too
-                        if (marker && marker.getPopup()) {
+                    if (marker && marker.getPopup()) {
+                        try {
                             const currentPopupContent = marker.getPopup().getContent();
                             if (typeof currentPopupContent === 'string') {
                                 const regex = new RegExp(
@@ -373,12 +382,25 @@
                                     `<div class="text-xs opacity-60" id="popup-status-${elementId}">Aktif: 1 menit yang lalu</div>`;
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                             }
-                        }
+                        } catch (_) { /* ignore stale marker errors */ }
+                    }
 
-                        // Update online counter
-                        updateOnlineCount();
-                    }, 70000); // 1 minute 10 seconds
-                };
+                    updateOnlineCount();
+                }
+
+                // Single polling interval — far more reliable than per-user timers
+                // when multiple users are online simultaneously.
+                if (window.onlineCheckInterval) {
+                    clearInterval(window.onlineCheckInterval);
+                }
+                window.onlineCheckInterval = setInterval(() => {
+                    const now = Date.now();
+                    Object.keys(onlineSince).forEach(eid => {
+                        if (now - onlineSince[eid] >= 70000) {
+                            markOffline(eid);
+                        }
+                    });
+                }, 10000); // scan every 10 seconds
 
                 function updateOnlineCount() {
                     const count = document.querySelectorAll('#device-list .bg-emerald-500').length;
@@ -509,6 +531,12 @@
                 // Putuskan koneksi saat pindah halaman (Livewire Navigation)
                 if (!window.hasWsDisconnectListener) {
                     document.addEventListener('livewire:navigating', () => {
+                        // Stop offline-detection interval
+                        if (window.onlineCheckInterval) {
+                            clearInterval(window.onlineCheckInterval);
+                            window.onlineCheckInterval = null;
+                        }
+
                         if (window.EchoInstance) {
                             console.log('Memutuskan koneksi WebSocket karena pindah halaman...');
                             if (typeof window.EchoInstance.disconnect === 'function') {
