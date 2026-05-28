@@ -1,42 +1,67 @@
 <?php
 
+use App\Models\Absensi;
+use App\Models\Cuti;
+use App\Models\Device;
+use App\Models\Jadwal;
+use App\Models\Personnel;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use App\Models\Personnel;
-use App\Models\Absensi;
-use App\Models\Cuti;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 new class extends Component
 {
     // Form Edit properties
     public $editingPersonnelId;
+
     public $editingTanggal;
+
     public $editingAbsensiId;
+
     public $editingPersonnelName;
+
     public $statusMasuk;
+
     public $statusPulang;
+
     public $jamMasuk;
+
     public $jamPulang;
+
     public $alasanEdit;
+
     public $nomorSurat;
+
     public $cutiId;
+
     public $keterangan;
+
     public $editingFotoMasuk;
+
     public $editingFotoPulang;
+
     public $platformMasuk;
+
     public $platformPulang;
+
     public $deviceNameMasuk;
+
     public $deviceNamePulang;
+
     public $uniqueDeviceIdMasuk;
+
     public $uniqueDeviceIdPulang;
+
     public bool $isOfficialDeviceMasuk = false;
+
     public bool $isOfficialDevicePulang = false;
+
     public $officialDeviceNameMasuk;
+
     public $officialDeviceNamePulang;
+
     public bool $isEdited = false;
 
     #[On('openEditAbsensi')]
@@ -47,7 +72,7 @@ new class extends Component
         $personnel = Personnel::findOrFail($personnelId);
 
         // Authorization check
-        if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
             return;
         }
 
@@ -79,17 +104,17 @@ new class extends Component
             $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
 
             if ($this->uniqueDeviceIdMasuk) {
-                $device = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdMasuk)->first();
-                $this->isOfficialDeviceMasuk = !is_null($device);
+                $device = Device::where('license_key', $this->uniqueDeviceIdMasuk)->first();
+                $this->isOfficialDeviceMasuk = ! is_null($device);
                 $this->officialDeviceNameMasuk = $device?->name;
             }
             if ($this->uniqueDeviceIdPulang) {
-                $device = \App\Models\Device::where('unique_device_id', $this->uniqueDeviceIdPulang)->first();
-                $this->isOfficialDevicePulang = !is_null($device);
+                $device = Device::where('license_key', $this->uniqueDeviceIdPulang)->first();
+                $this->isOfficialDevicePulang = ! is_null($device);
                 $this->officialDeviceNamePulang = $device?->name;
             }
 
-            $this->isEdited = !is_null($absensi->original_status_masuk);
+            $this->isEdited = ! is_null($absensi->original_status_masuk);
         }
 
         $this->dispatch('open-modal', id: 'edit-absensi-modal');
@@ -105,7 +130,7 @@ new class extends Component
         $personnel = Personnel::findOrFail($this->editingPersonnelId);
 
         // Authorization check
-        if (!Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
             return;
         }
 
@@ -146,12 +171,14 @@ new class extends Component
 
     public function resetToOriginal()
     {
-        if (!$this->editingAbsensiId || !$this->isEdited) return;
+        if (! $this->editingAbsensiId || ! $this->isEdited) {
+            return;
+        }
 
         $absensi = Absensi::findOrFail($this->editingAbsensiId);
 
         // Authorization check
-        if (!Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
             return;
         }
 
@@ -199,15 +226,19 @@ new class extends Component
 
     public function resetAbsensi()
     {
-        if (!$this->editingAbsensiId) return;
+        if (! $this->editingAbsensiId) {
+            return;
+        }
 
         // Permission check
-        if (!Auth::user()->can('reset-absen')) return;
+        if (! Auth::user()->can('reset-absen')) {
+            return;
+        }
 
         $absensi = Absensi::findOrFail($this->editingAbsensiId);
 
         // Authorization check
-        if (!Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
             return;
         }
 
@@ -219,7 +250,7 @@ new class extends Component
         $absensi->delete();
 
         // Buat ulang record absensi default berdasarkan jadwal
-        $jadwal = \App\Models\Jadwal::where('personnel_id', $personnelId)
+        $jadwal = Jadwal::where('personnel_id', $personnelId)
             ->where('tanggal', $tanggal)
             ->first();
 
