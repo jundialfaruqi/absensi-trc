@@ -903,10 +903,10 @@ class AttendanceController extends Controller
                 // Hitung waktu mulai shift sebagai datetime lengkap (tanggal + jam)
                 $shiftStartDatetime = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
 
-                // Toleransi: 1 menit setelah jam masuk shift
-                $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinute();
+                // Toleransi: 30 menit setelah jam masuk shift
+                $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinutes(30);
 
-                // Jika absen masuk SETELAH jam masuk + 1 menit toleransi → TELAT
+                // Jika absen masuk SETELAH jam masuk + 30 menit toleransi → TELAT
                 if ($now->greaterThan($shiftStartWithBuffer)) {
                     $status_masuk = 'TELAT';
                 }
