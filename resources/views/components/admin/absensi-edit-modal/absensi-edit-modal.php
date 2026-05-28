@@ -104,12 +104,12 @@ new class extends Component
             $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
 
             if ($this->uniqueDeviceIdMasuk) {
-                $device = Device::where('license_key', $this->uniqueDeviceIdMasuk)->first();
+                $device = Device::find($this->uniqueDeviceIdMasuk);
                 $this->isOfficialDeviceMasuk = ! is_null($device);
                 $this->officialDeviceNameMasuk = $device?->name;
             }
             if ($this->uniqueDeviceIdPulang) {
-                $device = Device::where('license_key', $this->uniqueDeviceIdPulang)->first();
+                $device = Device::find($this->uniqueDeviceIdPulang);
                 $this->isOfficialDevicePulang = ! is_null($device);
                 $this->officialDeviceNamePulang = $device?->name;
             }

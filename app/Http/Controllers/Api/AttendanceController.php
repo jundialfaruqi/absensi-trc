@@ -842,7 +842,7 @@ class AttendanceController extends Controller
                     'jarak_meter' => $lokasiResult['jarak_meter'],
                     'platform_masuk' => $request->platform,
                     'device_name_masuk' => $request->device_name,
-                    'unique_device_id_masuk' => $device?->license_key,
+                    'unique_device_id_masuk' => $device?->id,
                     'is_location_anomaly' => $isAnomaly,
                     'anomaly_reason' => $anomalyReason,
 
@@ -857,7 +857,7 @@ class AttendanceController extends Controller
                     'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
                     'platform_pulang' => $request->platform,
                     'device_name_pulang' => $request->device_name,
-                    'unique_device_id_pulang' => $device?->license_key,
+                    'unique_device_id_pulang' => $device?->id,
                 ]);
             } else {
                 $existing->update([
@@ -870,7 +870,7 @@ class AttendanceController extends Controller
                     'jarak_meter' => $lokasiResult['jarak_meter'],
                     'platform_masuk' => $request->platform,
                     'device_name_masuk' => $request->device_name,
-                    'unique_device_id_masuk' => $device?->license_key,
+                    'unique_device_id_masuk' => $device?->id,
                     'is_location_anomaly' => $isAnomaly,
                     'anomaly_reason' => $anomalyReason,
 
@@ -885,7 +885,7 @@ class AttendanceController extends Controller
                     'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
                     'platform_pulang' => $request->platform,
                     'device_name_pulang' => $request->device_name,
-                    'unique_device_id_pulang' => $device?->license_key,
+                    'unique_device_id_pulang' => $device?->id,
                 ]);
                 $absensi = $existing;
             }
@@ -933,7 +933,7 @@ class AttendanceController extends Controller
                     'jarak_meter' => $lokasiResult['jarak_meter'],
                     'platform_masuk' => $request->platform,
                     'device_name_masuk' => $request->device_name,
-                    'unique_device_id_masuk' => $device?->license_key,
+                    'unique_device_id_masuk' => $device?->id,
                     'is_location_anomaly' => $isAnomaly,
                     'anomaly_reason' => $anomalyReason,
                 ]);
@@ -951,7 +951,7 @@ class AttendanceController extends Controller
                     'jarak_meter' => $lokasiResult['jarak_meter'],
                     'platform_masuk' => $request->platform,
                     'device_name_masuk' => $request->device_name,
-                    'unique_device_id_masuk' => $device?->license_key,
+                    'unique_device_id_masuk' => $device?->id,
                     'is_location_anomaly' => $isAnomaly,
                     'anomaly_reason' => $anomalyReason,
                 ]);
@@ -1011,7 +1011,7 @@ class AttendanceController extends Controller
                 'jarak_meter_pulang' => $lokasiResult['jarak_meter'],
                 'platform_pulang' => $request->platform,
                 'device_name_pulang' => $request->device_name,
-                'unique_device_id_pulang' => $device?->license_key,
+                'unique_device_id_pulang' => $device?->id,
                 'is_location_anomaly' => $existing->is_location_anomaly || $isAnomaly,
                 'anomaly_reason' => $isAnomaly ? $anomalyReason : $existing->anomaly_reason,
             ]);
