@@ -226,7 +226,7 @@
                                         if (in_array($a->status, ['HADIR', 'SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
                                             $hadir++;
                                             $class = $a->status === 'HADIR' ? 'status-hadir' : 'status-izin';
-                                        } elseif ($a->status === 'alpa') {
+                                        } elseif ($a->status === 'ALPA') {
                                             $alpa++;
                                             $class = 'status-alpa';
                                         }
