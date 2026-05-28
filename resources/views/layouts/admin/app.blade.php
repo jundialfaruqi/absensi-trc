@@ -318,7 +318,7 @@
                 <div class="flex-1 overflow-y-auto no-scrollbar py-4">
                     <ul class="menu w-full px-4 gap-1">
 
-                        @can('lihat-dashboard|lihat-dashboard-opd')
+                        @canany(['lihat-dashboard', 'lihat-dashboard-opd'])
                             <li class="menu-title text-xs font-semibold opacity-50 uppercase mb-1">Overview</li>
 
                             <li>
@@ -337,7 +337,7 @@
                                     </span>
                                 </a>
                             </li>
-                        @endcan
+                        @endcanany
 
                         @can('manajemen-jadwal')
                             <li>
