@@ -1,19 +1,23 @@
 <?php
 
+use App\Models\Device;
+use App\Models\Kantor;
+use App\Models\Opd;
+use App\Models\Penugasan;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use App\Models\Device;
-use App\Models\Opd;
-use App\Models\Penugasan;
-use Illuminate\Support\Facades\Auth;
 
 new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Component
 {
     public bool $readyToLoad = false;
+
     public string $search = '';
+
     public string $filterOpd = '';
+
     public string $filterPenugasan = '';
 
     public function load()
@@ -24,8 +28,8 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
     #[Computed]
     public function opds()
     {
-        return Auth::user()->hasRole('super-admin') 
-            ? Opd::orderBy('name')->get() 
+        return Auth::user()->hasRole('super-admin')
+            ? Opd::orderBy('name')->get()
             : [Auth::user()->opd()];
     }
 
@@ -38,16 +42,18 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
     #[Computed]
     public function devices()
     {
-        if (!$this->readyToLoad) return [];
+        if (! $this->readyToLoad) {
+            return [];
+        }
 
         return Device::with([
-                'personnel:id,name,foto,penugasan_id,opd_id',
-                'personnel.penugasan:id,name',
-                'opd:id,name,singkatan',
-            ])
+            'personnel:id,name,foto,penugasan_id,opd_id',
+            'personnel.penugasan:id,name',
+            'opd:id,name,singkatan',
+        ])
             ->whereNotNull('last_latitude')
             ->whereNotNull('last_longitude')
-            ->when(!Auth::user()->hasRole('super-admin'), function ($q) {
+            ->when(! Auth::user()->hasRole('super-admin'), function ($q) {
                 $q->where('opd_id', Auth::user()->opd()?->id);
             })
             ->when($this->filterOpd, function ($q) {
@@ -60,7 +66,7 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
             })
             ->when($this->search, function ($q) {
                 $q->whereHas('personnel', function ($pq) {
-                    $pq->where('name', 'like', '%' . $this->search . '%');
+                    $pq->where('name', 'like', '%'.$this->search.'%');
                 });
             })
             // Hanya ambil kolom yang diperlukan untuk peta (hilangkan data sensitif)
@@ -71,16 +77,30 @@ new #[Title('Maps Real-time')] #[Layout('layouts::admin.app')] class extends Com
             ->get()
             ->map(function ($d) {
                 $d->last_seen_human = $d->last_seen_at ? $d->last_seen_at->diffForHumans() : 'Belum aktif';
+                $d->is_online = $d->last_seen_at && $d->last_seen_at->diffInMinutes() < 1;
+
                 return $d;
-            });
+            })
+            ->sortByDesc('is_online')
+            ->values();
+    }
+
+    #[Computed]
+    public function totalOnline(): int
+    {
+        if (! $this->readyToLoad) {
+            return 0;
+        }
+
+        return $this->devices->filter(fn ($d) => $d->is_online)->count();
     }
 
     #[Computed]
     public function kantors()
     {
-        return \App\Models\Kantor::when(!Auth::user()->hasRole('super-admin'), function ($q) {
-                $q->where('opd_id', Auth::user()->opd()?->id);
-            })
+        return Kantor::when(! Auth::user()->hasRole('super-admin'), function ($q) {
+            $q->where('opd_id', Auth::user()->opd()?->id);
+        })
             ->where('is_active', true)
             ->get();
     }

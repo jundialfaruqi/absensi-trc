@@ -39,10 +39,18 @@
 
             <div class="divider my-1"></div>
 
-            <div class="flex-1 overflow-y-auto space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                <span class="text-sm font-semibold text-base-content">
+                    Online : <span id="online-count">{{ $this->totalOnline }}</span>
+                </span>
+            </div>
+
+            <div id="device-list" class="flex-1 overflow-y-auto space-y-2">
                 @forelse($this->devices as $d)
                     @php $markerKey = $d->personnel_id ? ('p' . $d->personnel_id) : ('d' . $d->id); @endphp
-                    <div class="p-2 hover:bg-base-200 rounded-lg cursor-pointer flex items-center gap-2"
+                    @php $itemId = $d->personnel_id ?? 'd' . $d->id; @endphp
+                    <div id="device-item-{{ $itemId }}" class="p-2 hover:bg-base-200 rounded-lg cursor-pointer flex items-center gap-2"
                         onclick="focusMarker('{{ $markerKey }}', {{ $d->last_latitude }}, {{ $d->last_longitude }})">
                         <div class="avatar">
                             <div class="w-10 rounded-full">
@@ -319,6 +327,16 @@
                         textEl.classList.remove('opacity-60');
                     }
 
+                    // Move this item to top of sidebar list
+                    const listItem = document.getElementById(`device-item-${elementId}`);
+                    const listContainer = document.getElementById('device-list');
+                    if (listItem && listContainer && listContainer.firstElementChild !== listItem) {
+                        listContainer.prepend(listItem);
+                    }
+
+                    // Update online counter
+                    updateOnlineCount();
+
                     // Set timer to clear online status after 70 seconds
                     const timerKey = `statusTimer_${elementId}`;
                     if (window[timerKey]) {
@@ -356,8 +374,19 @@
                                 marker.setPopupContent(currentPopupContent.replace(regex, newDiv));
                             }
                         }
+
+                        // Update online counter
+                        updateOnlineCount();
                     }, 70000); // 1 minute 10 seconds
                 };
+
+                function updateOnlineCount() {
+                    const count = document.querySelectorAll('#device-list .bg-emerald-500').length;
+                    const el = document.getElementById('online-count');
+                    if (el) { el.textContent = count; }
+                }
+
+
 
                 function fetchAddress(lat, lng, id) {
                     const el = document.getElementById(`address-${id}`);
