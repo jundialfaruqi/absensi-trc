@@ -279,6 +279,7 @@ class AttendanceController extends Controller
                     'judul' => $b->judul,
                     'deskripsi' => $b->deskripsi,
                     'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
+                    'slug' => $b->slug,
                 ];
             });
 

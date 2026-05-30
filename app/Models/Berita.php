@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\BannerUpdated;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -25,38 +26,40 @@ class Berita extends Model
     {
         static::saved(function ($berita) {
             $activeBanners = static::where('is_banner_active', true)->get();
-            $bannerData = $activeBanners->map(function($b) {
+            $bannerData = $activeBanners->map(function ($b) {
                 return [
                     'id' => $b->id,
                     'judul' => $b->judul,
                     'deskripsi' => $b->deskripsi,
-                    'gambar' => $b->gambar ? asset('storage/' . $b->gambar) : null,
+                    'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
+                    'slug' => $b->slug,
                 ];
             })->toArray();
 
-            event(new \App\Events\BannerUpdated($bannerData));
+            event(new BannerUpdated($bannerData));
         });
 
         static::deleted(function ($berita) {
             if ($berita->is_banner_active) {
                 $activeBanners = static::where('is_banner_active', true)->get();
-                $bannerData = $activeBanners->map(function($b) {
+                $bannerData = $activeBanners->map(function ($b) {
                     return [
                         'id' => $b->id,
                         'judul' => $b->judul,
                         'deskripsi' => $b->deskripsi,
-                        'gambar' => $b->gambar ? asset('storage/' . $b->gambar) : null,
+                        'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
+                        'slug' => $b->slug,
                     ];
                 })->toArray();
 
-                event(new \App\Events\BannerUpdated($bannerData));
+                event(new BannerUpdated($bannerData));
             }
         });
     }
 
     public function creator()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
@@ -83,14 +86,14 @@ class Berita extends Model
             $query->where('id', '!=', $excludeId);
         }
 
-        if (!$query->exists()) {
+        if (! $query->exists()) {
             return $baseSlug;
         }
 
         // Tambahkan nomor di akhir
         $counter = 1;
         do {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = $baseSlug.'-'.$counter;
             $existsQuery = static::where('slug', $slug);
             if ($excludeId) {
                 $existsQuery->where('id', '!=', $excludeId);
