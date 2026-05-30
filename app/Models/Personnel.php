@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,11 +12,11 @@ class Personnel extends Authenticatable
     use HasApiTokens, Notifiable;
 
     protected $fillable = [
-        'name', 'nik', 'opd_id', 'penugasan_id', 'regu', 'kantor_id', 'nomor_hp', 'foto', 'face_descriptor', 'email', 'password', 'pin', 'wajib_absen_di_lokasi', 'face_recognition', 'attendance_type'
+        'name', 'nik', 'opd_id', 'penugasan_id', 'regu', 'kantor_id', 'nomor_hp', 'foto', 'face_descriptor', 'face_descriptor_mobile', 'email', 'password', 'pin', 'wajib_absen_di_lokasi', 'face_recognition', 'attendance_type',
     ];
 
     protected $hidden = [
-        'password', 'pin'
+        'password', 'pin',
     ];
 
     public function opd(): BelongsTo

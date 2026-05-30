@@ -191,7 +191,7 @@ class AttendanceController extends Controller
 
         // Get all personnels for face recognition (no OPD filter for Android)
         $query = Personnel::with('opd:id,name')
-            ->select('id', 'name', 'foto', 'face_descriptor', 'face_recognition', 'opd_id');
+            ->select('id', 'name', 'foto', 'face_descriptor_mobile', 'face_recognition', 'opd_id');
 
         if ($request->has('last_id')) {
             $query->where('id', '>', $request->last_id);
@@ -217,7 +217,8 @@ class AttendanceController extends Controller
                     'id' => $p->id,
                     'name' => $p->name,
                     'foto' => $p->foto,
-                    'face_descriptor' => $p->face_descriptor,
+                    // 'face_descriptor' => $p->face_descriptor,
+                    'face_descriptor_mobile' => $p->face_descriptor_mobile,
                     'face_recognition' => $p->face_recognition,
                     'opd_name' => $p->opd ? $p->opd->name : '-',
                 ];
@@ -1159,6 +1160,26 @@ class AttendanceController extends Controller
                 ],
                 'activities' => $activities,
             ],
+        ]);
+    }
+
+    public function storeFaceDescriptorMobile(Request $request)
+    {
+        $request->validate([
+            'faces' => 'required|array',
+            'faces.*.id' => 'required|exists:personnels,id',
+            'faces.*.face_descriptor_mobile' => 'required|string',
+        ]);
+
+        foreach ($request->faces as $face) {
+            Personnel::where('id', $face['id'])->update([
+                'face_descriptor_mobile' => $face['face_descriptor_mobile'],
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Face descriptor mobile berhasil diperbarui.',
         ]);
     }
 
