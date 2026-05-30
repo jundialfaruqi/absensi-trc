@@ -309,7 +309,7 @@
                                         <div
                                             class="relative w-full max-w-70 aspect-5/6 bg-base-300 rounded-lg overflow-hidden border-2 border-base-200">
                                             <video x-ref="video" x-show="isCameraOpen" autoplay muted playsinline
-                                                class="w-full h-full object-cover"></video>
+                                                class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
                                             <canvas x-ref="canvas" class="hidden"></canvas>
 
                                             <div x-show="!isCameraOpen"
@@ -560,76 +560,96 @@
                             },
 
                             async handleFileUpload(event) {
-                                const file = event.target.files[0];
-                                if (!file) return;
+                                 const file = event.target.files[0];
+                                 if (!file) return;
 
-                                this.isUploadingFile = true;
-                                try {
-                                    // Preview & Upload to Livewire
-                                    @this.upload('foto', file);
+                                 this.isUploadingFile = true;
+                                 try {
+                                     // Preview & Upload to Livewire
+                                     await new Promise((resolve, reject) => {
+                                         @this.upload('foto', file, 
+                                             (uploadedVal) => resolve(uploadedVal),
+                                             (err) => reject(err)
+                                         );
+                                     });
 
-                                    // Extract descriptor
-                                    if (!this.faceApiLoaded) await this.loadModels();
+                                     // Extract descriptor
+                                     if (!this.faceApiLoaded) await this.loadModels();
 
-                                    const img = await faceapi.bufferToImage(file);
-                                    const detection = await faceapi.detectSingleFace(img, new faceapi
-                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                        .withFaceDescriptor();
+                                     const img = await faceapi.bufferToImage(file);
+                                     const detection = await faceapi.detectSingleFace(img, new faceapi
+                                             .TinyFaceDetectorOptions()).withFaceLandmarks()
+                                         .withFaceDescriptor();
 
-                                    if (detection) {
-                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                            .descriptor)));
-                                    } else {
-                                        alert(
-                                            "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
-                                        );
-                                        @this.set('face_descriptor', '');
-                                    }
-                                } catch (err) {
-                                    console.error("Error processing file upload: ", err);
-                                } finally {
-                                    this.isUploadingFile = false;
-                                }
-                            },
+                                     if (detection) {
+                                         @this.set('face_descriptor', JSON.stringify(Array.from(detection
+                                             .descriptor)));
+                                     } else {
+                                         alert(
+                                             "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
+                                         );
+                                         @this.set('face_descriptor', '');
+                                     }
+                                 } catch (err) {
+                                     console.error("Error processing file upload: ", err);
+                                 } finally {
+                                     this.isUploadingFile = false;
+                                 }
+                             },
 
-                            async capture() {
-                                this.isCapturing = true;
-                                try {
-                                    const video = this.$refs.video;
-                                    const canvas = this.$refs.canvas;
-                                    canvas.width = video.videoWidth;
-                                    canvas.height = video.videoHeight;
+                             async capture() {
+                                 this.isCapturing = true;
+                                 try {
+                                     const video = this.$refs.video;
+                                     const canvas = this.$refs.canvas;
+                                     canvas.width = video.videoWidth;
+                                     canvas.height = video.videoHeight;
 
-                                    const context = canvas.getContext('2d');
-                                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                     const context = canvas.getContext('2d');
+                                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                                    // Extract descriptor from canvas
-                                    if (!this.faceApiLoaded) await this.loadModels();
-                                    const detection = await faceapi.detectSingleFace(canvas, new faceapi
-                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                        .withFaceDescriptor();
+                                     // Extract descriptor from canvas
+                                     if (!this.faceApiLoaded) await this.loadModels();
+                                     const detection = await faceapi.detectSingleFace(canvas, new faceapi
+                                             .TinyFaceDetectorOptions()).withFaceLandmarks()
+                                         .withFaceDescriptor();
 
-                                    if (detection) {
-                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                            .descriptor)));
+                                     if (detection) {
+                                         @this.set('face_descriptor', JSON.stringify(Array.from(detection
+                                             .descriptor)));
 
-                                        // Convert to Blob and upload
-                                        canvas.toBlob((blob) => {
-                                            const file = new File([blob], "capture.jpg", {
-                                                type: "image/jpeg"
-                                            });
-                                            @this.upload('foto', file);
-                                            this.stopCamera();
-                                        }, 'image/jpeg', 0.9);
-                                    } else {
-                                        alert(
-                                            "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
-                                        );
-                                    }
-                                } finally {
-                                    this.isCapturing = false;
-                                }
-                            }
+                                         // Convert to Blob and upload
+                                         await new Promise((resolve, reject) => {
+                                             canvas.toBlob((blob) => {
+                                                 if (!blob) {
+                                                     reject(new Error("Gagal membuat blob gambar."));
+                                                     return;
+                                                 }
+                                                 const file = new File([blob], "capture.jpg", {
+                                                     type: "image/jpeg"
+                                                 });
+                                                 @this.upload('foto', file, 
+                                                     (uploadedVal) => {
+                                                         this.stopCamera();
+                                                         resolve(uploadedVal);
+                                                     }, 
+                                                     (err) => {
+                                                         reject(err);
+                                                     }
+                                                 );
+                                             }, 'image/jpeg', 0.9);
+                                         });
+                                     } else {
+                                         alert(
+                                             "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
+                                         );
+                                     }
+                                 } catch (err) {
+                                     console.error("Error capturing/processing image: ", err);
+                                 } finally {
+                                     this.isCapturing = false;
+                                 }
+                             }
                         }));
                     }
                 };

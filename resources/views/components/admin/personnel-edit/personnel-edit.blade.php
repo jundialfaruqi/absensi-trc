@@ -405,7 +405,7 @@
                                         <div
                                             class="relative w-full max-w-70 aspect-5/6 bg-base-300 rounded-lg overflow-hidden border-2 border-base-200">
                                             <video x-ref="video" x-show="isCameraOpen" autoplay muted playsinline
-                                                class="w-full h-full object-cover"></video>
+                                                class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
                                             <canvas x-ref="canvas" class="hidden"></canvas>
 
                                             <div x-show="!isCameraOpen"
@@ -665,7 +665,12 @@
                                 this.isUploadingFile = true;
                                 try {
                                     // Preview & Upload to Livewire
-                                    @this.upload('foto', file);
+                                    await new Promise((resolve, reject) => {
+                                        @this.upload('foto', file, 
+                                            (uploadedVal) => resolve(uploadedVal),
+                                            (err) => reject(err)
+                                        );
+                                    });
 
                                     // Extract descriptor
                                     if (!this.faceApiLoaded) await this.loadModels();
@@ -713,18 +718,33 @@
                                             .descriptor)));
 
                                         // Convert to Blob and upload
-                                        canvas.toBlob((blob) => {
-                                            const file = new File([blob], "capture.jpg", {
-                                                type: "image/jpeg"
-                                            });
-                                            @this.upload('foto', file);
-                                            this.stopCamera();
-                                        }, 'image/jpeg', 0.9);
+                                        await new Promise((resolve, reject) => {
+                                            canvas.toBlob((blob) => {
+                                                if (!blob) {
+                                                    reject(new Error("Gagal membuat blob gambar."));
+                                                    return;
+                                                }
+                                                const file = new File([blob], "capture.jpg", {
+                                                    type: "image/jpeg"
+                                                });
+                                                @this.upload('foto', file, 
+                                                    (uploadedVal) => {
+                                                        this.stopCamera();
+                                                        resolve(uploadedVal);
+                                                    }, 
+                                                    (err) => {
+                                                        reject(err);
+                                                    }
+                                                );
+                                            }, 'image/jpeg', 0.9);
+                                        });
                                     } else {
                                         alert(
                                             "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
                                         );
                                     }
+                                } catch (err) {
+                                    console.error("Error capturing/processing image: ", err);
                                 } finally {
                                     this.isCapturing = false;
                                 }
