@@ -4,8 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AttendanceController;
 
 Route::middleware(['mobile_auth','noindex'])->group(function () {
-    // Public Mobile Routes (Only need API Key) — Longgar: 20 request per menit (mencegah terblokir saat testing)
-    Route::middleware('throttle:20,1')->group(function () {
+    // Public Mobile Routes (Only need API Key) — Longgar: 3\0 request per menit (mencegah terblokir saat testing)
+    Route::middleware('throttle:30,1')->group(function () {
         Route::post('/license/activate', [AttendanceController::class, 'activateLicense']);
         Route::post('/license/check', [AttendanceController::class, 'checkLicense']);
     });
@@ -24,7 +24,7 @@ Route::middleware(['mobile_auth','noindex'])->group(function () {
         // Login PIN (Dinonaktifkan karena sudah tidak digunakan)
         // Route::post('/login/pin', [AttendanceController::class, 'login'])->middleware('throttle:5,5');
 
-        // Absensi — 10 request per menit
-        Route::post('/absensi', [AttendanceController::class, 'store'])->middleware('throttle:10,1');
+        // Absensi — 30 request per menit
+        Route::post('/absensi', [AttendanceController::class, 'store'])->middleware('throttle:30,1');
     });
 });
