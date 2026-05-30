@@ -2,45 +2,66 @@
 
 namespace App\Livewire\Admin\PersonnelEdit;
 
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Computed;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use App\Models\Personnel;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use App\Models\Device;
+use App\Models\Kantor;
 use App\Models\Opd;
 use App\Models\Penugasan;
-use App\Models\Kantor;
+use App\Models\Personnel;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Component
 {
     use WithFileUploads;
 
     public int $personnelId;
+
     public string $name = '';
+
     public string $nik = '';
+
     public string $opd_id = '';
+
     public string $penugasan_id = '';
+
     public string $nomor_hp = '';
+
     public $foto;
+
     public ?string $oldFoto = null;
+
     public string $email = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
+
     public string $pin = '';
+
     public string $face_descriptor = '';
+
     public string $kantor_id = '';
+
     public bool $wajib_absen_di_lokasi = false;
+
     public bool $face_recognition = false;
+
     public string $attendance_type = 'SCHEDULED';
+
     public bool $auto_create_device = false;
+
     public bool $has_personal_device = false;
+
     public string $existing_device_name = '';
+
     public bool $readyToLoad = false;
 
     public function load()
@@ -69,6 +90,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             return Opd::query()->orderBy('name', 'asc')->get(['*']);
         } else {
             $userOpdId = Auth::user()->opd()?->id;
+
             return Opd::query()->where('id', '=', $userOpdId)->get(['*']);
         }
     }
@@ -83,9 +105,10 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     public function kantors()
     {
         $query = Kantor::query()->orderBy('name', 'asc');
-        if (!Auth::user()->hasRole('super-admin')) {
+        if (! Auth::user()->hasRole('super-admin')) {
             $query->where('opd_id', '=', Auth::user()->opd()?->id);
         }
+
         return $query->get(['*']);
     }
 
@@ -93,7 +116,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     {
         $item = Personnel::findOrFail($id);
 
-        if (!Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
+        if (! Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -112,7 +135,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->face_recognition = (bool) $item->face_recognition;
         $this->attendance_type = (string) $item->attendance_type;
 
-        $device = \App\Models\Device::where('personnel_id', $item->id)->first();
+        $device = Device::where('personnel_id', $item->id)->first();
         if ($device) {
             $this->has_personal_device = true;
             $this->existing_device_name = $device->name;
@@ -127,7 +150,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     private function generateUniquePin(): string
     {
         do {
-            $pin = sprintf("%06d", mt_rand(1, 999999));
+            $pin = sprintf('%06d', mt_rand(1, 999999));
         } while (Personnel::query()->where('pin', '=', $pin)->exists());
 
         return $pin;
@@ -202,14 +225,16 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         if ($this->foto) {
             try {
                 $mimeType = $this->foto->getMimeType();
-                if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
+                if (! in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
                     $this->reset('foto');
                     $this->addError('foto', 'File yang diunggah bukan merupakan gambar yang valid.');
+
                     return;
                 }
             } catch (\Exception $e) {
                 $this->reset('foto');
                 $this->addError('foto', 'File yang diunggah tidak dapat dibaca atau rusak.');
+
                 return;
             }
         }
@@ -219,7 +244,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
     public function save()
     {
-        if (!Auth::user()->hasRole('super-admin')) {
+        if (! Auth::user()->hasRole('super-admin')) {
             if ($this->opd_id != Auth::user()->opd()?->id) {
                 abort(403, 'Unauthorized action.');
             }
@@ -248,6 +273,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
         if ($this->foto) {
             $data['foto'] = $this->foto->store('personnel-fotos', 'public');
+            $data['face_descriptor_mobile'] = null;
 
             if ($this->oldFoto) {
                 Storage::disk('public')->delete($this->oldFoto);
@@ -259,22 +285,23 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
         $licenseMsg = '';
         if ($this->auto_create_device) {
-            $licenseKey = strtoupper(Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4));
-            \App\Models\Device::create([
+            $licenseKey = strtoupper(Str::random(4).'-'.Str::random(4).'-'.Str::random(4));
+            Device::create([
                 'opd_id' => $personnel->opd_id,
                 'personnel_id' => $personnel->id,
-                'name' => 'HP Personal - ' . $personnel->name,
+                'name' => 'HP Personal - '.$personnel->name,
                 'license_key' => $licenseKey,
                 'status' => 'inactive',
             ]);
-            $licenseMsg = " | License Key: " . $licenseKey;
+            $licenseMsg = ' | License Key: '.$licenseKey;
         }
 
         $this->dispatch('set-pending-toast', [
             'type' => 'success',
             'title' => 'Berhasil',
-            'message' => 'Data Personnel berhasil diperbarui.' . $licenseMsg
+            'message' => 'Data Personnel berhasil diperbarui.'.$licenseMsg,
         ]);
+
         return $this->redirectRoute('personnel', [], true, true);
     }
 };
