@@ -17,7 +17,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
 
     public bool $readyToLoad = false;
     #[Url]
-    public int $perPage = 20;
+    public int $perPage = 10;
 
     #[Url]
     public string $search = '';
