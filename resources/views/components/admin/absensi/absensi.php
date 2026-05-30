@@ -16,11 +16,10 @@ use Illuminate\Support\Facades\Auth;
 new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends Component
 {
     use WithPagination;
-
     public bool $readyToLoad = false;
 
     #[Url]
-    public int $perPage = 20;
+    public int $perPage = 10;
 
     #[Url]
     public string $search = '';
