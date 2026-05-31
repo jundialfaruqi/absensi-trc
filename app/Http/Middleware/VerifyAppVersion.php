@@ -19,6 +19,14 @@ class VerifyAppVersion
         $minVersion = ApkRelease::minimumVersionCode();
         $clientVersion = $request->header('X-App-Version-Code');
 
+        \Log::info('VerifyAppVersion Debug Log:', [
+            'url' => $request->fullUrl(),
+            'ip' => $request->ip(),
+            'client_version_header' => $clientVersion,
+            'min_version_required' => $minVersion,
+            'is_blocked' => (! $clientVersion || (int) $clientVersion < (int) $minVersion),
+        ]);
+
         if (! $clientVersion || (int) $clientVersion < (int) $minVersion) {
             return response()->json([
                 'success' => false,
