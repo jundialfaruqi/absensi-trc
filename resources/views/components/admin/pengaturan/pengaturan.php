@@ -82,7 +82,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         $this->pinMaxAttempts = Setting::get('pin_max_attempts', 5);
         $this->pinLock5 = Setting::get('pin_lock_duration_5', 5);
         $this->pinLock10 = Setting::get('pin_lock_duration_10', 15);
-        $this->minApkVersionCode = Setting::get('min_apk_version_code', 1);
+        $this->minApkVersionCode = ApkRelease::minimumVersionCode();
 
         $this->loadApkSettings();
     }
@@ -97,6 +97,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
             $this->apkDescription = $latest->description;
             $this->apkWhatsNew = $latest->whats_new ?? [];
             $this->apkOptionalMessage = $latest->optional_message;
+            $this->minApkVersionCode = $latest->min_version_code ?? 1;
         } else {
             // Load Legacy APK Settings
             $this->apkVersion = Setting::get('apk_version', 'v1.2.0');
@@ -169,13 +170,12 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
 
         ApkRelease::create([
             'version' => $this->apkVersion,
+            'min_version_code' => $this->minApkVersionCode,
             'release_date' => $this->apkReleaseDate,
             'description' => $this->apkDescription,
             'whats_new' => array_values(array_filter($this->apkWhatsNew)),
             'optional_message' => $this->apkOptionalMessage,
         ]);
-
-        Setting::set('min_apk_version_code', $this->minApkVersionCode, 'integer');
 
         $this->dispatch('toast', type: 'success', message: 'Informasi rilis APK baru berhasil disimpan.');
         $this->dispatch('close-modal', 'apk-modal');

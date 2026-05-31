@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Setting;
+use App\Models\ApkRelease;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +16,7 @@ class VerifyAppVersion
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $minVersion = Setting::get('min_apk_version_code', config('app.min_apk_version', 1));
+        $minVersion = ApkRelease::minimumVersionCode();
         $clientVersion = $request->header('X-App-Version-Code');
 
         if (! $clientVersion || (int) $clientVersion < (int) $minVersion) {

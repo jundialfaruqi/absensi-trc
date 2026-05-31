@@ -374,6 +374,7 @@
                         <thead>
                             <tr class="bg-base-200/50">
                                 <th class="text-[9px] font-black uppercase py-3">Versi</th>
+                                <th class="text-[9px] font-black uppercase py-3">Min. Build</th>
                                 <th class="text-[9px] font-black uppercase py-3">Tanggal</th>
                                 <th class="text-[9px] font-black uppercase py-3">Deskripsi</th>
                             </tr>
@@ -384,6 +385,10 @@
                                     <td class="py-3">
                                         <span
                                             class="badge badge-primary badge-sm text-[9px] font-black px-1.5 h-4">{{ $release->version }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span
+                                            class="badge badge-secondary badge-sm text-[9px] font-black px-1.5 h-4">{{ $release->min_version_code ?? 1 }}</span>
                                     </td>
                                     <td class="py-3">
                                         <span
