@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'min_apk_version' => (int) env('MIN_APK_VERSION_CODE', 1),
+
 ];
