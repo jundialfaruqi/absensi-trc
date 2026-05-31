@@ -1,15 +1,8 @@
 <?php
 
-use App\Http\Middleware\CheckDeviceLicense;
-use App\Http\Middleware\CheckMobileApiKey;
-use App\Http\Middleware\NoIndexMiddleware;
-use App\Http\Middleware\VerifyAppVersion;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Spatie\Permission\Middleware\PermissionMiddleware;
-use Spatie\Permission\Middleware\RoleMiddleware;
-use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,13 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => RoleMiddleware::class,
-            'permission' => PermissionMiddleware::class,
-            'role_or_permission' => RoleOrPermissionMiddleware::class,
-            'mobile_auth' => CheckMobileApiKey::class,
-            'device_auth' => CheckDeviceLicense::class,
-            'check_app_version' => VerifyAppVersion::class,
-            'noindex' => NoIndexMiddleware::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'mobile_auth' => \App\Http\Middleware\CheckMobileApiKey::class,
+            'device_auth' => \App\Http\Middleware\CheckDeviceLicense::class,
+            'noindex' => \App\Http\Middleware\NoIndexMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

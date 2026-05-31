@@ -271,8 +271,6 @@
                                 <h3 class="text-xs font-black uppercase tracking-tight">Android Application</h3>
                                 <span
                                     class="badge badge-primary badge-sm text-[10px] font-black h-4 px-1.5">{{ $apkVersion }}</span>
-                                <span
-                                    class="badge badge-secondary badge-sm text-[10px] font-black h-4 px-1.5">Min. Build: {{ $minApkVersionCode }}</span>
                                 @if ($apkReleaseDate)
                                     <span
                                         class="text-[9px] font-bold opacity-40 uppercase tracking-tighter">{{ \Carbon\Carbon::parse($apkReleaseDate)->format('d M Y') }}</span>
@@ -374,7 +372,6 @@
                         <thead>
                             <tr class="bg-base-200/50">
                                 <th class="text-[9px] font-black uppercase py-3">Versi</th>
-                                <th class="text-[9px] font-black uppercase py-3">Min. Build</th>
                                 <th class="text-[9px] font-black uppercase py-3">Tanggal</th>
                                 <th class="text-[9px] font-black uppercase py-3">Deskripsi</th>
                             </tr>
@@ -385,10 +382,6 @@
                                     <td class="py-3">
                                         <span
                                             class="badge badge-primary badge-sm text-[9px] font-black px-1.5 h-4">{{ $release->version }}</span>
-                                    </td>
-                                    <td class="py-3">
-                                        <span
-                                            class="badge badge-secondary badge-sm text-[9px] font-black px-1.5 h-4">{{ $release->min_version_code ?? 1 }}</span>
                                     </td>
                                     <td class="py-3">
                                         <span
@@ -542,43 +535,26 @@
 
             <form wire:submit="saveApkSettings">
                 <div class="p-6 space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {{-- Versi --}}
                         <div class="form-control w-full">
                             <label class="label py-1">
-                                <span class="label-text text-[10px] font-black uppercase text-base-content">Versi Aplikasi (Nama) <span class="text-error">*</span></span>
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Versi
+                                    Aplikasi <span class="text-error">*</span></span>
                             </label>
                             <input type="text" wire:model="apkVersion"
                                 class="input input-bordered focus:input-primary font-bold placeholder:text-base-content/40 w-full transition-all"
                                 placeholder="Cth: v1.2.0">
-                            @error('apkVersion')
-                                <span class="text-error text-[10px] mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Versi Build (Min. Version Code) --}}
-                        <div class="form-control w-full">
-                            <label class="label py-1">
-                                <span class="label-text text-[10px] font-black uppercase text-base-content">Versi Minimum (Build Code) <span class="text-error">*</span></span>
-                            </label>
-                            <input type="number" wire:model="minApkVersionCode"
-                                class="input input-bordered focus:input-primary font-bold placeholder:text-base-content/40 w-full transition-all"
-                                placeholder="Cth: 15">
-                            @error('minApkVersionCode')
-                                <span class="text-error text-[10px] mt-1">{{ $message }}</span>
-                            @enderror
                         </div>
 
                         {{-- Tanggal Rilis --}}
                         <div class="form-control w-full">
                             <label class="label py-1">
-                                <span class="label-text text-[10px] font-black uppercase text-base-content">Tanggal Rilis <span class="text-error">*</span></span>
+                                <span class="label-text text-[10px] font-black uppercase text-base-content">Tanggal
+                                    Rilis <span class="text-error">*</span></span>
                             </label>
                             <input type="date" wire:model="apkReleaseDate"
                                 class="input input-bordered focus:input-primary font-bold w-full transition-all">
-                            @error('apkReleaseDate')
-                                <span class="text-error text-[10px] mt-1">{{ $message }}</span>
-                            @enderror
                         </div>
                     </div>
 
@@ -661,7 +637,7 @@
                 <div class="modal-action mt-0 p-6 border-t border-base-200 bg-base-100 sticky bottom-0 z-50">
                     <button type="button" class="btn btn-ghost btn-sm"
                         onclick="document.getElementById('apk-modal').close()">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm text-white px-8">
+                    <button type="submit" class="btn btn-primary btn-sm text-white px-8" wire:click="closeApkModal">
                         <span wire:loading wire:target="saveApkSettings"
                             class="loading loading-spinner loading-xs"></span>
                         <span wire:loading.remove wire:target="saveApkSettings">Simpan Perubahan</span>

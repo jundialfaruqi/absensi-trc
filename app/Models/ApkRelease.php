@@ -11,11 +11,10 @@ class ApkRelease extends Model
 
     protected $fillable = [
         'version',
-        'min_version_code',
         'release_date',
         'description',
         'whats_new',
-        'optional_message',
+        'optional_message'
     ];
 
     protected $casts = [
@@ -26,19 +25,10 @@ class ApkRelease extends Model
     /**
      * Get the latest active release
      */
-    public static function latestRelease(): ?self
+    public static function latestRelease()
     {
         return self::orderByDesc('release_date')
             ->orderByDesc('id')
             ->first();
-    }
-
-    /**
-     * Get the minimum APK version code required to use the app.
-     * Falls back to 1 if no release exists.
-     */
-    public static function minimumVersionCode(): int
-    {
-        return (int) (self::orderByDesc('id')->value('min_version_code') ?? 1);
     }
 }
