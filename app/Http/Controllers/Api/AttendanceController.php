@@ -289,11 +289,16 @@ class AttendanceController extends Controller
         ]);
     }
 
-    public function checkStatus($id)
+    public function checkStatus(Request $request, $id)
     {
         $now = Carbon::now();
-        $today = $now->format('Y-m-d');
-        $yesterday = $now->copy()->subDay()->format('Y-m-d');
+        $today = $request->query('tanggal', $now->format('Y-m-d'));
+        try {
+            $today = Carbon::parse($today)->format('Y-m-d');
+        } catch (\Exception $e) {
+            $today = $now->format('Y-m-d');
+        }
+        $yesterday = Carbon::parse($today)->copy()->subDay()->format('Y-m-d');
         $nowTime = $now->format('H:i:s');
 
         $jadwal = null;
