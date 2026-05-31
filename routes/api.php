@@ -1,7 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\AttendanceController;
+use App\Models\ApkRelease;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/debug-app-version', function () {
+    return response()->json([
+        'min_version_code_from_db' => ApkRelease::minimumVersionCode(),
+        'latest_release' => ApkRelease::latestRelease(),
+        'all_releases' => ApkRelease::orderByDesc('id')->get(),
+        'x_app_version_code_header' => request()->header('X-App-Version-Code'),
+    ]);
+});
 
 Route::middleware(['mobile_auth', 'check_app_version', 'noindex'])->group(function () {
     // Public Mobile Routes (Only need API Key) — Longgar: 30 request per menit (mencegah terblokir saat testing)
