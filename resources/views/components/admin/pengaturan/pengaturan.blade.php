@@ -656,7 +656,7 @@
                 <div class="modal-action mt-0 p-6 border-t border-base-200 bg-base-100 sticky bottom-0 z-50">
                     <button type="button" class="btn btn-ghost btn-sm"
                         onclick="document.getElementById('apk-modal').close()">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm text-white px-8" wire:click="closeApkModal">
+                    <button type="submit" class="btn btn-primary btn-sm text-white px-8">
                         <span wire:loading wire:target="saveApkSettings"
                             class="loading loading-spinner loading-xs"></span>
                         <span wire:loading.remove wire:target="saveApkSettings">Simpan Perubahan</span>
