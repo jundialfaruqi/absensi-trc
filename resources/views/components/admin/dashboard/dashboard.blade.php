@@ -58,7 +58,7 @@
                 </div>
             </div>
 
-            {{-- Absen Masuk --}}
+            {{-- Status Kehadiran --}}
             <div
                 class="stats shadow bg-base-100 border border-base-200 group hover:border-success/30 transition-all duration-300">
                 <div class="stat">
@@ -70,8 +70,8 @@
                                 d="M11.5 21l-5.5-2V7l5.5 2V21zM11.5 21l5.5-2V7l-5.5 2V21zM9.5 13H13.5M11.5 11V15" />
                         </svg>
                     </div>
-                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Absen
-                        Masuk</div>
+                    <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
+                        Hadir</div>
                     <div class="stat-value text-success">{{ number_format($stats['total_masuk']) }}</div>
                     <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">
                         {{ $stats['hadir_percentage'] }}% dari total personel</div>
@@ -91,10 +91,9 @@
                         </svg>
                     </div>
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
-                        Selesai
-                        Tugas</div>
-                    <div class="stat-value text-secondary">{{ number_format($stats['total_pulang']) }}</div>
-                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Absen pulang tercatat
+                        Tidak Hadir</div>
+                    <div class="stat-value text-secondary">{{ number_format($stats['total_alpa']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">ALPA
                     </div>
                 </div>
             </div>
