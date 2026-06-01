@@ -13,6 +13,7 @@ use App\Models\Personnel;
 use App\Models\Setting;
 use App\Services\AbsensiLokasiService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -1208,5 +1209,42 @@ class AttendanceController extends Controller
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
+    }
+
+    /**
+     * Perbarui token FCM untuk personel yang dikaitkan dengan perangkat ini.
+     */
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $device = $request->get('device');
+
+        if (! $device || ! $device->personnel_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Perangkat ini tidak terdaftar atas nama personel personal.',
+            ], 403);
+        }
+
+        $personnel = $device->personnel;
+
+        if (! $personnel) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data personel tidak ditemukan.',
+            ], 404);
+        }
+
+        $personnel->update([
+            'fcm_token' => $request->fcm_token,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'FCM Token berhasil diperbarui.',
+        ]);
     }
 }

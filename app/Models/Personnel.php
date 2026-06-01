@@ -12,7 +12,7 @@ class Personnel extends Authenticatable
     use HasApiTokens, Notifiable;
 
     protected $fillable = [
-        'name', 'nik', 'opd_id', 'penugasan_id', 'regu', 'kantor_id', 'nomor_hp', 'foto', 'face_descriptor', 'face_descriptor_mobile', 'email', 'password', 'pin', 'wajib_absen_di_lokasi', 'face_recognition', 'attendance_type',
+        'name', 'nik', 'opd_id', 'penugasan_id', 'regu', 'kantor_id', 'nomor_hp', 'foto', 'face_descriptor', 'face_descriptor_mobile', 'email', 'password', 'pin', 'wajib_absen_di_lokasi', 'face_recognition', 'attendance_type', 'fcm_token',
     ];
 
     protected $hidden = [

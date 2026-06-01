@@ -18,6 +18,7 @@ Route::middleware(['mobile_auth', 'noindex'])->group(function () {
             Route::post('/personnels/face-mobile', [AttendanceController::class, 'storeFaceDescriptorMobile']);
             Route::get('/personnels/check-status/{id}', [AttendanceController::class, 'checkStatus']);
             Route::post('/device/location', [AttendanceController::class, 'updateLocation']);
+            Route::post('/device/fcm-token', [AttendanceController::class, 'updateFcmToken']);
             Route::get('/banners', [AttendanceController::class, 'getBanners']);
             Route::get('/global/dashboard', [AttendanceController::class, 'globalDashboard']);
         });
