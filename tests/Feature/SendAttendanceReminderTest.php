@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\SendFcmNotificationJob;
 use App\Models\Device;
 use App\Models\Jadwal;
 use App\Models\Opd;
@@ -10,6 +11,7 @@ use App\Services\FcmService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -204,4 +206,56 @@ test('send check-out attendance reminder sends fcm notification and caches it', 
 
     // Assert cache key is now stored (to avoid duplicate reminders)
     expect(Cache::has($cacheKey))->toBeTrue();
+});
+
+test('send attendance reminder dispatches SendFcmNotificationJob', function () {
+    Queue::fake();
+
+    Setting::set('absensi_masuk_mulai', 30, 'integer');
+    Setting::set('absensi_masuk_selesai', 120, 'integer');
+
+    $opd = Opd::create(['name' => 'Test OPD']);
+
+    $personnel = Personnel::create([
+        'id' => 3,
+        'name' => 'Personnel 3',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'foto.jpg',
+        'email' => 'personnel3@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+        'fcm_token' => 'mocked-fcm-token-777',
+    ]);
+
+    $shift = Shift::create([
+        'name' => 'PAGI',
+        'type' => 'shift',
+        'start_time' => '08:00:00',
+        'end_time' => '16:00:00',
+    ]);
+
+    $jadwal = Jadwal::create([
+        'personnel_id' => $personnel->id,
+        'shift_id' => $shift->id,
+        'tanggal' => '2026-06-01',
+        'status' => 'SHIFT',
+    ]);
+
+    // Mock time to 07:45 AM
+    Carbon::setTestNow(Carbon::parse('2026-06-01 07:45:00'));
+
+    // Run command
+    $this->artisan('attendance:send-reminder')->assertExitCode(0);
+
+    // Assert job was dispatched
+    Queue::assertPushed(SendFcmNotificationJob::class, function ($job) use ($jadwal) {
+        return $job->token === 'mocked-fcm-token-777'
+            && $job->title === '🚨 Peringatan Absen Masuk!'
+            && $job->body === 'Anda belum melakukan absen masuk, absen sekarang'
+            && $job->data['type'] === 'attendance_reminder'
+            && $job->data['action'] === 'check_in'
+            && $job->data['jadwal_id'] === (string) $jadwal->id;
+    });
 });

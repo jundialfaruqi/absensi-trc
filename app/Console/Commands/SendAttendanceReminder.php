@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SendFcmNotificationJob;
 use App\Models\Absensi;
 use App\Models\Jadwal;
 use App\Models\Personnel;
 use App\Models\Setting;
-use App\Services\FcmService;
 use Carbon\Carbon;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -20,7 +20,7 @@ class SendAttendanceReminder extends Command
     /**
      * Execute the console command.
      */
-    public function handle(FcmService $fcmService): int
+    public function handle(): int
     {
         $now = Carbon::now();
         $todayDate = $now->format('Y-m-d');
@@ -82,17 +82,13 @@ class SendAttendanceReminder extends Command
                                 'action' => 'check_in',
                             ];
 
-                            $this->info("Mengirim notifikasi absen masuk ke {$personnel->name}...");
-                            $sent = $fcmService->sendNotification($personnel->fcm_token, $title, $body, $data);
+                            // Simpan cache terlebih dahulu sebelum dispatch pekerjaan ke antrean
+                            $secondsRemaining = $now->diffInSeconds($windowInEnd);
+                            $cacheDuration = max($secondsRemaining, 600); // minimal 10 menit
+                            Cache::put($cacheKey, true, $cacheDuration);
 
-                            if ($sent) {
-                                $secondsRemaining = $now->diffInSeconds($windowInEnd);
-                                $cacheDuration = max($secondsRemaining, 600); // minimal 10 menit
-                                Cache::put($cacheKey, true, $cacheDuration);
-                                $this->info("Notifikasi masuk berhasil terkirim ke: {$personnel->name}");
-                            } else {
-                                $this->error("Gagal mengirim notifikasi masuk ke: {$personnel->name}");
-                            }
+                            $this->info("Mengantrekan notifikasi absen masuk ke {$personnel->name}...");
+                            SendFcmNotificationJob::dispatch($personnel->fcm_token, $title, $body, $data);
                         }
                     }
                 }
@@ -125,17 +121,13 @@ class SendAttendanceReminder extends Command
                                 'action' => 'check_out',
                             ];
 
-                            $this->info("Mengirim notifikasi absen pulang ke {$personnel->name}...");
-                            $sent = $fcmService->sendNotification($personnel->fcm_token, $title, $body, $data);
+                            // Simpan cache terlebih dahulu sebelum dispatch pekerjaan ke antrean
+                            $secondsRemaining = $now->diffInSeconds($windowOutEnd);
+                            $cacheDuration = max($secondsRemaining, 600); // minimal 10 menit
+                            Cache::put($cacheKey, true, $cacheDuration);
 
-                            if ($sent) {
-                                $secondsRemaining = $now->diffInSeconds($windowOutEnd);
-                                $cacheDuration = max($secondsRemaining, 600); // minimal 10 menit
-                                Cache::put($cacheKey, true, $cacheDuration);
-                                $this->info("Notifikasi pulang berhasil terkirim ke: {$personnel->name}");
-                            } else {
-                                $this->error("Gagal mengirim notifikasi pulang ke: {$personnel->name}");
-                            }
+                            $this->info("Mengantrekan notifikasi absen pulang ke {$personnel->name}...");
+                            SendFcmNotificationJob::dispatch($personnel->fcm_token, $title, $body, $data);
                         }
                     }
                 }
