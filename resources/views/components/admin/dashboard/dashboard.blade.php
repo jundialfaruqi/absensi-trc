@@ -78,21 +78,26 @@
                 </div>
             </div>
 
-            {{-- Absen Pulang --}}
+            {{-- Alpa (tidak hadir) --}}
             <div
-                class="stats shadow bg-base-100 border border-base-200 group hover:border-secondary/30 transition-all duration-300">
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-error/30 transition-all duration-300">
                 <div class="stat">
                     <div
-                        class="stat-figure text-secondary opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-10 h-10">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                        class="stat-figure text-error opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-user-x w-10 h-10">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                            <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
+                            <path d="M22 22l-5 -5" />
+                            <path d="M17 22l5 -5" />
                         </svg>
                     </div>
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
                         Tidak Hadir</div>
-                    <div class="stat-value text-secondary">{{ number_format($stats['total_alpa']) }}</div>
+                    <div class="stat-value text-error">{{ number_format($stats['total_alpa']) }}</div>
                     <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">ALPA
                     </div>
                 </div>
@@ -100,10 +105,10 @@
 
             {{-- Terlambat --}}
             <div
-                class="stats shadow bg-base-100 border border-base-200 group hover:border-error/30 transition-all duration-300">
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-warning/30 transition-all duration-300">
                 <div class="stat">
                     <div
-                        class="stat-figure text-error opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        class="stat-figure text-warning opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-10 h-10">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -113,9 +118,9 @@
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
                         Terlambat
                     </div>
-                    <div class="stat-value text-error">{{ number_format($stats['total_terlambat']) }}</div>
-                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-error">Memerlukan
-                        perhatian</div>
+                    <div class="stat-value text-warning">{{ number_format($stats['total_terlambat']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-warning">Personel
+                    </div>
                 </div>
             </div>
         @endif
