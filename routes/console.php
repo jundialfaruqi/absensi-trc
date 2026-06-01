@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('attendance:send-reminder')->everyMinute();
+Schedule::command('attendance:send-reminder')->everyTenMinutes();
