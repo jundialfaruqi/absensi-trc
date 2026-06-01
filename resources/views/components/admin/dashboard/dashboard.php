@@ -98,7 +98,11 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 
         // Activities
         $activities = (clone $absensiBase)
+            ->join('personnels', 'absensis.personnel_id', '=', 'personnels.id')
+            ->join('opds', 'personnels.opd_id', '=', 'opds.id')
+            ->select('absensis.*')
             ->with(['personnel.opd', 'jadwal.shift'])
+            ->orderBy('opds.singkatan')
             ->latest('absensis.updated_at')
             ->get();
 
