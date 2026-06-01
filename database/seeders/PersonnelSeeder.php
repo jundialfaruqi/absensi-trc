@@ -22,26 +22,26 @@ class PersonnelSeeder extends Seeder
         $opd = DB::table('opds')->where('singkatan', $opdSingkatan)->first();
         $penugasan = DB::table('penugasans')->where('name', $penugasanName)->first();
 
-        if (!$opd || !$penugasan) {
+        if (! $opd || ! $penugasan) {
             return;
         }
 
         $personnels = [];
-        for ($i = 1; $i <= 8; $i++) {
+        for ($i = 1; $i <= 6; $i++) {
             // Generate unique values based on OPD to avoid collision if run multiple times in same session
-            $uniqueSuffix = substr(md5($opdSingkatan . $i), 0, 4); 
-            
+            $uniqueSuffix = substr(md5($opdSingkatan.$i), 0, 4);
+
             $personnels[] = [
-                'name' => $namePrefix . ' ' . $i,
-                'nik' => '12345' . str_pad($opd->id, 2, '0', STR_PAD_LEFT) . str_pad($i, 3, '0', STR_PAD_LEFT) . $uniqueSuffix,
+                'name' => $namePrefix.' '.$i,
+                'nik' => '12345'.str_pad($opd->id, 2, '0', STR_PAD_LEFT).str_pad($i, 3, '0', STR_PAD_LEFT).$uniqueSuffix,
                 'opd_id' => $opd->id,
                 'penugasan_id' => $penugasan->id,
                 'regu' => 'A',
-                'nomor_hp' => '08' . str_pad($opd->id, 2, '0', STR_PAD_LEFT) . str_pad($i, 8, '0', STR_PAD_LEFT),
+                'nomor_hp' => '08'.str_pad($opd->id, 2, '0', STR_PAD_LEFT).str_pad($i, 8, '0', STR_PAD_LEFT),
                 'foto' => '',
-                'email' => $emailPrefix . $i . '@pekanbaru.go.id',
+                'email' => $emailPrefix.$i.'@pekanbaru.go.id',
                 'password' => Hash::make('password'),
-                'pin' => str_pad($opd->id, 2, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'pin' => str_pad($opd->id, 2, '0', STR_PAD_LEFT).str_pad($i, 4, '0', STR_PAD_LEFT),
                 'kantor_id' => null,
                 'wajib_absen_di_lokasi' => false,
                 'face_recognition' => false,

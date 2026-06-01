@@ -52,9 +52,9 @@
                         </svg>
                     </div>
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">Total
-                        Personel</div>
-                    <div class="stat-value text-primary">{{ number_format($stats['total_personnel']) }}</div>
-                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Aktif dalam sistem</div>
+                    </div>
+                    <div class="stat-value text-primary">{{ $stats['total_required'] }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">Personnel</div>
                 </div>
             </div>
 
