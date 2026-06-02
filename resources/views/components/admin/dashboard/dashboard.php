@@ -18,9 +18,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 {
     public bool $readyToLoad = false;
 
-    public string $filterKonsumsi = 'siang';
-
-    public string $filterShift = '';
+    public string $filterShift = 'siang';
 
     public string $filterTanggal = '';
 
@@ -46,7 +44,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $user = Auth::user();
         $isSuperAdmin = $user->can('lihat-dashboard');
         $opdId = $user->opd()?->id;
-        $shifts = Shift::orderBy('name')->get();
+        $shifts = Shift::where('type', 'shift')->orderBy('name')->get();
 
         if (! $this->readyToLoad) {
             return [
@@ -91,15 +89,14 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ->when(! $isSuperAdmin, function ($q) use ($opdId) {
                 $q->whereHas('personnel', fn ($pq) => $pq->where('opd_id', $opdId));
             })
-            ->when($this->filterKonsumsi, function ($q) {
-                if ($this->filterKonsumsi === 'flexible') {
+            ->when($this->filterShift, function ($q) {
+                if (is_numeric($this->filterShift)) {
+                    $q->whereHas('jadwal.shift', fn ($sq) => $sq->where('id', $this->filterShift));
+                } elseif ($this->filterShift === 'flexible') {
                     $q->whereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
                 } else {
-                    $q->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $this->filterKonsumsi));
+                    $q->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $this->filterShift));
                 }
-            })
-            ->when($this->filterShift, function ($q) {
-                $q->whereHas('jadwal.shift', fn ($sq) => $sq->where('id', $this->filterShift));
             });
 
         // Detailed Stats
