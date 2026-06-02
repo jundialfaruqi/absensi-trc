@@ -118,6 +118,7 @@ new class extends Component
         }
 
         $this->dispatch('open-modal', id: 'edit-absensi-modal');
+        $this->dispatch('edit-absensi-loaded');
     }
 
     public function saveEdit()

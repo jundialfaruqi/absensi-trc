@@ -266,17 +266,14 @@
                                             </tr>
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
-                                        <tr wire:click="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')"
-                                            wire:loading.class="pointer-events-none opacity-65"
-                                            wire:target="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')"
+                                        <tr @click="$dispatch('open-modal', { id: 'edit-absensi-modal' }); $dispatch('openEditAbsensi', { personnelId: {{ $log->personnel->id }}, tanggal: '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}' })"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group cursor-pointer">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar">
                                                         <div
                                                             class="mask mask-squircle w-10 h-10 bg-base-200 flex items-center justify-center">
-                                                            <div class="w-full h-full" wire:loading.remove
-                                                                wire:target="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')">
+                                                            <div class="w-full h-full">
                                                                 @if ($log->personnel->foto)
                                                                     <img src="{{ asset('storage/' . $log->personnel->foto) }}"
                                                                         alt="Avatar"
@@ -294,12 +291,6 @@
                                                                         </svg>
                                                                     </div>
                                                                 @endif
-                                                            </div>
-                                                            <div class="hidden items-center justify-center w-full h-full bg-base-100"
-                                                                wire:loading.class="!flex"
-                                                                wire:target="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')">
-                                                                <span
-                                                                    class="loading loading-spinner loading-xs text-primary"></span>
                                                             </div>
                                                         </div>
                                                     </div>

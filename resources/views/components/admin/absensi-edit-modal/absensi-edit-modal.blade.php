@@ -1,12 +1,16 @@
 <div>
     <dialog id="edit-absensi-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
-        x-on:open-modal.window="$event.detail.id === 'edit-absensi-modal' && $el.showModal()"
-        x-on:close-modal.window="$event.detail.id === 'edit-absensi-modal' && $el.close()">
+        x-data="{ show: false, loading: true }"
+        x-on:open-modal.window="if ($event.detail.id === 'edit-absensi-modal') { show = true; loading = true; $el.showModal(); }"
+        x-on:close-modal.window="if ($event.detail.id === 'edit-absensi-modal') { show = false; $el.close(); }"
+        x-on:edit-absensi-loaded.window="loading = false"
+        x-on:close="show = false; loading = true">
         <div class="modal-box p-0 shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
             {{-- Modal Header - Sticky --}}
             <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
                 <h3 class="font-bold text-lg">
-                    {{ $editingPersonnelName }}
+                    <span x-show="loading" class="inline-block h-6 w-48 bg-base-content/10 rounded animate-pulse"></span>
+                    <span x-show="!loading">{{ $editingPersonnelName }}</span>
                 </h3>
                 <button type="button" class="btn btn-ghost btn-sm btn-circle"
                     onclick="document.getElementById('edit-absensi-modal').close()">✕</button>
@@ -14,7 +18,65 @@
 
             {{-- Modal Body - Scrollable --}}
             <div class="overflow-y-auto flex-1">
-                <form wire:submit="saveEdit" class="p-6 space-y-5">
+                {{-- Skeleton Loader --}}
+                <div x-show="loading" class="p-6 space-y-6 animate-pulse">
+                    {{-- Tanggal Absen Skeleton --}}
+                    <div class="bg-base-200/50 p-4 flex items-center gap-3 rounded-xl">
+                        <div class="p-2 bg-base-300 rounded-lg w-9 h-9"></div>
+                        <div class="space-y-2 flex-1">
+                            <div class="h-2.5 bg-base-300 rounded w-20"></div>
+                            <div class="h-4 bg-base-300 rounded w-48"></div>
+                        </div>
+                    </div>
+
+                    {{-- Foto Bukti Skeleton --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <div class="h-3 bg-base-300 rounded w-16"></div>
+                            <div class="aspect-square bg-base-200 rounded-2xl"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-base-300 rounded w-16"></div>
+                            <div class="aspect-square bg-base-200 rounded-2xl"></div>
+                        </div>
+                    </div>
+
+                    {{-- Dropdowns Skeleton --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-2">
+                            <div class="h-3 bg-base-300 rounded w-24"></div>
+                            <div class="h-12 bg-base-200 rounded-lg w-full"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-base-300 rounded w-24"></div>
+                            <div class="h-12 bg-base-200 rounded-lg w-full"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-base-300 rounded w-24"></div>
+                            <div class="h-12 bg-base-200 rounded-lg w-full"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-base-300 rounded w-24"></div>
+                            <div class="h-12 bg-base-200 rounded-lg w-full"></div>
+                        </div>
+                    </div>
+
+                    {{-- Textarea Skeleton --}}
+                    <div class="space-y-2">
+                        <div class="h-3 bg-base-300 rounded w-32"></div>
+                        <div class="h-32 bg-base-200 rounded-lg w-full"></div>
+                    </div>
+
+                    {{-- Buttons Skeleton --}}
+                    <div class="flex justify-end gap-3 pt-4 border-t border-base-200">
+                        <div class="h-8 bg-base-200 rounded-lg w-20"></div>
+                        <div class="h-8 bg-base-300 rounded-lg w-32"></div>
+                    </div>
+                </div>
+
+                {{-- Actual Form --}}
+                <div x-show="!loading">
+                    <form wire:submit="saveEdit" class="p-6 space-y-5">
                     <div class="bg-primary/5 p-4 flex items-center justify-between rounded-xl">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-primary/10 rounded-lg">
@@ -342,7 +404,8 @@
                             </button>
                         </div>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
