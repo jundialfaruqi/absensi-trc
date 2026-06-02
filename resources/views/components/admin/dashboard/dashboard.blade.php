@@ -185,7 +185,7 @@
                         @if ($readyToLoad) wire:loading wire:target="$refresh, filterTanggal, filterShift" @endif>
                         <table class="table table-md">
                             <thead>
-                                <tr class="bg-base-200/50">
+                                <tr class="bg-base-100/50">
                                     <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
                                     <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
@@ -235,11 +235,11 @@
 
                     {{-- Real View --}}
                     @if ($readyToLoad)
-                        <div class="overflow-x-auto" wire:loading.remove
+                        <div class="overflow-x-auto overflow-y-auto max-h-[70vh]" wire:loading.remove
                             wire:target="$refresh, filterTanggal, filterShift">
                             <table class="table table-md">
                                 <thead>
-                                    <tr class="bg-base-200/50">
+                                    <tr class="sticky top-0 z-10 bg-base-100">
                                         <th class="text-[10px] font-black uppercase tracking-widest">Personel</th>
                                         <th class="text-[10px] font-black uppercase tracking-widest">Shift</th>
                                         <th class="text-[10px] font-black uppercase tracking-widest">Status</th>
@@ -253,7 +253,7 @@
                                     @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
-                                            <tr class="bg-base-200/50">
+                                            <tr class="sticky top-10 z-5 bg-base-200">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
