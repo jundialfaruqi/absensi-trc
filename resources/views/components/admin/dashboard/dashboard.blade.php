@@ -140,20 +140,32 @@
                         <h2 class="text-lg font-black text-base-content uppercase">Log Aktifitas Hari Ini</h2>
                     </div>
                     <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                        <div class="flex flex-row gap-2 w-full sm:w-auto">
-                            <div class="relative flex-1 sm:flex-none w-full sm:w-auto">
-                                <input type="date" wire:model.live="filterTanggal"
-                                    class="input input-bordered input-sm pl-4 text-xs font-black uppercase w-full sm:w-auto text-base-content scheme-light dark:text-base-content"
-                                    onclick="this.showPicker()" />
+                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <div class="flex flex-row gap-2 w-full sm:w-auto">
+                                <div class="relative flex-1 sm:flex-none w-full sm:w-auto">
+                                    <input type="date" wire:model.live="filterTanggal"
+                                        class="input input-bordered input-sm pl-4 text-xs font-black uppercase w-full sm:w-auto text-base-content scheme-light dark:text-base-content"
+                                        onclick="this.showPicker()" />
+                                </div>
+
+                                <div class="flex-1 sm:flex-none w-full sm:w-auto">
+                                    <select wire:model.live="filterKonsumsi"
+                                        class="select select-bordered select-sm text-xs font-black uppercase min-w-30 w-full sm:w-auto">
+                                        <option value="">Semua Shift</option>
+                                        <option value="siang">Siang</option>
+                                        <option value="malam">Malam</option>
+                                        <option value="flexible">Jadwal Bebas (Flex)</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <div class="flex-1 sm:flex-none w-full sm:w-auto">
-                                <select wire:model.live="filterKonsumsi"
+                            <div class="w-full sm:w-auto">
+                                <select wire:model.live="filterShift"
                                     class="select select-bordered select-sm text-xs font-black uppercase min-w-30 w-full sm:w-auto">
-                                    <option value="">Semua Shift</option>
-                                    <option value="siang">Siang</option>
-                                    <option value="malam">Malam</option>
-                                    <option value="flexible">Jadwal Bebas (Flex)</option>
+                                    <option value="">Semua Shift (Data)</option>
+                                    @foreach($shifts as $shift)
+                                        <option value="{{ $shift->id }}">{{ $shift->name }} - {{ $shift->keterangan }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -174,7 +186,7 @@
                 <div class="card bg-base-100 border border-base-200 overflow-hidden">
                     {{-- Skeleton View --}}
                     <div class="overflow-x-auto"
-                        @if ($readyToLoad) wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal" @endif>
+                        @if ($readyToLoad) wire:loading wire:target="$refresh, filterKonsumsi, filterTanggal, filterShift" @endif>
                         <table class="table table-md">
                             <thead>
                                 <tr class="bg-base-200/50">
@@ -228,7 +240,7 @@
                     {{-- Real View --}}
                     @if ($readyToLoad)
                         <div class="overflow-x-auto" wire:loading.remove
-                            wire:target="$refresh, filterKonsumsi, filterTanggal">
+                            wire:target="$refresh, filterKonsumsi, filterTanggal, filterShift">
                             <table class="table table-md">
                                 <thead>
                                     <tr class="bg-base-200/50">
@@ -474,7 +486,7 @@
 
                         @if ($activities->count() > 0)
                             <div class="p-4 bg-base-200/30 border-t border-base-200/50 space-y-4" wire:loading.remove
-                                wire:target="$refresh, filterKonsumsi, filterTanggal">
+                                wire:target="$refresh, filterKonsumsi, filterTanggal, filterShift">
                                 <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-2">
                                     <div class="flex items-center gap-2">
                                         <div class="w-2 h-2 rounded-full bg-primary/30"></div>

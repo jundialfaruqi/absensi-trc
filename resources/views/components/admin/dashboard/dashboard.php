@@ -4,6 +4,7 @@ use App\Models\Absensi;
 use App\Models\ApkRelease;
 use App\Models\LeaveRequest;
 use App\Models\Personnel;
+use App\Models\Shift;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,8 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
     public bool $readyToLoad = false;
 
     public string $filterKonsumsi = 'siang';
+
+    public string $filterShift = '';
 
     public string $filterTanggal = '';
 
@@ -43,6 +46,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $user = Auth::user();
         $isSuperAdmin = $user->can('lihat-dashboard');
         $opdId = $user->opd()?->id;
+        $shifts = Shift::orderBy('name')->get();
 
         if (! $this->readyToLoad) {
             return [
@@ -65,6 +69,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 'absentPersonnel' => collect(),
                 'isSuperAdmin' => $isSuperAdmin,
                 'opdName' => ! $isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+                'shifts' => $shifts,
                 'apkInfo' => [
                     'version' => '',
                     'description' => '',
@@ -92,6 +97,9 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 } else {
                     $q->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $this->filterKonsumsi));
                 }
+            })
+            ->when($this->filterShift, function ($q) {
+                $q->whereHas('jadwal.shift', fn ($sq) => $sq->where('id', $this->filterShift));
             });
 
         // Detailed Stats
@@ -158,6 +166,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             'absentPersonnel' => $absentPersonnel,
             'isSuperAdmin' => $isSuperAdmin,
             'opdName' => ! $isSuperAdmin ? $user->opd()?->name : 'Semua OPD',
+            'shifts' => $shifts,
             'apkInfo' => [
                 'version' => $latestApk?->version ?? 'v1.2.0',
                 'description' => $latestApk?->description ?? 'Rilis terbaru dengan penguatan sistem keamanan perangkat.',

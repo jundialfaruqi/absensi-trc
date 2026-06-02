@@ -127,6 +127,8 @@ class DatabaseSeeder extends Seeder
             'manajemen-maps',
             'manajemen-perangkat',
             'manajemen-shift',
+            'manajemen-role-permission',
+            'manajemen-user',
         ]);
 
         // 5. Assign specific permissions to admin-opd
