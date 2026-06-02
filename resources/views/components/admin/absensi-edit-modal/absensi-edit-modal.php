@@ -22,6 +22,8 @@ new class extends Component
 
     public $editingPersonnelName;
 
+    public $editingPersonnelFoto;
+
     public $statusMasuk;
 
     public $statusPulang;
@@ -78,6 +80,7 @@ new class extends Component
 
         $this->editingPersonnelId = $personnelId;
         $this->editingPersonnelName = $personnel->name;
+        $this->editingPersonnelFoto = $personnel->foto;
         $this->editingTanggal = $tanggal;
 
         $absensi = Absensi::where('personnel_id', $personnelId)
@@ -287,6 +290,7 @@ new class extends Component
         $this->editingTanggal = null;
         $this->editingAbsensiId = null;
         $this->editingPersonnelName = '';
+        $this->editingPersonnelFoto = null;
         $this->statusMasuk = '';
         $this->statusPulang = '';
         $this->jamMasuk = '';
