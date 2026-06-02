@@ -16,7 +16,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
 {
     public bool $readyToLoad = false;
 
-    public string $filterKonsumsi = '';
+    public string $filterKonsumsi = 'siang';
 
     public string $filterTanggal = '';
 
