@@ -166,16 +166,16 @@
                             </div>
                         </div>
 
-                        <button wire:click="$refresh" wire:loading.attr="disabled"
+                        <button wire:click="$refresh" wire:loading.attr="disabled" wire:target="$refresh"
                             class="btn btn-ghost btn-sm gap-2 text-base-content/40 hover:text-primary disabled:bg-transparent w-full sm:w-auto justify-center sm:justify-start">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="2" stroke="currentColor" class="w-4 h-4"
-                                wire:loading.class="animate-spin">
+                                wire:loading.class="animate-spin" wire:target="$refresh">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
-                            <span wire:loading.remove>Refresh</span>
-                            <span wire:loading>Memperbarui...</span>
+                            <span wire:loading.remove wire:target="$refresh">Refresh</span>
+                            <span wire:loading wire:target="$refresh">Memperbarui...</span>
                         </button>
                     </div>
                 </div>
