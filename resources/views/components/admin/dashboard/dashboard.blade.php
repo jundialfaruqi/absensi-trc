@@ -253,7 +253,7 @@
                                     @php $currentOpd = null; @endphp
                                     @forelse($activities as $log)
                                         @if ($isSuperAdmin && $currentOpd !== $log->personnel->opd_id)
-                                            <tr class="sticky top-10 z-5 bg-base-200">
+                                            <tr class="sticky top-10 z-20 bg-base-200">
                                                 <td colspan="5" class="py-2 px-4">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-1.5 h-3 bg-base-content"></div>
