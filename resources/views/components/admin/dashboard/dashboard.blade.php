@@ -586,7 +586,7 @@
                                         {{ $late->personnel->opd->singkatan }}</div>
                                 </div>
                                 <div class="flex-none text-right">
-                                    <div class="text-xs font-black text-error uppercase">
+                                    <div class="text-xs font-black text-warning uppercase">
                                         {{ $late->jam_masuk?->format('H:i') }}</div>
                                     <div class="text-[8px] font-bold text-base-content/30 uppercase tracking-widest">
                                         Jam Masuk</div>
@@ -639,7 +639,7 @@
                                 </div>
                                 <div class="flex-none">
                                     <span
-                                        class="badge badge-warning badge-outline text-[8px] font-black uppercase px-2">{{ $absent->jadwal?->shift?->name ?? 'N/A' }}</span>
+                                        class="badge badge-error badge-outline text-[8px] font-black uppercase px-2">{{ $absent->jadwal?->shift?->name ?? 'N/A' }}</span>
                                 </div>
                             </div>
                         @empty
