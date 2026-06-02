@@ -185,7 +185,7 @@
 
                                                 @if ($isOfficialDeviceMasuk)
                                                     <div
-                                                        class="badge badge-success h-auto py-1.5 px-2 gap-1 text-white whitespace-normal break-words text-left">
+                                                        class="flex items-center gap-1 text-success font-semibold text-[10px] whitespace-normal wrap-break-word xt-left">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                                             fill="currentColor" class="size-2.5 shrink-0">
                                                             <path fill-rule="evenodd"
@@ -193,7 +193,7 @@
                                                                 clip-rule="evenodd" />
                                                         </svg>
                                                         <span
-                                                            class="text-[8px] font-black tracking-tighter">TERDAFTAR</span>
+                                                            class="text-[10px] font-black text-success tracking-tighter">TERDAFTAR</span>
                                                     </div>
                                                 @endif
                                             </div>
