@@ -259,7 +259,8 @@
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
                                         <tr
-                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group">
+                                            wire:click="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')"
+                                            class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group cursor-pointer">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar">
@@ -831,4 +832,5 @@
             </div>
         </div>
     </div>
+    <livewire:admin::absensi-edit-modal />
 </div>

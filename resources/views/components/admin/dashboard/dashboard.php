@@ -9,6 +9,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -24,6 +25,17 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
     {
         $this->readyToLoad = true;
         $this->filterTanggal = Carbon::today()->format('Y-m-d');
+    }
+
+    public function openEditAbsensiFromDashboard(int $personnelId, string $tanggal): void
+    {
+        $this->dispatch('openEditAbsensi', personnelId: $personnelId, tanggal: $tanggal);
+    }
+
+    #[On('refreshAbsensi')]
+    public function refreshDashboard(): void
+    {
+        // Re-renders dashboard after edit saved
     }
 
     public function with()
