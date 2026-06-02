@@ -103,23 +103,23 @@
                 </div>
             </div>
 
-            {{-- Terlambat --}}
+            {{-- Sakit / Izin / Cuti / Dinas --}}
             <div
-                class="stats shadow bg-base-100 border border-base-200 group hover:border-warning/30 transition-all duration-300">
+                class="stats shadow bg-base-100 border border-base-200 group hover:border-info/30 transition-all duration-300">
                 <div class="stat">
                     <div
-                        class="stat-figure text-warning opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        class="stat-figure text-info opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-10 h-10">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 1 13.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 0 1 3.375 3.375M9 15h2.25M9 18h6M9 12h2.25" />
                         </svg>
                     </div>
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
-                        Terlambat
+                        IZIN / SAKIT / CUTI / DINAS
                     </div>
-                    <div class="stat-value text-warning">{{ number_format($stats['total_terlambat']) }}</div>
-                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-warning">Personel
+                    <div class="stat-value text-info">{{ number_format($stats['total_izin']) }}</div>
+                    <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-info">Personel
                     </div>
                 </div>
             </div>
@@ -511,7 +511,8 @@
                                     <div class="flex items-center gap-2">
                                         <div class="w-2 h-2 rounded-full bg-primary"></div>
                                         <span
-                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN:</span>
+                                            class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN
+                                            / SAKIT / CUTI / DINAS</span>
                                         <span
                                             class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
                                     </div>
@@ -742,17 +743,18 @@
                     max="100"></progress>
 
                 <div class="grid grid-cols-3 gap-3 pt-2">
-                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
+                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Masuk</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Hadir</span>
                         <span class="text-lg font-black text-success">{{ $stats['total_masuk'] }}</span>
                     </div>
-                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
+                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Pulang</span>
-                        <span class="text-lg font-black text-secondary">{{ $stats['total_pulang'] }}</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">IZIN
+                            / SAKIT / CUTI / DINAS</span>
+                        <span class="text-lg font-black text-info">{{ $stats['total_izin'] }}</span>
                     </div>
-                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200">
+                    <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
                             class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Alpa</span>
                         <span class="text-lg font-black text-error">{{ $stats['total_alpa'] }}</span>

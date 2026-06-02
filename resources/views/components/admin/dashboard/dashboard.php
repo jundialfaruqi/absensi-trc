@@ -105,7 +105,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $totalRequired = (clone $absensiBase)->count();
         $totalHadir = (clone $absensiBase)->where('status', 'HADIR')->count();
         $totalAlpa = (clone $absensiBase)->where('status', 'ALPA')->count();
-        $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT'])->count();
+        $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT', 'DINAS'])->count();
 
         $totalMasuk = (clone $absensiBase)->whereNotNull('jam_masuk')->count();
         $totalPulang = (clone $absensiBase)->whereNotNull('jam_pulang')->count();
