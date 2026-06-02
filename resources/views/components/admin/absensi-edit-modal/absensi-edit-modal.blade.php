@@ -70,24 +70,23 @@
                                 {{-- Device Info Masuk --}}
                                 @if ($platformMasuk)
                                     <div class="mt-2 flex flex-col gap-1">
-                                        <div
-                                            class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
+                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
                                             @if ($platformMasuk === 'android')
-                                                <div class="badge badge-neutral badge-xs py-2 px-2 gap-1">
+                                                <div class="badge badge-neutral h-auto py-1.5 px-2 gap-1 whitespace-normal break-words text-left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                        class="size-2.5">
+                                                        class="size-2.5 shrink-0">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
                                                     </svg>
                                                     <span
-                                                        class="text-[9px] font-bold uppercase">{{ $officialDeviceNameMasuk ?? ($deviceNameMasuk ?? 'Android') }}</span>
+                                                        class="text-[9px] font-bold uppercase break-all">{{ $officialDeviceNameMasuk ?? ($deviceNameMasuk ?? 'Android') }}</span>
                                                 </div>
                                             @else
-                                                <div class="badge badge-ghost badge-xs py-2 px-2 gap-1 border-base-300">
+                                                <div class="badge badge-ghost h-auto py-1.5 px-2 gap-1 border-base-300 whitespace-normal break-words text-left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                        class="size-2.5">
+                                                        class="size-2.5 shrink-0">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                                                     </svg>
@@ -96,9 +95,9 @@
                                             @endif
 
                                             @if ($isOfficialDeviceMasuk)
-                                                <div class="badge badge-success badge-xs py-2 px-2 gap-1 text-white">
+                                                <div class="badge badge-success h-auto py-1.5 px-2 gap-1 text-white whitespace-normal break-words text-left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="size-2.5">
+                                                        fill="currentColor" class="size-2.5 shrink-0">
                                                         <path fill-rule="evenodd"
                                                             d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
                                                             clip-rule="evenodd" />
@@ -144,25 +143,24 @@
                                 {{-- Device Info Pulang --}}
                                 @if ($platformPulang)
                                     <div class="mt-2 flex flex-col gap-1">
-                                        <div
-                                            class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
+                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
                                             @if ($platformPulang === 'android')
-                                                <div class="badge badge-neutral badge-xs py-2 px-2 gap-1">
+                                                <div class="badge badge-neutral h-auto py-1.5 px-2 gap-1 whitespace-normal break-words text-left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                        class="size-2.5">
+                                                        class="size-2.5 shrink-0">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
                                                     </svg>
                                                     <span
-                                                        class="text-[9px] font-bold uppercase">{{ $officialDeviceNamePulang ?? ($deviceNamePulang ?? 'Android') }}</span>
+                                                        class="text-[9px] font-bold uppercase break-all">{{ $officialDeviceNamePulang ?? ($deviceNamePulang ?? 'Android') }}</span>
                                                 </div>
                                             @else
                                                 <div
-                                                    class="badge badge-ghost badge-xs py-2 px-2 gap-1 border-base-300">
+                                                    class="badge badge-ghost h-auto py-1.5 px-2 gap-1 border-base-300 whitespace-normal break-words text-left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                        class="size-2.5">
+                                                        class="size-2.5 shrink-0">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                                                     </svg>
@@ -171,9 +169,9 @@
                                             @endif
 
                                             @if ($isOfficialDevicePulang)
-                                                <div class="badge badge-success badge-xs py-2 px-2 gap-1 text-white">
+                                                <div class="badge badge-success h-auto py-1.5 px-2 gap-1 text-white whitespace-normal break-words text-left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="size-2.5">
+                                                        fill="currentColor" class="size-2.5 shrink-0">
                                                         <path fill-rule="evenodd"
                                                             d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
                                                             clip-rule="evenodd" />
