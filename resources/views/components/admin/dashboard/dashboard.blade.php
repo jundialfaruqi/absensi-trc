@@ -746,7 +746,9 @@
                         <span class="text-lg font-black text-error">{{ $stats['total_alpa'] }}</span>
                     </div>
                 </div>
-            </div> {{-- APK Info Card --}}
+            </div>
+
+            {{-- APK Info Card --}}
             <div class="card bg-primary text-primary-content p-6 relative overflow-hidden group">
                 <div
                     class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -795,7 +797,7 @@
                     @endif
 
                     @if ($apkInfo['optional_message'])
-                        <p class="text-[10px] font-medium opacity-70 italic mb-4 leading-relaxed line-clamp-2">
+                        <p class="text-[10px] font-medium opacity-70 italic mb-4 leading-relaxed">
                             "{{ $apkInfo['optional_message'] }}"
                         </p>
                     @endif
