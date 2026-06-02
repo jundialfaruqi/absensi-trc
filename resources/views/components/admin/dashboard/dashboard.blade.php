@@ -267,32 +267,45 @@
                                             @php $currentOpd = $log->personnel->opd_id; @endphp
                                         @endif
                                         <tr wire:click="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')"
+                                            wire:loading.class="pointer-events-none opacity-65"
+                                            wire:target="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')"
                                             class="hover:bg-base-200/30 transition-colors border-b border-base-200/50 last:border-0 group cursor-pointer">
                                             <td>
                                                 <div class="flex items-center gap-3">
                                                     <div class="avatar">
-                                                        <div class="mask mask-squircle w-10 h-10 bg-base-200">
-                                                            @if ($log->personnel->foto)
-                                                                <img src="{{ asset('storage/' . $log->personnel->foto) }}"
-                                                                    alt="Avatar" />
-                                                            @else
-                                                                <div
-                                                                    class="flex items-center justify-center h-full text-base-content/20">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke-width="1.5" stroke="currentColor"
-                                                                        class="w-6 h-6">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                                                    </svg>
-                                                                </div>
-                                                            @endif
+                                                        <div
+                                                            class="mask mask-squircle w-10 h-10 bg-base-200 flex items-center justify-center">
+                                                            <div class="w-full h-full" wire:loading.remove
+                                                                wire:target="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')">
+                                                                @if ($log->personnel->foto)
+                                                                    <img src="{{ asset('storage/' . $log->personnel->foto) }}"
+                                                                        alt="Avatar"
+                                                                        class="w-full h-full object-cover" />
+                                                                @else
+                                                                    <div
+                                                                        class="flex items-center justify-center h-full text-base-content/20 bg-base-100">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            fill="none" viewBox="0 0 24 24"
+                                                                            stroke-width="1.5" stroke="currentColor"
+                                                                            class="w-6 h-6">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                                        </svg>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            <div class="hidden items-center justify-center w-full h-full bg-base-100"
+                                                                wire:loading.class="!flex"
+                                                                wire:target="openEditAbsensiFromDashboard({{ $log->personnel->id }}, '{{ \Carbon\Carbon::parse($log->tanggal)->format('Y-m-d') }}')">
+                                                                <span
+                                                                    class="loading loading-spinner loading-xs text-primary"></span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="flex flex-col">
                                                         <span
-                                                            class="text-xs font-black text-base-content uppercase tracking-tight">{{ $log->personnel->name }}</span>
+                                                            class="text-xs font-bold text-base-content tracking-tight">{{ $log->personnel->name }}</span>
                                                         <span
                                                             class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->penugasan->name }}</span>
                                                     </div>
@@ -550,7 +563,7 @@
                             <h3 class="text-xs font-black uppercase tracking-widest">Terlambat Hari Ini</h3>
                         </div>
                         <span
-                            class="badge badge-warning badge-sm font-black text-[10px]">{{ $latePersonnel->count() }}</span>
+                            class="badge badge-warning badge-sm font-black text-white text-[10px]">{{ $latePersonnel->count() }}</span>
                     </div>
                     <div class="max-h-100 overflow-y-auto divide-y divide-base-200">
                         @forelse($latePersonnel as $late)
@@ -561,12 +574,12 @@
                                             <img src="{{ asset('storage/' . $late->personnel->foto) }}" />
                                         @else
                                             <img
-                                                src="https://ui-avatars.com/api/?name={{ urlencode($late->personnel->name) }}&background=fee2e2&color=ef4444" />
+                                                src="https://ui-avatars.com/api/?name={{ urlencode($late->personnel->name) }}&background=fef3c7&color=d97706" />
                                         @endif
                                     </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="text-[11px] font-black text-base-content uppercase truncate">
+                                    <div class="text-[11px] font-bold text-base-content truncate">
                                         {{ $late->personnel->name }}</div>
                                     <div
                                         class="text-[9px] font-bold text-base-content/40 uppercase truncate tracking-tighter">
@@ -592,8 +605,8 @@
 
                 {{-- Belum Absen --}}
                 <div class="card bg-base-100 border border-base-200 overflow-hidden">
-                    <div class="p-4 bg-warning/5 border-b border-base-200 flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-warning">
+                    <div class="p-4 bg-error/5 border-b border-base-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-error">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -602,7 +615,7 @@
                             <h3 class="text-xs font-black uppercase tracking-widest">Belum Absen Masuk</h3>
                         </div>
                         <span
-                            class="badge badge-warning badge-sm font-black text-[10px]">{{ $absentPersonnel->count() }}</span>
+                            class="badge badge-error badge-sm font-black text-white text-[10px]">{{ $absentPersonnel->count() }}</span>
                     </div>
                     <div class="max-h-100 overflow-y-auto divide-y divide-base-200">
                         @forelse($absentPersonnel as $absent)
@@ -613,12 +626,12 @@
                                             <img src="{{ asset('storage/' . $absent->personnel->foto) }}" />
                                         @else
                                             <img
-                                                src="https://ui-avatars.com/api/?name={{ urlencode($absent->personnel->name) }}&background=fef3c7&color=d97706" />
+                                                src="https://ui-avatars.com/api/?name={{ urlencode($absent->personnel->name) }} &background=fee2e2&color=ef4444" />
                                         @endif
                                     </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="text-[11px] font-black text-base-content uppercase truncate">
+                                    <div class="text-[11px] font-bold text-base-content truncate">
                                         {{ $absent->personnel->name }}</div>
                                     <div
                                         class="text-[9px] font-bold text-base-content/40 uppercase truncate tracking-tighter">

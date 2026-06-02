@@ -658,12 +658,75 @@
                                 }
                             },
 
+                            async compressImage(file) {
+                                return new Promise((resolve, reject) => {
+                                    if (!file.type.startsWith('image/')) {
+                                        resolve(file);
+                                        return;
+                                    }
+
+                                    const reader = new FileReader();
+                                    reader.readAsDataURL(file);
+                                    reader.onload = (event) => {
+                                        const img = new Image();
+                                        img.src = event.target.result;
+                                        img.onload = () => {
+                                            const canvas = document.createElement('canvas');
+                                            let width = img.width;
+                                            let height = img.height;
+                                            const MAX_SIZE = 1000;
+
+                                            if (width > MAX_SIZE || height > MAX_SIZE) {
+                                                if (width > height) {
+                                                    height *= MAX_SIZE / width;
+                                                    width = MAX_SIZE;
+                                                } else {
+                                                    width *= MAX_SIZE / height;
+                                                    height = MAX_SIZE;
+                                                }
+                                            }
+
+                                            canvas.width = width;
+                                            canvas.height = height;
+                                            const ctx = canvas.getContext('2d');
+                                            ctx.drawImage(img, 0, 0, width, height);
+
+                                            canvas.toBlob((blob) => {
+                                                if (!blob) {
+                                                    resolve(file);
+                                                    return;
+                                                }
+
+                                                let filename = file.name;
+                                                const dotIndex = filename.lastIndexOf('.');
+                                                if (dotIndex !== -1) {
+                                                    filename = filename.substring(0, dotIndex) + '.jpg';
+                                                } else {
+                                                    filename = filename + '.jpg';
+                                                }
+
+                                                const compressedFile = new File([blob], filename, {
+                                                    type: 'image/jpeg',
+                                                    lastModified: Date.now()
+                                                });
+
+                                                resolve(compressedFile);
+                                            }, 'image/jpeg', 0.9);
+                                        };
+                                        img.onerror = (err) => reject(err);
+                                    };
+                                    reader.onerror = (err) => reject(err);
+                                });
+                            },
+
                             async handleFileUpload(event) {
-                                const file = event.target.files[0];
-                                if (!file) return;
+                                const rawFile = event.target.files[0];
+                                if (!rawFile) return;
 
                                 this.isUploadingFile = true;
                                 try {
+                                    const file = await this.compressImage(rawFile);
+
                                     // Preview & Upload to Livewire
                                     await new Promise((resolve, reject) => {
                                         @this.upload('foto', file, 
@@ -759,72 +822,5 @@
                     document.addEventListener('alpine:init', initPersonnelCamera);
                 }
             })();
-        </script>
-
-        <script>
-            function handlePersonnelImageUpload(input) {
-                const file = input.files[0];
-                if (!file) return;
-
-                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-                const allowedExtensions = ['jpg', 'jpeg', 'png'];
-                const extension = file.name.split('.').pop().toLowerCase();
-
-                if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(extension)) {
-                    alert('File tidak valid! Hanya format JPG, JPEG, dan PNG yang diperbolehkan.');
-                    input.value = '';
-                    return;
-                }
-
-                const maxSize = 2000 * 1024; // 2000KB
-
-                if (file.size > maxSize) {
-                    console.log('File personnel terlalu besar, melakukan kompresi...');
-                    resizePersonnelImage(file, 1200, 1200, 0.85, (resizedFile) => {
-                        @this.upload('foto', resizedFile);
-                    });
-                } else {
-                    @this.upload('foto', file);
-                }
-            }
-
-            function resizePersonnelImage(file, maxWidth, maxHeight, quality, callback) {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > maxWidth) {
-                                height *= maxWidth / width;
-                                width = maxWidth;
-                            }
-                        } else {
-                            if (height > maxHeight) {
-                                width *= maxHeight / height;
-                                height = maxHeight;
-                            }
-                        }
-
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        canvas.toBlob((blob) => {
-                            const resizedFile = new File([blob], file.name, {
-                                type: file.type,
-                                lastModified: Date.now()
-                            });
-                            callback(resizedFile);
-                        }, file.type, quality);
-                    };
-                };
-            }
         </script>
     </div>
