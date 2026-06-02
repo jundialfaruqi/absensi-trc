@@ -70,9 +70,10 @@
                                 {{-- Device Info Masuk --}}
                                 @if ($platformMasuk)
                                     <div class="mt-2 flex flex-col gap-1">
-                                        <div class="flex items-center gap-1.5">
+                                        <div
+                                            class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
                                             @if ($platformMasuk === 'android')
-                                                <div class="badge badge-neutral badge-xs py-2 px-2 gap-1">
+                                                <div class="gap-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                                                         class="size-2.5">
@@ -143,7 +144,8 @@
                                 {{-- Device Info Pulang --}}
                                 @if ($platformPulang)
                                     <div class="mt-2 flex flex-col gap-1">
-                                        <div class="flex items-center gap-1.5">
+                                        <div
+                                            class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
                                             @if ($platformPulang === 'android')
                                                 <div class="badge badge-neutral badge-xs py-2 px-2 gap-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"

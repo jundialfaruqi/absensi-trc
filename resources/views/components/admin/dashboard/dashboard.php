@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -28,6 +29,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
         $this->filterTanggal = Carbon::today()->format('Y-m-d');
     }
 
+    #[Renderless]
     public function openEditAbsensiFromDashboard(int $personnelId, string $tanggal): void
     {
         $this->dispatch('openEditAbsensi', personnelId: $personnelId, tanggal: $tanggal);
