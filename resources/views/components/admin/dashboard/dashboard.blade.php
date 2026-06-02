@@ -787,7 +787,7 @@
                                                 stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                                 <polyline points="20 6 9 17 4 12" />
                                             </svg>
-                                            <p class="text-[10px] font-medium uppercase leading-tight">
+                                            <p class="font-medium uppercase leading-tight">
                                                 {{ trim($line) }}</p>
                                         </div>
                                     @endif
@@ -797,7 +797,7 @@
                     @endif
 
                     @if ($apkInfo['optional_message'])
-                        <p class="text-[10px] font-medium opacity-70 italic mb-4 leading-relaxed">
+                        <p class="font-medium opacity-70 italic mb-4 leading-relaxed">
                             "{{ $apkInfo['optional_message'] }}"
                         </p>
                     @endif
