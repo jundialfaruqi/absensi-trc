@@ -187,7 +187,7 @@
                                                     <div
                                                         class="flex items-center gap-1 text-success font-semibold text-[10px] whitespace-normal wrap-break-word xt-left">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" class="size-2.5 shrink-0">
+                                                            fill="currentColor" class="size-3.5 shrink-0">
                                                             <path fill-rule="evenodd"
                                                                 d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
                                                                 clip-rule="evenodd" />
@@ -264,15 +264,15 @@
 
                                                 @if ($isOfficialDevicePulang)
                                                     <div
-                                                        class="badge badge-success h-auto py-1.5 px-2 gap-1 text-white whitespace-normal break-words text-left">
+                                                        class="flex items-center gap-1 text-success font-semibold text-[10px] whitespace-normal wrap-break-word xt-left">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor" class="size-2.5 shrink-0">
+                                                            fill="currentColor" class="size-3.5 shrink-0">
                                                             <path fill-rule="evenodd"
                                                                 d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
                                                                 clip-rule="evenodd" />
                                                         </svg>
                                                         <span
-                                                            class="text-[8px] font-black tracking-tighter">TERDAFTAR</span>
+                                                            class="text-[10px] font-black text-success tracking-tighter">TERDAFTAR</span>
                                                     </div>
                                                 @endif
                                             </div>
