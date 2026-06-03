@@ -139,21 +139,6 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
         }
     }
 
-    public function checkProgress()
-    {
-        if ($this->importId) {
-            $progressData = Cache::get("import_progress_{$this->importId}");
-            if ($progressData) {
-                $this->progress = $progressData;
-
-                if ($progressData['status'] === 'failed') {
-                    $errorMsg = $progressData['error'] ?? 'Terjadi kesalahan saat mengimpor file di antrean.';
-                    $this->addError('file', 'Gagal memproses file di antrean: '.$errorMsg);
-                }
-            }
-        }
-    }
-
     public function finishImport()
     {
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Data Jadwal berhasil diimpor.');

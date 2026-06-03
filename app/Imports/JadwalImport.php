@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Events\ImportProgressUpdated;
 use App\Models\Absensi;
 use App\Models\Jadwal;
 use App\Models\Personnel;
@@ -100,12 +101,15 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
             $total = Cache::get("import_total_{$this->importId}", 0);
             $percentage = $total > 0 ? min(99, round(($processed / $total) * 100)) : 0;
 
-            Cache::put("import_progress_{$this->importId}", [
+            $progress = [
                 'total' => $total,
                 'processed' => $processed,
                 'status' => 'processing',
                 'percentage' => $percentage,
-            ], 3600);
+            ];
+
+            Cache::put("import_progress_{$this->importId}", $progress, 3600);
+            ImportProgressUpdated::dispatch($this->importId, $progress);
         }
 
         foreach ($rows as $row) {
@@ -274,28 +278,41 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
 
                     Cache::put("import_total_{$this->importId}", $totalDataRows, 3600);
                     Cache::put("import_processed_{$this->importId}", 0, 3600);
+
+                    $progress = [
+                        'total' => $totalDataRows,
+                        'processed' => 0,
+                        'status' => 'processing',
+                        'percentage' => 0,
+                    ];
+                    Cache::put("import_progress_{$this->importId}", $progress, 3600);
+                    ImportProgressUpdated::dispatch($this->importId, $progress);
                 }
             },
             AfterImport::class => function (AfterImport $event) {
                 if ($this->importId) {
                     $total = Cache::get("import_total_{$this->importId}", 0);
-                    Cache::put("import_progress_{$this->importId}", [
+                    $progress = [
                         'total' => $total,
                         'processed' => $total,
                         'status' => 'completed',
                         'percentage' => 100,
-                    ], 3600);
+                    ];
+                    Cache::put("import_progress_{$this->importId}", $progress, 3600);
+                    ImportProgressUpdated::dispatch($this->importId, $progress);
                 }
             },
             ImportFailed::class => function (ImportFailed $event) {
                 if ($this->importId) {
-                    Cache::put("import_progress_{$this->importId}", [
+                    $progress = [
                         'total' => 0,
                         'processed' => 0,
                         'status' => 'failed',
                         'percentage' => 0,
                         'error' => $event->getException()->getMessage(),
-                    ], 3600);
+                    ];
+                    Cache::put("import_progress_{$this->importId}", $progress, 3600);
+                    ImportProgressUpdated::dispatch($this->importId, $progress);
                 }
             },
         ];
