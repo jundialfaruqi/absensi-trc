@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 class Jadwal extends Model
 {
@@ -37,16 +36,5 @@ class Jadwal extends Model
     public function absensis()
     {
         return $this->hasMany(Absensi::class);
-    }
-
-    public static function invalidateCache()
-    {
-        Cache::put('jadwal_cache_version', time(), 86400 * 30);
-    }
-
-    protected static function booted()
-    {
-        static::saved(fn () => static::invalidateCache());
-        static::deleted(fn () => static::invalidateCache());
     }
 }
