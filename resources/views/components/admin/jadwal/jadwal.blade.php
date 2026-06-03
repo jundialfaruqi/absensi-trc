@@ -284,7 +284,8 @@
                                         <td wire:key="cell-{{ $p->id }}-{{ $date }}"
                                             class="text-center border-r border-base-200 p-0 h-14 cursor-pointer hover:opacity-80 transition-all relative {{ $isToday && !$j ? 'bg-primary/10' : '' }} {{ $cellClass }} {{ $j && $j->is_manual ? 'bg-pattern-manual' : '' }}"
                                             style="{{ $style }}"
-                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}', '{{ $p->attendance_type }}')">
+                                            wire:click="openQuickAdd('{{ $p->id }}', '{{ $date }}', '{{ $p->attendance_type }}')"
+                                            x-on:click="$dispatch('open-modal', { id: 'quick-add-modal' })">
 
                                             <div class="w-full h-full flex items-center justify-center">
                                                 @if ($j)

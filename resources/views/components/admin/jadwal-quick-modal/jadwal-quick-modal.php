@@ -56,6 +56,7 @@ new class extends Component
         $this->swapWarning = '';
 
         $this->dispatch('open-modal', id: 'quick-add-modal');
+        $this->dispatch('quick-edit-loaded');
     }
 
     public function saveQuickJadwal(): void

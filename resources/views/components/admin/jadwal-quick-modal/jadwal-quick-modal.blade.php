@@ -1,44 +1,79 @@
 <div>
-    <dialog id="quick-add-modal" class="modal" wire:ignore.self
-        x-on:open-modal.window="$event.detail.id === 'quick-add-modal' && $el.showModal()"
-        x-on:close-modal.window="$event.detail.id === 'quick-add-modal' && $el.close()">
-        <div class="modal-box max-w-md">
-            {{-- Tabs --}}
-            <div class="tabs tabs-boxed mb-6 bg-base-200/50 p-1">
-                <button type="button" wire:click="$set('activeTab', 'quick')"
-                    class="tab tab-sm flex-1 {{ $activeTab === 'quick' ? 'tab-active bg-base-100! shadow-sm' : '' }}">
-                    <span wire:loading wire:target="$set('activeTab', 'quick')"
-                        class="loading loading-spinner loading-xs mr-2"></span>
-                    Quick Edit
-                </button>
-                <button type="button" wire:click="$set('activeTab', 'swap')"
-                    class="tab tab-sm flex-1 {{ $activeTab === 'swap' ? 'tab-active bg-base-100! shadow-sm' : '' }}">
-                    <span wire:loading wire:target="$set('activeTab', 'swap')"
-                        class="loading loading-spinner loading-xs mr-2"></span>
-                    Tukar Shift
-                </button>
+    <dialog id="quick-add-modal" class="modal backdrop-blur-xs modal-bottom sm:modal-middle" wire:ignore.self
+        x-data="{ show: false, loading: true }"
+        x-on:open-modal.window="if ($event.detail.id === 'quick-add-modal') { show = true; loading = true; $el.showModal(); }"
+        x-on:close-modal.window="if ($event.detail.id === 'quick-add-modal') { show = false; $el.close(); }"
+        x-on:quick-edit-loaded.window="loading = false" x-on:close="show = false; loading = true">
+        <div class="modal-box max-w-md p-0 shadow overflow-hidden relative">
+            {{-- Modal Header - Sticky --}}
+            <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
+                <div>
+                    <h3 class="font-bold text-lg">
+                        <span x-show="loading" class="inline-block h-6 w-36 bg-base-content/10 rounded animate-pulse"></span>
+                        <span x-show="!loading">{{ $activeTab === 'quick' ? 'Set Jadwal / Status' : 'Tukar Shift (2 Arah)' }}</span>
+                    </h3>
+                    <p class="text-xs text-base-content/60">
+                        <span x-show="loading" class="inline-block h-3 w-28 bg-base-content/10 rounded animate-pulse mt-1"></span>
+                        <span x-show="!loading">{{ $quickDate ? \Carbon\Carbon::parse($quickDate)->translatedFormat('l, d M Y') : '' }}</span>
+                    </p>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm btn-circle"
+                    onclick="document.getElementById('quick-add-modal').close()">✕</button>
             </div>
 
-            <div class="relative min-h-75">
-                {{-- Modal Content Loading Overlay --}}
-                <div wire:loading wire:target="activeTab"
-                    class="absolute inset-0 z-50 flex items-center justify-center rounded-xl bg-base-100/50 backdrop-blur-[1px]">
-                    <div class="flex flex-col items-center gap-3">
-                        <span class="loading loading-spinner loading-md text-primary"></span>
-                        <span class="text-xs font-medium opacity-60">Memuat data...</span>
+            {{-- Modal Content Wrapper --}}
+            <div class="p-6">
+                {{-- Skeleton Loader --}}
+                <div x-show="loading" class="space-y-6 animate-pulse">
+                    <div class="h-8 bg-base-200 rounded-lg w-full mb-4"></div>
+                    <div class="space-y-2">
+                        <div class="h-3 bg-base-300 rounded w-24"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="h-10 bg-base-200 rounded-lg"></div>
+                            <div class="h-10 bg-base-200 rounded-lg"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="h-3 bg-base-300 rounded w-20"></div>
+                        <div class="space-y-2 max-h-48 overflow-hidden">
+                            <div class="h-12 bg-base-200 rounded-xl"></div>
+                            <div class="h-12 bg-base-200 rounded-xl"></div>
+                            <div class="h-12 bg-base-200 rounded-xl"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-4 border-t border-base-200">
+                        <div class="h-8 bg-base-200 rounded-lg w-20"></div>
+                        <div class="h-8 bg-base-300 rounded-lg w-28"></div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="font-bold text-lg">
-                            {{ $activeTab === 'quick' ? 'Set Jadwal / Status' : 'Tukar Shift (2 Arah)' }}
-                        </h3>
-                        <p class="text-xs text-base-content/60">
-                            {{ $quickDate ? \Carbon\Carbon::parse($quickDate)->translatedFormat('l, d M Y') : '' }}
-                        </p>
+                {{-- Actual Form Content --}}
+                <div x-show="!loading">
+                    {{-- Tabs --}}
+                    <div class="tabs tabs-boxed mb-6 bg-base-200/50 p-1">
+                        <button type="button" wire:click="$set('activeTab', 'quick')"
+                            class="tab tab-sm flex-1 {{ $activeTab === 'quick' ? 'tab-active bg-base-100! shadow-sm' : '' }}">
+                            <span wire:loading wire:target="$set('activeTab', 'quick')"
+                                class="loading loading-spinner loading-xs mr-2"></span>
+                            Quick Edit
+                        </button>
+                        <button type="button" wire:click="$set('activeTab', 'swap')"
+                            class="tab tab-sm flex-1 {{ $activeTab === 'swap' ? 'tab-active bg-base-100! shadow-sm' : '' }}">
+                            <span wire:loading wire:target="$set('activeTab', 'swap')"
+                                class="loading loading-spinner loading-xs mr-2"></span>
+                            Tukar Shift
+                        </button>
                     </div>
-                </div>
+
+                    <div class="relative min-h-75">
+                        {{-- Modal Content Loading Overlay --}}
+                        <div wire:loading wire:target="activeTab"
+                            class="absolute inset-0 z-50 flex items-center justify-center rounded-xl bg-base-100/50 backdrop-blur-[1px]">
+                            <div class="flex flex-col items-center gap-3">
+                                <span class="loading loading-spinner loading-md text-primary"></span>
+                                <span class="text-xs font-medium opacity-60">Memuat data...</span>
+                            </div>
+                        </div>
 
                 @if ($activeTab === 'quick')
                     <form wire:submit="saveQuickJadwal">
@@ -212,6 +247,8 @@
                 @endif
             </div>
         </div>
+    </div>
+</div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>
         </form>
