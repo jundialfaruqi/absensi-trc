@@ -20,6 +20,7 @@ use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Events\AfterImport;
 use Maatwebsite\Excel\Events\BeforeImport;
 use Maatwebsite\Excel\Events\ImportFailed;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithEvents, WithStartRow
 {
@@ -295,7 +296,8 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
         return [
             BeforeImport::class => function (BeforeImport $event) {
                 if ($this->importId) {
-                    $spreadsheet = $event->getReader()->getDelegate();
+                    $filePath = (fn () => $this->currentFile->getLocalPath())->call($event->getReader());
+                    $spreadsheet = IOFactory::load($filePath);
                     $totalDataRows = 0;
                     foreach ($spreadsheet->getSheetNames() as $sheetIndex => $sheetName) {
                         $sheet = $spreadsheet->getSheet($sheetIndex);
