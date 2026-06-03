@@ -2,30 +2,47 @@
 
 namespace App\Imports;
 
+use App\Models\Absensi;
 use App\Models\Jadwal;
 use App\Models\Personnel;
 use App\Models\Shift;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Support\Collection;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithStartRow;
+use Maatwebsite\Excel\Events\AfterImport;
+use Maatwebsite\Excel\Events\BeforeImport;
+use Maatwebsite\Excel\Events\ImportFailed;
 
-use Illuminate\Support\Facades\Storage;
-
-class JadwalImport implements ToCollection
+class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithEvents, WithStartRow
 {
+    use Queueable;
+
     protected $month;
+
     protected $year;
+
     protected $opdId;
+
     protected $shifts;
+
     protected $shouldReset;
 
-    public function __construct($month = null, $year = null, $opdId = null, $shouldReset = false)
+    protected $importId;
+
+    public function __construct($month = null, $year = null, $opdId = null, $shouldReset = false, $importId = null)
     {
         $this->month = $month ?: date('m');
         $this->year = $year ?: date('Y');
         $this->opdId = $opdId;
         $this->shouldReset = $shouldReset;
+        $this->importId = $importId;
 
         if ($this->shouldReset) {
             $this->resetExistingData();
@@ -40,9 +57,9 @@ class JadwalImport implements ToCollection
     protected function resetExistingData()
     {
         // Hapus permanen absensi default (belum terisi) agar tidak memenuhi kotak sampah
-        $defaultAbsensis = \App\Models\Absensi::whereYear('tanggal', $this->year)
+        $defaultAbsensis = Absensi::whereYear('tanggal', $this->year)
             ->whereMonth('tanggal', $this->month)
-            ->whereHas('personnel', function($q) {
+            ->whereHas('personnel', function ($q) {
                 if ($this->opdId) {
                     $q->where('opd_id', $this->opdId);
                 }
@@ -58,15 +75,15 @@ class JadwalImport implements ToCollection
         }
 
         // Delete existing schedules (hanya jadwal yang absensinya default/sudah di-soft-delete)
-        \App\Models\Jadwal::whereYear('tanggal', $this->year)
+        Jadwal::whereYear('tanggal', $this->year)
             ->whereMonth('tanggal', $this->month)
-            ->whereHas('personnel', function($q) {
+            ->whereHas('personnel', function ($q) {
                 if ($this->opdId) {
                     $q->where('opd_id', $this->opdId);
                 }
             })
-            ->whereDoesntHave('absensis', function($q) {
-                $q->where(function($q2) {
+            ->whereDoesntHave('absensis', function ($q) {
+                $q->where(function ($q2) {
                     $q2->whereNotNull('jam_masuk')
                         ->orWhereNotNull('jam_pulang')
                         ->orWhereNotNull('foto_masuk')
@@ -78,23 +95,36 @@ class JadwalImport implements ToCollection
 
     public function collection(Collection $rows)
     {
-        // Skip branding, instructions, and double header rows (Rows 1-6)
-        $dataRows = $rows->slice(6);
+        if ($this->importId) {
+            $processed = Cache::increment("import_processed_{$this->importId}", $rows->count());
+            $total = Cache::get("import_total_{$this->importId}", 0);
+            $percentage = $total > 0 ? min(99, round(($processed / $total) * 100)) : 0;
 
-        foreach ($dataRows as $row) {
+            Cache::put("import_progress_{$this->importId}", [
+                'total' => $total,
+                'processed' => $processed,
+                'status' => 'processing',
+                'percentage' => $percentage,
+            ], 3600);
+        }
+
+        foreach ($rows as $row) {
             // Convert row to array to ensure we can use numeric indices reliably
             $rowData = $row instanceof Collection ? $row->toArray() : $row;
 
             $personnelId = $rowData[0] ?? null; // ID Personnel is in first column
-            if (is_null($personnelId) || trim($personnelId) === '') continue;
+            if (is_null($personnelId) || trim($personnelId) === '') {
+                continue;
+            }
 
-            $personnel = Personnel::when($this->opdId, function($q) {
-                    $q->where('opd_id', $this->opdId);
-                })
+            $personnel = Personnel::when($this->opdId, function ($q) {
+                $q->where('opd_id', $this->opdId);
+            })
                 ->where('attendance_type', '!=', 'FLEXIBLE')
                 ->find($personnelId);
-            if (!$personnel) {
+            if (! $personnel) {
                 Log::warning("JadwalImport: Personnel with ID {$personnelId} not found or unauthorized for current OPD context.");
+
                 continue;
             }
 
@@ -106,7 +136,7 @@ class JadwalImport implements ToCollection
                 $shiftValue = $rowData[$colIndex] ?? null;
 
                 // Trimming and checking if it's actually filled
-                $shiftValue = trim((string)$shiftValue);
+                $shiftValue = trim((string) $shiftValue);
 
                 if ($shiftValue !== '') {
                     $tanggal = Carbon::create($this->year, $this->month, $day)->format('Y-m-d');
@@ -119,7 +149,7 @@ class JadwalImport implements ToCollection
                         $absensiStatus = $sObj->type === 'off' ? ($sObj->keterangan ?? 'OFF') : 'ALPA';
 
                         // Skip jika absensi sudah terisi (bukan default)
-                        $existingAbsensi = \App\Models\Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
+                        $existingAbsensi = Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
                         if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
                             continue;
                         }
@@ -127,24 +157,24 @@ class JadwalImport implements ToCollection
                         $jadwal = Jadwal::updateOrCreate(
                             [
                                 'personnel_id' => $personnel->id,
-                                'tanggal'      => $tanggal,
+                                'tanggal' => $tanggal,
                             ],
                             [
                                 'shift_id' => $shiftId,
-                                'status'   => $status,
+                                'status' => $status,
                                 'is_manual' => false,
                             ]
                         );
 
                         // CREATE/UPDATE ABSENSI
-                        \App\Models\Absensi::updateOrCreate(
+                        Absensi::updateOrCreate(
                             [
                                 'personnel_id' => $personnel->id,
-                                'tanggal'      => $tanggal,
+                                'tanggal' => $tanggal,
                             ],
                             [
                                 'jadwal_id' => $jadwal->id,
-                                'status'    => $absensiStatus,
+                                'status' => $absensiStatus,
                                 'status_masuk' => $absensiStatus,
                                 'status_pulang' => $absensiStatus,
                             ]
@@ -153,7 +183,7 @@ class JadwalImport implements ToCollection
                         // Fallback logic for literal "LIBUR" if no shift matches
                         if (strtoupper($shiftValue) === 'LIBUR') {
                             // Skip jika absensi sudah terisi (bukan default)
-                            $existingAbsensi = \App\Models\Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
+                            $existingAbsensi = Absensi::where('personnel_id', $personnel->id)->where('tanggal', $tanggal)->first();
                             if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
                                 continue;
                             }
@@ -161,23 +191,23 @@ class JadwalImport implements ToCollection
                             $jadwal = Jadwal::updateOrCreate(
                                 [
                                     'personnel_id' => $personnel->id,
-                                    'tanggal'      => $tanggal,
+                                    'tanggal' => $tanggal,
                                 ],
                                 [
                                     'shift_id' => null,
-                                    'status'   => 'LIBUR',
+                                    'status' => 'LIBUR',
                                     'is_manual' => false,
                                 ]
                             );
 
-                            \App\Models\Absensi::updateOrCreate(
+                            Absensi::updateOrCreate(
                                 [
                                     'personnel_id' => $personnel->id,
-                                    'tanggal'      => $tanggal,
+                                    'tanggal' => $tanggal,
                                 ],
                                 [
                                     'jadwal_id' => $jadwal->id,
-                                    'status'    => 'LIBUR',
+                                    'status' => 'LIBUR',
                                     'status_masuk' => 'LIBUR',
                                     'status_pulang' => 'LIBUR',
                                 ]
@@ -196,7 +226,9 @@ class JadwalImport implements ToCollection
         // 1. Try direct ID first if it's numeric
         if (is_numeric($value)) {
             $shift = Shift::find($value);
-            if ($shift) return $shift->id;
+            if ($shift) {
+                return $shift->id;
+            }
         }
 
         // 2. Try exact slug match (e.g. "pagi" -> "pagi", "shift pagi" -> "shiftpagi")
@@ -219,5 +251,53 @@ class JadwalImport implements ToCollection
     {
         // Simple slugify: lowercase and remove all non-alphanumeric
         return preg_replace('/[^a-z0-9]/', '', strtolower(trim($text)));
+    }
+
+    public function chunkSize(): int
+    {
+        return 250;
+    }
+
+    public function startRow(): int
+    {
+        return 7;
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            BeforeImport::class => function (BeforeImport $event) {
+                if ($this->importId) {
+                    $totalRows = $event->getReader()->getTotalRows();
+                    $rowCount = reset($totalRows);
+                    $totalDataRows = max(0, $rowCount - 6);
+
+                    Cache::put("import_total_{$this->importId}", $totalDataRows, 3600);
+                    Cache::put("import_processed_{$this->importId}", 0, 3600);
+                }
+            },
+            AfterImport::class => function (AfterImport $event) {
+                if ($this->importId) {
+                    $total = Cache::get("import_total_{$this->importId}", 0);
+                    Cache::put("import_progress_{$this->importId}", [
+                        'total' => $total,
+                        'processed' => $total,
+                        'status' => 'completed',
+                        'percentage' => 100,
+                    ], 3600);
+                }
+            },
+            ImportFailed::class => function (ImportFailed $event) {
+                if ($this->importId) {
+                    Cache::put("import_progress_{$this->importId}", [
+                        'total' => 0,
+                        'processed' => 0,
+                        'status' => 'failed',
+                        'percentage' => 0,
+                        'error' => $event->getException()->getMessage(),
+                    ], 3600);
+                }
+            },
+        ];
     }
 }

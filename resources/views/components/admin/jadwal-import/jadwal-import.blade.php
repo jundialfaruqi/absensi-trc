@@ -1,4 +1,4 @@
-<div>
+<div @if($importId && (($progress['status'] ?? '') === 'processing' || ($progress['status'] ?? '') === '')) wire:poll.1s="checkProgress" @endif>
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
             <h1 class="text-xl font-black uppercase">Import Jadwal</h1>
@@ -197,6 +197,103 @@
         </div>
     @endif
 
+    {{-- Progress Modal Overlay --}}
+    @if ($importId && $progress)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-base-300/60 backdrop-blur-sm transition-all duration-300">
+            <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200 p-6 mx-4">
+                <div class="flex flex-col items-center text-center">
+                    
+                    @if (($progress['status'] ?? '') === 'completed')
+                        <!-- Success State -->
+                        <div class="w-16 h-16 rounded-full bg-success/15 flex items-center justify-center text-success mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                        </div>
+
+                        <h3 class="font-black text-xl text-base-content mb-1">Proses Selesai</h3>
+                        <p class="text-sm text-base-content/60 mb-6">Data jadwal berhasil diimpor sepenuhnya ke sistem.</p>
+
+                        <!-- Progress Bar Container (Static Green) -->
+                        <div class="w-full bg-base-200 rounded-full h-3 mb-4 overflow-hidden">
+                            <div class="bg-success h-full rounded-full w-full"></div>
+                        </div>
+
+                        <div class="text-xs text-base-content/75 font-semibold bg-success/10 py-2 px-4 rounded-lg border border-success/15 mb-6">
+                            Berhasil memproses {{ number_format($progress['processed'] ?? 0) }} baris data jadwal.
+                        </div>
+
+                        <button type="button" wire:click="finishImport" class="btn btn-success text-white w-full">
+                            Selesai & Lihat Jadwal
+                        </button>
+
+                    @elseif (($progress['status'] ?? '') === 'failed')
+                        <!-- Failed State -->
+                        <div class="w-16 h-16 rounded-full bg-error/15 flex items-center justify-center text-error mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+
+                        <h3 class="font-black text-xl text-error mb-1">Impor Gagal</h3>
+                        <p class="text-sm text-base-content/60 mb-4">Terjadi kendala saat memproses file Excel.</p>
+
+                        <!-- Error Message Container -->
+                        <div class="w-full text-xs text-left text-error bg-error/5 p-4 rounded-xl border border-error/20 mb-6 max-h-32 overflow-y-auto font-mono">
+                            {{ $progress['error'] ?? 'Terjadi kesalahan tidak dikenal saat mengimpor data.' }}
+                        </div>
+
+                        <button type="button" wire:click="resetImport" class="btn btn-neutral w-full">
+                            Tutup
+                        </button>
+
+                    @else
+                        <!-- Processing State -->
+                        <div class="relative mb-6">
+                            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary animate-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
+                                </svg>
+                            </div>
+                            <span class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></span>
+                        </div>
+
+                        <h3 class="font-black text-xl text-base-content mb-1">Sedang Memproses Impor</h3>
+                        <p class="text-sm text-base-content/60 mb-6">Harap tunggu, server sedang mengimpor data jadwal Anda.</p>
+
+                        <!-- Percentage Indicator -->
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span class="text-3xl font-black text-primary">{{ $progress['percentage'] ?? 0 }}</span>
+                            <span class="text-sm font-bold text-primary">%</span>
+                        </div>
+
+                        <!-- Progress Bar Container -->
+                        <div class="w-full bg-base-200 rounded-full h-3 mb-4 overflow-hidden">
+                            <div class="bg-primary h-full rounded-full transition-all duration-500 ease-out"
+                                 style="width: {{ $progress['percentage'] ?? 0 }}%"></div>
+                        </div>
+
+                        <!-- Processed Data Info -->
+                        <div class="text-xs text-base-content/50 font-medium mb-4">
+                            @if (($progress['total'] ?? 0) > 0)
+                                Memproses {{ number_format($progress['processed'] ?? 0) }} dari {{ number_format($progress['total'] ?? 0) }} baris data...
+                            @else
+                                Menghubungkan ke antrean & menghitung total data...
+                            @endif
+                        </div>
+
+                        <div class="py-2 px-4 bg-info/10 rounded-lg text-info border border-info/15 text-[11px] font-semibold flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>Jangan menutup atau menyegarkan halaman ini.</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
     <script>
         function validateImportFile(input) {
             const file = input.files[0];
@@ -212,3 +309,4 @@
         }
     </script>
 </div>
+
