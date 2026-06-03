@@ -125,7 +125,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                           ->whereMonth('tanggal', $this->month);
                 }
                 $query->with('shift');
-            }, 'penugasan'])
+            }, 'penugasan', 'opd'])
             ->when(!Auth::user()->hasRole('super-admin'), function ($q) use ($opdId) {
                 $q->where('personnels.opd_id', $opdId);
             })
