@@ -96,8 +96,25 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
 
     public function collection(Collection $rows)
     {
-        if ($this->importId) {
-            $processed = Cache::increment("import_processed_{$this->importId}", $rows->count());
+        $validRowsInChunk = 0;
+        foreach ($rows as $row) {
+            $rowData = $row instanceof Collection ? $row->toArray() : $row;
+            $personnelId = $rowData[0] ?? null;
+            $trimmedId = trim((string) $personnelId);
+
+            if ($trimmedId === '') {
+                continue;
+            }
+
+            if (stripos($trimmedId, 'DAFTAR REFERENSI') !== false) {
+                break;
+            }
+
+            $validRowsInChunk++;
+        }
+
+        if ($this->importId && $validRowsInChunk > 0) {
+            $processed = Cache::increment("import_processed_{$this->importId}", $validRowsInChunk);
             $total = Cache::get("import_total_{$this->importId}", 0);
             $percentage = $total > 0 ? min(99, round(($processed / $total) * 100)) : 0;
 
@@ -117,8 +134,14 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
             $rowData = $row instanceof Collection ? $row->toArray() : $row;
 
             $personnelId = $rowData[0] ?? null; // ID Personnel is in first column
-            if (is_null($personnelId) || trim($personnelId) === '') {
+            $trimmedId = trim((string) $personnelId);
+
+            if (is_null($personnelId) || $trimmedId === '') {
                 continue;
+            }
+
+            if (stripos($trimmedId, 'DAFTAR REFERENSI') !== false) {
+                break;
             }
 
             $personnel = Personnel::when($this->opdId, function ($q) {
@@ -272,9 +295,21 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
         return [
             BeforeImport::class => function (BeforeImport $event) {
                 if ($this->importId) {
-                    $totalRows = $event->getReader()->getTotalRows();
-                    $rowCount = reset($totalRows);
-                    $totalDataRows = max(0, $rowCount - 6);
+                    $spreadsheet = $event->getReader()->getDelegate();
+                    $totalDataRows = 0;
+                    foreach ($spreadsheet->getSheetNames() as $sheetIndex => $sheetName) {
+                        $sheet = $spreadsheet->getSheet($sheetIndex);
+                        $highestRow = $sheet->getHighestRow();
+                        for ($row = 7; $row <= $highestRow; $row++) {
+                            $cellValue = trim((string) $sheet->getCell("A$row")->getValue());
+                            if (stripos($cellValue, 'DAFTAR REFERENSI') !== false) {
+                                break;
+                            }
+                            if ($cellValue !== '') {
+                                $totalDataRows++;
+                            }
+                        }
+                    }
 
                     Cache::put("import_total_{$this->importId}", $totalDataRows, 3600);
                     Cache::put("import_processed_{$this->importId}", 0, 3600);
