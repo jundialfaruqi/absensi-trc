@@ -1,21 +1,26 @@
 <?php
 
+use App\Models\Jadwal;
+use App\Models\Opd;
+use App\Models\Personnel;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Jadwal;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends Component
 {
     use WithPagination;
 
     public bool $readyToLoad = false;
+
     #[Url]
     public int $perPage = 10;
 
@@ -40,13 +45,17 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     public ?int $deleteId = null;
 
     protected $listeners = [
-        'refreshJadwal' => '$refresh'
+        'refreshJadwal' => '$refresh',
     ];
 
     public function mount(): void
     {
-        if (!$this->month) $this->month = Carbon::now()->format('m');
-        if (!$this->year) $this->year = Carbon::now()->format('Y');
+        if (! $this->month) {
+            $this->month = Carbon::now()->format('m');
+        }
+        if (! $this->year) {
+            $this->year = Carbon::now()->format('Y');
+        }
     }
 
     public function load()
@@ -57,8 +66,8 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     #[Renderless]
     public function openQuickAdd($personnelId, $date, $attendanceType = null): void
     {
-        if (!$attendanceType) {
-            $personnel = \App\Models\Personnel::find($personnelId);
+        if (! $attendanceType) {
+            $personnel = Personnel::find($personnelId);
             $attendanceType = $personnel?->attendance_type;
         }
 
@@ -68,6 +77,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                 title: 'Informasi',
                 message: 'Personnel ini memiliki tipe Flexible dan tidak membutuhkan jadwal untuk absensi.'
             );
+
             return;
         }
 
@@ -91,6 +101,7 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
                 $dates[] = $start->format('Y-m-d');
                 $start->addDay();
             }
+
             return $dates;
         }
 
@@ -103,52 +114,68 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         for ($i = 1; $i <= $daysInMonth; $i++) {
             $dates[] = Carbon::create($this->year, $this->month, $i)->format('Y-m-d');
         }
+
         return $dates;
     }
 
     #[Computed]
     public function personnels()
     {
-        if (!$this->readyToLoad) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        if (! $this->readyToLoad) {
+            return new LengthAwarePaginator([], 0, $this->perPage);
         }
 
         $opdId = Auth::user()->opd()?->id;
+        $version = Cache::get('jadwal_cache_version', 1);
+        $userId = Auth::id();
+        $page = $this->paginators['page'] ?? request('page', 1);
 
-        $paginator = \App\Models\Personnel::with(['jadwals' => function ($query) {
+        $cacheKey = "jadwal_personnels_v{$version}_u{$userId}_p{$page}_pp{$this->perPage}_s".md5(json_encode([
+            $this->search,
+            $this->month,
+            $this->year,
+            $this->startDate,
+            $this->endDate,
+            $this->selectedOpd,
+        ]));
+
+        return Cache::remember($cacheKey, 86400, function () use ($opdId) {
+            $paginator = Personnel::with(['jadwals' => function ($query) {
                 if ($this->startDate && $this->endDate) {
                     $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
                 } elseif ($this->startDate) {
                     $query->whereDate('tanggal', $this->startDate);
                 } else {
                     $query->whereYear('tanggal', $this->year)
-                          ->whereMonth('tanggal', $this->month);
+                        ->whereMonth('tanggal', $this->month);
                 }
                 $query->with('shift');
             }, 'penugasan', 'opd'])
-            ->when(!Auth::user()->hasRole('super-admin'), function ($q) use ($opdId) {
-                $q->where('personnels.opd_id', $opdId);
-            })
-            ->when(Auth::user()->hasRole('super-admin') && $this->selectedOpd, function ($q) {
-                $q->where('personnels.opd_id', $this->selectedOpd);
-            })
-            ->when($this->search, function ($q) {
-                $q->where('personnels.name', 'like', '%' . $this->search . '%');
-            })
-            ->join('opds', 'personnels.opd_id', '=', 'opds.id')
-            ->select('personnels.*')
-            ->orderBy('opds.name')
-            ->orderByRaw('LENGTH(personnels.regu) ASC, personnels.regu ASC')
-            ->orderBy('personnels.name')
-            ->paginate($this->perPage);
+                ->when(! Auth::user()->hasRole('super-admin'), function ($q) use ($opdId) {
+                    $q->where('personnels.opd_id', $opdId);
+                })
+                ->when(Auth::user()->hasRole('super-admin') && $this->selectedOpd, function ($q) {
+                    $q->where('personnels.opd_id', $this->selectedOpd);
+                })
+                ->when($this->search, function ($q) {
+                    $q->where('personnels.name', 'like', '%'.$this->search.'%');
+                })
+                ->join('opds', 'personnels.opd_id', '=', 'opds.id')
+                ->select('personnels.*')
+                ->orderBy('opds.name')
+                ->orderByRaw('LENGTH(personnels.regu) ASC, personnels.regu ASC')
+                ->orderBy('personnels.name')
+                ->paginate($this->perPage);
 
-        // Key their data by date for easy lookup in the view
-        $paginator->getCollection()->transform(function ($personnel) {
-            $personnel->jadwal_map = $personnel->jadwals->keyBy(fn($j) => $j->tanggal->format('Y-m-d'));
-            return $personnel;
+            // Key their data by date for easy lookup in the view
+            $paginator->getCollection()->transform(function ($personnel) {
+                $personnel->jadwal_map = $personnel->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
+
+                return $personnel;
+            });
+
+            return $paginator;
         });
-
-        return $paginator;
     }
 
     public function updatedStartDate($value)
@@ -184,8 +211,8 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
         $item = Jadwal::findOrFail($this->deleteId);
 
         // Authorization Check
-        if (!Auth::user()->hasRole('super-admin') && $item->personnel->opd_id !== Auth::user()->opd()?->id) {
-             throw new \Exception('Unauthorized');
+        if (! Auth::user()->hasRole('super-admin') && $item->personnel->opd_id !== Auth::user()->opd()?->id) {
+            throw new Exception('Unauthorized');
         }
 
         $item->delete();
@@ -218,6 +245,6 @@ new #[Title('Manajemen Jadwal')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function opds()
     {
-        return \App\Models\Opd::query()->orderBy('name', 'asc')->get(['*']);
+        return Opd::query()->orderBy('name', 'asc')->get(['*']);
     }
 };

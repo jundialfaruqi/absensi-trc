@@ -1,5 +1,15 @@
 <?php
 
+use App\Models\Jadwal;
+use App\Models\Opd;
+use App\Models\Penugasan;
+use App\Models\Personnel;
+use App\Models\Shift;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 return [
@@ -125,6 +135,19 @@ return [
     |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        LengthAwarePaginator::class,
+        Paginator::class,
+        Collection::class,
+        Illuminate\Database\Eloquent\Collection::class,
+        Model::class,
+        Personnel::class,
+        Jadwal::class,
+        Opd::class,
+        Penugasan::class,
+        Shift::class,
+        Carbon::class,
+        Illuminate\Support\Carbon::class,
+    ],
 
 ];

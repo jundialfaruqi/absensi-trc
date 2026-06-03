@@ -1,19 +1,19 @@
 <?php
 
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\Url;
-use Livewire\Component;
-use App\Models\Personnel;
-use App\Models\Opd;
-use App\Models\Shift;
-use App\Models\Jadwal;
 use App\Models\Absensi;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Jadwal;
+use App\Models\Opd;
+use App\Models\Personnel;
+use App\Models\Shift;
+use App\Models\ShiftCycleTemplate;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -27,26 +27,32 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     // Step 2: Personnel Selection
     #[Url]
     public array $selectedPersonnelIds = [];
+
     public bool $selectAll = false;
+
     public int $peoplePerRegu = 2;
+
     public bool $useRegu = false;
 
     // Step 3: Shift Sequence
     // Each item: ['type' => 'SHIFT|OFF', 'shift_id' => null, 'duration' => 1, 'count' => 1]
     #[Url]
     public array $shiftSequence = [
-        ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1, 'count' => 1]
+        ['type' => 'SHIFT', 'shift_id' => '', 'duration' => 1, 'count' => 1],
     ];
 
     // Step 4: Date Range
     #[Url]
     public string $startDate;
+
     #[Url]
     public string $endDate;
 
     // Template Management
     public ?int $selectedTemplateId = null;
+
     public bool $saveAsTemplate = false;
+
     public string $templateName = '';
 
     // Generate Mode: 'cycle' (Rolling), 'weekly' (Fixed), or 'quota' (Smart)
@@ -66,7 +72,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         $user = Auth::user();
         $isSuperAdmin = $user->hasRole('super-admin');
 
-        if (!$isSuperAdmin) {
+        if (! $isSuperAdmin) {
             $this->selectedOpdId = $user->opd()?->id;
             if ($this->step === 1) {
                 $this->step = 2;
@@ -104,7 +110,10 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     #[Computed]
     public function personnels()
     {
-        if (!$this->selectedOpdId) return collect();
+        if (! $this->selectedOpdId) {
+            return collect();
+        }
+
         return Personnel::where('opd_id', $this->selectedOpdId)
             ->where('attendance_type', '!=', 'FLEXIBLE')
             ->orderBy('name')
@@ -120,7 +129,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     #[Computed]
     public function templates()
     {
-        return \App\Models\ShiftCycleTemplate::where('opd_id', $this->selectedOpdId)
+        return ShiftCycleTemplate::where('opd_id', $this->selectedOpdId)
             ->orWhereNull('opd_id')
             ->orderBy('name')
             ->get();
@@ -129,7 +138,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public function updatedSelectedTemplateId($value)
     {
         if ($value) {
-            $template = \App\Models\ShiftCycleTemplate::find($value);
+            $template = ShiftCycleTemplate::find($value);
             if ($template) {
                 $this->generateMode = $template->mode ?? 'cycle';
                 if ($this->generateMode === 'cycle') {
@@ -139,7 +148,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 } else {
                     $this->quotaConfig = $template->sequence;
                 }
-                $this->dispatch('toast', type: 'success', message: 'Template "' . $template->name . '" berhasil dimuat.');
+                $this->dispatch('toast', type: 'success', message: 'Template "'.$template->name.'" berhasil dimuat.');
             }
         }
     }
@@ -151,14 +160,18 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         ]);
 
         $sequence = $this->shiftSequence;
-        if ($this->generateMode === 'weekly') $sequence = $this->weeklyConfig;
-        if ($this->generateMode === 'quota') $sequence = $this->quotaConfig;
+        if ($this->generateMode === 'weekly') {
+            $sequence = $this->weeklyConfig;
+        }
+        if ($this->generateMode === 'quota') {
+            $sequence = $this->quotaConfig;
+        }
 
-        \App\Models\ShiftCycleTemplate::create([
+        ShiftCycleTemplate::create([
             'name' => $this->templateName,
             'opd_id' => $this->selectedOpdId,
             'mode' => $this->generateMode,
-            'sequence' => $sequence
+            'sequence' => $sequence,
         ]);
 
         $this->templateName = '';
@@ -169,8 +182,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public function nextStep()
     {
         if ($this->step == 1) {
-            if (!$this->selectedOpdId) {
+            if (! $this->selectedOpdId) {
                 $this->dispatch('toast', type: 'error', message: 'Silakan pilih OPD terlebih dahulu.');
+
                 return;
             }
         }
@@ -178,6 +192,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         if ($this->step == 2) {
             if (empty($this->selectedPersonnelIds)) {
                 $this->dispatch('toast', type: 'error', message: 'Silakan pilih minimal satu personel.');
+
                 return;
             }
         }
@@ -187,18 +202,22 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                 foreach ($this->shiftSequence as $seq) {
                     if ($seq['type'] === 'SHIFT' && empty($seq['shift_id'])) {
                         $this->dispatch('toast', type: 'error', message: 'Silakan pilih shift untuk semua entri SHIFT.');
+
                         return;
                     }
                     if ($seq['type'] === 'OFF' && empty($seq['shift_id'])) {
                         $this->dispatch('toast', type: 'error', message: 'Silakan pilih status OFF terlebih dahulu.');
+
                         return;
                     }
                     if ($seq['duration'] < 1) {
                         $this->dispatch('toast', type: 'error', message: 'Durasi minimal adalah 1 hari.');
+
                         return;
                     }
                     if (($seq['count'] ?? 1) < 1) {
                         $this->dispatch('toast', type: 'error', message: 'Jumlah personel minimal adalah 1.');
+
                         return;
                     }
                 }
@@ -207,11 +226,13 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     if ($config['type'] === 'SHIFT' && empty($config['shift_id'])) {
                         $dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][$day];
                         $this->dispatch('toast', type: 'error', message: "Silakan pilih shift untuk hari $dayName.");
+
                         return;
                     }
                     if ($config['type'] === 'OFF' && empty($config['shift_id'])) {
                         $dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][$day];
                         $this->dispatch('toast', type: 'error', message: "Silakan pilih status OFF untuk hari $dayName.");
+
                         return;
                     }
                 }
@@ -221,7 +242,8 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
         if ($this->step == 3 && $this->generateMode === 'quota') {
             $totalNeeded = array_sum($this->quotaConfig);
             if ($totalNeeded > count($this->selectedPersonnelIds)) {
-                $this->dispatch('toast', type: 'error', message: "Kebutuhan personel ($totalNeeded) melebihi jumlah personel yang dipilih (" . count($this->selectedPersonnelIds) . ").");
+                $this->dispatch('toast', type: 'error', message: "Kebutuhan personel ($totalNeeded) melebihi jumlah personel yang dipilih (".count($this->selectedPersonnelIds).').');
+
                 return;
             }
         }
@@ -232,7 +254,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public function prevStep()
     {
         $user = Auth::user();
-        if ($this->step == 2 && !$user->hasRole('super-admin')) {
+        if ($this->step == 2 && ! $user->hasRole('super-admin')) {
             return; // Cannot go back to OPD selection if not super-admin
         }
         $this->step--;
@@ -241,7 +263,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
     public function toggleSelectAll()
     {
         if ($this->selectAll) {
-            $this->selectedPersonnelIds = $this->personnels->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            $this->selectedPersonnelIds = $this->personnels->pluck('id')->map(fn ($id) => (string) $id)->toArray();
         } else {
             $this->selectedPersonnelIds = [];
         }
@@ -274,6 +296,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
 
         if ($exists) {
             $this->showConfirmModal = true;
+
             return;
         }
 
@@ -319,7 +342,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $dailyCycle[] = [
                         'type' => $seq['type'], // SHIFT or OFF
                         'shift_id' => $seq['shift_id'],
-                        'count' => $seq['count'] ?? 1
+                        'count' => $seq['count'] ?? 1,
                     ];
                 }
             }
@@ -327,6 +350,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             $cycleLength = count($dailyCycle);
             if ($cycleLength === 0) {
                 $this->dispatch('toast', type: 'error', message: 'Siklus shift tidak valid.');
+
                 return;
             }
 
@@ -334,7 +358,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             foreach ($this->selectedPersonnelIds as $index => $pId) {
                 if ($this->useRegu) {
                     $reguIndex = (int) floor($index / max(1, $this->peoplePerRegu));
-                    $reguName = 'Regu ' . ($reguIndex + 1);
+                    $reguName = 'Regu '.($reguIndex + 1);
                     Personnel::where('id', $pId)->update(['regu' => $reguName]);
                     $startOffset = $reguIndex % $cycleLength;
                 } else {
@@ -352,6 +376,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $existingAbsensi = Absensi::where('personnel_id', $pId)->where('tanggal', $dateStr)->first();
                     if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
                         $dayCounter++;
+
                         continue;
                     }
 
@@ -365,7 +390,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                             'status' => $finalStatus,
                             'shift_id' => $config['shift_id'],
                             'is_manual' => false,
-                            'keterangan' => null
+                            'keterangan' => null,
                         ]
                     );
 
@@ -410,7 +435,7 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                             'status' => $finalStatus,
                             'shift_id' => $config['shift_id'],
                             'is_manual' => false,
-                            'keterangan' => null
+                            'keterangan' => null,
                         ]
                     );
 
@@ -436,13 +461,12 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     'weekend_offs' => 0,
                     'consecutive_work' => 0,
                     'last_shift_id' => null,
-                    'last_status' => null
+                    'last_status' => null,
                 ];
             }
 
             // Get Night Shift IDs for recovery rule
-            $nightShiftIds = $this->shifts->filter(fn($s) =>
-                stripos($s->name, 'malam') !== false ||
+            $nightShiftIds = $this->shifts->filter(fn ($s) => stripos($s->name, 'malam') !== false ||
                 (Carbon::parse($s->start_time)->hour >= 18 || Carbon::parse($s->start_time)->hour < 4)
             )->pluck('id')->toArray();
 
@@ -481,21 +505,21 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                     $pool[] = [
                         'id' => $pId,
                         'eligible' => $eligible,
-                        'score' => $score + (rand(0, 9) / 10) // Small random for tie-breaking
+                        'score' => $score + (rand(0, 9) / 10), // Small random for tie-breaking
                     ];
                 }
 
                 // 2. Sort pool by score (Ascending: low score = prioritize for WORK)
                 // Filter eligible first
-                $eligiblePool = array_filter($pool, fn($p) => $p['eligible']);
-                usort($eligiblePool, fn($a, $b) => $a['score'] <=> $b['score']);
+                $eligiblePool = array_filter($pool, fn ($p) => $p['eligible']);
+                usort($eligiblePool, fn ($a, $b) => $a['score'] <=> $b['score']);
                 $eligiblePids = array_column($eligiblePool, 'id');
 
                 // 3. Fill Shifts
                 $assignedToday = [];
                 foreach ($this->quotaConfig as $shiftId => $count) {
                     for ($i = 0; $i < $count; $i++) {
-                        if (!empty($eligiblePids)) {
+                        if (! empty($eligiblePids)) {
                             $pId = array_shift($eligiblePids);
                             $assignedToday[$pId] = $shiftId;
                         }
@@ -521,10 +545,13 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                             $s['consecutive_work']++;
                         } else {
                             $s['consecutive_work'] = 0;
-                            if ($isWeekend) $s['weekend_offs']++;
+                            if ($isWeekend) {
+                                $s['weekend_offs']++;
+                            }
                         }
                         $s['last_shift_id'] = $shiftId;
                         $s['last_status'] = $status;
+
                         continue;
                     }
 
@@ -549,7 +576,9 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
                         $s['consecutive_work']++;
                     } else {
                         $s['consecutive_work'] = 0;
-                        if ($isWeekend) $s['weekend_offs']++;
+                        if ($isWeekend) {
+                            $s['weekend_offs']++;
+                        }
                     }
                     $s['last_shift_id'] = $shiftId;
                     $s['last_status'] = $status;
@@ -560,7 +589,10 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             Personnel::whereIn('id', $pIds)->update(['regu' => null]);
         }
 
+        Jadwal::invalidateCache();
+
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal otomatis berhasil digenerate.');
+
         return $this->redirectRoute('jadwal', navigate: true);
     }
 };

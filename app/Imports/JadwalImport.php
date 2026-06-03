@@ -93,6 +93,8 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
                 });
             })
             ->delete();
+
+        Jadwal::invalidateCache();
     }
 
     public function collection(Collection $rows)
