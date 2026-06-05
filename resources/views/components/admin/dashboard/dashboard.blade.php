@@ -750,14 +750,14 @@
                     </div>
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">IZIN
-                            / SAKIT / CUTI / DINAS</span>
-                        <span class="text-lg font-black text-info">{{ $stats['total_izin'] }}</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Alpa</span>
+                        <span class="text-lg font-black text-error">{{ $stats['total_alpa'] }}</span>
                     </div>
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
-                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Alpa</span>
-                        <span class="text-lg font-black text-error">{{ $stats['total_alpa'] }}</span>
+                            class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">IZIN
+                            / SAKIT / CUTI / DINAS</span>
+                        <span class="text-lg font-black text-info">{{ $stats['total_izin'] }}</span>
                     </div>
                 </div>
             </div>
