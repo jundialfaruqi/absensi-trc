@@ -841,16 +841,8 @@ class AttendanceController extends Controller
                 $absensi = Absensi::create([
                     'personnel_id' => $personnel->id,
                     'jadwal_id' => $jadwal ? $jadwal->id : null,
-                    'kantor_id' => $lokasiResult['kantor_id'],
                     'tanggal' => $activeDate,
                     'status' => 'HADIR',
-                    'lat_masuk' => $request->lat,
-                    'lng_masuk' => $request->lng,
-                    'is_within_radius' => $lokasiResult['is_within_radius'],
-                    'jarak_meter' => $lokasiResult['jarak_meter'],
-                    'platform_masuk' => $request->platform,
-                    'device_name_masuk' => $request->device_name,
-                    'unique_device_id_masuk' => $device?->id,
                     'is_location_anomaly' => $isAnomaly,
                     'anomaly_reason' => $anomalyReason,
 
@@ -870,15 +862,7 @@ class AttendanceController extends Controller
             } else {
                 $existing->update([
                     'jadwal_id' => $jadwal ? $jadwal->id : null,
-                    'kantor_id' => $lokasiResult['kantor_id'],
                     'status' => 'HADIR',
-                    'lat_masuk' => $request->lat,
-                    'lng_masuk' => $request->lng,
-                    'is_within_radius' => $lokasiResult['is_within_radius'],
-                    'jarak_meter' => $lokasiResult['jarak_meter'],
-                    'platform_masuk' => $request->platform,
-                    'device_name_masuk' => $request->device_name,
-                    'unique_device_id_masuk' => $device?->id,
                     'is_location_anomaly' => $isAnomaly,
                     'anomaly_reason' => $anomalyReason,
 
