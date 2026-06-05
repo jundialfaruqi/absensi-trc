@@ -72,7 +72,7 @@
                     </div>
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
                         Hadir</div>
-                    <div class="stat-value text-success">{{ number_format($stats['total_masuk']) }}</div>
+                    <div class="stat-value text-success">{{ number_format($stats['total_hadir']) }}</div>
                     <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1">
                         {{ $stats['hadir_percentage'] }}% dari total personel</div>
                 </div>
