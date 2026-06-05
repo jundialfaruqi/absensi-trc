@@ -746,7 +746,7 @@
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
                             class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">Hadir</span>
-                        <span class="text-lg font-black text-success">{{ $stats['total_masuk'] }}</span>
+                        <span class="text-lg font-black text-success">{{ $stats['total_hadir'] }}</span>
                     </div>
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
