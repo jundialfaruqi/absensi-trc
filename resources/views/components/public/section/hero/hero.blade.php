@@ -1,14 +1,5 @@
 <main class="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
     <div class="flex flex-col space-y-8">
-        <div
-            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 w-fit">
-            <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span class="text-[10px] font-extrabold uppercase tracking-widest text-blue-400">Siaga 24 Jam
-                Penuh</span>
-        </div>
 
         <h1 class="text-5xl lg:text-7xl font-black text-white leading-[1.05] tracking-tighter">
             PEKANBARU <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300">AMAN</span>

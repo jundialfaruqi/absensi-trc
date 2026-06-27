@@ -26,13 +26,6 @@
                                 Pekanbaru</p>
                         </div>
                     </div>
-
-                    {{-- Decoration Labels --}}
-                    <div
-                        class="absolute flex top-6 right-6 px-3 py-2 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-md">
-                        <span class="text-[8px] font-black text-blue-400 uppercase tracking-widest">Official
-                            Speech</span>
-                    </div>
                 </div>
 
                 {{-- Decorative Corners --}}

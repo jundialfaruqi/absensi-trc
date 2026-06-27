@@ -3,17 +3,9 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-black text-base-content uppercase">Dashboard TRC</h1>
-            <p class="text-xs font-bold text-base-content/50 uppercase tracking-[0.3em]">
+            <p class="text-xs font-bold text-base-content/50">
                 {{ $opdName }} • {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
             </p>
-        </div>
-        <div class="flex items-center gap-2 px-4 py-2 bg-base-100 rounded-xl shadow">
-            <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-            </span>
-            <span class="text-[10px] font-black uppercase tracking-widest text-base-content opacity-70">Sistem Berjalan
-                Normal</span>
         </div>
     </div>
 
