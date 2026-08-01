@@ -194,12 +194,3 @@ Route::group([
     Route::livewire('/ajukan-cuti', 'personnel::ajukan-cuti')
         ->name('personnel.ajukan-cuti');
 });
-
-
-use Illuminate\Support\Facades\Response;
-
-Route::get('/test-image', function () {
-    return Response::file(
-        storage_path('app/public/berita/5EhWbynX0xP5cfkHnBJTSxGPOoFExzaXefzvBzWd.webp')
-    );
-});
