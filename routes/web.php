@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApkController;
-use App\Http\Controllers\BeritaController;
+// use App\Http\Controllers\BeritaController;
 
 // Public Route
 Route::get('/', function () {
@@ -193,4 +193,13 @@ Route::group([
 
     Route::livewire('/ajukan-cuti', 'personnel::ajukan-cuti')
         ->name('personnel.ajukan-cuti');
+});
+
+
+use Illuminate\Support\Facades\Response;
+
+Route::get('/test-image', function () {
+    return Response::file(
+        storage_path('app/public/berita/5EhWbynX0xP5cfkHnBJTSxGPOoFExzaXefzvBzWd.webp')
+    );
 });
