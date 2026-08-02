@@ -6,7 +6,7 @@
   Name              : ABSENSI TRC
   Version           : 1.0
   Date              : April 14, 2026
-  Url               : -
+  Url               : absensitrc.pekanbaru.go.id
   Type              : Web APP
   Project Analyst   : Deni Hidayat
   Developer         : M. Jundi Al faruqi
