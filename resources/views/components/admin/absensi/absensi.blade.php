@@ -160,7 +160,7 @@
                 </div>
 
                 <a href="{{ route('absensi.export-excel', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'opd_id' => $selectedOpd]) }}"
-                    class="btn btn-sm md:btn-md btn-neutral text-white gap-2 shadow-sm">
+                    target="_blank" class="btn btn-sm md:btn-md btn-neutral text-white gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                         class="icon icon-tabler icons-tabler-outline icon-tabler-file-spreadsheet">
