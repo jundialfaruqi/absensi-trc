@@ -15,8 +15,8 @@
         @endif
         <tr>
             <th colspan="{{ count($dates) + 4 }}"
-                style="font-size: 11pt; font-weight: bold; color: #333333; text-align: left;">
-                OPD: {{ strtoupper($opdName) }}
+                style="font-size: 11pt; font-weight: bold; color: #333333; text-align: center;">
+                {{ strtoupper($opdName) }}
             </th>
         </tr>
         <tr>
