@@ -62,8 +62,8 @@
             <div class="flex flex-col sm:flex-row items-center gap-3">
                 <div class="join">
                     <span
-                        class="btn btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
-                    <select wire:model.live="perPage" class="select select-bordered join-item w-20 rounded-end-md">
+                        class="btn btn-sm md:btn-md btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
+                    <select wire:model.live="perPage" class="select select-bordered select-sm md:select-md join-item w-20 rounded-end-md">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
@@ -75,7 +75,7 @@
 
                 @if (auth()->user()->hasRole('super-admin'))
                     <div class="w-full sm:w-auto">
-                        <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
+                        <select wire:model.live="selectedOpd" class="select select-bordered select-sm md:select-md w-full sm:w-64 bg-base-100">
                             <option value="">Semua OPD (Filter)</option>
                             @foreach ($this->opds as $opd)
                                 <option value="{{ $opd->id }}">{{ $opd->name }}</option>
@@ -87,19 +87,19 @@
                 <form wire:submit.prevent="applyFilter" class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <div class="join w-full sm:w-auto">
                         <div
-                            class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                            class="join-item flex items-center btn btn-sm md:btn-md btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
                             Dari</div>
                         <input type="date" id="startDate" wire:model="filterStartDate"
-                            class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
+                            class="input input-bordered input-sm md:input-md join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
                         <div
-                            class="join-item flex items-center btn btn-disabled pointer-events-none px-3 text-[10px] uppercase text-base-content">
+                            class="join-item flex items-center btn btn-sm md:btn-md btn-disabled pointer-events-none px-3 text-[10px] uppercase text-base-content">
                             S/D</div>
                         <input type="date" id="endDate" wire:model="filterEndDate"
-                            class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
+                            class="input input-bordered input-sm md:input-md join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
                     </div>
 
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button type="submit" class="btn btn-primary gap-1.5 flex-1 sm:flex-initial shadow-sm">
+                        <button type="submit" class="btn btn-sm md:btn-md btn-primary gap-1.5 flex-1 sm:flex-initial shadow-sm">
                             <span wire:loading.remove wire:target="applyFilter" class="flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -115,7 +115,7 @@
                         </button>
 
                         <button type="button" wire:click="resetFilters"
-                            class="btn btn-outline border-base-300 text-base-content/70 hover:text-error hover:border-error gap-1.5 flex-1 sm:flex-initial"
+                            class="btn btn-sm md:btn-md btn-outline border-base-300 text-base-content/70 hover:text-error hover:border-error gap-1.5 flex-1 sm:flex-initial"
                             title="Reset filter tanggal">
                             <span wire:loading.remove wire:target="resetFilters" class="flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -137,13 +137,13 @@
             <div class="flex flex-wrap gap-2 justify-end">
 
                 <div class="join">
-                    <select wire:model.live="paperSize" class="select select-bordered join-item">
+                    <select wire:model.live="paperSize" class="select select-bordered select-sm md:select-md join-item">
                         <option value="a4">Kertas A4</option>
                         <option value="f4">Kertas F4 / Folio</option>
                         <option value="legal">Kertas Legal</option>
                     </select>
                     <a href="{{ route('absensi.export-pdf', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize, 'opd_id' => $selectedOpd]) }}"
-                        target="_blank" class="btn btn-neutral join-item gap-2">
+                        target="_blank" class="btn btn-sm md:btn-md btn-neutral join-item gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                             class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf">
@@ -160,7 +160,7 @@
                 </div>
 
                 <a href="{{ route('absensi.export-excel', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'opd_id' => $selectedOpd]) }}"
-                    class="btn btn-neutral text-white gap-2 shadow-sm">
+                    class="btn btn-sm md:btn-md btn-neutral text-white gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                         class="icon icon-tabler icons-tabler-outline icon-tabler-file-spreadsheet">
