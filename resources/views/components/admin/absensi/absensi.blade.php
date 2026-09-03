@@ -84,62 +84,54 @@
                     </div>
                 @endif
 
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="join w-full sm:w-auto">
-                        <select wire:model.live="month" class="select select-bordered join-item w-full sm:w-auto">
-                            @for ($i = 1; $i <= 12; $i++)
-                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">
-                                    {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
-                                </option>
-                            @endfor
-                        </select>
-                        <select wire:model.live="year" class="select select-bordered join-item w-full sm:w-auto">
-                            @for ($y = \Carbon\Carbon::now()->year - 2; $y <= \Carbon\Carbon::now()->year + 1; $y++)
-                                <option value="{{ $y }}">{{ $y }}</option>
-                            @endfor
-                        </select>
-                    </div>
-
-                    <style>
-                        input[type="date"]::-webkit-calendar-picker-indicator {
-                            display: block !important;
-                            cursor: pointer;
-                            opacity: 0.5;
-                            filter: invert(1);
-                        }
-
-                        .dark input[type="date"]::-webkit-calendar-picker-indicator {
-                            filter: invert(0);
-                        }
-
-                        input[type="date"]::-webkit-calendar-picker-indicator:hover {
-                            opacity: 1;
-                        }
-                    </style>
-
+                <form wire:submit.prevent="applyFilter" class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <div class="join w-full sm:w-auto">
                         <div
                             class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
                             Dari</div>
-                        <input type="date" id="startDate" wire:model.live="startDate"
-                            class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
+                        <input type="date" id="startDate" wire:model="filterStartDate"
+                            class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
                         <div
-                            class="join-item flex items-center btn btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                            class="join-item flex items-center btn btn-disabled pointer-events-none px-3 text-[10px] uppercase text-base-content">
                             S/D</div>
-                        <input type="date" id="endDate" wire:model.live="endDate"
-                            class="input input-bordered join-item w-full sm:w-auto text-base-content/60" />
-
-                        @if (!$this->isDefaultDateFilter)
-                            <button type="button" wire:click="resetFilters"
-                                class="btn join-item px-3 text-error btn-bordered">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="2.5" stroke="currentColor" class="size-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        @endif
+                        <input type="date" id="endDate" wire:model="filterEndDate"
+                            class="input input-bordered join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
                     </div>
-                </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="submit" class="btn btn-primary gap-1.5 flex-1 sm:flex-initial shadow-sm">
+                            <span wire:loading.remove wire:target="applyFilter" class="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                <span>Terapkan</span>
+                            </span>
+                            <span wire:loading wire:target="applyFilter" class="flex items-center gap-1.5">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span>Terapkan</span>
+                            </span>
+                        </button>
+
+                        <button type="button" wire:click="resetFilters"
+                            class="btn btn-outline border-base-300 text-base-content/70 hover:text-error hover:border-error gap-1.5 flex-1 sm:flex-initial"
+                            title="Reset filter tanggal">
+                            <span wire:loading.remove wire:target="resetFilters" class="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                <span>Reset</span>
+                            </span>
+                            <span wire:loading wire:target="resetFilters" class="flex items-center gap-1.5">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span>Reset</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <div class="flex flex-wrap gap-2 justify-end">
@@ -149,7 +141,7 @@
                         <option value="f4">Kertas F4 / Folio</option>
                         <option value="legal">Kertas Legal</option>
                     </select>
-                    <a href="{{ route('absensi.export-pdf', ['month' => $month, 'year' => $year, 'search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize, 'opd_id' => $selectedOpd]) }}"
+                    <a href="{{ route('absensi.export-pdf', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize, 'opd_id' => $selectedOpd]) }}"
                         target="_blank" class="btn btn-neutral join-item gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-5">
@@ -205,7 +197,7 @@
                     <tbody>
                         @for ($i = 0; $i < ($perPage > 10 ? 10 : $perPage); $i++)
                             <tr
-                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage, resetFilters" @endif>
+                                @if ($readyToLoad) wire:loading wire:target="perPage, selectedOpd, search, applyFilter, resetFilters, gotoPage, nextPage, previousPage" @endif>
                                 <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                     <div class="flex items-center gap-2 ps-4">
                                         <div class="skeleton h-10 w-10 rounded-full shrink-0"></div>
@@ -235,7 +227,7 @@
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
                                     <tr class="bg-base-200" wire:key="opd-header-{{ $p->opd_id }}"
                                         wire:loading.remove
-                                        wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage">
+                                        wire:target="perPage, selectedOpd, search, applyFilter, resetFilters, gotoPage, nextPage, previousPage">
                                         <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                             class="sticky left-0 top-16 z-50 p-0 border-b border-base-200 bg-base-200">
                                             <div class="sticky left-0 w-fit px-4 py-2 flex items-center gap-2">
@@ -250,7 +242,7 @@
                                     @php $currentOpd = $p->opd_id; @endphp
                                 @endif
                                 <tr class="group" wire:key="personnel-row-{{ $p->id }}" wire:loading.remove
-                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage">
+                                    wire:target="perPage, selectedOpd, search, applyFilter, resetFilters, gotoPage, nextPage, previousPage">
                                     <td class="sticky left-0 z-10 bg-base-100 border-r border-base-200 p-3 w-50">
                                         <div class="flex items-center gap-2 ps-4">
                                             <div class="avatar placeholder">
@@ -564,7 +556,7 @@
                                 </tr>
                             @empty
                                 <tr wire:loading.remove
-                                    wire:target="perPage, selectedOpd, search, month, year, startDate, endDate, gotoPage, nextPage, previousPage">
+                                    wire:target="perPage, selectedOpd, search, applyFilter, resetFilters, gotoPage, nextPage, previousPage">
                                     <td colspan="{{ count($this->dates) * 2 + 1 }}"
                                         class="text-center py-12 text-sm text-base-content/60">
                                         <div class="flex flex-col items-center justify-center">

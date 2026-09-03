@@ -25,16 +25,14 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public string $search = '';
 
     #[Url]
-    public string $month = '';
-
-    #[Url]
-    public string $year = '';
-
-    #[Url]
     public string $startDate = '';
 
     #[Url]
     public string $endDate = '';
+
+    public string $filterStartDate = '';
+
+    public string $filterEndDate = '';
 
     #[Url]
     public string $selectedOpd = '';
@@ -47,7 +45,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
     public function mount(): void
     {
-        // Set default 7 hari: dari kemarin sampai 5 hari ke depan
+        // Set default rentang tanggal: dari kemarin sampai 10 hari ke depan
         if (!$this->startDate) {
             $this->startDate = Carbon::yesterday()->format('Y-m-d');
         }
@@ -56,9 +54,8 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             $this->endDate = Carbon::yesterday()->addDays(10)->format('Y-m-d');
         }
 
-        // Sinkronkan filter dropdown bulan/tahun bawaan
-        if (!$this->month) $this->month = Carbon::parse($this->startDate)->format('m');
-        if (!$this->year) $this->year = Carbon::parse($this->startDate)->format('Y');
+        $this->filterStartDate = $this->startDate;
+        $this->filterEndDate = $this->endDate;
     }
 
     #[Computed]
@@ -98,10 +95,12 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             return [$this->startDate];
         }
 
-        $daysInMonth = Carbon::create($this->year, $this->month, 1)->daysInMonth;
+        $start = Carbon::yesterday();
+        $end = Carbon::yesterday()->addDays(10);
         $dates = [];
-        for ($i = 1; $i <= $daysInMonth; $i++) {
-            $dates[] = Carbon::create($this->year, $this->month, $i)->format('Y-m-d');
+        while ($start <= $end) {
+            $dates[] = $start->format('Y-m-d');
+            $start->addDay();
         }
         return $dates;
     }
@@ -120,9 +119,6 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                     $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
                 } elseif ($this->startDate) {
                     $query->whereDate('tanggal', $this->startDate);
-                } else {
-                    $query->whereYear('tanggal', $this->year)
-                          ->whereMonth('tanggal', $this->month);
                 }
                 $query->with('kantor');
             }, 'jadwals' => function ($query) {
@@ -130,9 +126,6 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                     $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
                 } elseif ($this->startDate) {
                     $query->whereDate('tanggal', $this->startDate);
-                } else {
-                    $query->whereYear('tanggal', $this->year)
-                          ->whereMonth('tanggal', $this->month);
                 }
                 $query->with('shift');
             }, 'penugasan'])
@@ -169,26 +162,42 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         return $paginator;
     }
 
-    public function updatedStartDate($value)
+    public function applyFilter(): void
     {
-        if ($value) {
-            $date = Carbon::parse($value);
-            $this->month = $date->format('m');
-            $this->year = $date->format('Y');
+        if (!$this->filterStartDate && $this->filterEndDate) {
+            $this->filterStartDate = $this->filterEndDate;
+        } elseif ($this->filterStartDate && !$this->filterEndDate) {
+            $this->filterEndDate = $this->filterStartDate;
         }
+
+        if ($this->filterStartDate && $this->filterEndDate) {
+            if ($this->filterStartDate > $this->filterEndDate) {
+                $temp = $this->filterStartDate;
+                $this->filterStartDate = $this->filterEndDate;
+                $this->filterEndDate = $temp;
+            }
+
+            $start = Carbon::parse($this->filterStartDate);
+            $end = Carbon::parse($this->filterEndDate);
+            if ($start->diffInDays($end) > 31) {
+                $this->filterEndDate = $start->copy()->addDays(31)->format('Y-m-d');
+            }
+        }
+
+        $this->startDate = $this->filterStartDate;
+        $this->endDate = $this->filterEndDate;
+
         $this->resetPage();
     }
 
-    public function updatedEndDate($value)
+    public function resetFilters(): void
     {
-        $this->resetPage();
-    }
-
-    public function resetFilters()
-    {
-        // Kembalikan ke default 7 hari
+        // Kembalikan ke default
         $this->startDate = Carbon::yesterday()->format('Y-m-d');
         $this->endDate = Carbon::yesterday()->addDays(10)->format('Y-m-d');
+
+        $this->filterStartDate = $this->startDate;
+        $this->filterEndDate = $this->endDate;
 
         $this->resetPage();
     }
@@ -200,16 +209,6 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     }
 
     public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedMonth(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedYear(): void
     {
         $this->resetPage();
     }
