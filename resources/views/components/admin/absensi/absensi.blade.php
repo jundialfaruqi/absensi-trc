@@ -135,20 +135,6 @@
             </div>
 
             <div class="flex flex-wrap gap-2 justify-end">
-                <a href="{{ route('absensi.export-excel', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'opd_id' => $selectedOpd]) }}"
-                    class="btn btn-neutral text-white gap-2 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-file-spreadsheet">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
-                        <path d="M8 11h8v7h-8l0 -7" />
-                        <path d="M8 15h8" />
-                        <path d="M11 11v7" />
-                    </svg>
-                    Export Excel
-                </a>
 
                 <div class="join">
                     <select wire:model.live="paperSize" class="select select-bordered join-item">
@@ -172,6 +158,21 @@
                         Export PDF
                     </a>
                 </div>
+
+                <a href="{{ route('absensi.export-excel', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'opd_id' => $selectedOpd]) }}"
+                    class="btn btn-neutral text-white gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-file-spreadsheet">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+                        <path d="M8 11h8v7h-8l0 -7" />
+                        <path d="M8 15h8" />
+                        <path d="M11 11v7" />
+                    </svg>
+                    Export Excel
+                </a>
             </div>
         </div>
     </div>
