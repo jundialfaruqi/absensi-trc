@@ -47,7 +47,7 @@
                 </th>
                 <th colspan="{{ count($monthDates) }}"
                     style="border: 1px solid #999999; background-color: #f2f2f2; font-weight: bold; text-align: center;">
-                    Tanggal
+                    Hari/Tanggal
                 </th>
                 <th colspan="3"
                     style="border: 1px solid #999999; background-color: #f2f2f2; font-weight: bold; text-align: center;">

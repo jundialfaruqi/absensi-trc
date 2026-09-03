@@ -12,6 +12,34 @@
     },
     hidePreview() {
         this.showPreview = false;
+    },
+    showExportModal: false,
+    exportType: 'pdf',
+    exportStartDate: '{{ $startDate }}',
+    exportEndDate: '{{ $endDate }}',
+    exportPaperSize: '{{ $paperSize }}',
+    openExportModal(type) {
+        this.exportType = type;
+        this.exportStartDate = $wire.get('startDate') || '{{ $startDate }}';
+        this.exportEndDate = $wire.get('endDate') || '{{ $endDate }}';
+        this.exportPaperSize = $wire.get('paperSize') || '{{ $paperSize }}';
+        this.showExportModal = true;
+    },
+    get exportUrl() {
+        let base = this.exportType === 'pdf' ?
+            '{{ route('absensi.export-pdf') }}' :
+            '{{ route('absensi.export-excel') }}';
+        let params = new URLSearchParams();
+        let s = $wire.get('search');
+        let opd = $wire.get('selectedOpd');
+        if (s) params.append('search', s);
+        if (opd) params.append('opd_id', opd);
+        params.append('startDate', this.exportStartDate);
+        params.append('endDate', this.exportEndDate);
+        if (this.exportType === 'pdf') {
+            params.append('paperSize', this.exportPaperSize);
+        }
+        return base + '?' + params.toString();
     }
 }" wire:init="load">
     {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
@@ -63,7 +91,8 @@
                 <div class="join">
                     <span
                         class="btn btn-sm md:btn-md btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
-                    <select wire:model.live="perPage" class="select select-bordered select-sm md:select-md join-item w-20 rounded-end-md">
+                    <select wire:model.live="perPage"
+                        class="select select-bordered select-sm md:select-md join-item w-20 rounded-end-md">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
@@ -75,7 +104,8 @@
 
                 @if (auth()->user()->hasRole('super-admin'))
                     <div class="w-full sm:w-auto">
-                        <select wire:model.live="selectedOpd" class="select select-bordered select-sm md:select-md w-full sm:w-64 bg-base-100">
+                        <select wire:model.live="selectedOpd"
+                            class="select select-bordered select-sm md:select-md w-full sm:w-64 bg-base-100">
                             <option value="">Semua OPD (Filter)</option>
                             @foreach ($this->opds as $opd)
                                 <option value="{{ $opd->id }}">{{ $opd->name }}</option>
@@ -99,7 +129,8 @@
                     </div>
 
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button type="submit" class="btn btn-sm md:btn-md btn-primary gap-1.5 flex-1 sm:flex-initial shadow-sm">
+                        <button type="submit"
+                            class="btn btn-sm md:btn-md btn-primary gap-1.5 flex-1 sm:flex-initial shadow-sm">
                             <span wire:loading.remove wire:target="applyFilter" class="flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -142,8 +173,8 @@
                         <option value="f4">Kertas F4 / Folio</option>
                         <option value="legal">Kertas Legal</option>
                     </select>
-                    <a href="{{ route('absensi.export-pdf', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'paperSize' => $paperSize, 'opd_id' => $selectedOpd]) }}"
-                        target="_blank" class="btn btn-sm md:btn-md btn-neutral join-item gap-2">
+                    <button type="button" @click="openExportModal('pdf')"
+                        class="btn btn-sm md:btn-md btn-neutral join-item gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                             class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf">
@@ -156,11 +187,11 @@
                             <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" />
                         </svg>
                         Export PDF
-                    </a>
+                    </button>
                 </div>
 
-                <a href="{{ route('absensi.export-excel', ['search' => $search, 'startDate' => $startDate, 'endDate' => $endDate, 'opd_id' => $selectedOpd]) }}"
-                    target="_blank" class="btn btn-sm md:btn-md btn-neutral text-white gap-2 shadow-sm">
+                <button type="button" @click="openExportModal('excel')"
+                    class="btn btn-sm md:btn-md btn-neutral text-white gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                         class="icon icon-tabler icons-tabler-outline icon-tabler-file-spreadsheet">
@@ -172,7 +203,7 @@
                         <path d="M11 11v7" />
                     </svg>
                     Export Excel
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -607,6 +638,143 @@
     </div>
 
     <livewire:admin::absensi-edit-modal />
+
+    {{-- ─── Modal Konfirmasi Download (PDF & Excel) ────────────────────────── --}}
+    <dialog class="modal modal-bottom sm:modal-middle backdrop-blur-xs" :class="{ 'modal-open': showExportModal }">
+        <div class="modal-box max-w-md rounded-2xl shadow-2xl border border-base-200">
+            {{-- Header Modal --}}
+            <div class="flex items-start justify-between pb-3 border-b border-base-200">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-xl shadow-sm"
+                        :class="exportType === 'pdf' ? 'bg-error/10 text-error' : 'bg-success/10 text-success'">
+                        <template x-if="exportType === 'pdf'">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
+                                <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" />
+                                <path d="M17 18h2" />
+                                <path d="M20 15h-3v6" />
+                                <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" />
+                            </svg>
+                        </template>
+                        <template x-if="exportType === 'excel'">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+                                <path d="M8 11h8v7h-8l0 -7" />
+                                <path d="M8 15h8" />
+                                <path d="M11 11v7" />
+                            </svg>
+                        </template>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-base-content">Konfirmasi Download</h3>
+                        <p class="text-xs text-base-content/60"
+                            x-text="exportType === 'pdf' ? 'Unduh Rekap Absensi format PDF (.pdf)' : 'Unduh Rekap Absensi format Excel (.xlsx)'">
+                        </p>
+                    </div>
+                </div>
+                <button type="button" @click="showExportModal = false"
+                    class="btn btn-sm btn-ghost btn-circle text-base-content/50 hover:text-base-content">✕</button>
+            </div>
+
+            {{-- Body Modal --}}
+            <div class="py-4 space-y-4 text-sm">
+                {{-- Info Ringkasan Export --}}
+                <div class="bg-base-200/60 rounded-xl p-3 space-y-2 border border-base-200">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-base-content/60">Format File:</span>
+                        <span class="font-bold uppercase"
+                            x-text="exportType === 'pdf' ? 'PDF Document' : 'Excel Spreadsheet'"></span>
+                    </div>
+
+                    @if (auth()->user()->hasRole('super-admin'))
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-base-content/60">Target OPD:</span>
+                            <span class="font-semibold text-base-content truncate max-w-50">
+                                {{ $selectedOpd ? $this->opds->firstWhere('id', $selectedOpd)?->name ?? 'OPD Terpilih' : 'Semua OPD' }}
+                            </span>
+                        </div>
+                    @endif
+
+                    @if ($search)
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-base-content/60">Filter Nama:</span>
+                            <span class="font-semibold text-primary truncate max-w-50">"{{ $search }}"</span>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Ubah Range Tanggal --}}
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-base-content/70">
+                        Atur Periode Tanggal
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="label py-1 text-xs text-base-content/60 font-medium">Dari Tanggal</label>
+                            <input type="date" x-model="exportStartDate"
+                                class="input input-bordered input-sm w-full text-xs scheme-light dark:scheme-dark" />
+                        </div>
+                        <div>
+                            <label class="label py-1 text-xs text-base-content/60 font-medium">Sampai Tanggal</label>
+                            <input type="date" x-model="exportEndDate"
+                                class="input input-bordered input-sm w-full text-xs scheme-light dark:scheme-dark" />
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-base-content/50 italic flex items-center gap-1 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-info shrink-0" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Rentang tanggal maksimal 31 hari.
+                    </p>
+                </div>
+
+                {{-- Opsi Ukuran Kertas (Khusus PDF) --}}
+                <template x-if="exportType === 'pdf'">
+                    <div class="space-y-1.5 pt-1">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-base-content/70">
+                            Ukuran Kertas (PDF)
+                        </label>
+                        <select x-model="exportPaperSize" class="select select-bordered select-sm w-full text-xs">
+                            <option value="a4">Kertas A4</option>
+                            <option value="f4">Kertas F4 / Folio</option>
+                            <option value="legal">Kertas Legal</option>
+                        </select>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Footer Aksi --}}
+            <div class="modal-action pt-3 border-t border-base-200">
+                <button type="button" @click="showExportModal = false"
+                    class="btn btn-sm btn-ghost text-base-content/70">
+                    Batal
+                </button>
+                <a :href="exportUrl" target="_blank" @click="showExportModal = false"
+                    class="btn btn-sm btn-neutral text-white gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Ya, Download Sekarang</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- Backdrop --}}
+        <div class="modal-backdrop bg-neutral/40" @click="showExportModal = false"></div>
+    </dialog>
+
     {{-- Teleport Preview Overlay --}}
     @teleport('body')
         <div x-show="showPreview" x-transition:enter="transition ease-out duration-200"
