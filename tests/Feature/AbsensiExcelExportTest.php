@@ -129,3 +129,51 @@ test('absensi export filters by opd_id when selected', function () {
     expect(count($sheets))->toBe(1);
     expect($sheets[0]->title())->toBe('DINKES');
 });
+
+test('absensi export date header cells are formatted with 00 and suppress number stored as text warning', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan', 'singkatan' => 'DISHUB']);
+
+    Personnel::create([
+        'name' => 'Petugas Dishub',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'dishub.jpg',
+        'email' => 'dishub@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '999888',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+    $this->actingAs($user);
+
+    // Export to temporary file and inspect cells with PhpSpreadsheet
+    $tempPath = storage_path('framework/testing/test_absensi.xlsx');
+    if (!file_exists(dirname($tempPath))) {
+        mkdir(dirname($tempPath), 0777, true);
+    }
+
+    Excel::store(new AbsensiExport('2026-09-01', '2026-09-05', null, (string)$opd->id), 'test_absensi.xlsx', 'local');
+
+    $storedFile = storage_path('app/private/test_absensi.xlsx');
+    if (!file_exists($storedFile)) {
+        $storedFile = storage_path('app/test_absensi.xlsx');
+    }
+
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
+    $sheet = $spreadsheet->getSheet(0);
+
+    // Assert row 8 contains day names (e.g. Sel, Rab, Kam)
+    expect($sheet->getCell('B8')->getValue())->toBe('Sel');
+
+    // Assert row 9 contains date numbers as numeric with '00' format (displayed as 01 in Excel, no Number Stored as Text warning)
+    expect($sheet->getCell('B9')->getValue())->toBe(1);
+    expect($sheet->getCell('B9')->getDataType())->toBe(\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+    expect($sheet->getCell('B9')->getStyle()->getNumberFormat()->getFormatCode())->toBe('00');
+
+    // Clean up temporary stored file
+    if (file_exists($storedFile)) {
+        unlink($storedFile);
+    }
+});
