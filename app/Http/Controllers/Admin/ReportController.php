@@ -9,6 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AbsensiExport;
 
 class ReportController extends Controller
 {
@@ -92,6 +94,42 @@ class ReportController extends Controller
                 ->setPaper($paperFormat, 'landscape');
 
             return $pdf->download("rekap_absensi_{$month}_{$year}.pdf");
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => explode("\n", $e->getTraceAsString()),
+            ], 500);
+        }
+    }
+
+    public function exportAbsensiExcel(Request $request)
+    {
+        try {
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
+
+            $startDate = $request->get('startDate');
+            $endDate = $request->get('endDate');
+            $search = $request->get('search');
+            $opdId = $request->get('opd_id');
+
+            $filename = 'rekap_absensi';
+            if ($startDate && $endDate) {
+                $filename .= "_{$startDate}_{$endDate}";
+            } elseif ($startDate) {
+                $filename .= "_{$startDate}";
+            } else {
+                $filename .= '_' . date('Y_m_d');
+            }
+            $filename .= '.xlsx';
+
+            return Excel::download(
+                new AbsensiExport($startDate, $endDate, $search, $opdId),
+                $filename
+            );
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => true,
