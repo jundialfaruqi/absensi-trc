@@ -120,27 +120,26 @@
                             }
 
                             if ($a) {
-                                $display = substr($a->status, 0, 1);
-
-                                if (in_array($a->status, ['HADIR', 'SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
+                                if (in_array($a->status, ['HADIR', 'TELAT'])) {
+                                    $display = 'H';
                                     $hadir++;
-                                    if ($a->status === 'HADIR') {
-                                        $cellStyle =
-                                            'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
-                                    } else {
-                                        $cellStyle =
-                                            'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
-                                    }
+                                    $cellStyle =
+                                        'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
+                                } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
+                                    $display = substr($a->status, 0, 1);
+                                    $hadir++;
+                                    $cellStyle =
+                                        'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
                                 } elseif ($a->status === 'ALPA') {
+                                    $display = 'A';
                                     $alpa++;
                                     $cellStyle =
                                         'background-color: #fee2e2; color: #991b1b; font-weight: bold; text-align: center;';
-                                } elseif ($a->status === 'TELAT') {
-                                    $hadir++;
-                                    $cellStyle =
-                                        'background-color: #fef9c3; color: #854d0e; font-weight: bold; text-align: center;';
                                 } elseif ($a->status === 'LIBUR') {
+                                    $display = 'L';
                                     $cellStyle = 'background-color: #f3f4f6; color: #6b7280; text-align: center;';
+                                } else {
+                                    $display = substr($a->status, 0, 1);
                                 }
                             } elseif ($j) {
                                 $display = '.';
@@ -194,9 +193,8 @@
 
 <table>
     <tr>
-        <td colspan="{{ $leftCols }}"
-            style="font-style: italic; font-size: 9pt; color: #444444; vertical-align: top;">
-            <strong>Keterangan:</strong> H: Hadir | T: Telat | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur | -:
+        <td colspan="{{ $leftCols }}" style="font-size: 9pt; color: #444444; vertical-align: top;">
+            <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur /
             Lepas Jadwal
         </td>
         <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">

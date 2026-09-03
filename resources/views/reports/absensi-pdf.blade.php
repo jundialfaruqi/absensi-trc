@@ -220,15 +220,21 @@
                                     }
 
                                     if ($a) {
-                                        $display = substr($a->status, 0, 1);
-
-                                        // Warna dan Statistik
-                                        if (in_array($a->status, ['HADIR', 'SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
+                                        // Telat tetap ditampilkan sebagai Hadir (H)
+                                        if (in_array($a->status, ['HADIR', 'TELAT'])) {
+                                            $display = 'H';
                                             $hadir++;
-                                            $class = $a->status === 'HADIR' ? 'status-hadir' : 'status-izin';
+                                            $class = 'status-hadir';
+                                        } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
+                                            $display = substr($a->status, 0, 1);
+                                            $hadir++;
+                                            $class = 'status-izin';
                                         } elseif ($a->status === 'ALPA') {
+                                            $display = 'A';
                                             $alpa++;
                                             $class = 'status-alpa';
+                                        } else {
+                                            $display = substr($a->status, 0, 1);
                                         }
                                     } elseif ($j) {
                                         $display = '.';
@@ -254,7 +260,7 @@
     @endforeach
 
     <div class="summary-info">
-        <strong>Keterangan:</strong> H: Hadir | T: Telat | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur | -: Lepas
+        <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur/Lepas
         Jadwal
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id

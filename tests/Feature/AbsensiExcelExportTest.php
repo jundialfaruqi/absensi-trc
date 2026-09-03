@@ -177,3 +177,66 @@ test('absensi export date header cells are formatted with 00 and suppress number
         unlink($storedFile);
     }
 });
+
+test('telat attendance is displayed as H and counted as Hadir in Excel, footer excludes Telat', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan', 'singkatan' => 'DISHUB']);
+
+    $personnel = Personnel::create([
+        'name' => 'Budi Santoso',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'budi.jpg',
+        'email' => 'budi@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-01',
+        'status' => 'TELAT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+    $this->actingAs($user);
+
+    Excel::store(new AbsensiExport('2026-09-01', '2026-09-01', null, (string)$opd->id), 'test_telat.xlsx', 'local');
+
+    $storedFile = storage_path('app/private/test_telat.xlsx');
+    if (!file_exists($storedFile)) {
+        $storedFile = storage_path('app/test_telat.xlsx');
+    }
+
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
+    $sheet = $spreadsheet->getSheet(0);
+
+    $rows = $sheet->toArray();
+    // find row containing 'Budi Santoso'
+    $budiRow = null;
+    foreach ($rows as $idx => $r) {
+        if (in_array('Budi Santoso', $r)) {
+            $budiRow = $r;
+            break;
+        }
+    }
+    expect($budiRow)->not->toBeNull();
+    // Budi Santoso is in column 0, date 'H' is in column 1
+    expect($budiRow[0])->toBe('Budi Santoso');
+    expect($budiRow[1])->toBe('H');
+    // Hadir count is in column 3
+    expect((int)$budiRow[3])->toBe(1);
+
+    // Footer Keterangan should NOT contain T: Telat
+    $allText = implode(' ', array_map(fn($r) => implode(' ', array_filter($r)), $rows));
+    expect($allText)->toContain('H: Hadir');
+    expect($allText)->not->toContain('T: Telat');
+
+    if (file_exists($storedFile)) {
+        unlink($storedFile);
+    }
+});
+
