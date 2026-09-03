@@ -645,8 +645,7 @@
             {{-- Header Modal --}}
             <div class="flex items-start justify-between pb-3 border-b border-base-200">
                 <div class="flex items-center gap-3">
-                    <div class="p-2.5 rounded-xl shadow-sm"
-                        :class="exportType === 'pdf' ? 'bg-error/10 text-error' : 'bg-success/10 text-success'">
+                    <div class="text-base-content">
                         <template x-if="exportType === 'pdf'">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -713,23 +712,23 @@
 
                 {{-- Ubah Range Tanggal --}}
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-base-content/70">
+                    <label class="block text-xs font-bold text-base-content/70">
                         Atur Periode Tanggal
                     </label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="label py-1 text-xs text-base-content/60 font-medium">Dari Tanggal</label>
+                            <label class="label text-xs py-1 text-base-content/60 font-medium">Dari Tanggal</label>
                             <input type="date" x-model="exportStartDate"
-                                class="input input-bordered input-sm w-full text-xs scheme-light dark:scheme-dark" />
+                                class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" />
                         </div>
                         <div>
-                            <label class="label py-1 text-xs text-base-content/60 font-medium">Sampai Tanggal</label>
+                            <label class="label text-xs py-1 text-base-content/60 font-medium">Sampai Tanggal</label>
                             <input type="date" x-model="exportEndDate"
-                                class="input input-bordered input-sm w-full text-xs scheme-light dark:scheme-dark" />
+                                class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" />
                         </div>
                     </div>
                     <p class="text-[11px] text-base-content/50 italic flex items-center gap-1 mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-info shrink-0" fill="none"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -741,10 +740,10 @@
                 {{-- Opsi Ukuran Kertas (Khusus PDF) --}}
                 <template x-if="exportType === 'pdf'">
                     <div class="space-y-1.5 pt-1">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-base-content/70">
+                        <label class="block text-xs font-bold text-base-content/70">
                             Ukuran Kertas (PDF)
                         </label>
-                        <select x-model="exportPaperSize" class="select select-bordered select-sm w-full text-xs">
+                        <select x-model="exportPaperSize" class="select select-bordered w-full text-xs">
                             <option value="a4">Kertas A4</option>
                             <option value="f4">Kertas F4 / Folio</option>
                             <option value="legal">Kertas Legal</option>
@@ -755,18 +754,17 @@
 
             {{-- Footer Aksi --}}
             <div class="modal-action pt-3 border-t border-base-200">
-                <button type="button" @click="showExportModal = false"
-                    class="btn btn-sm btn-ghost text-base-content/70">
+                <button type="button" @click="showExportModal = false" class="btn btn-ghost text-base-content/70">
                     Batal
                 </button>
                 <a :href="exportUrl" target="_blank" @click="showExportModal = false"
-                    class="btn btn-sm btn-neutral text-white gap-2 shadow-sm">
+                    class="btn btn-neutral text-white gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    <span>Ya, Download Sekarang</span>
+                    <span>Download</span>
                 </a>
             </div>
         </div>
