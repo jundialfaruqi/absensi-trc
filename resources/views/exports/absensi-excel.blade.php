@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th colspan="{{ count($dates) + 4 }}" style="font-size: 16pt; font-weight: bold; text-align: center;">
-                REKAPITULASI ABSENSI PERSONEL
+                REKAPITULASI ABSENSI PERSONEL TRC AMAN 112
             </th>
         </tr>
         @if (count($dates) > 0)
@@ -15,7 +15,7 @@
         @endif
         <tr>
             <th colspan="{{ count($dates) + 4 }}"
-                style="font-size: 11pt; font-weight: bold; background-color: #333333; color: #ffffff; text-align: left;">
+                style="font-size: 11pt; font-weight: bold; color: #333333; text-align: left;">
                 OPD: {{ strtoupper($opdName) }}
             </th>
         </tr>
@@ -186,21 +186,68 @@
     </table>
 @endforeach
 
+@php
+    $totalCols = count($dates) + 4;
+    $sigCols = $totalCols >= 16 ? 8 : max(4, intval($totalCols / 2));
+    $leftCols = $totalCols - $sigCols;
+@endphp
+
 <table>
     <tr>
-        <td colspan="{{ count($dates) + 4 }}" style="font-style: italic; font-size: 9pt; color: #444444;">
+        <td colspan="{{ $leftCols }}"
+            style="font-style: italic; font-size: 9pt; color: #444444; vertical-align: top;">
             <strong>Keterangan:</strong> H: Hadir | T: Telat | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur | -:
             Lepas Jadwal
         </td>
-    </tr>
-    <tr>
-        <td colspan="{{ count($dates) + 4 }}" style="font-size: 8pt; color: #666666;">
-            Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id
+        <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
+            Mengetahui,
         </td>
     </tr>
     <tr>
-        <td colspan="{{ count($dates) + 4 }}" style="font-size: 8pt; color: #888888;">
+        <td colspan="{{ $leftCols }}" style="font-size: 8pt; color: #666666; vertical-align: top;">
+            Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id
+        </td>
+        <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
+            Kepala Bidang Persandian Aplikasi dan Tata Kelola SPBE
+        </td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}" style="font-size: 8pt; color: #888888; vertical-align: top;">
             Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}
+        </td>
+        <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
+            Dinas Komunikasi Informatika Statistik dan Persandian
+        </td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}"></td>
+        <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
+            Kota Pekanbaru
+        </td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}"></td>
+        <td colspan="{{ $sigCols }}"></td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}"></td>
+        <td colspan="{{ $sigCols }}"></td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}"></td>
+        <td colspan="{{ $sigCols }}"></td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}"></td>
+        <td colspan="{{ $sigCols }}"
+            style="font-size: 10pt; font-weight: bold; text-decoration: underline; text-align: center;">
+            DENI HIDAYAT, S.T, M.M
+        </td>
+    </tr>
+    <tr>
+        <td colspan="{{ $leftCols }}"></td>
+        <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
+            NIP. 197801062005011006
         </td>
     </tr>
 </table>
