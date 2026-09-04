@@ -115,7 +115,7 @@
                             $display = '';
                             $cellStyle = 'text-align: center;';
 
-                            if ($j && $j->status !== 'LIBUR') {
+                            if ($j && !in_array($j->status, ['LIBUR', 'DINAS']) && (!$a || !in_array($a->status, ['LIBUR', 'DINAS']))) {
                                 $jmlHari++;
                             }
 

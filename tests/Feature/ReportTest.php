@@ -169,11 +169,13 @@ test('dinas attendance renders as D and is not counted as Hadir in PDF report', 
     $response->assertSuccessful();
     $response->assertHeader('content-type', 'application/pdf');
 
-    // Also assert directly on the rendered Blade view to verify D display and Hadir count = 0
+    // Also assert directly on the rendered Blade view to verify D display, JML = 0, and Hadir count = 0
     $personnel->absensi_map = collect([
         '2026-05-01' => (object) ['status' => 'DINAS'],
     ]);
-    $personnel->jadwal_map = collect();
+    $personnel->jadwal_map = collect([
+        '2026-05-01' => (object) ['status' => 'SHIFT'],
+    ]);
 
     $html = view('reports.absensi-pdf', [
         'personnels' => collect([$personnel]),

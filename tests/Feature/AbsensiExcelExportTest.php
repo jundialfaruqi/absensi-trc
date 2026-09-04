@@ -262,6 +262,23 @@ test('dinas attendance is displayed as D in Excel but NOT counted as Hadir', fun
         'updated_at' => now(),
     ]);
 
+    $shift = \App\Models\Shift::create([
+        'name' => 'Shift Pagi',
+        'start_time' => '08:00:00',
+        'end_time' => '17:00:00',
+        'type' => 'shift',
+        'color' => '#10b981',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-01',
+        'shift_id' => $shift->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
     $user = User::factory()->create();
     $user->assignRole('super-admin');
     $this->actingAs($user);
@@ -288,6 +305,8 @@ test('dinas attendance is displayed as D in Excel but NOT counted as Hadir', fun
     // Ahmad Dani in column 0, date displays 'D' in column 1
     expect($ahmadRow[0])->toBe('Ahmad Dani');
     expect($ahmadRow[1])->toBe('D');
+    // JML count is in column 2, should be 0 (DINAS is not counted in JML)
+    expect((int)$ahmadRow[2])->toBe(0);
     // Hadir count is in column 3, should be 0 (DINAS is not counted as hadir)
     expect((int)$ahmadRow[3])->toBe(0);
 
