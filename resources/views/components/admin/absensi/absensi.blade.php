@@ -18,12 +18,14 @@
     exportStartDate: '{{ $startDate }}',
     exportEndDate: '{{ $endDate }}',
     exportPaperSize: '{{ $paperSize }}',
+    exportOpdId: '{{ $selectedOpd }}',
     selectedShifts: [],
     openExportModal(type) {
         this.exportType = type;
         this.exportStartDate = $wire.get('startDate') || '{{ $startDate }}';
         this.exportEndDate = $wire.get('endDate') || '{{ $endDate }}';
         this.exportPaperSize = $wire.get('paperSize') || '{{ $paperSize }}';
+        this.exportOpdId = $wire.get('selectedOpd') || '';
         this.selectedShifts = [];
         this.showExportModal = true;
     },
@@ -33,9 +35,8 @@
             '{{ route('absensi.export-excel') }}';
         let params = new URLSearchParams();
         let s = $wire.get('search');
-        let opd = $wire.get('selectedOpd');
         if (s) params.append('search', s);
-        if (opd) params.append('opd_id', opd);
+        if (this.exportOpdId) params.append('opd_id', this.exportOpdId);
         params.append('startDate', this.exportStartDate);
         params.append('endDate', this.exportEndDate);
         if (this.exportType === 'pdf') {
@@ -700,15 +701,6 @@
                             x-text="exportType === 'pdf' ? 'PDF Document' : 'Excel Spreadsheet'"></span>
                     </div>
 
-                    @if (auth()->user()->hasRole('super-admin'))
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-base-content/60">Target OPD:</span>
-                            <span class="font-semibold text-base-content truncate max-w-50">
-                                {{ $selectedOpd ? $this->opds->firstWhere('id', $selectedOpd)?->name ?? 'OPD Terpilih' : 'Semua OPD' }}
-                            </span>
-                        </div>
-                    @endif
-
                     @if ($search)
                         <div class="flex justify-between items-center text-xs">
                             <span class="text-base-content/60">Filter Nama:</span>
@@ -716,6 +708,29 @@
                         </div>
                     @endif
                 </div>
+
+                {{-- Target OPD --}}
+                @if (auth()->user()->hasRole('super-admin'))
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-base-content/70">
+                            Target OPD
+                        </label>
+                        <select x-model="exportOpdId" class="select select-bordered w-full text-xs bg-base-100">
+                            <option value="">Semua OPD</option>
+                            @foreach ($this->opds as $opd)
+                                <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @else
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-base-content/70">
+                            Target OPD
+                        </label>
+                        <input type="text" value="{{ auth()->user()->opd()?->name ?? 'OPD Anda' }}" disabled
+                            class="input input-bordered w-full text-xs bg-base-200/60 text-base-content/70 cursor-not-allowed" />
+                    </div>
+                @endif
 
                 {{-- Ubah Range Tanggal --}}
                 <div class="space-y-2">

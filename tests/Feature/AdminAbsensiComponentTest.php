@@ -80,3 +80,31 @@ test('admin absensi resetFilters restores default dates', function () {
         ->assertSet('filterStartDate', $yesterday)
         ->assertSet('filterEndDate', $defaultEnd);
 });
+
+test('export modal allows super-admin to select and edit target OPD', function () {
+    $opd1 = Opd::create(['name' => 'Dinas Kesehatan']);
+    $opd2 = Opd::create(['name' => 'Dinas Perhubungan']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi')
+        ->assertSee('x-model="exportOpdId"', false)
+        ->assertSee('Semua OPD')
+        ->assertSee('Dinas Kesehatan')
+        ->assertSee('Dinas Perhubungan')
+        ->assertSee('exportOpdId: \'\',', false);
+});
+
+test('export modal displays disabled target OPD for non-super-admin', function () {
+    $opd = Opd::create(['name' => 'Satuan Polisi Pamong Praja']);
+
+    $user = User::factory()->create();
+    $user->opds()->attach($opd->id);
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi')
+        ->assertDontSee('x-model="exportOpdId"', false)
+        ->assertSee('Satuan Polisi Pamong Praja');
+});
