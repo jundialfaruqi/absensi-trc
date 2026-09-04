@@ -755,9 +755,10 @@
                                 x-text="selectedShifts.length + ' shift dipilih'"></span>
                         </template>
                     </div>
-                    <div class="border border-base-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto bg-base-100 shadow-inner">
+                    <div
+                        class="border border-base-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto bg-base-100 shadow-inner">
                         <table class="table table-xs w-full text-left border-collapse">
-                            <thead class="bg-base-200/80 sticky top-0 z-10 text-[10px] uppercase text-base-content/70">
+                            <thead class="bg-base-200 sticky top-0 z-10 text-[10px] uppercase text-base-content/70">
                                 <tr class="border-b border-base-200">
                                     <th class="w-8 text-center p-2"></th>
                                     <th class="p-2">Shift</th>
@@ -775,7 +776,8 @@
                                         :class="{ 'bg-primary/5': selectedShifts.includes({{ $shift->id }}) }"
                                         @click="if (selectedShifts.includes({{ $shift->id }})) { selectedShifts = selectedShifts.filter(id => id !== {{ $shift->id }}) } else { selectedShifts.push({{ $shift->id }}) }">
                                         <td class="text-center p-2" @click.stop>
-                                            <input type="checkbox" :value="{{ $shift->id }}" x-model.number="selectedShifts"
+                                            <input type="checkbox" :value="{{ $shift->id }}"
+                                                x-model.number="selectedShifts"
                                                 class="checkbox checkbox-xs checkbox-primary" />
                                         </td>
                                         <td class="font-bold p-2 text-base-content">{{ $shift->name }}</td>
@@ -784,7 +786,8 @@
                                             @if ($konsumsiNames->isEmpty())
                                                 <span class="text-base-content/40">-</span>
                                             @else
-                                                <span class="badge badge-ghost badge-xs font-normal">{{ $konsumsiText }}</span>
+                                                <span
+                                                    class="badge badge-ghost badge-xs font-normal">{{ $konsumsiText }}</span>
                                             @endif
                                         </td>
                                     </tr>

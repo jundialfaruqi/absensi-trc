@@ -481,6 +481,27 @@ test('excluded shifts display *H and are not counted towards Hadir while keeping
     $allText = implode(' ', array_map(fn($r) => implode(' ', array_filter($r)), $rows));
     expect($allText)->toContain('*H: Hadir (Shift Dikecualikan)');
 
+    // Verify cell style: Day 2 has underline on *H and Hadir summary cell has yellow fill (#FEF08A)
+    $sitiRowIndex = null;
+    foreach ($sheet->getRowIterator() as $row) {
+        $cellVal = $sheet->getCell('A' . $row->getRowIndex())->getValue();
+        if ($cellVal === 'Siti Aminah') {
+            $sitiRowIndex = $row->getRowIndex();
+            break;
+        }
+    }
+    expect($sitiRowIndex)->not->toBeNull();
+
+    // Day 2 is Column C (index 3)
+    $day2Cell = $sheet->getCell('C' . $sitiRowIndex);
+    expect($day2Cell->getValue())->toBe('*H');
+    expect($day2Cell->getStyle()->getFont()->getUnderline())->toBe(\PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_SINGLE);
+
+    // Hadir summary is Column G (index 7)
+    $hadirCell = $sheet->getCell('G' . $sitiRowIndex);
+    expect((int)$hadirCell->getValue())->toBe(1);
+    expect(strtoupper($hadirCell->getStyle()->getFill()->getStartColor()->getRGB()))->toBe('FEF08A');
+
     if (file_exists($storedFile)) {
         unlink($storedFile);
     }

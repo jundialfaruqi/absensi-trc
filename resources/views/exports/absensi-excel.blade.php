@@ -99,6 +99,7 @@
                     $jmlHari = 0;
                     $hadir = 0;
                     $alpa = 0;
+                    $hasExcludedHadir = false;
                 @endphp
                 <tr>
                     <td style="border: 1px solid #999999; font-weight: bold; text-align: left;">
@@ -125,13 +126,16 @@
                             if ($a) {
                                 if (in_array($a->status, ['HADIR', 'TELAT'])) {
                                     if ($isShiftExcluded) {
-                                        $display = '*H';
+                                        $display = '*<u>H</u>';
+                                        $hasExcludedHadir = true;
+                                        $cellStyle =
+                                            'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center; text-decoration: underline;';
                                     } else {
                                         $display = 'H';
                                         $hadir++;
+                                        $cellStyle =
+                                            'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
                                     }
-                                    $cellStyle =
-                                        'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
                                 } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
                                     $display = substr($a->status, 0, 1);
                                     $hadir++;
@@ -161,7 +165,7 @@
                             }
                         @endphp
                         <td style="border: 1px solid #999999; {{ $cellStyle }}">
-                            {{ $display }}
+                            {!! $display !!}
                         </td>
                     @endforeach
 
@@ -170,7 +174,7 @@
                         {{ $jmlHari }}
                     </td>
                     <td
-                        style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">
+                        style="border: 1px solid #999999; background-color: {{ $hasExcludedHadir ? '#fef08a' : '#f9f9f9' }}; font-weight: bold; text-align: center;">
                         {{ $hadir }}
                     </td>
                     <td
@@ -205,7 +209,7 @@
 <table>
     <tr>
         <td colspan="{{ $leftCols }}" style="font-size: 9pt; color: #444444; vertical-align: top;">
-            <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *H: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur /
+            <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *<u>H</u>: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur /
             Lepas Jadwal
         </td>
         <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">

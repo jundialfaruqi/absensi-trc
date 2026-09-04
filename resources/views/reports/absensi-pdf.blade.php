@@ -74,6 +74,11 @@
             font-weight: bold;
         }
 
+        .highlight-hadir {
+            background-color: #fef08a !important;
+            color: #000000;
+        }
+
         .status-hadir {
             background-color: #dcfce7;
             color: #166534;
@@ -207,6 +212,7 @@
                             $jmlHari = 0;
                             $hadir = 0;
                             $alpa = 0;
+                            $hasExcludedHadir = false;
                         @endphp
                         <tr>
                             <td class="name-column">
@@ -230,7 +236,8 @@
                                         // Telat tetap ditampilkan sebagai Hadir (H)
                                         if (in_array($a->status, ['HADIR', 'TELAT'])) {
                                             if ($isShiftExcluded) {
-                                                $display = '*H';
+                                                $display = '*<u>H</u>';
+                                                $hasExcludedHadir = true;
                                             } else {
                                                 $display = 'H';
                                                 $hadir++;
@@ -259,11 +266,11 @@
                                         $display = '-';
                                     }
                                 @endphp
-                                <td class="{{ $class }}">{{ $display }}</td>
+                                <td class="{{ $class }}">{!! $display !!}</td>
                             @endforeach
 
                             <td class="summary-column">{{ $jmlHari }}</td>
-                            <td class="summary-column">{{ $hadir }}</td>
+                            <td class="summary-column {{ $hasExcludedHadir ? 'highlight-hadir' : '' }}">{{ $hadir }}</td>
                             <td class="summary-column">{{ $alpa }}</td>
                         </tr>
                     @endforeach
@@ -277,7 +284,7 @@
     @endforeach
 
     <div class="summary-info">
-        <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *H: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
+        <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *<u>H</u>: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
         Jadwal
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id

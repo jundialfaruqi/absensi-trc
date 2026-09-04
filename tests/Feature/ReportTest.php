@@ -239,12 +239,12 @@ test('excluded shifts display *H and are not counted towards Hadir in PDF report
     ])->render();
 
     expect($html)->toContain('>H<');
-    expect($html)->toContain('>*H<');
+    expect($html)->toContain('>*<u>H</u><');
     // JML = 2 (two shifts scheduled)
     expect($html)->toContain('<td class="summary-column">2</td>');
-    // H = 1 (only Day 1 counted, Day 2 *H is excluded)
-    expect($html)->toContain('<td class="summary-column">1</td>');
+    // H = 1 (only Day 1 counted, Day 2 *H is excluded, has highlight-hadir class!)
+    expect($html)->toContain('<td class="summary-column highlight-hadir">1</td>');
     // Footer legend
-    expect($html)->toContain('*H: Hadir (Shift Dikecualikan)');
+    expect($html)->toContain('*<u>H</u>: Hadir (Shift Dikecualikan)');
 });
 
