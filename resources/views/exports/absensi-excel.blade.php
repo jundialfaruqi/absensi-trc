@@ -13,9 +13,6 @@
                 </th>
             </tr>
         @endif
-        {{-- <tr>
-            <td></td>
-        </tr> --}}
     </thead>
 </table>
 
