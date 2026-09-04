@@ -68,7 +68,7 @@
                 <table class="table table-zebra w-full">
                     <thead class="bg-base-100 uppercase text-[10px] tracking-widest text-base-content/50">
                         <tr>
-                            <th class="p-4">Waktu Edit</th>
+                            <th class="p-4">Tanggal Edit</th>
                             <th>Admin</th>
                             <th>Personnel</th>
                             <th>Tanggal Absen</th>
@@ -81,7 +81,6 @@
                             <tr class="group">
                                 <td class="p-4">
                                     <div class="font-bold">{{ $log->edited_at->translatedFormat('d F Y') }}</div>
-                                    <div class="text-[10px] opacity-60">{{ $log->edited_at->format('H:i:s') }}</div>
                                 </td>
                                 <td>
                                     <div class="flex items-center gap-3">
