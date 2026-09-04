@@ -190,3 +190,61 @@ test('dinas attendance renders as D and is not counted as Hadir in PDF report', 
     expect($html)->toContain('D: Dinas');
     expect($html)->toContain('<td class="summary-column">0</td>');
 });
+
+test('excluded shifts display *H and are not counted towards Hadir in PDF report', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan']);
+    $personnel = Personnel::create([
+        'name' => 'Bambang',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'bambang.jpg',
+        'email' => 'bambang@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '998877',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $response = $this->actingAs($user)->get(route('absensi.export-pdf', [
+        'startDate' => '2026-05-01',
+        'endDate' => '2026-05-02',
+        'paperSize' => 'a4',
+        'opd_id' => $opd->id,
+        'excluded_shifts' => [99],
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+
+    // Test blade view rendering with 2 days: Day 1 (Shift 10, Hadir), Day 2 (Shift 99, Hadir -> *H)
+    $personnel->absensi_map = collect([
+        '2026-05-01' => (object) ['status' => 'HADIR'],
+        '2026-05-02' => (object) ['status' => 'HADIR'],
+    ]);
+    $personnel->jadwal_map = collect([
+        '2026-05-01' => (object) ['shift_id' => 10, 'status' => 'SHIFT'],
+        '2026-05-02' => (object) ['shift_id' => 99, 'status' => 'SHIFT'],
+    ]);
+
+    $html = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => ['2026-05-01', '2026-05-02'],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+        'excludedShiftIds' => [99],
+    ])->render();
+
+    expect($html)->toContain('>H<');
+    expect($html)->toContain('>*H<');
+    // JML = 2 (two shifts scheduled)
+    expect($html)->toContain('<td class="summary-column">2</td>');
+    // H = 1 (only Day 1 counted, Day 2 *H is excluded)
+    expect($html)->toContain('<td class="summary-column">1</td>');
+    // Footer legend
+    expect($html)->toContain('*H: Hadir (Shift Dikecualikan)');
+});
+

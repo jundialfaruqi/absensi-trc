@@ -112,6 +112,8 @@
                             $display = '';
                             $cellStyle = 'text-align: center;';
 
+                            $isShiftExcluded = !empty($j->shift_id) && in_array((int) $j->shift_id, $excludedShiftIds ?? []);
+
                             if (
                                 $j &&
                                 !in_array($j->status, ['LIBUR', 'DINAS']) &&
@@ -122,8 +124,12 @@
 
                             if ($a) {
                                 if (in_array($a->status, ['HADIR', 'TELAT'])) {
-                                    $display = 'H';
-                                    $hadir++;
+                                    if ($isShiftExcluded) {
+                                        $display = '*H';
+                                    } else {
+                                        $display = 'H';
+                                        $hadir++;
+                                    }
                                     $cellStyle =
                                         'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
                                 } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
@@ -199,7 +205,7 @@
 <table>
     <tr>
         <td colspan="{{ $leftCols }}" style="font-size: 9pt; color: #444444; vertical-align: top;">
-            <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur /
+            <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *H: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur /
             Lepas Jadwal
         </td>
         <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">

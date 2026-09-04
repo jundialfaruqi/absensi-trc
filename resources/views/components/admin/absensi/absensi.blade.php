@@ -18,11 +18,13 @@
     exportStartDate: '{{ $startDate }}',
     exportEndDate: '{{ $endDate }}',
     exportPaperSize: '{{ $paperSize }}',
+    selectedShifts: [],
     openExportModal(type) {
         this.exportType = type;
         this.exportStartDate = $wire.get('startDate') || '{{ $startDate }}';
         this.exportEndDate = $wire.get('endDate') || '{{ $endDate }}';
         this.exportPaperSize = $wire.get('paperSize') || '{{ $paperSize }}';
+        this.selectedShifts = [];
         this.showExportModal = true;
     },
     get exportUrl() {
@@ -38,6 +40,11 @@
         params.append('endDate', this.exportEndDate);
         if (this.exportType === 'pdf') {
             params.append('paperSize', this.exportPaperSize);
+        }
+        if (this.selectedShifts.length > 0) {
+            this.selectedShifts.forEach(id => {
+                params.append('excluded_shifts[]', id);
+            });
         }
         return base + '?' + params.toString();
     }
@@ -641,7 +648,7 @@
 
     {{-- ─── Modal Konfirmasi Download (PDF & Excel) ────────────────────────── --}}
     <dialog class="modal modal-bottom sm:modal-middle backdrop-blur-xs" :class="{ 'modal-open': showExportModal }">
-        <div class="modal-box max-w-md rounded-2xl shadow-2xl border border-base-200">
+        <div class="modal-box max-w-lg rounded-2xl shadow-2xl border border-base-200">
             {{-- Header Modal --}}
             <div class="flex items-start justify-between pb-3 border-b border-base-200">
                 <div class="flex items-center gap-3">
@@ -734,6 +741,65 @@
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Rentang tanggal maksimal 31 hari.
+                    </p>
+                </div>
+
+                {{-- Pilih Shift (Opsional) --}}
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-bold text-base-content/70">
+                            Pilih Shift (Opsional)
+                        </label>
+                        <template x-if="selectedShifts.length > 0">
+                            <span class="text-[11px] font-semibold text-primary"
+                                x-text="selectedShifts.length + ' shift dipilih'"></span>
+                        </template>
+                    </div>
+                    <div class="border border-base-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto bg-base-100 shadow-inner">
+                        <table class="table table-xs w-full text-left border-collapse">
+                            <thead class="bg-base-200/80 sticky top-0 z-10 text-[10px] uppercase text-base-content/70">
+                                <tr class="border-b border-base-200">
+                                    <th class="w-8 text-center p-2"></th>
+                                    <th class="p-2">Shift</th>
+                                    <th class="p-2">Keterangan</th>
+                                    <th class="p-2">Konsumsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-base-200 text-xs">
+                                @forelse ($this->shifts as $shift)
+                                    @php
+                                        $konsumsiNames = $shift->konsumsis->pluck('nama')->filter()->values();
+                                        $konsumsiText = $konsumsiNames->isEmpty() ? '-' : $konsumsiNames->implode(', ');
+                                    @endphp
+                                    <tr class="hover:bg-base-200/50 cursor-pointer transition-colors"
+                                        :class="{ 'bg-primary/5': selectedShifts.includes({{ $shift->id }}) }"
+                                        @click="if (selectedShifts.includes({{ $shift->id }})) { selectedShifts = selectedShifts.filter(id => id !== {{ $shift->id }}) } else { selectedShifts.push({{ $shift->id }}) }">
+                                        <td class="text-center p-2" @click.stop>
+                                            <input type="checkbox" :value="{{ $shift->id }}" x-model.number="selectedShifts"
+                                                class="checkbox checkbox-xs checkbox-primary" />
+                                        </td>
+                                        <td class="font-bold p-2 text-base-content">{{ $shift->name }}</td>
+                                        <td class="p-2 text-base-content/70">{{ $shift->keterangan ?: '-' }}</td>
+                                        <td class="p-2 text-base-content/70">
+                                            @if ($konsumsiNames->isEmpty())
+                                                <span class="text-base-content/40">-</span>
+                                            @else
+                                                <span class="badge badge-ghost badge-xs font-normal">{{ $konsumsiText }}</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-xs text-base-content/50">
+                                            Tidak ada data shift
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-base-content/50 italic">
+                        Shift yang diceklis tidak akan dihitung pada kolom H (Hadir) dan ditandai dengan *H.
                     </p>
                 </div>
 

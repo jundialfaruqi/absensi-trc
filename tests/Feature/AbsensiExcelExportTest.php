@@ -328,3 +328,162 @@ test('dinas attendance is displayed as D in Excel but NOT counted as Hadir', fun
     }
 });
 
+test('excluded shifts display *H and are not counted towards Hadir while keeping JML in Excel export', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan', 'singkatan' => 'DISHUB']);
+
+    $personnel = Personnel::create([
+        'name' => 'Siti Aminah',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'siti.jpg',
+        'email' => 'siti@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '112233',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $shiftPagi = \App\Models\Shift::create([
+        'name' => 'P',
+        'type' => 'shift',
+        'keterangan' => 'PAGI',
+        'color' => '#22c55e',
+    ]);
+
+    $shiftMalam = \App\Models\Shift::create([
+        'name' => 'M',
+        'type' => 'shift',
+        'keterangan' => 'MALAM',
+        'color' => '#3b82f6',
+    ]);
+
+    $shiftLibur = \App\Models\Shift::create([
+        'name' => 'L',
+        'type' => 'off',
+        'keterangan' => 'LIBUR',
+        'color' => '#eab308',
+    ]);
+
+    // Day 1: 2026-09-01 -> Shift Pagi (HADIR) -> H
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-01',
+        'shift_id' => $shiftPagi->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-01',
+        'status' => 'HADIR',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Day 2: 2026-09-02 -> Shift Malam (HADIR, BUT Malam is excluded) -> *H
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-02',
+        'shift_id' => $shiftMalam->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-02',
+        'status' => 'HADIR',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Day 3: 2026-09-03 -> Shift Libur (LIBUR) -> L
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-03',
+        'shift_id' => $shiftLibur->id,
+        'status' => 'LIBUR',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-03',
+        'status' => 'LIBUR',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Day 4: 2026-09-04 -> Shift Pagi (DINAS) -> D
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-04',
+        'shift_id' => $shiftPagi->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-04',
+        'status' => 'DINAS',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+    $this->actingAs($user);
+
+    // Export with excludedShiftIds containing Shift Malam
+    Excel::store(
+        new AbsensiExport('2026-09-01', '2026-09-04', null, (string)$opd->id, [$shiftMalam->id]),
+        'test_excluded_shifts.xlsx',
+        'local'
+    );
+
+    $storedFile = storage_path('app/private/test_excluded_shifts.xlsx');
+    if (!file_exists($storedFile)) {
+        $storedFile = storage_path('app/test_excluded_shifts.xlsx');
+    }
+
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
+    $sheet = $spreadsheet->getSheet(0);
+
+    $rows = $sheet->toArray();
+    $sitiRow = null;
+    foreach ($rows as $r) {
+        if (in_array('Siti Aminah', $r)) {
+            $sitiRow = $r;
+            break;
+        }
+    }
+    expect($sitiRow)->not->toBeNull();
+
+    // Siti Aminah in column 0
+    expect($sitiRow[0])->toBe('Siti Aminah');
+    // Day 1: H
+    expect($sitiRow[1])->toBe('H');
+    // Day 2: *H
+    expect($sitiRow[2])->toBe('*H');
+    // Day 3: L
+    expect($sitiRow[3])->toBe('L');
+    // Day 4: D
+    expect($sitiRow[4])->toBe('D');
+    // JML count in column 5: 2 (Day 1 + Day 2)
+    expect((int)$sitiRow[5])->toBe(2);
+    // Hadir count in column 6: 1 (Only Day 1, Day 2 *H is excluded!)
+    expect((int)$sitiRow[6])->toBe(1);
+    // Alpa count in column 7: 0
+    expect((int)$sitiRow[7])->toBe(0);
+
+    // Footer Keterangan should contain *H: Hadir (Shift Dikecualikan)
+    $allText = implode(' ', array_map(fn($r) => implode(' ', array_filter($r)), $rows));
+    expect($allText)->toContain('*H: Hadir (Shift Dikecualikan)');
+
+    if (file_exists($storedFile)) {
+        unlink($storedFile);
+    }
+});
+
+

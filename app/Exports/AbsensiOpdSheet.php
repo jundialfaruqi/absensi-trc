@@ -16,17 +16,20 @@ class AbsensiOpdSheet implements FromView, WithTitle, ShouldAutoSize, WithStyles
     public string $opdSingkatan;
     public Collection $personnels;
     public array $dates;
+    public array $excludedShiftIds;
 
     public function __construct(
         string $opdName,
         string $opdSingkatan,
         Collection $personnels,
-        array $dates
+        array $dates,
+        array $excludedShiftIds = []
     ) {
         $this->opdName = $opdName;
         $this->opdSingkatan = $opdSingkatan;
         $this->personnels = $personnels;
         $this->dates = $dates;
+        $this->excludedShiftIds = $excludedShiftIds;
     }
 
     public function view(): View
@@ -35,6 +38,7 @@ class AbsensiOpdSheet implements FromView, WithTitle, ShouldAutoSize, WithStyles
             'opdName' => $this->opdName,
             'personnels' => $this->personnels,
             'dates' => $this->dates,
+            'excludedShiftIds' => $this->excludedShiftIds,
         ]);
     }
 

@@ -72,6 +72,10 @@ class ReportController extends Controller
             $opdName = $opdId ? Opd::find($opdId)->name : 'Semua OPD';
             $monthName = Carbon::create()->month($month)->translatedFormat('F');
 
+            $excludedShifts = $request->get('excluded_shifts', $request->get('shift_ids', []));
+            $excludedShiftIds = is_array($excludedShifts) ? $excludedShifts : explode(',', (string) $excludedShifts);
+            $excludedShiftIds = array_map('intval', array_filter($excludedShiftIds));
+
             $data = [
                 'personnels' => $personnels,
                 'dates' => $dates,
@@ -79,6 +83,7 @@ class ReportController extends Controller
                 'year' => $year,
                 'monthName' => $monthName,
                 'opdName' => $opdName,
+                'excludedShiftIds' => $excludedShiftIds,
             ];
 
             // Define paper dimensions (landscape)
@@ -116,6 +121,10 @@ class ReportController extends Controller
             $search = $request->get('search');
             $opdId = $request->get('opd_id');
 
+            $excludedShifts = $request->get('excluded_shifts', $request->get('shift_ids', []));
+            $excludedShiftIds = is_array($excludedShifts) ? $excludedShifts : explode(',', (string) $excludedShifts);
+            $excludedShiftIds = array_map('intval', array_filter($excludedShiftIds));
+
             $filename = 'rekap_absensi';
             if ($startDate && $endDate) {
                 $filename .= "_{$startDate}_{$endDate}";
@@ -127,7 +136,7 @@ class ReportController extends Controller
             $filename .= '.xlsx';
 
             return Excel::download(
-                new AbsensiExport($startDate, $endDate, $search, $opdId),
+                new AbsensiExport($startDate, $endDate, $search, $opdId, $excludedShiftIds),
                 $filename
             );
         } catch (\Throwable $e) {

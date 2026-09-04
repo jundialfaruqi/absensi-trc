@@ -220,6 +220,8 @@
                                     $display = '';
                                     $class = '';
 
+                                    $isShiftExcluded = !empty($j->shift_id) && in_array((int) $j->shift_id, $excludedShiftIds ?? []);
+
                                     if ($j && !in_array($j->status, ['LIBUR', 'DINAS']) && (!$a || !in_array($a->status, ['LIBUR', 'DINAS']))) {
                                         $jmlHari++;
                                     }
@@ -227,8 +229,12 @@
                                     if ($a) {
                                         // Telat tetap ditampilkan sebagai Hadir (H)
                                         if (in_array($a->status, ['HADIR', 'TELAT'])) {
-                                            $display = 'H';
-                                            $hadir++;
+                                            if ($isShiftExcluded) {
+                                                $display = '*H';
+                                            } else {
+                                                $display = 'H';
+                                                $hadir++;
+                                            }
                                             $class = 'status-hadir';
                                         } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
                                             $display = substr($a->status, 0, 1);
@@ -271,7 +277,7 @@
     @endforeach
 
     <div class="summary-info">
-        <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
+        <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *H: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
         Jadwal
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id

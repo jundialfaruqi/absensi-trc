@@ -224,4 +224,13 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
         // Perbaikan Poin 5: Optimasi select tabel referensi
         return \App\Models\Opd::select('id', 'name')->orderBy('name')->get();
     }
+
+    #[Computed]
+    public function shifts()
+    {
+        return \App\Models\Shift::where('type', '!=', 'off')
+            ->with('konsumsis')
+            ->orderBy('name')
+            ->get();
+    }
 };

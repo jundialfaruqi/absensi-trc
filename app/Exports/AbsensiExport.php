@@ -15,13 +15,20 @@ class AbsensiExport implements WithMultipleSheets
     protected ?string $search;
     protected ?string $opdId;
     protected array $dates = [];
+    protected array $excludedShiftIds = [];
 
-    public function __construct(?string $startDate = null, ?string $endDate = null, ?string $search = null, ?string $opdId = null)
-    {
+    public function __construct(
+        ?string $startDate = null,
+        ?string $endDate = null,
+        ?string $search = null,
+        ?string $opdId = null,
+        array $excludedShiftIds = []
+    ) {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->search = $search;
         $this->opdId = $opdId;
+        $this->excludedShiftIds = $excludedShiftIds;
 
         $this->calculateDates();
     }
@@ -107,7 +114,8 @@ class AbsensiExport implements WithMultipleSheets
                 opdName: $opdName,
                 opdSingkatan: $opdName,
                 personnels: collect(),
-                dates: $this->dates
+                dates: $this->dates,
+                excludedShiftIds: $this->excludedShiftIds
             );
             return $sheets;
         }
@@ -135,7 +143,8 @@ class AbsensiExport implements WithMultipleSheets
                 opdName: $opdName,
                 opdSingkatan: $sheetTitle,
                 personnels: $group,
-                dates: $this->dates
+                dates: $this->dates,
+                excludedShiftIds: $this->excludedShiftIds
             );
         }
 
