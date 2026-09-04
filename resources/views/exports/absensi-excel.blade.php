@@ -13,15 +13,9 @@
                 </th>
             </tr>
         @endif
-        <tr>
-            <th colspan="{{ count($dates) + 4 }}"
-                style="font-size: 11pt; font-weight: bold; color: #333333; text-align: center;">
-                {{ strtoupper($opdName) }}
-            </th>
-        </tr>
-        <tr>
-            <td colspan="{{ count($dates) + 4 }}"></td>
-        </tr>
+        {{-- <tr>
+            <td></td>
+        </tr> --}}
     </thead>
 </table>
 
@@ -36,7 +30,13 @@
         <thead>
             <tr>
                 <th colspan="{{ count($monthDates) + 4 }}"
-                    style="font-size: 10pt; font-weight: bold; background-color: #e5e7eb; color: #333333; text-align: left;">
+                    style="font-size: 11pt; font-weight: bold; background-color: #000000; color: #ffffff; text-align: left;">
+                    {{ str_starts_with(strtoupper($opdName), 'OPD') ? strtoupper($opdName) : 'OPD: ' . strtoupper($opdName) }}
+                </th>
+            </tr>
+            <tr>
+                <th colspan="{{ count($monthDates) + 4 }}"
+                    style="font-size: 11pt; font-weight: bold; background-color: #e5e7eb; color: #333333; text-align: left;">
                     BULAN: {{ strtoupper($monthLabel) }}
                 </th>
             </tr>
@@ -115,7 +115,11 @@
                             $display = '';
                             $cellStyle = 'text-align: center;';
 
-                            if ($j && !in_array($j->status, ['LIBUR', 'DINAS']) && (!$a || !in_array($a->status, ['LIBUR', 'DINAS']))) {
+                            if (
+                                $j &&
+                                !in_array($j->status, ['LIBUR', 'DINAS']) &&
+                                (!$a || !in_array($a->status, ['LIBUR', 'DINAS']))
+                            ) {
                                 $jmlHari++;
                             }
 
@@ -182,11 +186,11 @@
         </tbody>
     </table>
 
-    <table>
+    {{-- <table>
         <tr>
-            <td colspan="{{ count($monthDates) + 4 }}"></td>
+            <td></td>
         </tr>
-    </table>
+    </table> --}}
 @endforeach
 
 @php

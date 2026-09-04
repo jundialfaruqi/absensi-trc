@@ -164,6 +164,15 @@ test('absensi export date header cells are formatted with 00 and suppress number
     $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
     $sheet = $spreadsheet->getSheet(0);
 
+    // Assert OPD name row is positioned above month row with black bg and white text
+    expect((string)$sheet->getCell('A4')->getValue())->toContain('DISHUB');
+    expect($sheet->getCell('A4')->getStyle()->getAlignment()->getHorizontal())->toBe(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    expect(strtoupper($sheet->getCell('A4')->getStyle()->getFill()->getStartColor()->getRGB()))->toBe('000000');
+    expect(strtoupper($sheet->getCell('A4')->getStyle()->getFont()->getColor()->getRGB()))->toBe('FFFFFF');
+
+    // Assert month row is below OPD row
+    expect((string)$sheet->getCell('A5')->getValue())->toContain('BULAN');
+
     // Assert row 8 contains day names (e.g. Sel, Rab, Kam)
     expect($sheet->getCell('B8')->getValue())->toBe('Sel');
 
