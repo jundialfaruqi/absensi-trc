@@ -94,6 +94,11 @@
             color: #075985;
         }
 
+        .status-libur {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
         .footer {
             margin-top: 20px;
             text-align: right;
@@ -225,14 +230,20 @@
                                             $display = 'H';
                                             $hadir++;
                                             $class = 'status-hadir';
-                                        } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
+                                        } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
                                             $display = substr($a->status, 0, 1);
                                             $hadir++;
+                                            $class = 'status-izin';
+                                        } elseif ($a->status === 'DINAS') {
+                                            $display = 'D';
                                             $class = 'status-izin';
                                         } elseif ($a->status === 'ALPA') {
                                             $display = 'A';
                                             $alpa++;
                                             $class = 'status-alpa';
+                                        } elseif ($a->status === 'LIBUR') {
+                                            $display = 'L';
+                                            $class = 'status-libur';
                                         } else {
                                             $display = substr($a->status, 0, 1);
                                         }
@@ -260,7 +271,7 @@
     @endforeach
 
     <div class="summary-info">
-        <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur/Lepas
+        <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
         Jadwal
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id

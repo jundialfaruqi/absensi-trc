@@ -240,3 +240,63 @@ test('telat attendance is displayed as H and counted as Hadir in Excel, footer e
     }
 });
 
+test('dinas attendance is displayed as D in Excel but NOT counted as Hadir', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan', 'singkatan' => 'DISHUB']);
+
+    $personnel = Personnel::create([
+        'name' => 'Ahmad Dani',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'ahmad.jpg',
+        'email' => 'ahmad@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '654321',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-09-01',
+        'status' => 'DINAS',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+    $this->actingAs($user);
+
+    Excel::store(new AbsensiExport('2026-09-01', '2026-09-01', null, (string)$opd->id), 'test_dinas.xlsx', 'local');
+
+    $storedFile = storage_path('app/private/test_dinas.xlsx');
+    if (!file_exists($storedFile)) {
+        $storedFile = storage_path('app/test_dinas.xlsx');
+    }
+
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
+    $sheet = $spreadsheet->getSheet(0);
+
+    $rows = $sheet->toArray();
+    $ahmadRow = null;
+    foreach ($rows as $r) {
+        if (in_array('Ahmad Dani', $r)) {
+            $ahmadRow = $r;
+            break;
+        }
+    }
+    expect($ahmadRow)->not->toBeNull();
+    // Ahmad Dani in column 0, date displays 'D' in column 1
+    expect($ahmadRow[0])->toBe('Ahmad Dani');
+    expect($ahmadRow[1])->toBe('D');
+    // Hadir count is in column 3, should be 0 (DINAS is not counted as hadir)
+    expect((int)$ahmadRow[3])->toBe(0);
+
+    // Footer Keterangan should contain D: Dinas
+    $allText = implode(' ', array_map(fn($r) => implode(' ', array_filter($r)), $rows));
+    expect($allText)->toContain('D: Dinas');
+
+    if (file_exists($storedFile)) {
+        unlink($storedFile);
+    }
+});
+

@@ -134,3 +134,57 @@ test('super-admin filters by opd_id when selected', function () {
     $response->assertSuccessful();
     $response->assertHeader('content-type', 'application/pdf');
 });
+
+test('dinas attendance renders as D and is not counted as Hadir in PDF report', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan']);
+    $personnel = Personnel::create([
+        'name' => 'Ahmad Dani',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'ahmad.jpg',
+        'email' => 'ahmad@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '654321',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => '2026-05-01',
+        'status' => 'DINAS',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $response = $this->actingAs($user)->get(route('absensi.export-pdf', [
+        'startDate' => '2026-05-01',
+        'endDate' => '2026-05-01',
+        'paperSize' => 'a4',
+        'opd_id' => $opd->id,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+
+    // Also assert directly on the rendered Blade view to verify D display and Hadir count = 0
+    $personnel->absensi_map = collect([
+        '2026-05-01' => (object) ['status' => 'DINAS'],
+    ]);
+    $personnel->jadwal_map = collect();
+
+    $html = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => ['2026-05-01'],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+    ])->render();
+
+    expect($html)->toContain('>D<');
+    expect($html)->toContain('D: Dinas');
+    expect($html)->toContain('<td class="summary-column">0</td>');
+});

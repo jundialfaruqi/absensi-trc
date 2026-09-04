@@ -125,9 +125,13 @@
                                     $hadir++;
                                     $cellStyle =
                                         'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
-                                } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI', 'DINAS'])) {
+                                } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
                                     $display = substr($a->status, 0, 1);
                                     $hadir++;
+                                    $cellStyle =
+                                        'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
+                                } elseif ($a->status === 'DINAS') {
+                                    $display = 'D';
                                     $cellStyle =
                                         'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
                                 } elseif ($a->status === 'ALPA') {
@@ -194,7 +198,7 @@
 <table>
     <tr>
         <td colspan="{{ $leftCols }}" style="font-size: 9pt; color: #444444; vertical-align: top;">
-            <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | L: Libur /
+            <strong>Keterangan:</strong> H: Hadir | A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur /
             Lepas Jadwal
         </td>
         <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
