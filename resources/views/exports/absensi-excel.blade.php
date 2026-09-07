@@ -138,7 +138,6 @@
                                     }
                                 } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
                                     $display = substr($a->status, 0, 1);
-                                    $hadir++;
                                     $cellStyle =
                                         'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
                                 } elseif ($a->status === 'DINAS') {

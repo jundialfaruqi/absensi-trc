@@ -507,4 +507,76 @@ test('excluded shifts display *H and are not counted towards Hadir while keeping
     }
 });
 
+test('sakit, izin, and cuti attendance are displayed as S, I, C in Excel and NOT counted as Hadir', function () {
+    $opd = Opd::create(['name' => 'Dinas Kesehatan', 'singkatan' => 'DINKES']);
+
+    $personnel = Personnel::create([
+        'name' => 'Dewi Sartika',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'dewi.jpg',
+        'email' => 'dewi@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '778899',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        [
+            'personnel_id' => $personnel->id,
+            'tanggal' => '2026-09-01',
+            'status' => 'SAKIT',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'personnel_id' => $personnel->id,
+            'tanggal' => '2026-09-02',
+            'status' => 'IZIN',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'personnel_id' => $personnel->id,
+            'tanggal' => '2026-09-03',
+            'status' => 'CUTI',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+    $this->actingAs($user);
+
+    Excel::store(new AbsensiExport('2026-09-01', '2026-09-03', null, (string)$opd->id), 'test_sic.xlsx', 'local');
+
+    $storedFile = storage_path('app/private/test_sic.xlsx');
+    if (!file_exists($storedFile)) {
+        $storedFile = storage_path('app/test_sic.xlsx');
+    }
+
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
+    $sheet = $spreadsheet->getSheet(0);
+
+    $rows = $sheet->toArray();
+    $dewiRow = null;
+    foreach ($rows as $r) {
+        if (in_array('Dewi Sartika', $r)) {
+            $dewiRow = $r;
+            break;
+        }
+    }
+    expect($dewiRow)->not->toBeNull();
+    expect($dewiRow[0])->toBe('Dewi Sartika');
+    expect($dewiRow[1])->toBe('S');
+    expect($dewiRow[2])->toBe('I');
+    expect($dewiRow[3])->toBe('C');
+    expect((int)$dewiRow[5])->toBe(0);
+
+    if (file_exists($storedFile)) {
+        unlink($storedFile);
+    }
+});
+
 

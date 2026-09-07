@@ -245,7 +245,6 @@
                                             $class = 'status-hadir';
                                         } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
                                             $display = substr($a->status, 0, 1);
-                                            $hadir++;
                                             $class = 'status-izin';
                                         } elseif ($a->status === 'DINAS') {
                                             $display = 'D';

@@ -248,3 +248,42 @@ test('excluded shifts display *H and are not counted towards Hadir in PDF report
     expect($html)->toContain('*<u>H</u>: Hadir (Shift Dikecualikan)');
 });
 
+test('sakit, izin, and cuti attendance render correctly and are NOT counted as Hadir in PDF report', function () {
+    $opd = Opd::create(['name' => 'Dinas Kesehatan']);
+    $personnel = Personnel::create([
+        'name' => 'Dr. Rina',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'rina.jpg',
+        'email' => 'rina@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123123',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $personnel->absensi_map = collect([
+        '2026-05-01' => (object) ['status' => 'SAKIT'],
+        '2026-05-02' => (object) ['status' => 'IZIN'],
+        '2026-05-03' => (object) ['status' => 'CUTI'],
+    ]);
+    $personnel->jadwal_map = collect([
+        '2026-05-01' => (object) ['status' => 'SHIFT'],
+        '2026-05-02' => (object) ['status' => 'SHIFT'],
+        '2026-05-03' => (object) ['status' => 'SHIFT'],
+    ]);
+
+    $html = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => ['2026-05-01', '2026-05-02', '2026-05-03'],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+    ])->render();
+
+    expect($html)->toContain('>S<');
+    expect($html)->toContain('>I<');
+    expect($html)->toContain('>C<');
+    expect($html)->toContain('<td class="summary-column ">0</td>');
+});
+
