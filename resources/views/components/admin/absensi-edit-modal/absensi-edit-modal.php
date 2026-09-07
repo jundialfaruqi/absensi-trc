@@ -76,6 +76,8 @@ new class extends Component
     #[On('openEditAbsensi')]
     public function open($personnelId, $tanggal)
     {
+        $this->resetValidation();
+        $this->resetErrorBag();
         $this->resetEditForm();
 
         $personnel = Personnel::findOrFail($personnelId);
@@ -215,11 +217,23 @@ new class extends Component
         }
     }
 
+    public function closeModal()
+    {
+        $this->resetValidation();
+        $this->resetErrorBag();
+        $this->resetEditForm();
+        $this->dispatch('close-modal', id: 'edit-absensi-modal');
+    }
+
     public function saveEdit()
     {
         $this->validate([
             'statusMasuk' => 'required',
             'alasanEdit' => 'required|min:5',
+        ], [
+            'statusMasuk.required' => 'Status masuk wajib dipilih.',
+            'alasanEdit.required' => 'Alasan perubahan data wajib diisi.',
+            'alasanEdit.min' => 'Alasan perubahan data minimal :min karakter.',
         ]);
 
         $personnel = Personnel::findOrFail($this->editingPersonnelId);
@@ -380,6 +394,8 @@ new class extends Component
 
     private function resetEditForm()
     {
+        $this->resetValidation();
+        $this->resetErrorBag();
         $this->editingPersonnelId = null;
         $this->editingTanggal = null;
         $this->editingAbsensiId = null;

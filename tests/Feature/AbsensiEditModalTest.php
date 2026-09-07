@@ -188,3 +188,52 @@ test('applyJadwalMasuk and applyJadwalPulang populate times and set status to HA
         ->and(Carbon::parse($saved->jam_masuk)->format('H:i'))->toBe('08:00')
         ->and(Carbon::parse($saved->jam_pulang)->format('H:i'))->toBe('20:00');
 });
+
+test('validation messages are in Indonesian and validation errors are reset on closeModal and open', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $opd = Opd::create(['name' => 'BPBD', 'code' => 'BPBD']);
+    $personnel = Personnel::create([
+        'name' => 'Siti Aminah',
+        'nik' => '1234567890123457',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'siti.jpg',
+        'email' => 'siti@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-16';
+
+    $component = Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->set('statusMasuk', '')
+        ->set('alasanEdit', '')
+        ->call('saveEdit')
+        ->assertHasErrors([
+            'statusMasuk' => 'required',
+            'alasanEdit' => 'required',
+        ])
+        ->assertSee('Status masuk wajib dipilih.')
+        ->assertSee('Alasan perubahan data wajib diisi.');
+
+    // When closeModal is called, errors should be cleared
+    $component->call('closeModal')
+        ->assertHasNoErrors()
+        ->assertDispatched('close-modal', id: 'edit-absensi-modal');
+
+    // Trigger validation error again
+    $component->call('open', $personnel->id, $date)
+        ->set('alasanEdit', 'abc') // min 5 characters
+        ->call('saveEdit')
+        ->assertHasErrors(['alasanEdit' => 'min'])
+        ->assertSee('Alasan perubahan data minimal 5 karakter.');
+
+    // Opening modal again resets errors
+    $component->call('open', $personnel->id, $date)
+        ->assertHasNoErrors();
+});

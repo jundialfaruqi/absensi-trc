@@ -3,7 +3,7 @@
         x-data="{ show: false, loading: true }"
         x-on:open-modal.window="if ($event.detail.id === 'edit-absensi-modal') { show = true; loading = true; $el.showModal(); }"
         x-on:close-modal.window="if ($event.detail.id === 'edit-absensi-modal') { show = false; $el.close(); }"
-        x-on:edit-absensi-loaded.window="loading = false" x-on:close="show = false; loading = true">
+        x-on:edit-absensi-loaded.window="loading = false" x-on:close="if (show) { show = false; loading = true; $wire.closeModal(); }">
         <div class="modal-box p-0 shadow max-h-[80vh] max-w-2xl overflow-y-auto relative">
             {{-- Modal Header - Sticky --}}
             <div class="p-6 border-b border-base-200 bg-base-200 flex justify-between items-center sticky top-0 z-50">
@@ -34,7 +34,7 @@
                     </h3>
                 </div>
                 <button type="button" class="btn btn-ghost btn-sm btn-circle"
-                    onclick="document.getElementById('edit-absensi-modal').close()">✕</button>
+                    wire:click="closeModal">✕</button>
             </div>
 
             {{-- Modal Body - Scrollable --}}
@@ -469,8 +469,7 @@
                                 @endcan
                             </div>
                             <div class="flex gap-1.5 justify-end">
-                                <button type="button" class="btn btn-ghost btn-sm"
-                                    onclick="document.getElementById('edit-absensi-modal').close()">Batal</button>
+                                <button type="button" class="btn btn-ghost btn-sm" wire:click="closeModal">Batal</button>
                                 <button type="submit" class="btn btn-primary btn-sm px-6"
                                     wire:loading.attr="disabled">
                                     <span wire:loading wire:target="saveEdit"
@@ -484,7 +483,7 @@
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
-            <button>close</button>
+            <button wire:click="closeModal">close</button>
         </form>
     </dialog>
 </div>
