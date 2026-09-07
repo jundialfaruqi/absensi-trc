@@ -42,8 +42,8 @@
                 {{-- Skeleton Loader --}}
                 <div x-show="loading" class="p-6 space-y-6 animate-pulse">
                     {{-- Tanggal Absen Skeleton --}}
-                    <div class="bg-base-200/50 p-4 flex items-center gap-3 rounded-xl">
-                        <div class="p-2 bg-base-300 rounded-lg w-9 h-9"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-base-300 rounded-md w-6 h-6"></div>
                         <div class="space-y-2 flex-1">
                             <div class="h-2.5 bg-base-300 rounded w-20"></div>
                             <div class="h-4 bg-base-300 rounded w-48"></div>
@@ -98,15 +98,8 @@
                 {{-- Actual Form --}}
                 <div x-show="!loading">
                     <form wire:submit="saveEdit" class="p-6 space-y-5">
-                        <div class="bg-primary/5 p-4 flex items-center justify-between rounded-xl">
+                        <div class="flex items-center justify-between pb-1">
                             <div class="flex items-center gap-3">
-                                <div class="p-2 bg-primary/10 rounded-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="size-5 text-primary">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
-                                    </svg>
-                                </div>
                                 <div>
                                     <div class="text-[10px] uppercase font-black opacity-40 tracking-widest">Tanggal
                                         Absen
@@ -116,6 +109,21 @@
                                     </div>
                                 </div>
                             </div>
+                            @if ($jadwalShiftName)
+                                <div class="text-right">
+                                    <div class="text-[10px] uppercase font-black opacity-40 tracking-widest">Jadwal
+                                        Shift</div>
+                                    <div
+                                        class="font-bold text-xs sm:text-sm text-primary flex items-center gap-1.5 justify-end">
+                                        <span>{{ $jadwalShiftName }}
+                                            @if ($jadwalJamMasuk && $jadwalJamPulang)
+                                                <span class="font-mono">{{ $jadwalJamMasuk }} -
+                                                    {{ $jadwalJamPulang }}</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         {{-- Bukti Foto --}}
@@ -324,11 +332,26 @@
 
                             {{-- Jam Masuk --}}
                             <div class="form-control order-2 md:order-3">
-                                <label class="label py-1"><span
-                                        class="label-text text-sm font-medium text-base-content">Jam
-                                        Masuk</span></label>
+                                <div class="flex items-center justify-between py-1">
+                                    <label class="label-text text-sm font-medium text-base-content">Jam Masuk</label>
+                                    @if ($jadwalJamMasuk)
+                                        <button type="button" wire:click="applyJadwalMasuk"
+                                            class="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                                            title="Klik untuk mengisi sesuai jam jadwal masuk">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                fill="currentColor" class="size-3">
+                                                <path fill-rule="evenodd"
+                                                    d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5V3.75Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Jadwal: {{ $jadwalJamMasuk }}
+                                        </button>
+                                    @endif
+                                </div>
                                 <div class="relative">
                                     <input type="time" wire:model="jamMasuk" step="60"
+                                        x-on:pointerdown="if (!$el.value && '{{ $jadwalJamMasuk }}') { $el.value = '{{ $jadwalJamMasuk }}'; $dispatch('input'); }"
+                                        x-on:focus="if (!$el.value && '{{ $jadwalJamMasuk }}') { $el.value = '{{ $jadwalJamMasuk }}'; $dispatch('input'); }"
                                         class="input input-bordered w-full text-base-content/70 pl-10 bg-base-50 focus:border-primary" />
                                     <div
                                         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">
@@ -343,11 +366,26 @@
 
                             {{-- Jam Pulang --}}
                             <div class="form-control order-4 md:order-4">
-                                <label class="label py-1"><span
-                                        class="label-text text-sm font-medium text-base-content">Jam
-                                        Pulang</span></label>
+                                <div class="flex items-center justify-between py-1">
+                                    <label class="label-text text-sm font-medium text-base-content">Jam Pulang</label>
+                                    @if ($jadwalJamPulang)
+                                        <button type="button" wire:click="applyJadwalPulang"
+                                            class="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                                            title="Klik untuk mengisi sesuai jam jadwal pulang">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                fill="currentColor" class="size-3">
+                                                <path fill-rule="evenodd"
+                                                    d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5V3.75Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Jadwal: {{ $jadwalJamPulang }}
+                                        </button>
+                                    @endif
+                                </div>
                                 <div class="relative">
                                     <input type="time" wire:model="jamPulang" step="60"
+                                        x-on:pointerdown="if (!$el.value && '{{ $jadwalJamPulang }}') { $el.value = '{{ $jadwalJamPulang }}'; $dispatch('input'); }"
+                                        x-on:focus="if (!$el.value && '{{ $jadwalJamPulang }}') { $el.value = '{{ $jadwalJamPulang }}'; $dispatch('input'); }"
                                         class="input input-bordered w-full text-base-content/70 pl-10 bg-base-50 focus:border-primary" />
                                     <div
                                         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none opacity-40">

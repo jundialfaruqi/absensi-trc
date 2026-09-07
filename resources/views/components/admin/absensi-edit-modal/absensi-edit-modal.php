@@ -5,6 +5,7 @@ use App\Models\Cuti;
 use App\Models\Device;
 use App\Models\Jadwal;
 use App\Models\Personnel;
+use App\Models\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -66,6 +67,12 @@ new class extends Component
 
     public bool $isEdited = false;
 
+    public $jadwalShiftName;
+
+    public $jadwalJamMasuk;
+
+    public $jadwalJamPulang;
+
     #[On('openEditAbsensi')]
     public function open($personnelId, $tanggal)
     {
@@ -86,6 +93,56 @@ new class extends Component
         $absensi = Absensi::where('personnel_id', $personnelId)
             ->whereDate('tanggal', $tanggal)
             ->first();
+
+        // Cari jadwal untuk tanggal yang diedit
+        $jadwal = Jadwal::where('personnel_id', $personnelId)
+            ->whereDate('tanggal', $tanggal)
+            ->with('shift')
+            ->first();
+
+        if (! $jadwal && $absensi && $absensi->jadwal_id) {
+            $jadwal = Jadwal::with('shift')->find($absensi->jadwal_id);
+        }
+
+        $shift = $jadwal?->shift;
+
+        if ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
+            $this->jadwalShiftName = $shift->name . ($shift->keterangan ? ' (' . $shift->keterangan . ')' : '');
+            $this->jadwalJamMasuk = Carbon::parse($shift->start_time)->format('H:i');
+            $this->jadwalJamPulang = Carbon::parse($shift->end_time)->format('H:i');
+        } else {
+            // Fallback jika tidak ada jadwal shift berjam pada tanggal tersebut
+            $recentJadwal = Jadwal::where('personnel_id', $personnelId)
+                ->whereHas('shift', function ($q) {
+                    $q->where('type', '!=', 'off')
+                        ->whereNotNull('start_time')
+                        ->whereNotNull('end_time');
+                })
+                ->with('shift')
+                ->orderByDesc('tanggal')
+                ->first();
+
+            if ($recentJadwal && $recentJadwal->shift) {
+                $this->jadwalShiftName = $recentJadwal->shift->name . ($recentJadwal->shift->keterangan ? ' (' . $recentJadwal->shift->keterangan . ')' : '');
+                $this->jadwalJamMasuk = Carbon::parse($recentJadwal->shift->start_time)->format('H:i');
+                $this->jadwalJamPulang = Carbon::parse($recentJadwal->shift->end_time)->format('H:i');
+            } else {
+                $defaultShift = Shift::where('type', '!=', 'off')
+                    ->whereNotNull('start_time')
+                    ->whereNotNull('end_time')
+                    ->first();
+
+                if ($defaultShift) {
+                    $this->jadwalShiftName = $defaultShift->name . ($defaultShift->keterangan ? ' (' . $defaultShift->keterangan . ')' : '');
+                    $this->jadwalJamMasuk = Carbon::parse($defaultShift->start_time)->format('H:i');
+                    $this->jadwalJamPulang = Carbon::parse($defaultShift->end_time)->format('H:i');
+                } else {
+                    $this->jadwalShiftName = null;
+                    $this->jadwalJamMasuk = '08:00';
+                    $this->jadwalJamPulang = '16:00';
+                }
+            }
+        }
 
         if ($absensi) {
             $this->editingAbsensiId = $absensi->id;
@@ -124,6 +181,40 @@ new class extends Component
         $this->dispatch('edit-absensi-loaded');
     }
 
+    public function updatedStatusMasuk($value)
+    {
+        if (in_array($value, ['HADIR', 'TELAT']) && empty($this->jamMasuk) && $this->jadwalJamMasuk) {
+            $this->jamMasuk = $this->jadwalJamMasuk;
+        }
+    }
+
+    public function updatedStatusPulang($value)
+    {
+        if (in_array($value, ['HADIR', 'PC']) && empty($this->jamPulang) && $this->jadwalJamPulang) {
+            $this->jamPulang = $this->jadwalJamPulang;
+        }
+    }
+
+    public function applyJadwalMasuk()
+    {
+        if ($this->jadwalJamMasuk) {
+            $this->jamMasuk = $this->jadwalJamMasuk;
+            if ($this->statusMasuk === 'ALPA' || empty($this->statusMasuk)) {
+                $this->statusMasuk = 'HADIR';
+            }
+        }
+    }
+
+    public function applyJadwalPulang()
+    {
+        if ($this->jadwalJamPulang) {
+            $this->jamPulang = $this->jadwalJamPulang;
+            if ($this->statusPulang === 'ALPA' || empty($this->statusPulang)) {
+                $this->statusPulang = 'HADIR';
+            }
+        }
+    }
+
     public function saveEdit()
     {
         $this->validate([
@@ -139,34 +230,37 @@ new class extends Component
         }
 
         $existing = Absensi::where('personnel_id', $this->editingPersonnelId)
-            ->where('tanggal', $this->editingTanggal)
+            ->whereDate('tanggal', $this->editingTanggal)
             ->first();
 
         // Capture original status ONLY if it's the first edit
         $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
         $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
 
-        $absensi = Absensi::updateOrCreate(
-            [
+        $attributes = [
+            'status' => $this->statusMasuk,
+            'status_masuk' => $this->statusMasuk,
+            'status_pulang' => $this->statusPulang,
+            'jam_masuk' => ! empty($this->jamMasuk) ? $this->jamMasuk : null,
+            'jam_pulang' => ! empty($this->jamPulang) ? $this->jamPulang : null,
+            'alasan_edit' => $this->alasanEdit,
+            'nomor_surat' => $this->nomorSurat,
+            'cuti_id' => ($this->statusMasuk === 'CUTI' || $this->statusPulang === 'CUTI') ? $this->cutiId : null,
+            'keterangan' => $this->keterangan,
+            'edited_by_user_id' => Auth::id(),
+            'edited_at' => now(),
+            'original_status_masuk' => $originalStatusMasuk,
+            'original_status_pulang' => $originalStatusPulang,
+        ];
+
+        if ($existing) {
+            $existing->update($attributes);
+        } else {
+            Absensi::create(array_merge([
                 'personnel_id' => $this->editingPersonnelId,
                 'tanggal' => $this->editingTanggal,
-            ],
-            [
-                'status' => $this->statusMasuk,
-                'status_masuk' => $this->statusMasuk,
-                'status_pulang' => $this->statusPulang,
-                'jam_masuk' => $this->jamMasuk,
-                'jam_pulang' => $this->jamPulang,
-                'alasan_edit' => $this->alasanEdit,
-                'nomor_surat' => $this->nomorSurat,
-                'cuti_id' => ($this->statusMasuk === 'CUTI' || $this->statusPulang === 'CUTI') ? $this->cutiId : null,
-                'keterangan' => $this->keterangan,
-                'edited_by_user_id' => Auth::id(),
-                'edited_at' => now(),
-                'original_status_masuk' => $originalStatusMasuk,
-                'original_status_pulang' => $originalStatusPulang,
-            ]
-        );
+            ], $attributes));
+        }
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
         $this->dispatch('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
@@ -312,6 +406,9 @@ new class extends Component
         $this->officialDeviceNameMasuk = null;
         $this->officialDeviceNamePulang = null;
         $this->isEdited = false;
+        $this->jadwalShiftName = null;
+        $this->jadwalJamMasuk = null;
+        $this->jadwalJamPulang = null;
     }
 
     public function render()
