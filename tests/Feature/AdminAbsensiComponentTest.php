@@ -108,3 +108,18 @@ test('export modal displays disabled target OPD for non-super-admin', function (
         ->assertDontSee('x-model="exportOpdId"', false)
         ->assertSee('Satuan Polisi Pamong Praja');
 });
+
+test('export modal initiates download via startExport with progress and file path feedback without target _blank', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi')
+        ->assertSee('@click="startExport()"', false)
+        ->assertDontSee('target="_blank" @click="showExportModal = false"', false)
+        ->assertSee('x-show="exportStatus === \'processing\'"', false)
+        ->assertSee('x-show="exportStatus === \'success\'"', false)
+        ->assertSee('x-text="exportProgress + \'%\'"', false)
+        ->assertSee('x-text="exportedFilename"', false)
+        ->assertSee('Unduh Ulang');
+});

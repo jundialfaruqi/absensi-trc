@@ -54,6 +54,7 @@ test('authenticated super-admin can export PDF with default parameters', functio
 
     $response->assertSuccessful();
     $response->assertHeader('content-type', 'application/pdf');
+    $response->assertHeader('x-filename', 'rekap_absensi_5_2026.pdf');
     expect($response->headers->get('content-disposition'))->toContain('attachment; filename=rekap_absensi_5_2026.pdf');
 });
 

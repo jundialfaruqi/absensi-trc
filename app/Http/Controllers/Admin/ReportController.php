@@ -98,7 +98,12 @@ class ReportController extends Controller
             $pdf = Pdf::loadView('reports.absensi-pdf', $data)
                 ->setPaper($paperFormat, 'landscape');
 
-            return $pdf->download("rekap_absensi_{$month}_{$year}.pdf");
+            $filename = "rekap_absensi_{$month}_{$year}.pdf";
+
+            return $pdf->download($filename)->withHeaders([
+                'Access-Control-Expose-Headers' => 'X-Filename, Content-Disposition',
+                'X-Filename' => $filename,
+            ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => true,
@@ -135,10 +140,15 @@ class ReportController extends Controller
             }
             $filename .= '.xlsx';
 
-            return Excel::download(
+            $response = Excel::download(
                 new AbsensiExport($startDate, $endDate, $search, $opdId, $excludedShiftIds),
                 $filename
             );
+
+            $response->headers->set('Access-Control-Expose-Headers', 'X-Filename, Content-Disposition');
+            $response->headers->set('X-Filename', $filename);
+
+            return $response;
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => true,

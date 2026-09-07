@@ -50,6 +50,7 @@ test('authenticated super-admin can export Excel and download .xlsx file', funct
 
     $response->assertSuccessful();
     $response->assertHeader('content-disposition');
+    $response->assertHeader('x-filename', 'rekap_absensi_2026-05-01_2026-05-10.xlsx');
     expect($response->headers->get('content-disposition'))->toContain('attachment; filename=rekap_absensi_2026-05-01_2026-05-10.xlsx');
 });
 
