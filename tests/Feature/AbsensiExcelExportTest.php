@@ -476,6 +476,14 @@ test('excluded shifts display *H and are not counted towards Hadir while keeping
     expect((int)$sitiRow[6])->toBe(1);
     // Alpa count in column 7: 0
     expect((int)$sitiRow[7])->toBe(0);
+    // HSK count in column 8: 1 (Day 2 excluded shift hadir)
+    expect((int)$sitiRow[8])->toBe(1);
+    // I count in column 9: 0
+    expect((int)$sitiRow[9])->toBe(0);
+    // S count in column 10: 0
+    expect((int)$sitiRow[10])->toBe(0);
+    // C count in column 11: 0
+    expect((int)$sitiRow[11])->toBe(0);
 
     // Footer Keterangan should contain *H: Hadir (Shift Dikecualikan)
     $allText = implode(' ', array_map(fn($r) => implode(' ', array_filter($r)), $rows));
@@ -572,7 +580,13 @@ test('sakit, izin, and cuti attendance are displayed as S, I, C in Excel and NOT
     expect($dewiRow[1])->toBe('S');
     expect($dewiRow[2])->toBe('I');
     expect($dewiRow[3])->toBe('C');
-    expect((int)$dewiRow[5])->toBe(0);
+    expect((int)$dewiRow[4])->toBe(0); // JML = 0
+    expect((int)$dewiRow[5])->toBe(0); // Hadir = 0
+    expect((int)$dewiRow[6])->toBe(0); // Alpa = 0
+    expect((int)$dewiRow[7])->toBe(0); // HSK = 0
+    expect((int)$dewiRow[8])->toBe(1); // I = 1
+    expect((int)$dewiRow[9])->toBe(1); // S = 1
+    expect((int)$dewiRow[10])->toBe(1); // C = 1
 
     if (file_exists($storedFile)) {
         unlink($storedFile);

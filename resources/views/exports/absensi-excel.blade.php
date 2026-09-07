@@ -1,13 +1,13 @@
 <table>
     <thead>
         <tr>
-            <th colspan="{{ count($dates) + 4 }}" style="font-size: 16pt; font-weight: bold; text-align: center;">
+            <th colspan="{{ count($dates) + 8 }}" style="font-size: 16pt; font-weight: bold; text-align: center;">
                 REKAPITULASI ABSENSI PERSONEL TRC AMAN 112
             </th>
         </tr>
         @if (count($dates) > 0)
             <tr>
-                <th colspan="{{ count($dates) + 4 }}" style="font-size: 10pt; text-align: center; color: #555555;">
+                <th colspan="{{ count($dates) + 8 }}" style="font-size: 10pt; text-align: center; color: #555555;">
                     Periode: {{ \Carbon\Carbon::parse($dates[0])->translatedFormat('d F Y') }} s/d
                     {{ \Carbon\Carbon::parse(end($dates))->translatedFormat('d F Y') }}
                 </th>
@@ -26,13 +26,13 @@
     <table>
         <thead>
             <tr>
-                <th colspan="{{ count($monthDates) + 4 }}"
+                <th colspan="{{ count($monthDates) + 8 }}"
                     style="font-size: 11pt; font-weight: bold; background-color: #000000; color: #ffffff; text-align: left;">
                     {{ str_starts_with(strtoupper($opdName), 'OPD') ? strtoupper($opdName) : 'OPD: ' . strtoupper($opdName) }}
                 </th>
             </tr>
             <tr>
-                <th colspan="{{ count($monthDates) + 4 }}"
+                <th colspan="{{ count($monthDates) + 8 }}"
                     style="font-size: 11pt; font-weight: bold; background-color: #e5e7eb; color: #333333; text-align: left;">
                     BULAN: {{ strtoupper($monthLabel) }}
                 </th>
@@ -49,6 +49,10 @@
                 <th colspan="3"
                     style="border: 1px solid #999999; background-color: #f2f2f2; font-weight: bold; text-align: center;">
                     Ringkasan
+                </th>
+                <th colspan="4"
+                    style="border: 1px solid #999999; background-color: #f2f2f2; font-weight: bold; text-align: center;">
+                    Lainnya
                 </th>
             </tr>
             <tr>
@@ -77,6 +81,22 @@
                     style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center; vertical-align: middle;">
                     A
                 </th>
+                <th rowspan="2"
+                    style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center; vertical-align: middle;">
+                    HSK
+                </th>
+                <th rowspan="2"
+                    style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center; vertical-align: middle;">
+                    I
+                </th>
+                <th rowspan="2"
+                    style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center; vertical-align: middle;">
+                    S
+                </th>
+                <th rowspan="2"
+                    style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center; vertical-align: middle;">
+                    C
+                </th>
             </tr>
             <tr>
                 @foreach ($monthDates as $date)
@@ -98,6 +118,10 @@
                 @php
                     $jmlHari = 0;
                     $hadir = 0;
+                    $hsk = 0;
+                    $sakit = 0;
+                    $izin = 0;
+                    $cuti = 0;
                     $alpa = 0;
                     $hasExcludedHadir = false;
                 @endphp
@@ -113,7 +137,8 @@
                             $display = '';
                             $cellStyle = 'text-align: center;';
 
-                            $isShiftExcluded = !empty($j->shift_id) && in_array((int) $j->shift_id, $excludedShiftIds ?? []);
+                            $isShiftExcluded =
+                                !empty($j->shift_id) && in_array((int) $j->shift_id, $excludedShiftIds ?? []);
 
                             if (
                                 $j &&
@@ -128,6 +153,7 @@
                                     if ($isShiftExcluded) {
                                         $display = '*<u>H</u>';
                                         $hasExcludedHadir = true;
+                                        $hsk++;
                                         $cellStyle =
                                             'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center; text-decoration: underline;';
                                     } else {
@@ -136,8 +162,19 @@
                                         $cellStyle =
                                             'background-color: #dcfce7; color: #166534; font-weight: bold; text-align: center;';
                                     }
-                                } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
-                                    $display = substr($a->status, 0, 1);
+                                } elseif ($a->status === 'SAKIT') {
+                                    $display = 'S';
+                                    $sakit++;
+                                    $cellStyle =
+                                        'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
+                                } elseif ($a->status === 'IZIN') {
+                                    $display = 'I';
+                                    $izin++;
+                                    $cellStyle =
+                                        'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
+                                } elseif ($a->status === 'CUTI') {
+                                    $display = 'C';
+                                    $cuti++;
                                     $cellStyle =
                                         'background-color: #e0f2fe; color: #075985; font-weight: bold; text-align: center;';
                                 } elseif ($a->status === 'DINAS') {
@@ -168,6 +205,7 @@
                         </td>
                     @endforeach
 
+                    {{-- Ringkasan --}}
                     <td
                         style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">
                         {{ $jmlHari }}
@@ -180,10 +218,27 @@
                         style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">
                         {{ $alpa }}
                     </td>
+                    {{-- Lainnya --}}
+                    <td
+                        style="border: 1px solid #999999; background-color: {{ $hsk > 0 ? '#fef08a' : '#f9f9f9' }}; font-weight: bold; text-align: center;">
+                        {{ $hsk }}
+                    </td>
+                    <td
+                        style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">
+                        {{ $izin }}
+                    </td>
+                    <td
+                        style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">
+                        {{ $sakit }}
+                    </td>
+                    <td
+                        style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">
+                        {{ $cuti }}
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ count($monthDates) + 4 }}"
+                    <td colspan="{{ count($monthDates) + 8 }}"
                         style="border: 1px solid #999999; text-align: center; padding: 10px; color: #666666;">
                         Tidak ada data personel pada OPD ini
                     </td>
@@ -208,7 +263,10 @@
 <table>
     <tr>
         <td colspan="{{ $leftCols }}" style="font-size: 9pt; color: #444444; vertical-align: top;">
-            <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *<u>H</u>: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur /
+            <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))
+                | *<u>H</u>: Hadir (Shift Dikecualikan)
+            @endif| HSK: Hadir Shift Dikecualikan | A: Alpa | S: Sakit | I: Izin | C: Cuti | D:
+            Dinas | L: Libur /
             Lepas Jadwal
         </td>
         <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
