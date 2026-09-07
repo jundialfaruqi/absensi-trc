@@ -203,7 +203,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     }
 
     #[Renderless]
-    public function editAbsensi($personnelId, $tanggal)
+    public function editAbsensi($personnelId, $tanggal, $type = 'in')
     {
         $this->dispatch('openEditAbsensi', personnelId: $personnelId, tanggal: $tanggal);
     }

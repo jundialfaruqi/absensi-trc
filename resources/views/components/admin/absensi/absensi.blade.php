@@ -385,14 +385,14 @@
                                                     : '';
                                         @endphp
                                         <td wire:key="cell-in-{{ $p->id }}-{{ $date }}"
-                                            wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                            wire:click="editAbsensi({{ $p->id }}, '{{ $date }}', 'in')"
                                             wire:loading.class="opacity-40 pointer-events-none"
-                                            wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                            wire:target="editAbsensi({{ $p->id }}, '{{ $date }}', 'in')"
                                             class="{{ $cellClassM }}" style="{{ $cellStyleM }}">
                                             <div class="relative w-full h-full flex items-center justify-center">
                                                 {{-- Specific Cell Loader --}}
                                                 <div wire:loading
-                                                    wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                                    wire:target="editAbsensi({{ $p->id }}, '{{ $date }}', 'in')"
                                                     class="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
                                                     <span
                                                         class="loading loading-spinner loading-xs text-primary"></span>
@@ -512,14 +512,14 @@
                                                     : '';
                                         @endphp
                                         <td wire:key="cell-out-{{ $p->id }}-{{ $date }}"
-                                            wire:click="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                            wire:click="editAbsensi({{ $p->id }}, '{{ $date }}', 'out')"
                                             wire:loading.class="opacity-40 pointer-events-none"
-                                            wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                            wire:target="editAbsensi({{ $p->id }}, '{{ $date }}', 'out')"
                                             class="{{ $cellClassP }}" style="{{ $cellStyleP }}">
                                             <div class="relative w-full h-full flex items-center justify-center">
                                                 {{-- Specific Cell Loader --}}
                                                 <div wire:loading
-                                                    wire:target="editAbsensi({{ $p->id }}, '{{ $date }}')"
+                                                    wire:target="editAbsensi({{ $p->id }}, '{{ $date }}', 'out')"
                                                     class="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
                                                     <span
                                                         class="loading loading-spinner loading-xs text-primary"></span>
