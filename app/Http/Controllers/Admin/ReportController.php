@@ -98,7 +98,7 @@ class ReportController extends Controller
             $pdf = Pdf::loadView('reports.absensi-pdf', $data)
                 ->setPaper($paperFormat, 'landscape');
 
-            $filename = "rekap_absensi_{$month}_{$year}.pdf";
+            $filename = $this->generateExportFilename($request, 'pdf');
 
             return $pdf->download($filename)->withHeaders([
                 'Access-Control-Expose-Headers' => 'X-Filename, Content-Disposition',
@@ -130,15 +130,7 @@ class ReportController extends Controller
             $excludedShiftIds = is_array($excludedShifts) ? $excludedShifts : explode(',', (string) $excludedShifts);
             $excludedShiftIds = array_map('intval', array_filter($excludedShiftIds));
 
-            $filename = 'rekap_absensi';
-            if ($startDate && $endDate) {
-                $filename .= "_{$startDate}_{$endDate}";
-            } elseif ($startDate) {
-                $filename .= "_{$startDate}";
-            } else {
-                $filename .= '_' . date('Y_m_d');
-            }
-            $filename .= '.xlsx';
+            $filename = $this->generateExportFilename($request, 'xlsx');
 
             $response = Excel::download(
                 new AbsensiExport($startDate, $endDate, $search, $opdId, $excludedShiftIds),
@@ -158,5 +150,32 @@ class ReportController extends Controller
                 'trace' => explode("\n", $e->getTraceAsString()),
             ], 500);
         }
+    }
+
+    private function generateExportFilename(Request $request, string $extension): string
+    {
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+
+        if ($startDate && $endDate) {
+            $startFormatted = Carbon::parse($startDate)->format('d-m-Y');
+            $endFormatted = Carbon::parse($endDate)->format('d-m-Y');
+
+            return "rekap_absensi_{$startFormatted}_{$endFormatted}.{$extension}";
+        }
+
+        if ($startDate) {
+            $startFormatted = Carbon::parse($startDate)->format('d-m-Y');
+
+            return "rekap_absensi_{$startFormatted}.{$extension}";
+        }
+
+        $month = (int) $request->get('month', date('m'));
+        $year = (int) $request->get('year', date('Y'));
+        $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+        $startFormatted = Carbon::create($year, $month, 1)->format('d-m-Y');
+        $endFormatted = Carbon::create($year, $month, $daysInMonth)->format('d-m-Y');
+
+        return "rekap_absensi_{$startFormatted}_{$endFormatted}.{$extension}";
     }
 }

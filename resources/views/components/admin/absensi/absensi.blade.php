@@ -1092,8 +1092,14 @@
                             }
                         }
                         if (!filename) {
-                            filename = 'rekap_absensi_' + (this.exportStartDate || '') + '_' + (this.exportEndDate ||
-                                '') + '.' + (this.exportType === 'pdf' ? 'pdf' : 'xlsx');
+                            const formatIndo = (d) => {
+                                if (!d) return '';
+                                const parts = d.split('-');
+                                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : d;
+                            };
+                            const s = formatIndo(this.exportStartDate);
+                            const e = formatIndo(this.exportEndDate);
+                            filename = 'rekap_absensi_' + (s && e ? `${s}_${e}` : (s || '')) + '.' + (this.exportType === 'pdf' ? 'pdf' : 'xlsx');
                         }
 
                         const blob = await response.blob();
