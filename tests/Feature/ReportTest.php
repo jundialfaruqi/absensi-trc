@@ -287,3 +287,37 @@ test('sakit, izin, and cuti attendance render correctly and are NOT counted as H
     expect($html)->toContain('<td class="summary-column ">0</td>');
 });
 
+test('personnel with flexible attendance type has JML equal to Hadir in PDF report', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan']);
+    $personnel = Personnel::create([
+        'name' => 'Fajar Flex',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'fajar.jpg',
+        'email' => 'fajar@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '654987',
+        'attendance_type' => 'FLEXIBLE',
+    ]);
+
+    $personnel->absensi_map = collect([
+        '2026-08-01' => (object) ['status' => 'HADIR'],
+        '2026-08-02' => (object) ['status' => 'HADIR'],
+        '2026-08-03' => (object) ['status' => 'TELAT'],
+    ]);
+    $personnel->jadwal_map = collect([]);
+
+    $html = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => ['2026-08-01', '2026-08-02', '2026-08-03'],
+        'month' => 8,
+        'year' => 2026,
+        'monthName' => 'Agustus',
+        'opdName' => $opd->name,
+    ])->render();
+
+    // JML column should be 3 (equal to Hadir)
+    expect($html)->toContain('<td class="summary-column">3</td>');
+    expect($html)->toContain('<td class="summary-column ">3</td>');
+});
+

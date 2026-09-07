@@ -205,6 +205,12 @@
                         </td>
                     @endforeach
 
+                    @php
+                        if ($p->attendance_type === 'FLEXIBLE') {
+                            $jmlHari = $hadir;
+                        }
+                    @endphp
+
                     {{-- Ringkasan --}}
                     <td
                         style="border: 1px solid #999999; background-color: #f9f9f9; font-weight: bold; text-align: center;">

@@ -268,6 +268,12 @@
                                 <td class="{{ $class }}">{!! $display !!}</td>
                             @endforeach
 
+                            @php
+                                if ($p->attendance_type === 'FLEXIBLE') {
+                                    $jmlHari = $hadir;
+                                }
+                            @endphp
+
                             <td class="summary-column">{{ $jmlHari }}</td>
                             <td class="summary-column {{ $hasExcludedHadir ? 'highlight-hadir' : '' }}">{{ $hadir }}</td>
                             <td class="summary-column">{{ $alpa }}</td>

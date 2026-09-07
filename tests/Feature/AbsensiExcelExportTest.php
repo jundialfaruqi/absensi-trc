@@ -593,4 +593,75 @@ test('sakit, izin, and cuti attendance are displayed as S, I, C in Excel and NOT
     }
 });
 
+test('personnel with flexible attendance type has JML equal to Hadir in Excel export', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan', 'singkatan' => 'DISHUB']);
+
+    $personnel = Personnel::create([
+        'name' => 'Fajar Flex',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'fajar.jpg',
+        'email' => 'fajar@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '654987',
+        'attendance_type' => 'FLEXIBLE',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        [
+            'personnel_id' => $personnel->id,
+            'tanggal' => '2026-08-01',
+            'status' => 'HADIR',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'personnel_id' => $personnel->id,
+            'tanggal' => '2026-08-02',
+            'status' => 'HADIR',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'personnel_id' => $personnel->id,
+            'tanggal' => '2026-08-03',
+            'status' => 'TELAT',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+    $this->actingAs($user);
+
+    Excel::store(new AbsensiExport('2026-08-01', '2026-08-03', null, (string)$opd->id), 'test_flex.xlsx', 'local');
+
+    $storedFile = storage_path('app/private/test_flex.xlsx');
+    if (!file_exists($storedFile)) {
+        $storedFile = storage_path('app/test_flex.xlsx');
+    }
+
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($storedFile);
+    $sheet = $spreadsheet->getSheet(0);
+
+    $rows = $sheet->toArray();
+    $fajarRow = null;
+    foreach ($rows as $r) {
+        if (in_array('Fajar Flex', $r)) {
+            $fajarRow = $r;
+            break;
+        }
+    }
+    expect($fajarRow)->not->toBeNull();
+    // Col 4: JML (should be equal to Hadir: 3)
+    expect((int)$fajarRow[4])->toBe(3);
+    // Col 5: Hadir (3)
+    expect((int)$fajarRow[5])->toBe(3);
+
+    if (file_exists($storedFile)) {
+        unlink($storedFile);
+    }
+});
+
 
