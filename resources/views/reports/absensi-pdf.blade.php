@@ -69,7 +69,7 @@
         }
 
         .summary-column {
-            width: 25px;
+            width: 18px;
             background-color: #f9f9f9;
             font-weight: bold;
         }
@@ -178,6 +178,7 @@
                         <th rowspan="3" class="name-column">Nama Personel</th>
                         <th colspan="{{ count($monthDates) }}">Tanggal</th>
                         <th colspan="3" class="summary-column">Ringkasan</th>
+                        <th colspan="4" class="summary-column">Lainnya</th>
                     </tr>
                     <tr>
                         @foreach ($monthDates as $date)
@@ -191,9 +192,15 @@
                             <th class="date-column" style="font-size: 5px; {{ $weekendStyle }}">{{ $shortDay }}
                             </th>
                         @endforeach
+                        {{-- Ringkasan --}}
                         <th rowspan="2" class="summary-column">JML</th>
                         <th rowspan="2" class="summary-column">H</th>
                         <th rowspan="2" class="summary-column">A</th>
+                        {{-- Lainnya --}}
+                        <th rowspan="2" class="summary-column">HSK</th>
+                        <th rowspan="2" class="summary-column">I</th>
+                        <th rowspan="2" class="summary-column">S</th>
+                        <th rowspan="2" class="summary-column">C</th>
                     </tr>
                     <tr>
                         @foreach ($monthDates as $date)
@@ -211,6 +218,10 @@
                         @php
                             $jmlHari = 0;
                             $hadir = 0;
+                            $hsk = 0;
+                            $sakit = 0;
+                            $izin = 0;
+                            $cuti = 0;
                             $alpa = 0;
                             $hasExcludedHadir = false;
                         @endphp
@@ -238,13 +249,23 @@
                                             if ($isShiftExcluded) {
                                                 $display = '*<u>H</u>';
                                                 $hasExcludedHadir = true;
+                                                $hsk++;
                                             } else {
                                                 $display = 'H';
                                                 $hadir++;
                                             }
                                             $class = 'status-hadir';
-                                        } elseif (in_array($a->status, ['SAKIT', 'IZIN', 'CUTI'])) {
-                                            $display = substr($a->status, 0, 1);
+                                        } elseif ($a->status === 'SAKIT') {
+                                            $display = 'S';
+                                            $sakit++;
+                                            $class = 'status-izin';
+                                        } elseif ($a->status === 'IZIN') {
+                                            $display = 'I';
+                                            $izin++;
+                                            $class = 'status-izin';
+                                        } elseif ($a->status === 'CUTI') {
+                                            $display = 'C';
+                                            $cuti++;
                                             $class = 'status-izin';
                                         } elseif ($a->status === 'DINAS') {
                                             $display = 'D';
@@ -274,9 +295,16 @@
                                 }
                             @endphp
 
+                            {{-- Ringkasan --}}
                             <td class="summary-column">{{ $jmlHari }}</td>
                             <td class="summary-column {{ $hasExcludedHadir ? 'highlight-hadir' : '' }}">{{ $hadir }}</td>
                             <td class="summary-column">{{ $alpa }}</td>
+
+                            {{-- Lainnya --}}
+                            <td class="summary-column {{ $hsk > 0 ? 'highlight-hadir' : '' }}">{{ $hsk }}</td>
+                            <td class="summary-column">{{ $izin }}</td>
+                            <td class="summary-column">{{ $sakit }}</td>
+                            <td class="summary-column">{{ $cuti }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -289,7 +317,7 @@
     @endforeach
 
     <div class="summary-info">
-        <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *<u>H</u>: Hadir (Shift Dikecualikan) @endif| A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
+        <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *<u>H</u>: Hadir (Shift Dikecualikan) @endif| HSK: Hadir Shift Dikecualikan | A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
         Jadwal
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id

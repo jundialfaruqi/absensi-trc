@@ -285,6 +285,11 @@ test('sakit, izin, and cuti attendance render correctly and are NOT counted as H
     expect($html)->toContain('>I<');
     expect($html)->toContain('>C<');
     expect($html)->toContain('<td class="summary-column ">0</td>');
+    expect($html)->toContain('>Lainnya</th>');
+    expect($html)->toContain('>HSK</th>');
+    expect($html)->toContain('>I</th>');
+    expect($html)->toContain('>S</th>');
+    expect($html)->toContain('>C</th>');
 });
 
 test('personnel with flexible attendance type has JML equal to Hadir in PDF report', function () {
