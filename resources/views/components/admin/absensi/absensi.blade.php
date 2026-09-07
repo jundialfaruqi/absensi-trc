@@ -647,7 +647,8 @@
     <livewire:admin::absensi-edit-modal />
 
     {{-- ─── Modal Konfirmasi Download (PDF & Excel) ────────────────────────── --}}
-    <dialog class="modal modal-bottom sm:modal-middle backdrop-blur-xs" :class="{ 'modal-open': showExportModal }">
+    <dialog class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999"
+        :class="{ 'modal-open': showExportModal }">
         <div class="modal-box max-w-lg rounded-2xl shadow-2xl border border-base-200">
             {{-- Header Modal --}}
             <div class="flex items-start justify-between pb-3 border-b border-base-200">
