@@ -55,4 +55,5 @@ Route::prefix('v1/admin/auth')->middleware('noindex')->group(function () {
 
 Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function () {
     Route::get('/my-profile', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'myProfile']);
+    Route::get('/jadwal', [\App\Http\Controllers\Api\V1\AdminJadwalController::class, 'index']);
 });
