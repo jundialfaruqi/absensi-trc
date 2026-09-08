@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'mobile_auth' => \App\Http\Middleware\CheckMobileApiKey::class,
             'device_auth' => \App\Http\Middleware\CheckDeviceLicense::class,
             'noindex' => \App\Http\Middleware\NoIndexMiddleware::class,
+            'jwt.admin' => \App\Http\Middleware\JwtAdminAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -30,3 +30,24 @@ Route::middleware(['mobile_auth', 'noindex'])->group(function () {
         Route::post('/absensi', [AttendanceController::class, 'store'])->middleware('throttle:30,1');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| V1 Admin Authentication Routes (Pure JWT + Refresh Token)
+|--------------------------------------------------------------------------
+| Khusus aplikasi Absensi TRC Admin (role: admin-opd & super-admin).
+| Tanpa lisensi perangkat, menggunakan email & password.
+*/
+Route::prefix('v1/admin/auth')->middleware('noindex')->group(function () {
+    // Public Auth Routes (Rate limited: 10 per minute untuk proteksi brute-force)
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/login', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'login']);
+        Route::post('/refresh', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'refresh']);
+    });
+
+    // Protected Auth Routes (Wajib JWT Access Token Admin yang valid)
+    Route::middleware('jwt.admin')->group(function () {
+        Route::post('/logout', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'logout']);
+        Route::get('/me', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'me']);
+    });
+});
