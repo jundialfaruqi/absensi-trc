@@ -171,10 +171,16 @@ class AdminJadwalController extends Controller
             ->map(function ($s) {
                 $start = $s->start_time ? Carbon::parse($s->start_time)->format('H:i') : '';
                 $end = $s->end_time ? Carbon::parse($s->end_time)->format('H:i') : '';
+                $jam = ($start && $end) ? "$start - $end" : '';
+                $keterangan = trim($s->keterangan ?? '');
+
                 return [
                     'id' => (string) $s->id,
                     'name' => $s->name,
-                    'keterangan' => ($start && $end) ? "$start - $end" : ($s->keterangan ?? ''),
+                    'keterangan' => $keterangan,
+                    'jam' => $jam,
+                    'start_time' => $start,
+                    'end_time' => $end,
                 ];
             });
 
