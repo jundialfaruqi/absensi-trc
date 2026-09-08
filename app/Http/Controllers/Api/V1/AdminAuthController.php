@@ -197,4 +197,51 @@ class AdminAuthController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Endpoint khusus My Profile untuk aplikasi Absensi TRC Admin (role: admin-opd & super-admin).
+     * Membatasi data secara efisien dan hanya mengambil atribut yang diperlukan.
+     */
+    public function myProfile(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        // Validasi ketat role admin
+        if (!$user->hasAnyRole(['admin-opd', 'super-admin'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Akses ditolak. Endpoint ini khusus untuk Admin OPD dan Super Admin.',
+            ], 403);
+        }
+
+        // Ambil data OPD hanya kolom penting (id, name, singkatan, alamat) tanpa memuat relasi lain
+        $opd = $user->opds()
+            ->select(['opds.id', 'opds.name', 'opds.singkatan', 'opds.alamat'])
+            ->first();
+
+        $isSuperAdmin = $user->hasRole('super-admin');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data profil berhasil diambil.',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'nomor_hp' => $user->nomor_hp,
+                'foto' => $user->foto ? url('storage/' . $user->foto) : null,
+                'roles' => $user->getRoleNames()->values(),
+                'role' => $isSuperAdmin ? 'Super Admin' : 'Admin OPD',
+                'role_code' => $isSuperAdmin ? 'super-admin' : 'admin-opd',
+                'is_super_admin' => $isSuperAdmin,
+                'opd' => $opd ? [
+                    'id' => $opd->id,
+                    'name' => $opd->name,
+                    'singkatan' => $opd->singkatan,
+                    'alamat' => $opd->alamat,
+                ] : null,
+            ],
+        ]);
+    }
 }

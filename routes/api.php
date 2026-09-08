@@ -49,5 +49,10 @@ Route::prefix('v1/admin/auth')->middleware('noindex')->group(function () {
     Route::middleware('jwt.admin')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'logout']);
         Route::get('/me', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'me']);
+        Route::get('/my-profile', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'myProfile']);
     });
+});
+
+Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function () {
+    Route::get('/my-profile', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'myProfile']);
 });
