@@ -250,6 +250,18 @@ class AdminAbsensiController extends Controller
         $shift = $jadwal->shift;
         $isDirectCheckOut = false;
 
+        $shiftStart = ($shift && $shift->start_time) ? Carbon::parse($shift->start_time)->format('H:i') : '';
+        $shiftEnd = ($shift && $shift->end_time) ? Carbon::parse($shift->end_time)->format('H:i') : '';
+        $shiftJam = ($shiftStart && $shiftEnd) ? "$shiftStart - $shiftEnd WIB" : '';
+
+        $shiftData = $shift ? [
+            'id' => (string) $shift->id,
+            'name' => $shift->name,
+            'start_time' => $shiftStart,
+            'end_time' => $shiftEnd,
+            'jam' => $shiftJam,
+        ] : null;
+
         if ($shift && $shift->start_time && $shift->end_time) {
             $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
             $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
@@ -282,20 +294,11 @@ class AdminAbsensiController extends Controller
                         'message' => "Belum waktunya Absen Masuk. Jadwal shift {$shift->name} masuk pukul {$startTime->format('H:i')} WIB (dibuka mulai {$windowInStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
-                            'shift' => [
-                                'id' => (string) $shift->id,
-                                'name' => $shift->name,
-                                'start_time' => $shift->start_time,
-                                'end_time' => $shift->end_time,
-                            ],
+                            'shift' => $shiftData,
                             'jadwal' => [
                                 'id' => (string) $jadwal->id,
-                                'shift' => [
-                                    'id' => (string) $shift->id,
-                                    'name' => $shift->name,
-                                    'start_time' => $shift->start_time,
-                                    'end_time' => $shift->end_time,
-                                ],
+                                'tanggal' => $activeDate,
+                                'shift' => $shiftData,
                             ],
                             'action_type' => 'masuk',
                         ],
@@ -309,20 +312,11 @@ class AdminAbsensiController extends Controller
                         'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB). Silakan kembali $diff lagi untuk Absen Pulang (dibuka mulai {$windowOutStart->format('H:i')} WIB).",
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
-                            'shift' => [
-                                'id' => (string) $shift->id,
-                                'name' => $shift->name,
-                                'start_time' => $shift->start_time,
-                                'end_time' => $shift->end_time,
-                            ],
+                            'shift' => $shiftData,
                             'jadwal' => [
                                 'id' => (string) $jadwal->id,
-                                'shift' => [
-                                    'id' => (string) $shift->id,
-                                    'name' => $shift->name,
-                                    'start_time' => $shift->start_time,
-                                    'end_time' => $shift->end_time,
-                                ],
+                                'tanggal' => $activeDate,
+                                'shift' => $shiftData,
                             ],
                             'action_type' => 'pulang',
                         ],
@@ -335,20 +329,11 @@ class AdminAbsensiController extends Controller
                         'message' => "Batas waktu toleransi presensi untuk jadwal ini telah berakhir ({$windowOutEnd->format('H:i')} WIB).",
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
-                            'shift' => [
-                                'id' => (string) $shift->id,
-                                'name' => $shift->name,
-                                'start_time' => $shift->start_time,
-                                'end_time' => $shift->end_time,
-                            ],
+                            'shift' => $shiftData,
                             'jadwal' => [
                                 'id' => (string) $jadwal->id,
-                                'shift' => [
-                                    'id' => (string) $shift->id,
-                                    'name' => $shift->name,
-                                    'start_time' => $shift->start_time,
-                                    'end_time' => $shift->end_time,
-                                ],
+                                'tanggal' => $activeDate,
+                                'shift' => $shiftData,
                             ],
                             'action_type' => 'terlewat',
                         ],
@@ -365,20 +350,11 @@ class AdminAbsensiController extends Controller
                         'message' => "Belum waktunya Absen Pulang. Jadwal shift {$shift->name} pulang pukul {$endTime->format('H:i')} WIB (dibuka mulai {$windowOutStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
-                            'shift' => [
-                                'id' => (string) $shift->id,
-                                'name' => $shift->name,
-                                'start_time' => $shift->start_time,
-                                'end_time' => $shift->end_time,
-                            ],
+                            'shift' => $shiftData,
                             'jadwal' => [
                                 'id' => (string) $jadwal->id,
-                                'shift' => [
-                                    'id' => (string) $shift->id,
-                                    'name' => $shift->name,
-                                    'start_time' => $shift->start_time,
-                                    'end_time' => $shift->end_time,
-                                ],
+                                'tanggal' => $activeDate,
+                                'shift' => $shiftData,
                             ],
                             'action_type' => 'pulang',
                         ],
@@ -393,20 +369,11 @@ class AdminAbsensiController extends Controller
                         'message' => "Batas waktu toleransi Absen Pulang untuk jadwal ini telah berakhir ({$windowOutEnd->format('H:i')} WIB).",
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
-                            'shift' => [
-                                'id' => (string) $shift->id,
-                                'name' => $shift->name,
-                                'start_time' => $shift->start_time,
-                                'end_time' => $shift->end_time,
-                            ],
+                            'shift' => $shiftData,
                             'jadwal' => [
                                 'id' => (string) $jadwal->id,
-                                'shift' => [
-                                    'id' => (string) $shift->id,
-                                    'name' => $shift->name,
-                                    'start_time' => $shift->start_time,
-                                    'end_time' => $shift->end_time,
-                                ],
+                                'tanggal' => $activeDate,
+                                'shift' => $shiftData,
                             ],
                             'action_type' => 'pulang',
                         ],
@@ -431,21 +398,11 @@ class AdminAbsensiController extends Controller
                     'name' => $personnel->name,
                     'opd_name' => $personnel->opd?->name ?? '-',
                 ],
-                'shift' => [
-                    'id' => (string) $jadwal->shift?->id,
-                    'name' => $jadwal->shift?->name ?? 'Shift',
-                    'start_time' => $jadwal->shift?->start_time,
-                    'end_time' => $jadwal->shift?->end_time,
-                ],
+                'shift' => $shiftData,
                 'jadwal' => [
                     'id' => (string) $jadwal->id,
                     'tanggal' => $activeDate,
-                    'shift' => [
-                        'id' => (string) $jadwal->shift?->id,
-                        'name' => $jadwal->shift?->name ?? 'Shift',
-                        'start_time' => $jadwal->shift?->start_time,
-                        'end_time' => $jadwal->shift?->end_time,
-                    ],
+                    'shift' => $shiftData,
                 ],
                 'action_type' => $nextAction,
                 'absensi' => $absensi,
