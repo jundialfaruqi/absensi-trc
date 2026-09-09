@@ -233,4 +233,34 @@ class AdminAbsensiApiTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_can_update_face_descriptor_mobile_with_valid_data(): void
+    {
+        [$admin1, $token1] = $this->createAdminUser($this->opd1);
+        $penugasan = \App\Models\Penugasan::create(['name' => 'Petugas Lapangan']);
+
+        $personnel = Personnel::create([
+            'name' => 'Budi Mobile',
+            'nik' => '1234567890123457',
+            'email' => 'budi.192@example.com',
+            'password' => bcrypt('password'),
+            'foto' => 'personnel/budi192.jpg',
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $penugasan->id,
+        ]);
+
+        $valid192 = json_encode(array_fill(0, 192, 0.05));
+
+        $response = $this->withHeader('Authorization', "Bearer $token1")
+            ->postJson("/api/v1/admin/personnels/{$personnel->id}/face-mobile", [
+                'face_descriptor_mobile' => $valid192,
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.face_descriptor_mobile_count', 192);
+
+        $this->assertEquals($valid192, $personnel->fresh()->face_descriptor_mobile);
+    }
 }
+

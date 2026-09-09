@@ -476,23 +476,6 @@
                                                     </span>
                                                 @endif
                                             </div>
-
-                                            {{-- Dedicated ArcFace 512-D Button --}}
-                                            <div class="mt-2 pt-2 border-t border-base-200">
-                                                <button type="button" @click="generate512D()"
-                                                    class="btn btn-sm btn-outline btn-primary w-full gap-1.5"
-                                                    :disabled="isGenerating512">
-                                                    <span x-show="isGenerating512"
-                                                        class="loading loading-spinner loading-xs"></span>
-
-                                                    <span
-                                                        x-text="isGenerating512 ? 'Mengekstrak 512D...' : (isCameraOpen ? '📸 Jepret & Rekam 512D (Kamera)' : '📸 Rekam / Generate 512D (ArcFace)')"></span>
-                                                </button>
-                                                <p class="text-[9px] text-base-content/50 mt-1 leading-tight">
-                                                    Ekstrak 512 titik fitur biometrik presisi tinggi ArcFace langsung
-                                                    dari foto/kamera untuk aplikasi Admin Mobile.
-                                                </p>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -554,7 +537,6 @@
                             isCapturing: false,
                             isStartingCamera: false,
                             isUploadingFile: false,
-                            isGenerating512: false,
                             stream: null,
                             faceApiLoaded: false,
 
@@ -702,16 +684,11 @@
                                     if (detection) {
                                         @this.set('face_descriptor', JSON.stringify(Array.from(detection
                                             .descriptor)));
-                                        const desc512 = this.computeArcFace512Embedding(detection);
-                                        if (desc512 && desc512.length === 512) {
-                                            @this.set('face_descriptor_512', JSON.stringify(desc512));
-                                        }
                                     } else {
                                         alert(
                                             "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
                                         );
                                         @this.set('face_descriptor', '');
-                                        @this.set('face_descriptor_512', '');
                                     }
                                 } catch (err) {
                                     console.error("Error processing file upload: ", err);
@@ -774,193 +751,6 @@
                                     console.error("Error capturing/processing image: ", err);
                                 } finally {
                                     this.isCapturing = false;
-                                }
-                            },
-
-                            computeArcFace512Embedding(detection) {
-                                try {
-                                    const desc128 = Array.from(detection.descriptor);
-                                    const landmarks = detection.landmarks.positions;
-                                    const box = detection.detection.box;
-
-                                    const vec = new Float32Array(512);
-                                    for (let i = 0; i < 128; i++) {
-                                        vec[i] = desc128[i];
-                                    }
-                                    for (let i = 0; i < landmarks.length && (128 + i * 2 + 1) < 264; i++) {
-                                        const pt = landmarks[i];
-                                        vec[128 + i * 2] = ((pt.x - box.x) / box.width - 0.5) * 2.0;
-                                        vec[128 + i * 2 + 1] = ((pt.y - box.y) / box.height - 0.5) * 2.0;
-                                    }
-                                    for (let i = 0; i < 128; i++) {
-                                        vec[264 + i] = Math.sin(desc128[i] * Math.PI);
-                                    }
-                                    for (let i = 0; i < 120; i++) {
-                                        const p1 = landmarks[i % landmarks.length];
-                                        const p2 = landmarks[(i * 7 + 1) % landmarks.length];
-                                        const dist = Math.hypot((p1.x - p2.x) / box.width, (p1.y - p2.y) /
-                                            box.height);
-                                        vec[392 + i] = dist - 0.5;
-                                    }
-
-                                    let sumSq = 0.0;
-                                    for (let i = 0; i < 512; i++) {
-                                        sumSq += vec[i] * vec[i];
-                                    }
-                                    const norm = Math.sqrt(sumSq) || 1.0;
-                                    const result = [];
-                                    for (let i = 0; i < 512; i++) {
-                                        result.push(Number((vec[i] / norm).toFixed(6)));
-                                    }
-                                    return result;
-                                } catch (e) {
-                                    console.error("Error calculating 512D embedding:", e);
-                                    return null;
-                                }
-                            },
-
-                            async generate512D() {
-                                this.isGenerating512 = true;
-                                try {
-                                    if (!this.faceApiLoaded) await this.loadModels();
-
-                                    // 1. Jika kamera sedang menyala: Langsung jepret dari kamera live
-                                    if (this.isCameraOpen && this.$refs.video) {
-                                        await this.capture512DFromCamera();
-                                        return;
-                                    }
-
-                                    // 2. Cek apakah ada foto profil yang sedang ditampilkan
-                                    const previewImg = this.$refs.previewImage || document.querySelector('img[alt="Preview"]');
-                                    const hasPhoto = previewImg && (previewImg.complete || previewImg.src);
-
-                                    if (!hasPhoto) {
-                                        // Belum ada foto sama sekali -> Langsung buka kamera
-                                        await this.startCamera();
-                                        return;
-                                    }
-
-                                    // 3. Jika sudah ada foto personil, tanyakan apakah ingin menggunakan foto ini atau buka kamera
-                                    const useExisting = confirm(
-                                        "Foto personil terdeteksi.\n\n" +
-                                        "• Klik [OK] untuk langsung GENERATE biometrik 512D dari foto saat ini.\n" +
-                                        "• Klik [Batal / Cancel] untuk mengaktifkan KAMERA dan merekam wajah baru."
-                                    );
-
-                                    if (!useExisting) {
-                                        await this.startCamera();
-                                        return;
-                                    }
-
-                                    // 4. Ekstrak dari foto yang ada
-                                    await this.extract512FromImage(previewImg);
-
-                                } catch (err) {
-                                    console.error("Error in generate512D: ", err);
-                                    alert("Terjadi kesalahan saat memproses 512D: " + (err.message || err));
-                                } finally {
-                                    this.isGenerating512 = false;
-                                }
-                            },
-
-                            async capture512DFromCamera() {
-                                const video = this.$refs.video;
-                                const canvas = this.$refs.canvas;
-                                canvas.width = video.videoWidth || 640;
-                                canvas.height = video.videoHeight || 480;
-
-                                const context = canvas.getContext('2d');
-                                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                                const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({
-                                    inputSize: 416,
-                                    scoreThreshold: 0.3
-                                }))
-                                .withFaceLandmarks()
-                                .withFaceDescriptor();
-
-                                if (!detection) {
-                                    alert("Wajah tidak terdeteksi di kamera! Pastikan wajah Anda terlihat jelas menghadap depan di dalam lingkaran panduan.");
-                                    return;
-                                }
-
-                                @this.set('face_descriptor', JSON.stringify(Array.from(detection.descriptor)));
-                                const desc512 = this.computeArcFace512Embedding(detection);
-                                if (desc512 && desc512.length === 512) {
-                                    @this.set('face_descriptor_512', JSON.stringify(desc512));
-                                }
-
-                                await new Promise((resolve) => {
-                                    canvas.toBlob((blob) => {
-                                        if (!blob) {
-                                            this.stopCamera();
-                                            resolve();
-                                            return;
-                                        }
-                                        const file = new File([blob], "capture_512.jpg", { type: "image/jpeg" });
-                                        @this.upload('foto', file,
-                                            (uploadedVal) => {
-                                                this.stopCamera();
-                                                resolve(uploadedVal);
-                                            },
-                                            () => {
-                                                this.stopCamera();
-                                                resolve();
-                                            }
-                                        );
-                                    }, 'image/jpeg', 0.9);
-                                });
-
-                                alert("Berhasil merekam foto dan mengekstrak biometrik 512-D ArcFace!\n\nSilakan klik tombol 'Simpan Personil' di bawah untuk menyimpan.");
-                            },
-
-                            async extract512FromImage(imgElement) {
-                                if (!imgElement.complete || imgElement.naturalWidth === 0) {
-                                    await new Promise((resolve) => {
-                                        imgElement.onload = () => resolve();
-                                        imgElement.onerror = () => resolve();
-                                        if (imgElement.complete) resolve();
-                                    });
-                                }
-
-                                let source = imgElement;
-                                try {
-                                    const canvas = document.createElement('canvas');
-                                    canvas.width = imgElement.naturalWidth || imgElement.width || 400;
-                                    canvas.height = imgElement.naturalHeight || imgElement.height || 400;
-                                    const ctx = canvas.getContext('2d');
-                                    ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
-                                    source = canvas;
-                                } catch (e) {
-                                    console.warn("Fallback passing imgElement directly: ", e);
-                                    source = imgElement;
-                                }
-
-                                const detection = await faceapi.detectSingleFace(source, new faceapi.TinyFaceDetectorOptions({
-                                    inputSize: 416,
-                                    scoreThreshold: 0.3
-                                }))
-                                .withFaceLandmarks()
-                                .withFaceDescriptor();
-
-                                if (!detection) {
-                                    const openCam = confirm(
-                                        "Wajah tidak terdeteksi pada foto saat ini (mungkin buram atau posisi wajah miring).\n\n" +
-                                        "Apakah Anda ingin mengaktifkan KAMERA untuk merekam foto baru?"
-                                    );
-                                    if (openCam) {
-                                        await this.startCamera();
-                                    }
-                                    return;
-                                }
-
-                                @this.set('face_descriptor', JSON.stringify(Array.from(detection.descriptor)));
-                                const desc512 = this.computeArcFace512Embedding(detection);
-                                if (desc512 && desc512.length === 512) {
-                                    @this.set('face_descriptor_512', JSON.stringify(desc512));
-                                    alert("Berhasil mengekstrak biometrik 512-D ArcFace dari foto profil!\n\nSilakan klik tombol 'Simpan Personil' di bawah untuk menyimpan.");
-                                } else {
-                                    alert("Gagal menghitung vektor 512-D.");
                                 }
                             }
                         }));

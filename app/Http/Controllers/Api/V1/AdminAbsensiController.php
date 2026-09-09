@@ -554,5 +554,67 @@ class AdminAbsensiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Memperbarui atau menyimpan face_descriptor_mobile (192-D) untuk personil tertentu.
+     */
+    public function updateFaceDescriptorMobile(Request $request, Personnel $personnel): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+        $isSuperAdmin = $user->hasRole('super-admin');
+
+        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak berwenang memperbarui data biometrik personil di luar OPD Anda.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'face_descriptor_mobile' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $decoded = json_decode($value, true);
+                    if (!is_array($decoded) || count($decoded) !== 192) {
+                        return $fail('face_descriptor_mobile harus berupa string JSON array berisi tepat 192 elemen numerik.');
+                    }
+                    foreach ($decoded as $val) {
+                        if (!is_numeric($val) || is_nan((float)$val) || is_infinite((float)$val)) {
+                            return $fail('Semua elemen dalam face_descriptor_mobile harus berupa angka float yang valid.');
+                        }
+                    }
+                },
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $personnel->update([
+            'face_descriptor_mobile' => $request->face_descriptor_mobile,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Biometrik MobileFaceNet 192-D berhasil disimpan untuk personil {$personnel->name}.",
+            'data' => [
+                'personnel_id' => (string) $personnel->id,
+                'name' => $personnel->name,
+                'face_descriptor_mobile_count' => 192,
+            ],
+        ]);
+    }
 }
+
 
