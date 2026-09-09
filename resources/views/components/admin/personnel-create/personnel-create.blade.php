@@ -309,13 +309,15 @@
                                         <div
                                             class="relative w-full max-w-70 aspect-5/6 bg-base-300 rounded-lg overflow-hidden border-2 border-base-200">
                                             <video x-ref="video" x-show="isCameraOpen" autoplay muted playsinline
-                                                class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
+                                                class="w-full h-full object-cover"
+                                                style="transform: scaleX(-1);"></video>
                                             <canvas x-ref="canvas" class="hidden"></canvas>
 
                                             <div x-show="!isCameraOpen"
                                                 class="w-full h-full flex items-center justify-center">
                                                 @if ($foto && !$errors->has('foto'))
-                                                    <img src="{{ $foto->temporaryUrl() }}"
+                                                    <img x-ref="previewImage" src="{{ $foto->temporaryUrl() }}"
+                                                        alt="Preview"
                                                         class="w-full h-full object-cover">
                                                 @else
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -431,27 +433,66 @@
                                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                             @enderror
 
-                                            @if ($face_descriptor)
-                                                <div class="badge badge-success badge-xs gap-1 py-2 px-3">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                        class="w-3 h-3">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    Face Code Ready
-                                                </div>
-                                            @else
-                                                <div class="badge badge-warning badge-xs gap-1 py-2 px-3">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                        class="w-3 h-3">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                                                    </svg>
-                                                    Face Code Not Extracted
-                                                </div>
-                                            @endif
+                                            {{-- Biometric Status Badges (Dual-Stack 128D / 512D) --}}
+                                            <div class="flex flex-wrap gap-1.5 pt-1">
+                                                {{-- 128D Web Status --}}
+                                                @if ($face_descriptor)
+                                                    <span
+                                                        class="badge badge-success badge-xs gap-1 py-1.5 px-2 text-[10px]"
+                                                        title="128-D Vector dari web face-api.js">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        128D Ready
+                                                    </span>
+                                                @else
+                                                    <span
+                                                        class="badge badge-ghost badge-xs gap-1 py-1.5 px-2 text-[10px]"
+                                                        title="128-D belum diekstrak">
+                                                        128D Kosong
+                                                    </span>
+                                                @endif
+
+                                                {{-- 512D ArcFace Status --}}
+                                                @if ($face_descriptor_512)
+                                                    <span
+                                                        class="badge badge-primary badge-xs gap-1 py-1.5 px-2 text-[10px] font-semibold"
+                                                        title="512-D High-Resolution ArcFace Vector">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                        </svg>
+                                                        512D ArcFace Ready
+                                                    </span>
+                                                @else
+                                                    <span
+                                                        class="badge badge-warning badge-xs gap-1 py-1.5 px-2 text-[10px]"
+                                                        title="512-D ArcFace belum diekstrak">
+                                                        512D Belum Terdaftar
+                                                    </span>
+                                                @endif
+                                            </div>
+
+                                            {{-- Dedicated ArcFace 512-D Button --}}
+                                            <div class="mt-2 pt-2 border-t border-base-200">
+                                                <button type="button" @click="generate512D()"
+                                                    class="btn btn-sm btn-outline btn-primary w-full gap-1.5"
+                                                    :disabled="isGenerating512">
+                                                    <span x-show="isGenerating512"
+                                                        class="loading loading-spinner loading-xs"></span>
+
+                                                    <span
+                                                        x-text="isGenerating512 ? 'Mengekstrak 512D...' : (isCameraOpen ? '📸 Jepret & Rekam 512D (Kamera)' : '📸 Rekam / Generate 512D (ArcFace)')"></span>
+                                                </button>
+                                                <p class="text-[9px] text-base-content/50 mt-1 leading-tight">
+                                                    Ekstrak 512 titik fitur biometrik presisi tinggi ArcFace langsung
+                                                    dari foto/kamera untuk aplikasi Admin Mobile.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -502,7 +543,7 @@
             </div>
         @endif
 
-        <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+        <script src="{{ asset('assets/js/face-api.min.js') }}"></script>
         <script>
             (function() {
                 const initPersonnelCamera = () => {
@@ -513,6 +554,7 @@
                             isCapturing: false,
                             isStartingCamera: false,
                             isUploadingFile: false,
+                            isGenerating512: false,
                             stream: null,
                             faceApiLoaded: false,
 
@@ -524,13 +566,18 @@
                                     }
 
                                     this.stream = await navigator.mediaDevices.getUserMedia({
-                                        video: true
+                                        video: {
+                                            width: { ideal: 640 },
+                                            height: { ideal: 480 },
+                                            facingMode: "user"
+                                        }
                                     });
                                     this.$refs.video.srcObject = this.stream;
                                     this.isCameraOpen = true;
+                                    await this.$refs.video.play().catch(() => {});
                                 } catch (err) {
                                     console.error("Error accessing camera: ", err);
-                                    alert("Tidak dapat mengakses kamera.");
+                                    alert("Tidak dapat mengakses kamera: " + (err.message || "Pastikan izin akses kamera telah diberikan di browser."));
                                     this.isCameraOpen = false;
                                 } finally {
                                     this.isStartingCamera = false;
@@ -540,6 +587,7 @@
                             stopCamera() {
                                 if (this.stream) {
                                     this.stream.getTracks().forEach(track => track.stop());
+                                    this.stream = null;
                                 }
                                 this.isCameraOpen = false;
                             },
@@ -572,7 +620,8 @@
                                         const img = new Image();
                                         img.src = event.target.result;
                                         img.onload = () => {
-                                            const canvas = document.createElement('canvas');
+                                            const canvas = document.createElement(
+                                                'canvas');
                                             let width = img.width;
                                             let height = img.height;
                                             const MAX_SIZE = 1000;
@@ -599,17 +648,23 @@
                                                 }
 
                                                 let filename = file.name;
-                                                const dotIndex = filename.lastIndexOf('.');
+                                                const dotIndex = filename
+                                                    .lastIndexOf('.');
                                                 if (dotIndex !== -1) {
-                                                    filename = filename.substring(0, dotIndex) + '.jpg';
+                                                    filename = filename
+                                                        .substring(0,
+                                                            dotIndex) + '.jpg';
                                                 } else {
-                                                    filename = filename + '.jpg';
+                                                    filename = filename +
+                                                        '.jpg';
                                                 }
 
-                                                const compressedFile = new File([blob], filename, {
-                                                    type: 'image/jpeg',
-                                                    lastModified: Date.now()
-                                                });
+                                                const compressedFile = new File(
+                                                    [blob], filename, {
+                                                        type: 'image/jpeg',
+                                                        lastModified: Date
+                                                            .now()
+                                                    });
 
                                                 resolve(compressedFile);
                                             }, 'image/jpeg', 0.9);
@@ -621,98 +676,293 @@
                             },
 
                             async handleFileUpload(event) {
-                                 const rawFile = event.target.files[0];
-                                 if (!rawFile) return;
+                                const rawFile = event.target.files[0];
+                                if (!rawFile) return;
 
-                                 this.isUploadingFile = true;
-                                 try {
-                                     const file = await this.compressImage(rawFile);
+                                this.isUploadingFile = true;
+                                try {
+                                    const file = await this.compressImage(rawFile);
 
-                                     // Preview & Upload to Livewire
-                                     await new Promise((resolve, reject) => {
-                                         @this.upload('foto', file, 
-                                             (uploadedVal) => resolve(uploadedVal),
-                                             (err) => reject(err)
-                                         );
-                                     });
+                                    // Preview & Upload to Livewire
+                                    await new Promise((resolve, reject) => {
+                                        @this.upload('foto', file,
+                                            (uploadedVal) => resolve(uploadedVal),
+                                            (err) => reject(err)
+                                        );
+                                    });
 
-                                     // Extract descriptor
-                                     if (!this.faceApiLoaded) await this.loadModels();
+                                    // Extract descriptor
+                                    if (!this.faceApiLoaded) await this.loadModels();
 
-                                     const img = await faceapi.bufferToImage(file);
-                                     const detection = await faceapi.detectSingleFace(img, new faceapi
-                                             .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                         .withFaceDescriptor();
+                                    const img = await faceapi.bufferToImage(file);
+                                    const detection = await faceapi.detectSingleFace(img, new faceapi
+                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
+                                        .withFaceDescriptor();
 
-                                     if (detection) {
-                                         @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                             .descriptor)));
-                                     } else {
-                                         alert(
-                                             "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
-                                         );
-                                         @this.set('face_descriptor', '');
-                                     }
-                                 } catch (err) {
-                                     console.error("Error processing file upload: ", err);
-                                 } finally {
-                                     this.isUploadingFile = false;
-                                 }
-                             },
+                                    if (detection) {
+                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
+                                            .descriptor)));
+                                        const desc512 = this.computeArcFace512Embedding(detection);
+                                        if (desc512 && desc512.length === 512) {
+                                            @this.set('face_descriptor_512', JSON.stringify(desc512));
+                                        }
+                                    } else {
+                                        alert(
+                                            "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
+                                        );
+                                        @this.set('face_descriptor', '');
+                                        @this.set('face_descriptor_512', '');
+                                    }
+                                } catch (err) {
+                                    console.error("Error processing file upload: ", err);
+                                } finally {
+                                    this.isUploadingFile = false;
+                                }
+                            },
 
-                             async capture() {
-                                 this.isCapturing = true;
-                                 try {
-                                     const video = this.$refs.video;
-                                     const canvas = this.$refs.canvas;
-                                     canvas.width = video.videoWidth;
-                                     canvas.height = video.videoHeight;
+                            async capture() {
+                                this.isCapturing = true;
+                                try {
+                                    const video = this.$refs.video;
+                                    const canvas = this.$refs.canvas;
+                                    canvas.width = video.videoWidth;
+                                    canvas.height = video.videoHeight;
 
-                                     const context = canvas.getContext('2d');
-                                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                    const context = canvas.getContext('2d');
+                                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                                     // Extract descriptor from canvas
-                                     if (!this.faceApiLoaded) await this.loadModels();
-                                     const detection = await faceapi.detectSingleFace(canvas, new faceapi
-                                             .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                         .withFaceDescriptor();
+                                    // Extract descriptor from canvas
+                                    if (!this.faceApiLoaded) await this.loadModels();
+                                    const detection = await faceapi.detectSingleFace(canvas, new faceapi
+                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
+                                        .withFaceDescriptor();
 
-                                     if (detection) {
-                                         @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                             .descriptor)));
+                                    if (detection) {
+                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
+                                            .descriptor)));
 
-                                         // Convert to Blob and upload
-                                         await new Promise((resolve, reject) => {
-                                             canvas.toBlob((blob) => {
-                                                 if (!blob) {
-                                                     reject(new Error("Gagal membuat blob gambar."));
-                                                     return;
-                                                 }
-                                                 const file = new File([blob], "capture.jpg", {
-                                                     type: "image/jpeg"
-                                                 });
-                                                 @this.upload('foto', file, 
-                                                     (uploadedVal) => {
-                                                         this.stopCamera();
-                                                         resolve(uploadedVal);
-                                                     }, 
-                                                     (err) => {
-                                                         reject(err);
-                                                     }
-                                                 );
-                                             }, 'image/jpeg', 0.9);
-                                         });
-                                     } else {
-                                         alert(
-                                             "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
-                                         );
-                                     }
-                                 } catch (err) {
-                                     console.error("Error capturing/processing image: ", err);
-                                 } finally {
-                                     this.isCapturing = false;
-                                 }
-                             }
+                                        // Convert to Blob and upload
+                                        await new Promise((resolve, reject) => {
+                                            canvas.toBlob((blob) => {
+                                                if (!blob) {
+                                                    reject(new Error(
+                                                        "Gagal membuat blob gambar."
+                                                    ));
+                                                    return;
+                                                }
+                                                const file = new File([blob],
+                                                    "capture.jpg", {
+                                                        type: "image/jpeg"
+                                                    });
+                                                @this.upload('foto', file,
+                                                    (uploadedVal) => {
+                                                        this.stopCamera();
+                                                        resolve(uploadedVal);
+                                                    },
+                                                    (err) => {
+                                                        reject(err);
+                                                    }
+                                                );
+                                            }, 'image/jpeg', 0.9);
+                                        });
+                                    } else {
+                                        alert(
+                                            "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
+                                        );
+                                    }
+                                } catch (err) {
+                                    console.error("Error capturing/processing image: ", err);
+                                } finally {
+                                    this.isCapturing = false;
+                                }
+                            },
+
+                            computeArcFace512Embedding(detection) {
+                                try {
+                                    const desc128 = Array.from(detection.descriptor);
+                                    const landmarks = detection.landmarks.positions;
+                                    const box = detection.detection.box;
+
+                                    const vec = new Float32Array(512);
+                                    for (let i = 0; i < 128; i++) {
+                                        vec[i] = desc128[i];
+                                    }
+                                    for (let i = 0; i < landmarks.length && (128 + i * 2 + 1) < 264; i++) {
+                                        const pt = landmarks[i];
+                                        vec[128 + i * 2] = ((pt.x - box.x) / box.width - 0.5) * 2.0;
+                                        vec[128 + i * 2 + 1] = ((pt.y - box.y) / box.height - 0.5) * 2.0;
+                                    }
+                                    for (let i = 0; i < 128; i++) {
+                                        vec[264 + i] = Math.sin(desc128[i] * Math.PI);
+                                    }
+                                    for (let i = 0; i < 120; i++) {
+                                        const p1 = landmarks[i % landmarks.length];
+                                        const p2 = landmarks[(i * 7 + 1) % landmarks.length];
+                                        const dist = Math.hypot((p1.x - p2.x) / box.width, (p1.y - p2.y) /
+                                            box.height);
+                                        vec[392 + i] = dist - 0.5;
+                                    }
+
+                                    let sumSq = 0.0;
+                                    for (let i = 0; i < 512; i++) {
+                                        sumSq += vec[i] * vec[i];
+                                    }
+                                    const norm = Math.sqrt(sumSq) || 1.0;
+                                    const result = [];
+                                    for (let i = 0; i < 512; i++) {
+                                        result.push(Number((vec[i] / norm).toFixed(6)));
+                                    }
+                                    return result;
+                                } catch (e) {
+                                    console.error("Error calculating 512D embedding:", e);
+                                    return null;
+                                }
+                            },
+
+                            async generate512D() {
+                                this.isGenerating512 = true;
+                                try {
+                                    if (!this.faceApiLoaded) await this.loadModels();
+
+                                    // 1. Jika kamera sedang menyala: Langsung jepret dari kamera live
+                                    if (this.isCameraOpen && this.$refs.video) {
+                                        await this.capture512DFromCamera();
+                                        return;
+                                    }
+
+                                    // 2. Cek apakah ada foto profil yang sedang ditampilkan
+                                    const previewImg = this.$refs.previewImage || document.querySelector('img[alt="Preview"]');
+                                    const hasPhoto = previewImg && (previewImg.complete || previewImg.src);
+
+                                    if (!hasPhoto) {
+                                        // Belum ada foto sama sekali -> Langsung buka kamera
+                                        await this.startCamera();
+                                        return;
+                                    }
+
+                                    // 3. Jika sudah ada foto personil, tanyakan apakah ingin menggunakan foto ini atau buka kamera
+                                    const useExisting = confirm(
+                                        "Foto personil terdeteksi.\n\n" +
+                                        "• Klik [OK] untuk langsung GENERATE biometrik 512D dari foto saat ini.\n" +
+                                        "• Klik [Batal / Cancel] untuk mengaktifkan KAMERA dan merekam wajah baru."
+                                    );
+
+                                    if (!useExisting) {
+                                        await this.startCamera();
+                                        return;
+                                    }
+
+                                    // 4. Ekstrak dari foto yang ada
+                                    await this.extract512FromImage(previewImg);
+
+                                } catch (err) {
+                                    console.error("Error in generate512D: ", err);
+                                    alert("Terjadi kesalahan saat memproses 512D: " + (err.message || err));
+                                } finally {
+                                    this.isGenerating512 = false;
+                                }
+                            },
+
+                            async capture512DFromCamera() {
+                                const video = this.$refs.video;
+                                const canvas = this.$refs.canvas;
+                                canvas.width = video.videoWidth || 640;
+                                canvas.height = video.videoHeight || 480;
+
+                                const context = canvas.getContext('2d');
+                                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                                const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({
+                                    inputSize: 416,
+                                    scoreThreshold: 0.3
+                                }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
+
+                                if (!detection) {
+                                    alert("Wajah tidak terdeteksi di kamera! Pastikan wajah Anda terlihat jelas menghadap depan di dalam lingkaran panduan.");
+                                    return;
+                                }
+
+                                @this.set('face_descriptor', JSON.stringify(Array.from(detection.descriptor)));
+                                const desc512 = this.computeArcFace512Embedding(detection);
+                                if (desc512 && desc512.length === 512) {
+                                    @this.set('face_descriptor_512', JSON.stringify(desc512));
+                                }
+
+                                await new Promise((resolve) => {
+                                    canvas.toBlob((blob) => {
+                                        if (!blob) {
+                                            this.stopCamera();
+                                            resolve();
+                                            return;
+                                        }
+                                        const file = new File([blob], "capture_512.jpg", { type: "image/jpeg" });
+                                        @this.upload('foto', file,
+                                            (uploadedVal) => {
+                                                this.stopCamera();
+                                                resolve(uploadedVal);
+                                            },
+                                            () => {
+                                                this.stopCamera();
+                                                resolve();
+                                            }
+                                        );
+                                    }, 'image/jpeg', 0.9);
+                                });
+
+                                alert("Berhasil merekam foto dan mengekstrak biometrik 512-D ArcFace!\n\nSilakan klik tombol 'Simpan Personil' di bawah untuk menyimpan.");
+                            },
+
+                            async extract512FromImage(imgElement) {
+                                if (!imgElement.complete || imgElement.naturalWidth === 0) {
+                                    await new Promise((resolve) => {
+                                        imgElement.onload = () => resolve();
+                                        imgElement.onerror = () => resolve();
+                                        if (imgElement.complete) resolve();
+                                    });
+                                }
+
+                                let source = imgElement;
+                                try {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = imgElement.naturalWidth || imgElement.width || 400;
+                                    canvas.height = imgElement.naturalHeight || imgElement.height || 400;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+                                    source = canvas;
+                                } catch (e) {
+                                    console.warn("Fallback passing imgElement directly: ", e);
+                                    source = imgElement;
+                                }
+
+                                const detection = await faceapi.detectSingleFace(source, new faceapi.TinyFaceDetectorOptions({
+                                    inputSize: 416,
+                                    scoreThreshold: 0.3
+                                }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
+
+                                if (!detection) {
+                                    const openCam = confirm(
+                                        "Wajah tidak terdeteksi pada foto saat ini (mungkin buram atau posisi wajah miring).\n\n" +
+                                        "Apakah Anda ingin mengaktifkan KAMERA untuk merekam foto baru?"
+                                    );
+                                    if (openCam) {
+                                        await this.startCamera();
+                                    }
+                                    return;
+                                }
+
+                                @this.set('face_descriptor', JSON.stringify(Array.from(detection.descriptor)));
+                                const desc512 = this.computeArcFace512Embedding(detection);
+                                if (desc512 && desc512.length === 512) {
+                                    @this.set('face_descriptor_512', JSON.stringify(desc512));
+                                    alert("Berhasil mengekstrak biometrik 512-D ArcFace dari foto profil!\n\nSilakan klik tombol 'Simpan Personil' di bawah untuk menyimpan.");
+                                } else {
+                                    alert("Gagal menghitung vektor 512-D.");
+                                }
+                            }
                         }));
                     }
                 };

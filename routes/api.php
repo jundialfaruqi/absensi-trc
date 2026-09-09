@@ -63,5 +63,9 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         Route::get('/check-status/{id}', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'checkStatus']);
         Route::post('/store', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'store']);
     });
+
+    // Perekaman Biometrik ArcFace 512-D
+    Route::post('/personnels/{personnel}/face-512', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'updateFaceDescriptor512'])
+        ->middleware('throttle:30,1');
 });
 
