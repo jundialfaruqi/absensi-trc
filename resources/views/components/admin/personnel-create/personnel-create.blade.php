@@ -453,28 +453,7 @@
                                                         title="128-D belum diekstrak">
                                                         128D Kosong
                                                     </span>
-                                                @endif
-
-                                                {{-- 512D ArcFace Status --}}
-                                                @if ($face_descriptor_512)
-                                                    <span
-                                                        class="badge badge-primary badge-xs gap-1 py-1.5 px-2 text-[10px] font-semibold"
-                                                        title="512-D High-Resolution ArcFace Vector">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                        </svg>
-                                                        512D ArcFace Ready
-                                                    </span>
-                                                @else
-                                                    <span
-                                                        class="badge badge-warning badge-xs gap-1 py-1.5 px-2 text-[10px]"
-                                                        title="512-D ArcFace belum diekstrak">
-                                                        512D Belum Terdaftar
-                                                    </span>
-                                                @endif
+                                                 @endif
                                             </div>
                                         </div>
                                     </div>

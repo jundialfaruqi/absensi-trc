@@ -55,7 +55,7 @@ class AdminAbsensiController extends Controller
             'kantor:id,name,latitude,longitude,radius_meter',
         ])
         ->select([
-            'id', 'name', 'nik', 'foto', 'face_descriptor_mobile', 'face_descriptor_512',
+            'id', 'name', 'nik', 'foto', 'face_descriptor_mobile',
             'face_recognition', 'opd_id', 'kantor_id',
             'wajib_absen_di_lokasi', 'attendance_type',
         ]);
@@ -73,7 +73,6 @@ class AdminAbsensiController extends Controller
                     'nik' => $p->nik ?? '',
                     'foto' => $p->foto ? url('storage/' . $p->foto) : null,
                     'face_descriptor_mobile' => $p->face_descriptor_mobile,
-                    'face_descriptor_512' => $p->face_descriptor_512,
                     'face_recognition' => (bool) $p->face_recognition,
                     'wajib_absen_di_lokasi' => (bool) $p->wajib_absen_di_lokasi,
                     'attendance_type' => $p->attendance_type ?? 'SHIFT',
@@ -489,71 +488,6 @@ class AdminAbsensiController extends Controller
         ]);
     }
 
-    /**
-     * Memperbarui atau menyimpan face_descriptor_512 untuk personil tertentu.
-     * Dilengkapi validasi keamanan ketat:
-     * 1. Autentikasi Admin & Otorisasi OPD (Super Admin atau Admin OPD yang sama).
-     * 2. Format JSON array valid dengan tepat 512 elemen float.
-     * 3. Sanitasi batas nilai (-5.0 <= val <= 5.0) dan anti-NaN / anti-Infinity.
-     */
-    public function updateFaceDescriptor512(Request $request, Personnel $personnel): JsonResponse
-    {
-        if ($authError = $this->authorizeAdmin($request)) {
-            return $authError;
-        }
-
-        /** @var User $user */
-        $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
-
-        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Anda tidak berwenang memperbarui data biometrik personil di luar OPD Anda.',
-            ], 403);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'face_descriptor_512' => [
-                'required',
-                'string',
-                function ($attribute, $value, $fail) {
-                    $decoded = json_decode($value, true);
-                    if (!is_array($decoded) || count($decoded) !== 512) {
-                        return $fail('face_descriptor_512 harus berupa string JSON array berisi tepat 512 elemen numerik.');
-                    }
-                    foreach ($decoded as $val) {
-                        if (!is_numeric($val) || is_nan((float)$val) || is_infinite((float)$val)) {
-                            return $fail('Semua elemen dalam face_descriptor_512 harus berupa angka float yang valid.');
-                        }
-                    }
-                },
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first(),
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        // Simpan vektor biometrik 512D
-        $personnel->update([
-            'face_descriptor_512' => $request->face_descriptor_512,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => "Biometrik ArcFace 512-D berhasil disimpan untuk personil {$personnel->name}.",
-            'data' => [
-                'personnel_id' => (string) $personnel->id,
-                'name' => $personnel->name,
-                'face_descriptor_512_count' => 512,
-            ],
-        ]);
-    }
 
     /**
      * Memperbarui atau menyimpan face_descriptor_mobile (192-D) untuk personil tertentu.

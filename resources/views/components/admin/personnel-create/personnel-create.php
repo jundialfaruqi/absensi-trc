@@ -29,7 +29,6 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     public $foto;
     public string $pin = '';
     public string $face_descriptor = '';
-    public string $face_descriptor_512 = '';
     public string $kantor_id = '';
     public bool $wajib_absen_di_lokasi = false;
     public bool $face_recognition = false;
@@ -123,22 +122,6 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
             ],
             'foto' => 'required|image|max:2048', // Max 2MB
             'face_descriptor' => 'nullable|string',
-            'face_descriptor_512' => [
-                'nullable',
-                'string',
-                function ($attribute, $value, $fail) {
-                    if (empty($value)) return;
-                    $decoded = json_decode($value, true);
-                    if (!is_array($decoded) || count($decoded) !== 512) {
-                        return $fail('face_descriptor_512 harus berupa string JSON array berisi tepat 512 elemen numerik.');
-                    }
-                    foreach ($decoded as $val) {
-                        if (!is_numeric($val) || is_nan((float)$val) || is_infinite((float)$val)) {
-                            return $fail('Semua elemen dalam face_descriptor_512 harus berupa angka float valid.');
-                        }
-                    }
-                },
-            ],
             'kantor_id' => 'nullable|exists:kantors,id',
             'attendance_type' => 'required|in:SCHEDULED,FLEXIBLE',
         ];
@@ -211,7 +194,6 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
             'nomor_hp' => $this->nomor_hp,
             'pin' => $this->pin,
             'face_descriptor' => $this->face_descriptor ?: null,
-            'face_descriptor_512' => $this->face_descriptor_512 ?: null,
             'kantor_id' => $this->kantor_id ?: null,
             'wajib_absen_di_lokasi' => $this->wajib_absen_di_lokasi,
             'face_recognition' => $this->face_recognition,
