@@ -409,6 +409,26 @@
                                                 style="transform: scaleX(-1);"></video>
                                             <canvas x-ref="canvas" class="hidden"></canvas>
 
+                                            {{-- Dynamic Face Bounding Box Overlay (Garis Pelacak Wajah Real-Time) --}}
+                                            <div x-show="(isCameraOpen && detectedFaceBox.found) || (!isCameraOpen && uploadedFaceBox.found)"
+                                                class="absolute pointer-events-none transition-all duration-150 ease-out border-2 border-emerald-400 rounded-lg shadow-[0_0_15px_rgba(52,211,153,0.45)] z-20"
+                                                :style="isCameraOpen 
+                                                    ? `left: ${detectedFaceBox.left}; top: ${detectedFaceBox.top}; width: ${detectedFaceBox.width}; height: ${detectedFaceBox.height};`
+                                                    : `left: ${uploadedFaceBox.left}; top: ${uploadedFaceBox.top}; width: ${uploadedFaceBox.width}; height: ${uploadedFaceBox.height};`">
+                                                <!-- Corner Brackets (Sudut Siku-siku HUD AI) -->
+                                                <span class="absolute -top-1 -left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-emerald-400"></span>
+                                                <span class="absolute -top-1 -right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-emerald-400"></span>
+                                                <span class="absolute -bottom-1 -left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-emerald-400"></span>
+                                                <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-emerald-400"></span>
+                                                <!-- Tag Status Wajah -->
+                                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 whitespace-nowrap">
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Wajah Terdeteksi
+                                                </span>
+                                            </div>
+
                                             <div x-show="!isCameraOpen"
                                                 class="w-full h-full flex items-center justify-center">
                                                 @if ($foto && !$errors->has('foto'))
@@ -639,6 +659,9 @@
                             isUploadingFile: false,
                             stream: null,
                             faceApiLoaded: false,
+                            detectedFaceBox: { left: '0%', top: '0%', width: '0%', height: '0%', found: false },
+                            uploadedFaceBox: { left: '0%', top: '0%', width: '0%', height: '0%', found: false },
+                            trackingInterval: null,
 
                             async startCamera() {
                                 this.isStartingCamera = true;
@@ -657,6 +680,7 @@
                                     this.$refs.video.srcObject = this.stream;
                                     this.isCameraOpen = true;
                                     await this.$refs.video.play().catch(() => {});
+                                    this.startFaceTracking();
                                 } catch (err) {
                                     console.error("Error accessing camera: ", err);
                                     alert("Tidak dapat mengakses kamera: " + (err.message || "Pastikan izin akses kamera telah diberikan di browser."));
@@ -666,7 +690,51 @@
                                 }
                             },
 
+                            startFaceTracking() {
+                                this.stopFaceTracking();
+                                this.trackingInterval = setInterval(async () => {
+                                    if (!this.isCameraOpen || !this.faceApiLoaded || this.isCapturing) return;
+                                    try {
+                                        const video = this.$refs.video;
+                                        if (!video || video.paused || video.ended || !video.videoWidth) return;
+
+                                        const detection = await faceapi.detectSingleFace(
+                                            video,
+                                            new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+                                        );
+
+                                        if (detection) {
+                                            const box = detection.box;
+                                            const vw = video.videoWidth;
+                                            const vh = video.videoHeight;
+                                            // Video dicerminkan dengan style scaleX(-1)
+                                            const mirroredX = vw - (box.x + box.width);
+                                            this.detectedFaceBox = {
+                                                left: (mirroredX / vw * 100).toFixed(1) + '%',
+                                                top: (box.y / vh * 100).toFixed(1) + '%',
+                                                width: (box.width / vw * 100).toFixed(1) + '%',
+                                                height: (box.height / vh * 100).toFixed(1) + '%',
+                                                found: true
+                                            };
+                                        } else {
+                                            this.detectedFaceBox.found = false;
+                                        }
+                                    } catch (e) {
+                                        // Abaikan error transisi frame
+                                    }
+                                }, 140);
+                            },
+
+                            stopFaceTracking() {
+                                if (this.trackingInterval) {
+                                    clearInterval(this.trackingInterval);
+                                    this.trackingInterval = null;
+                                }
+                                this.detectedFaceBox = { left: '0%', top: '0%', width: '0%', height: '0%', found: false };
+                            },
+
                             stopCamera() {
+                                this.stopFaceTracking();
                                 if (this.stream) {
                                     this.stream.getTracks().forEach(track => track.stop());
                                     this.stream = null;
@@ -757,41 +825,106 @@
                                 });
                             },
 
+                            // Helper untuk memotong (crop) hanya area wajah dengan margin proporsional (mengeliminasi background & baju berlebih)
+                            async cropFace(source, box, filename = 'foto_personnel.jpg') {
+                                const marginX = box.width * 0.25;
+                                const marginYTop = box.height * 0.35; // margin dahi/rambut
+                                const marginYBottom = box.height * 0.25; // margin dagu/leher
+
+                                const cropX = Math.max(0, box.x - marginX);
+                                const cropY = Math.max(0, box.y - marginYTop);
+                                const cropW = Math.min(source.width - cropX, box.width + (marginX * 2));
+                                const cropH = Math.min(source.height - cropY, box.height + marginYTop + marginYBottom);
+
+                                const cropCanvas = document.createElement('canvas');
+                                cropCanvas.width = cropW;
+                                cropCanvas.height = cropH;
+                                const ctx = cropCanvas.getContext('2d');
+                                ctx.drawImage(source, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+                                return new Promise((resolve, reject) => {
+                                    cropCanvas.toBlob((blob) => {
+                                        if (!blob) {
+                                            reject(new Error("Gagal membuat blob gambar hasil crop."));
+                                            return;
+                                        }
+                                        const croppedFile = new File([blob], filename, {
+                                            type: 'image/jpeg',
+                                            lastModified: Date.now()
+                                        });
+                                        resolve(croppedFile);
+                                    }, 'image/jpeg', 0.92);
+                                });
+                            },
+
                             async handleFileUpload(event) {
                                 const rawFile = event.target.files[0];
                                 if (!rawFile) return;
 
                                 this.isUploadingFile = true;
                                 try {
-                                    const file = await this.compressImage(rawFile);
+                                    if (!this.faceApiLoaded) await this.loadModels();
 
-                                    // Preview & Upload to Livewire
+                                    const img = await faceapi.bufferToImage(rawFile);
+
+                                    // Quality Gate 1: Deteksi seluruh wajah dalam foto
+                                    const detections = await faceapi.detectAllFaces(
+                                        img,
+                                        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
+                                    ).withFaceLandmarks().withFaceDescriptors();
+
+                                    if (detections.length === 0) {
+                                        alert("Wajah tidak terdeteksi pada file tersebut. Harap gunakan foto dengan wajah yang terlihat jelas dan menghadap ke kamera.");
+                                        @this.set('face_descriptor', '');
+                                        event.target.value = '';
+                                        return;
+                                    }
+
+                                    if (detections.length > 1) {
+                                        alert("Terdeteksi " + detections.length + " wajah pada foto! Harap unggah foto sendiri tanpa ada orang lain di latar belakang.");
+                                        @this.set('face_descriptor', '');
+                                        event.target.value = '';
+                                        return;
+                                    }
+
+                                    const primaryDetection = detections[0];
+                                    const box = primaryDetection.detection.box;
+                                    const minDimension = Math.min(img.width, img.height);
+
+                                    // Quality Gate 2: Ukuran wajah memadai (tidak terlalu jauh)
+                                    if (box.width < minDimension * 0.15) {
+                                        alert("Ukuran wajah terlalu kecil atau jauh pada foto. Harap gunakan foto portrait atau pasfoto yang lebih dekat.");
+                                        @this.set('face_descriptor', '');
+                                        event.target.value = '';
+                                        return;
+                                    }
+
+                                    // Visualisasi kotak deteksi wajah pada foto
+                                    this.uploadedFaceBox = {
+                                        left: (box.x / img.width * 100).toFixed(1) + '%',
+                                        top: (box.y / img.height * 100).toFixed(1) + '%',
+                                        width: (box.width / img.width * 100).toFixed(1) + '%',
+                                        height: (box.height / img.height * 100).toFixed(1) + '%',
+                                        found: true
+                                    };
+
+                                    // Auto-crop area wajah (menghilangkan background & baju yang tidak perlu)
+                                    let filename = rawFile.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                                    const croppedFile = await this.cropFace(img, box, filename);
+
+                                    // Upload foto hasil crop ke Livewire
                                     await new Promise((resolve, reject) => {
-                                        @this.upload('foto', file,
+                                        @this.upload('foto', croppedFile,
                                             (uploadedVal) => resolve(uploadedVal),
                                             (err) => reject(err)
                                         );
                                     });
 
-                                    // Extract descriptor
-                                    if (!this.faceApiLoaded) await this.loadModels();
-
-                                    const img = await faceapi.bufferToImage(file);
-                                    const detection = await faceapi.detectSingleFace(img, new faceapi
-                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                        .withFaceDescriptor();
-
-                                    if (detection) {
-                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                            .descriptor)));
-                                    } else {
-                                        alert(
-                                            "Wajah tidak terdeteksi pada file tersebut. Silakan coba foto lain."
-                                        );
-                                        @this.set('face_descriptor', '');
-                                    }
+                                    // Simpan descriptor 128D (web)
+                                    @this.set('face_descriptor', JSON.stringify(Array.from(primaryDetection.descriptor)));
                                 } catch (err) {
                                     console.error("Error processing file upload: ", err);
+                                    alert("Gagal memproses file foto: " + (err.message || err));
                                 } finally {
                                     this.isUploadingFile = false;
                                 }
@@ -799,6 +932,7 @@
 
                             async capture() {
                                 this.isCapturing = true;
+                                this.stopFaceTracking();
                                 try {
                                     const video = this.$refs.video;
                                     const canvas = this.$refs.canvas;
@@ -808,47 +942,53 @@
                                     const context = canvas.getContext('2d');
                                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                                    // Extract descriptor from canvas
                                     if (!this.faceApiLoaded) await this.loadModels();
-                                    const detection = await faceapi.detectSingleFace(canvas, new faceapi
-                                            .TinyFaceDetectorOptions()).withFaceLandmarks()
-                                        .withFaceDescriptor();
 
-                                    if (detection) {
-                                        @this.set('face_descriptor', JSON.stringify(Array.from(detection
-                                            .descriptor)));
+                                    // Quality Gate 1: Deteksi seluruh wajah pada frame kamera
+                                    const detections = await faceapi.detectAllFaces(
+                                        canvas,
+                                        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
+                                    ).withFaceLandmarks().withFaceDescriptors();
 
-                                        // Convert to Blob and upload
-                                        await new Promise((resolve, reject) => {
-                                            canvas.toBlob((blob) => {
-                                                if (!blob) {
-                                                    reject(new Error(
-                                                        "Gagal membuat blob gambar."
-                                                        ));
-                                                    return;
-                                                }
-                                                const file = new File([blob],
-                                                    "capture.jpg", {
-                                                        type: "image/jpeg"
-                                                    });
-                                                @this.upload('foto', file,
-                                                    (uploadedVal) => {
-                                                        this.stopCamera();
-                                                        resolve(uploadedVal);
-                                                    },
-                                                    (err) => {
-                                                        reject(err);
-                                                    }
-                                                );
-                                            }, 'image/jpeg', 0.9);
-                                        });
-                                    } else {
-                                        alert(
-                                            "Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera."
-                                        );
+                                    if (detections.length === 0) {
+                                        alert("Wajah tidak terdeteksi! Pastikan wajah terlihat jelas di depan kamera dan pencahayaan memadai.");
+                                        return;
                                     }
+
+                                    if (detections.length > 1) {
+                                        alert("Terdeteksi " + detections.length + " wajah! Harap pastikan hanya ada 1 orang di depan kamera.");
+                                        return;
+                                    }
+
+                                    const primaryDetection = detections[0];
+                                    const box = primaryDetection.detection.box;
+                                    const minDimension = Math.min(canvas.width, canvas.height);
+
+                                    // Quality Gate 2: Ukuran wajah memadai (tidak terlalu jauh)
+                                    if (box.width < minDimension * 0.20) {
+                                        alert("Wajah terlalu jauh dari kamera. Harap mendekat ke kamera dan ulangi pemotretan.");
+                                        return;
+                                    }
+
+                                    // Auto-crop area wajah langsung dari canvas
+                                    const croppedFile = await this.cropFace(canvas, box, "capture.jpg");
+
+                                    // Upload foto hasil crop ke Livewire
+                                    await new Promise((resolve, reject) => {
+                                        @this.upload('foto', croppedFile,
+                                            (uploadedVal) => {
+                                                this.stopCamera();
+                                                resolve(uploadedVal);
+                                            },
+                                            (err) => reject(err)
+                                        );
+                                    });
+
+                                    // Simpan descriptor 128D (web)
+                                    @this.set('face_descriptor', JSON.stringify(Array.from(primaryDetection.descriptor)));
                                 } catch (err) {
                                     console.error("Error capturing/processing image: ", err);
+                                    alert("Gagal memproses hasil pemotretan: " + (err.message || err));
                                 } finally {
                                     this.isCapturing = false;
                                 }
