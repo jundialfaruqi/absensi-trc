@@ -153,9 +153,10 @@ class AdminAbsensiController extends Controller
                 // Jika sekarang sebelum windowOutEnd dan user belum absen pulang kemarin
                 if ($now->lessThanOrEqualTo($windowOutEnd)) {
                     $existingYest = Absensi::where('personnel_id', $id)
-                        ->where('tanggal', $yesterday)
+                        ->whereDate('tanggal', $yesterday)
                         ->first();
-                    if ($existingYest && $existingYest->jam_masuk && !$existingYest->jam_pulang) {
+                    // DIRECT CHECK-OUT: Selama belum absen pulang kemarin, gunakan jadwal shift kemarin
+                    if (!$existingYest || !$existingYest->jam_pulang) {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
@@ -173,7 +174,7 @@ class AdminAbsensiController extends Controller
 
         // Cek absensi pada tanggal aktif
         $absensi = Absensi::where('personnel_id', $id)
-            ->where('tanggal', $activeDate)
+            ->whereDate('tanggal', $activeDate)
             ->first();
 
         // 1. Jika mode flexible atau tidak ada jadwal
@@ -231,13 +232,13 @@ class AdminAbsensiController extends Controller
             ]);
         }
 
-        // 3. Jika sudah lengkap masuk & pulang
-        if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+        // 3. Jika sudah absen pulang untuk jadwal ini (baik normal maupun direct check-out)
+        if ($absensi && $absensi->jam_pulang) {
             return response()->json([
                 'status' => 'info',
                 'can_attend' => false,
                 'action_type' => 'selesai',
-                'message' => 'Personel sudah menyelesaikan absen masuk dan pulang untuk jadwal ini.',
+                'message' => 'Personel sudah menyelesaikan absen' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' untuk jadwal ini.',
                 'data' => [
                     'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
                     'absensi' => $absensi,
@@ -247,6 +248,8 @@ class AdminAbsensiController extends Controller
 
         // 4. Validasi Jendela Waktu Jadwal Shift (Time Window Validation)
         $shift = $jadwal->shift;
+        $isDirectCheckOut = false;
+
         if ($shift && $shift->start_time && $shift->end_time) {
             $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
             $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
@@ -267,7 +270,10 @@ class AdminAbsensiController extends Controller
 
             if (!$absensi || !$absensi->jam_masuk) {
                 // Skenario: Belum Absen Masuk
-                if ($now->lessThan($windowInStart)) {
+                if ($now->between($windowOutStart, $windowOutEnd)) {
+                    // DIRECT CHECK-OUT: Berada di rentang waktu pulang, langsung diizinkan absen pulang
+                    $isDirectCheckOut = true;
+                } elseif ($now->lessThan($windowInStart)) {
                     $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
                     return response()->json([
                         'status' => 'info',
@@ -282,30 +288,71 @@ class AdminAbsensiController extends Controller
                                 'start_time' => $shift->start_time,
                                 'end_time' => $shift->end_time,
                             ],
-                            'action_type' => 'masuk',
-                        ],
-                    ]);
-                }
-
-                if ($now->greaterThan($windowInEnd)) {
-                    if (!$now->between($windowOutStart, $windowOutEnd)) {
-                        return response()->json([
-                            'status' => 'error',
-                            'can_attend' => false,
-                            'action_type' => 'terlewat',
-                            'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB).",
-                            'data' => [
-                                'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
+                            'jadwal' => [
+                                'id' => (string) $jadwal->id,
                                 'shift' => [
                                     'id' => (string) $shift->id,
                                     'name' => $shift->name,
                                     'start_time' => $shift->start_time,
                                     'end_time' => $shift->end_time,
                                 ],
-                                'action_type' => 'masuk',
                             ],
-                        ]);
-                    }
+                            'action_type' => 'masuk',
+                        ],
+                    ]);
+                } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+                    return response()->json([
+                        'status' => 'info',
+                        'can_attend' => false,
+                        'action_type' => 'belum_pulang',
+                        'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB). Silakan kembali $diff lagi untuk Absen Pulang (dibuka mulai {$windowOutStart->format('H:i')} WIB).",
+                        'data' => [
+                            'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
+                            'shift' => [
+                                'id' => (string) $shift->id,
+                                'name' => $shift->name,
+                                'start_time' => $shift->start_time,
+                                'end_time' => $shift->end_time,
+                            ],
+                            'jadwal' => [
+                                'id' => (string) $jadwal->id,
+                                'shift' => [
+                                    'id' => (string) $shift->id,
+                                    'name' => $shift->name,
+                                    'start_time' => $shift->start_time,
+                                    'end_time' => $shift->end_time,
+                                ],
+                            ],
+                            'action_type' => 'pulang',
+                        ],
+                    ]);
+                } elseif ($now->greaterThan($windowOutEnd)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'can_attend' => false,
+                        'action_type' => 'terlewat',
+                        'message' => "Batas waktu toleransi presensi untuk jadwal ini telah berakhir ({$windowOutEnd->format('H:i')} WIB).",
+                        'data' => [
+                            'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
+                            'shift' => [
+                                'id' => (string) $shift->id,
+                                'name' => $shift->name,
+                                'start_time' => $shift->start_time,
+                                'end_time' => $shift->end_time,
+                            ],
+                            'jadwal' => [
+                                'id' => (string) $jadwal->id,
+                                'shift' => [
+                                    'id' => (string) $shift->id,
+                                    'name' => $shift->name,
+                                    'start_time' => $shift->start_time,
+                                    'end_time' => $shift->end_time,
+                                ],
+                            ],
+                            'action_type' => 'terlewat',
+                        ],
+                    ]);
                 }
             } else {
                 // Skenario: Sudah Masuk, Mau Absen Pulang
@@ -323,6 +370,15 @@ class AdminAbsensiController extends Controller
                                 'name' => $shift->name,
                                 'start_time' => $shift->start_time,
                                 'end_time' => $shift->end_time,
+                            ],
+                            'jadwal' => [
+                                'id' => (string) $jadwal->id,
+                                'shift' => [
+                                    'id' => (string) $shift->id,
+                                    'name' => $shift->name,
+                                    'start_time' => $shift->start_time,
+                                    'end_time' => $shift->end_time,
+                                ],
                             ],
                             'action_type' => 'pulang',
                         ],
@@ -343,6 +399,15 @@ class AdminAbsensiController extends Controller
                                 'start_time' => $shift->start_time,
                                 'end_time' => $shift->end_time,
                             ],
+                            'jadwal' => [
+                                'id' => (string) $jadwal->id,
+                                'shift' => [
+                                    'id' => (string) $shift->id,
+                                    'name' => $shift->name,
+                                    'start_time' => $shift->start_time,
+                                    'end_time' => $shift->end_time,
+                                ],
+                            ],
                             'action_type' => 'pulang',
                         ],
                     ]);
@@ -350,13 +415,16 @@ class AdminAbsensiController extends Controller
             }
         }
 
-        $nextAction = ($absensi && $absensi->jam_masuk) ? 'pulang' : 'masuk';
+        $nextAction = ($isDirectCheckOut || ($absensi && $absensi->jam_masuk)) ? 'pulang' : 'masuk';
+        $pesan = $isDirectCheckOut
+            ? "Siap melakukan presensi pulang (Shift {$shift->name})."
+            : "Siap melakukan presensi $nextAction.";
 
         return response()->json([
             'status' => 'success',
             'can_attend' => true,
             'action_type' => $nextAction,
-            'message' => "Siap melakukan presensi $nextAction.",
+            'message' => $pesan,
             'data' => [
                 'personnel' => [
                     'id' => (string) $personnel->id,
@@ -368,6 +436,16 @@ class AdminAbsensiController extends Controller
                     'name' => $jadwal->shift?->name ?? 'Shift',
                     'start_time' => $jadwal->shift?->start_time,
                     'end_time' => $jadwal->shift?->end_time,
+                ],
+                'jadwal' => [
+                    'id' => (string) $jadwal->id,
+                    'tanggal' => $activeDate,
+                    'shift' => [
+                        'id' => (string) $jadwal->shift?->id,
+                        'name' => $jadwal->shift?->name ?? 'Shift',
+                        'start_time' => $jadwal->shift?->start_time,
+                        'end_time' => $jadwal->shift?->end_time,
+                    ],
                 ],
                 'action_type' => $nextAction,
                 'absensi' => $absensi,
@@ -477,9 +555,10 @@ class AdminAbsensiController extends Controller
 
                 if ($now->lessThanOrEqualTo($windowOutEnd)) {
                     $existingYest = Absensi::where('personnel_id', $personnel->id)
-                        ->where('tanggal', $yesterday)
+                        ->whereDate('tanggal', $yesterday)
                         ->first();
-                    if ($existingYest && $existingYest->jam_masuk && !$existingYest->jam_pulang) {
+                    // DIRECT CHECK-OUT: Selama belum absen pulang kemarin, gunakan jadwal shift kemarin
+                    if (!$existingYest || !$existingYest->jam_pulang) {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
@@ -496,16 +575,31 @@ class AdminAbsensiController extends Controller
         }
 
         // Cari atau inisialisasi record Absensi
-        $absensi = Absensi::firstOrNew([
-            'personnel_id' => $personnel->id,
-            'tanggal' => $activeDate,
-        ]);
+        $absensi = Absensi::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $activeDate)
+            ->first();
+
+        if (!$absensi) {
+            $absensi = new Absensi([
+                'personnel_id' => $personnel->id,
+                'tanggal' => $activeDate,
+            ]);
+        }
+
+        if ($absensi->exists && $absensi->jam_pulang) {
+            return response()->json([
+                'status' => 'info',
+                'message' => 'Personel ini sudah menyelesaikan seluruh sesi absensi untuk jadwal ini.',
+                'data' => $absensi,
+            ]);
+        }
 
         $platform = $request->platform ?: 'Android (Admin App)';
         $deviceName = $request->device_name ?: 'Admin Mobile';
         $uniqueId = $request->unique_device_id ?: 'admin-' . $user->id;
 
         // 3b. Validasi Jendela Waktu Jadwal Shift (Time Window Validation)
+        $isDirectCheckOut = false;
         if ($jadwal && $jadwal->shift && $jadwal->shift->start_time && $jadwal->shift->end_time) {
             $shift = $jadwal->shift;
             $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
@@ -526,23 +620,30 @@ class AdminAbsensiController extends Controller
             $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
             if (!$absensi->exists || !$absensi->jam_masuk) {
-                // Skenario: Mencoba Absen Masuk
-                if ($now->lessThan($windowInStart)) {
+                // Skenario: Belum Absen Masuk
+                if ($now->between($windowOutStart, $windowOutEnd)) {
+                    // DIRECT CHECK-OUT: Diizinkan langsung absen pulang jika berada di jendela pulang
+                    $isDirectCheckOut = true;
+                } elseif ($now->lessThan($windowInStart)) {
                     $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Masuk. Jadwal shift {$shift->name} masuk pukul {$startTime->format('H:i')} WIB (dibuka mulai {$windowInStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
                     ], 422);
-                }
-
-                if ($now->greaterThan($windowInEnd) && !$now->between($windowOutStart, $windowOutEnd)) {
+                } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
                     return response()->json([
                         'status' => 'error',
-                        'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB).",
+                        'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB). Silakan kembali $diff lagi untuk Absen Pulang.",
+                    ], 422);
+                } elseif ($now->greaterThan($windowOutEnd)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu toleransi presensi untuk jadwal ini telah berakhir ({$windowOutEnd->format('H:i')} WIB).",
                     ], 422);
                 }
             } else {
-                // Skenario: Mencoba Absen Pulang
+                // Skenario: Mencoba Absen Pulang (Sudah Masuk)
                 if ($now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
                     return response()->json([
@@ -561,7 +662,45 @@ class AdminAbsensiController extends Controller
         }
 
         // 4. LOGIKA ABSEN MASUK VS PULANG
-        if (!$absensi->exists || !$absensi->jam_masuk) {
+        if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && !$absensi->jam_pulang)) {
+            // --- ABSEN PULANG (Normal atau Direct Check-Out) ---
+            $statusPulang = 'HADIR';
+            if ($jadwal && $jadwal->shift && $jadwal->shift->end_time) {
+                $eDate = $activeDate;
+                if ($jadwal->shift->start_time && Carbon::parse($jadwal->shift->start_time)->format('H:i:s') >= Carbon::parse($jadwal->shift->end_time)->format('H:i:s')) {
+                    $eDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+                }
+                $shiftEnd = Carbon::parse($eDate)->setTimeFrom($jadwal->shift->end_time);
+                if ($now->lessThan($shiftEnd)) {
+                    $statusPulang = 'PULANG CEPAT';
+                }
+            }
+
+            $absensi->jadwal_id = $jadwal?->id;
+            $absensi->status = 'HADIR'; // Status keseluruhan tetap HADIR
+
+            if ($isDirectCheckOut) {
+                // Sesi masuk tidak dilakukan -> ditandai ALPA
+                $absensi->status_masuk = 'ALPA';
+            }
+
+            $absensi->kantor_id_pulang = $hasilLokasi['kantor_id'];
+            $absensi->jam_pulang = $now;
+            $absensi->status_pulang = $statusPulang;
+            $absensi->foto_pulang = $fileName;
+            $absensi->lat_pulang = $request->lat;
+            $absensi->lng_pulang = $request->lng;
+            $absensi->jarak_meter_pulang = $hasilLokasi['jarak_meter'];
+            $absensi->is_within_radius_pulang = $hasilLokasi['is_within_radius'];
+            $absensi->platform_pulang = $platform;
+            $absensi->device_name_pulang = $deviceName;
+            $absensi->unique_device_id_pulang = $uniqueId;
+            $absensi->edited_by_user_id = $user->id; // Tercatat diawasi oleh admin
+            $absensi->save();
+
+            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat untuk {$personnel->name}." . ($isDirectCheckOut ? " (Masuk: ALPA)" : "");
+            $actionType = 'pulang';
+        } elseif (!$absensi->exists || !$absensi->jam_masuk) {
             // --- ABSEN MASUK ---
             $statusMasuk = 'HADIR';
             if ($jadwal && $jadwal->shift && $jadwal->shift->start_time) {
@@ -591,36 +730,6 @@ class AdminAbsensiController extends Controller
 
             $pesan = "Absen MASUK ($statusMasuk) berhasil dicatat untuk {$personnel->name}.";
             $actionType = 'masuk';
-        } elseif (!$absensi->jam_pulang) {
-            // --- ABSEN PULANG ---
-            $statusPulang = 'HADIR';
-            if ($jadwal && $jadwal->shift && $jadwal->shift->end_time) {
-                $eDate = $activeDate;
-                if ($jadwal->shift->start_time && Carbon::parse($jadwal->shift->start_time)->format('H:i:s') >= Carbon::parse($jadwal->shift->end_time)->format('H:i:s')) {
-                    $eDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
-                }
-                $shiftEnd = Carbon::parse($eDate)->setTimeFrom($jadwal->shift->end_time);
-                if ($now->lessThan($shiftEnd)) {
-                    $statusPulang = 'PULANG CEPAT';
-                }
-            }
-
-            $absensi->kantor_id_pulang = $hasilLokasi['kantor_id'];
-            $absensi->jam_pulang = $now;
-            $absensi->status_pulang = $statusPulang;
-            $absensi->foto_pulang = $fileName;
-            $absensi->lat_pulang = $request->lat;
-            $absensi->lng_pulang = $request->lng;
-            $absensi->jarak_meter_pulang = $hasilLokasi['jarak_meter'];
-            $absensi->is_within_radius_pulang = $hasilLokasi['is_within_radius'];
-            $absensi->platform_pulang = $platform;
-            $absensi->device_name_pulang = $deviceName;
-            $absensi->unique_device_id_pulang = $uniqueId;
-            $absensi->edited_by_user_id = $user->id; // Tercatat diawasi oleh admin
-            $absensi->save();
-
-            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat untuk {$personnel->name}.";
-            $actionType = 'pulang';
         } else {
             return response()->json([
                 'status' => 'info',
@@ -639,6 +748,7 @@ class AdminAbsensiController extends Controller
                 'action_type' => $actionType,
                 'tanggal' => $absensi->tanggal->format('Y-m-d'),
                 'jam' => $now->format('H:i:s'),
+                'status' => $absensi->status,
                 'status_masuk' => $absensi->status_masuk,
                 'status_pulang' => $absensi->status_pulang,
                 'jarak_meter' => $hasilLokasi['jarak_meter'],

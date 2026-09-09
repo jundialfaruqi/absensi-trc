@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\Absensi;
+use App\Models\Jadwal;
 use App\Models\Kantor;
 use App\Models\Opd;
 use App\Models\Personnel;
 use App\Models\Shift;
 use App\Models\User;
 use App\Services\JwtService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -176,6 +179,219 @@ class AdminAbsensiApiTest extends TestCase
             ->assertJsonPath('data.face_descriptor_mobile_count', 192);
 
         $this->assertEquals($valid192, $personnel->fresh()->face_descriptor_mobile);
+    }
+
+    protected function generateDummyImageBase64(): string
+    {
+        ob_start();
+        $img = imagecreatetruecolor(10, 10);
+        imagejpeg($img);
+        $dummyImage = ob_get_clean();
+        imagedestroy($img);
+        return base64_encode($dummyImage);
+    }
+
+    public function test_personnel_without_check_in_can_direct_check_out_during_checkout_window(): void
+    {
+        [$admin1, $token1] = $this->createAdminUser($this->opd1);
+        $penugasan = \App\Models\Penugasan::create(['name' => 'Petugas Lapangan']);
+
+        $personnel = Personnel::create([
+            'name' => 'Budi Shift Pagi',
+            'nik' => '1234567890123488',
+            'email' => 'budi.shift@example.com',
+            'password' => bcrypt('password'),
+            'foto' => 'personnel/budi.jpg',
+            'opd_id' => $this->opd1->id,
+            'kantor_id' => $this->kantor1->id,
+            'penugasan_id' => $penugasan->id,
+        ]);
+
+        $shift = Shift::create([
+            'name' => 'Pagi (08:00 - 16:00)',
+            'type' => 'shift',
+            'start_time' => '08:00:00',
+            'end_time' => '16:00:00',
+        ]);
+
+        Jadwal::create([
+            'personnel_id' => $personnel->id,
+            'shift_id' => $shift->id,
+            'tanggal' => '2026-09-10',
+            'status' => 'SHIFT',
+        ]);
+
+        // Simulasi waktu saat jam kepulangan (16:15 WIB)
+        Carbon::setTestNow(Carbon::parse('2026-09-10 16:15:00'));
+
+        // 1. Cek Status: Harus langsung diizinkan Absen Pulang
+        $statusResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson("/api/v1/admin/absensi/check-status/{$personnel->id}");
+
+        $statusResp->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('can_attend', true)
+            ->assertJsonPath('action_type', 'pulang')
+            ->assertJsonPath('data.action_type', 'pulang')
+            ->assertJsonPath('data.shift.name', 'Pagi (08:00 - 16:00)');
+
+        // 2. Simpan Presensi Pulang (Direct Check-Out)
+        $storeResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->postJson('/api/v1/admin/absensi/store', [
+                'personnel_id' => $personnel->id,
+                'foto' => $this->generateDummyImageBase64(),
+                'lat' => $this->kantor1->latitude,
+                'lng' => $this->kantor1->longitude,
+            ]);
+
+        $storeResp->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.action_type', 'pulang')
+            ->assertJsonPath('data.status', 'HADIR')
+            ->assertJsonPath('data.status_masuk', 'ALPA')
+            ->assertJsonPath('data.status_pulang', 'HADIR');
+
+        // 3. Verifikasi Data Tersimpan di Database
+        $absensi = Absensi::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', '2026-09-10')
+            ->first();
+
+        $this->assertNotNull($absensi);
+        $this->assertEquals('HADIR', $absensi->status);
+        $this->assertEquals('ALPA', $absensi->status_masuk);
+        $this->assertNull($absensi->jam_masuk);
+        $this->assertEquals('HADIR', $absensi->status_pulang);
+        $this->assertNotNull($absensi->jam_pulang);
+
+        // 4. Scan ulang setelah direct checkout -> status selesai
+        $recheckResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson("/api/v1/admin/absensi/check-status/{$personnel->id}");
+
+        $recheckResp->assertStatus(200)
+            ->assertJsonPath('can_attend', false)
+            ->assertJsonPath('action_type', 'selesai');
+
+        Carbon::setTestNow(); // Reset test time
+    }
+
+    public function test_night_shift_direct_check_out_next_day_morning(): void
+    {
+        [$admin1, $token1] = $this->createAdminUser($this->opd1);
+        $penugasan = \App\Models\Penugasan::create(['name' => 'Petugas Lapangan']);
+
+        $personnel = Personnel::create([
+            'name' => 'Budi Shift Malam',
+            'nik' => '1234567890123499',
+            'email' => 'budi.malam@example.com',
+            'password' => bcrypt('password'),
+            'foto' => 'personnel/budi.jpg',
+            'opd_id' => $this->opd1->id,
+            'kantor_id' => $this->kantor1->id,
+            'penugasan_id' => $penugasan->id,
+        ]);
+
+        // Shift Malam: 20:00 s/d 08:00 (lintas hari)
+        $shiftMalam = Shift::create([
+            'name' => 'Malam (20:00 - 08:00)',
+            'type' => 'shift',
+            'start_time' => '20:00:00',
+            'end_time' => '08:00:00',
+        ]);
+
+        // Jadwal kemarin (2026-09-09)
+        Jadwal::create([
+            'personnel_id' => $personnel->id,
+            'shift_id' => $shiftMalam->id,
+            'tanggal' => '2026-09-09',
+            'status' => 'SHIFT',
+        ]);
+
+        // Simulasi hari ini pagi pukul 08:05 WIB (jendela pulang shift kemarin)
+        Carbon::setTestNow(Carbon::parse('2026-09-10 08:05:00'));
+
+        // 1. Cek Status: mengenali shift malam kemarin dan siap absen pulang
+        $statusResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson("/api/v1/admin/absensi/check-status/{$personnel->id}");
+
+        $statusResp->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('can_attend', true)
+            ->assertJsonPath('action_type', 'pulang')
+            ->assertJsonPath('data.shift.name', 'Malam (20:00 - 08:00)');
+
+        // 2. Simpan Presensi Pulang
+        $storeResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->postJson('/api/v1/admin/absensi/store', [
+                'personnel_id' => $personnel->id,
+                'foto' => $this->generateDummyImageBase64(),
+                'lat' => $this->kantor1->latitude,
+                'lng' => $this->kantor1->longitude,
+            ]);
+
+        $storeResp->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.action_type', 'pulang')
+            ->assertJsonPath('data.tanggal', '2026-09-09')
+            ->assertJsonPath('data.status', 'HADIR')
+            ->assertJsonPath('data.status_masuk', 'ALPA')
+            ->assertJsonPath('data.status_pulang', 'HADIR');
+
+        // 3. Verifikasi Database
+        $absensi = Absensi::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', '2026-09-09')
+            ->first();
+
+        $this->assertNotNull($absensi);
+        $this->assertEquals('HADIR', $absensi->status);
+        $this->assertEquals('ALPA', $absensi->status_masuk);
+        $this->assertNull($absensi->jam_masuk);
+        $this->assertEquals('HADIR', $absensi->status_pulang);
+        $this->assertNotNull($absensi->jam_pulang);
+
+        Carbon::setTestNow(); // Reset test time
+    }
+
+    public function test_personnel_without_check_in_blocked_during_gap_between_in_and_out(): void
+    {
+        [$admin1, $token1] = $this->createAdminUser($this->opd1);
+        $penugasan = \App\Models\Penugasan::create(['name' => 'Petugas Lapangan']);
+
+        $personnel = Personnel::create([
+            'name' => 'Budi Siang',
+            'nik' => '1234567890123477',
+            'email' => 'budi.siang@example.com',
+            'password' => bcrypt('password'),
+            'foto' => 'personnel/budi.jpg',
+            'opd_id' => $this->opd1->id,
+            'kantor_id' => $this->kantor1->id,
+            'penugasan_id' => $penugasan->id,
+        ]);
+
+        $shift = Shift::create([
+            'name' => 'Pagi (08:00 - 16:00)',
+            'type' => 'shift',
+            'start_time' => '08:00:00',
+            'end_time' => '16:00:00',
+        ]);
+
+        Jadwal::create([
+            'personnel_id' => $personnel->id,
+            'shift_id' => $shift->id,
+            'tanggal' => '2026-09-10',
+            'status' => 'SHIFT',
+        ]);
+
+        // Simulasi pukul 12:00 WIB (window in sudah tutup, window out belum buka)
+        Carbon::setTestNow(Carbon::parse('2026-09-10 12:00:00'));
+
+        $statusResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson("/api/v1/admin/absensi/check-status/{$personnel->id}");
+
+        $statusResp->assertStatus(200)
+            ->assertJsonPath('can_attend', false)
+            ->assertJsonPath('action_type', 'belum_pulang');
+
+        Carbon::setTestNow();
     }
 }
 
