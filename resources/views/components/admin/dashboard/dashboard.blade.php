@@ -95,7 +95,7 @@
                 </div>
             </div>
 
-            {{-- Sakit / Izin / Cuti / Dinas --}}
+            {{-- Sakit / Izin / Cuti --}}
             <div
                 class="stats shadow bg-base-100 border border-base-200 group hover:border-info/30 transition-all duration-300">
                 <div class="stat">
@@ -108,7 +108,7 @@
                         </svg>
                     </div>
                     <div class="stat-title text-[10px] font-black uppercase tracking-widest text-base-content/50">
-                        IZIN / SAKIT / CUTI / DINAS
+                        IZIN / SAKIT / CUTI
                     </div>
                     <div class="stat-value text-info">{{ number_format($stats['total_izin']) }}</div>
                     <div class="stat-desc font-bold text-[9px] uppercase tracking-tighter mt-1 text-info">Personel
@@ -504,7 +504,7 @@
                                         <div class="w-2 h-2 rounded-full bg-primary"></div>
                                         <span
                                             class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-40">IZIN
-                                            / SAKIT / CUTI / DINAS</span>
+                                            / SAKIT / CUTI</span>
                                         <span
                                             class="text-[10px] md:text-[10px] font-black text-primary">{{ $stats['total_izin'] }}</span>
                                     </div>
@@ -748,7 +748,7 @@
                     <div class="p-3 bg-base-200/50 rounded-xl border border-base-200 flex flex-col justify-between">
                         <span
                             class="block text-[8px] font-black text-base-content/40 uppercase tracking-widest mb-0.5">IZIN
-                            / SAKIT / CUTI / DINAS</span>
+                            / SAKIT / CUTI</span>
                         <span class="text-lg font-black text-info">{{ $stats['total_izin'] }}</span>
                     </div>
                 </div>
