@@ -51,7 +51,23 @@ class AdminAbsensiController extends Controller
         $opd = $user->opds()->first();
         $opdId = $opd?->id;
 
-        $query = Personnel::with([
+        // Base query OPD (untuk kalkulasi stats global seluruh personil)
+        $baseQuery = Personnel::query();
+        if (!$isSuperAdmin) {
+            $baseQuery->where('opd_id', $opdId);
+        }
+
+        // Global stats (tidak terpengaruh oleh search/filter chip)
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'with_photo' => (clone $baseQuery)->whereNotNull('foto')->where('foto', '!=', '')->count(),
+            'ready_192' => (clone $baseQuery)->whereNotNull('face_descriptor_mobile')->where('face_descriptor_mobile', '!=', '')->count(),
+            'missing_192' => (clone $baseQuery)->where(function ($q) {
+                $q->whereNull('face_descriptor_mobile')->orWhere('face_descriptor_mobile', '');
+            })->count(),
+        ];
+
+        $query = (clone $baseQuery)->with([
             'opd:id,name',
             'kantor:id,name,latitude,longitude,radius_meter',
         ])
@@ -61,33 +77,77 @@ class AdminAbsensiController extends Controller
             'wajib_absen_di_lokasi', 'attendance_type',
         ]);
 
-        if (!$isSuperAdmin) {
-            $query->where('opd_id', $opdId);
+        // Filter status biometrik jika diminta
+        if ($request->filled('filter')) {
+            $filter = $request->input('filter');
+            if ($filter === 'missing_192' || $filter === 'missing') {
+                $query->where(function ($q) {
+                    $q->whereNull('face_descriptor_mobile')->orWhere('face_descriptor_mobile', '');
+                });
+            } elseif ($filter === 'ready_192' || $filter === 'ready') {
+                $query->whereNotNull('face_descriptor_mobile')->where('face_descriptor_mobile', '!=', '');
+            }
         }
 
-        $personnels = $query->orderBy('name')
-            ->get()
-            ->map(function (Personnel $p) {
-                return [
-                    'id' => (string) $p->id,
-                    'name' => $p->name,
-                    'nik' => $p->nik ?? '',
-                    'foto' => $p->foto ? url('storage/' . $p->foto) : null,
-                    'face_descriptor_mobile' => $p->face_descriptor_mobile,
-                    'face_recognition' => (bool) $p->face_recognition,
-                    'wajib_absen_di_lokasi' => (bool) $p->wajib_absen_di_lokasi,
-                    'attendance_type' => $p->attendance_type ?? 'SHIFT',
-                    'opd_id' => (string) $p->opd_id,
-                    'opd_name' => $p->opd?->name ?? '-',
-                    'kantor' => $p->kantor ? [
-                        'id' => (string) $p->kantor->id,
-                        'name' => $p->kantor->name,
-                        'latitude' => (float) $p->kantor->latitude,
-                        'longitude' => (float) $p->kantor->longitude,
-                        'radius_meter' => (int) $p->kantor->radius_meter,
-                    ] : null,
-                ];
-            });
+        // Pencarian nama atau NIK
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            if ($search !== '') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('nik', 'like', "%{$search}%");
+                });
+            }
+        }
+
+        $query->orderBy('name');
+
+        $formatPersonnel = function (Personnel $p) {
+            return [
+                'id' => (string) $p->id,
+                'name' => $p->name,
+                'nik' => $p->nik ?? '',
+                'foto' => $p->foto ? url('storage/' . $p->foto) : null,
+                'face_descriptor_mobile' => $p->face_descriptor_mobile,
+                'face_recognition' => (bool) $p->face_recognition,
+                'wajib_absen_di_lokasi' => (bool) $p->wajib_absen_di_lokasi,
+                'attendance_type' => $p->attendance_type ?? 'SHIFT',
+                'opd_id' => (string) $p->opd_id,
+                'opd_name' => $p->opd?->name ?? '-',
+                'kantor' => $p->kantor ? [
+                    'id' => (string) $p->kantor->id,
+                    'name' => $p->kantor->name,
+                    'latitude' => (float) $p->kantor->latitude,
+                    'longitude' => (float) $p->kantor->longitude,
+                    'radius_meter' => (int) $p->kantor->radius_meter,
+                ] : null,
+            ];
+        };
+
+        // Jika request meminta paginasi
+        if ($request->boolean('paginate', false) || $request->filled('page') || $request->filled('per_page')) {
+            $perPage = max(1, min((int) $request->input('per_page', 15), 100));
+            $paginated = $query->paginate($perPage);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data personil dan biometrik berhasil diambil.',
+                'data' => [
+                    'total' => $paginated->total(),
+                    'personnels' => collect($paginated->items())->map($formatPersonnel),
+                    'pagination' => [
+                        'current_page' => $paginated->currentPage(),
+                        'last_page' => $paginated->lastPage(),
+                        'per_page' => $paginated->perPage(),
+                        'total' => $paginated->total(),
+                        'has_more' => $paginated->hasMorePages(),
+                    ],
+                    'stats' => $stats,
+                ],
+            ]);
+        }
+
+        $personnels = $query->get()->map($formatPersonnel);
 
         return response()->json([
             'status' => 'success',
@@ -95,6 +155,7 @@ class AdminAbsensiController extends Controller
             'data' => [
                 'total' => $personnels->count(),
                 'personnels' => $personnels,
+                'stats' => $stats,
             ],
         ]);
     }

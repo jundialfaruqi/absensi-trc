@@ -401,5 +401,59 @@ class AdminAbsensiApiTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_admin_can_get_personnels_paginated_with_stats(): void
+    {
+        [$admin1, $token1] = $this->createAdminUser($this->opd1);
+        $penugasan = \App\Models\Penugasan::create(['name' => 'Staf']);
+
+        // Buat 25 personil: 15 punya 192D, 10 tidak punya
+        for ($i = 1; $i <= 25; $i++) {
+            Personnel::create([
+                'name' => 'Personel ' . str_pad((string)$i, 2, '0', STR_PAD_LEFT),
+                'nik' => '14710100000000' . str_pad((string)$i, 2, '0', STR_PAD_LEFT),
+                'email' => "p{$i}@example.com",
+                'password' => bcrypt('password'),
+                'foto' => $i <= 20 ? "personnel/p{$i}.jpg" : '',
+                'face_descriptor_mobile' => $i <= 15 ? json_encode(array_fill(0, 192, 0.01)) : null,
+                'opd_id' => $this->opd1->id,
+                'penugasan_id' => $penugasan->id,
+            ]);
+        }
+
+        // 1. Test Paginated: per_page=10, page=1
+        $response = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson('/api/v1/admin/absensi/personnels?paginate=true&per_page=10&page=1');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.total', 25)
+            ->assertJsonPath('data.pagination.current_page', 1)
+            ->assertJsonPath('data.pagination.last_page', 3)
+            ->assertJsonPath('data.pagination.per_page', 10)
+            ->assertJsonPath('data.pagination.has_more', true)
+            ->assertJsonPath('data.stats.total', 25)
+            ->assertJsonPath('data.stats.with_photo', 20)
+            ->assertJsonPath('data.stats.ready_192', 15)
+            ->assertJsonPath('data.stats.missing_192', 10);
+
+        $this->assertCount(10, $response->json('data.personnels'));
+
+        // 2. Test Filter missing_192
+        $filterResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson('/api/v1/admin/absensi/personnels?paginate=true&filter=missing_192&per_page=15');
+
+        $filterResp->assertStatus(200)
+            ->assertJsonPath('data.total', 10);
+        $this->assertCount(10, $filterResp->json('data.personnels'));
+
+        // 3. Test Search
+        $searchResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson('/api/v1/admin/absensi/personnels?paginate=true&search=Personel 05');
+
+        $searchResp->assertStatus(200)
+            ->assertJsonPath('data.total', 1);
+        $this->assertEquals('Personel 05', $searchResp->json('data.personnels.0.name'));
+    }
 }
 
