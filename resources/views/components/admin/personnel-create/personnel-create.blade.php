@@ -1353,11 +1353,8 @@
                                     canvas.height = video.videoHeight;
 
                                     const context = canvas.getContext('2d');
-                                    context.save();
-                                    context.translate(canvas.width, 0);
-                                    context.scale(-1, 1);
+                                    // Simpan gambar hasil kamera dalam bentuk raw (tanpa mirror)
                                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                                    context.restore();
 
                                     if (!this.faceApiLoaded) await this.loadModels();
 

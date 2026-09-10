@@ -979,16 +979,46 @@
                             isPoseValid: false,
                             has192D: {{ !empty($face_descriptor_mobile) ? 'true' : 'false' }},
                             isSyncingMobile: false,
+                            syncTimeout: null,
 
                             init() {
-                                if (window.Echo) {
-                                    window.Echo.channel('personnel-biometrics')
-                                        .listen('PersonnelVectorUpdated', (e) => {
-                                            if (e.personnel_id == {{ $personnelId }}) {
-                                                this.has192D = true;
-                                                this.isSyncingMobile = false;
-                                            }
+                                const EchoConstructor = window._EchoHandler || window.Echo;
+                                if (typeof EchoConstructor === 'function' && !window.Echo) {
+                                    try {
+                                        const reverbHost = '{{ env('REVERB_HOST') }}';
+                                        const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
+                                            window.location.hostname : reverbHost;
+                                        const isSecure = window.location.protocol === 'https:';
+                                        window.Echo = new EchoConstructor({
+                                            broadcaster: 'reverb',
+                                            key: '{{ env('REVERB_APP_KEY') }}',
+                                            wsHost: wsHost,
+                                            wsPort: window.location.port || (isSecure ? 443 : 80),
+                                            wssPort: window.location.port || (isSecure ? 443 : 80),
+                                            forceTLS: isSecure,
+                                            enabledTransports: ['ws', 'wss'],
                                         });
+                                    } catch (e) {
+                                        console.warn("Could not init Echo in personnel-edit: ", e);
+                                    }
+                                }
+
+                                if (window.Echo && typeof window.Echo.channel === 'function') {
+                                    try {
+                                        window.Echo.channel('personnel-biometrics')
+                                            .listen('PersonnelVectorUpdated', (e) => {
+                                                if (e.personnel_id == {{ $personnelId }}) {
+                                                    this.has192D = true;
+                                                    this.isSyncingMobile = false;
+                                                    if (this.syncTimeout) {
+                                                        clearTimeout(this.syncTimeout);
+                                                        this.syncTimeout = null;
+                                                    }
+                                                }
+                                            });
+                                    } catch (e) {
+                                        console.warn("Could not listen to Echo channel: ", e);
+                                    }
                                 }
                             },
 
@@ -1474,6 +1504,17 @@
                                         .descriptor));
                                     @this.set('face_descriptor', descriptor);
                                     await @this.call('saveFotoDirectly', descriptor);
+
+                                    this.has192D = false;
+                                    if (window.Echo && typeof window.Echo.channel === 'function') {
+                                        this.isSyncingMobile = true;
+                                        if (this.syncTimeout) clearTimeout(this.syncTimeout);
+                                        this.syncTimeout = setTimeout(() => {
+                                            this.isSyncingMobile = false;
+                                        }, 6000);
+                                    } else {
+                                        this.isSyncingMobile = false;
+                                    }
                                 } catch (err) {
                                     console.error("Error processing file upload: ", err);
                                     alert("Gagal memproses file foto: " + (err.message || err));
@@ -1494,11 +1535,8 @@
                                     canvas.height = video.videoHeight;
 
                                     const context = canvas.getContext('2d');
-                                    context.save();
-                                    context.translate(canvas.width, 0);
-                                    context.scale(-1, 1);
+                                    // Simpan gambar hasil kamera dalam bentuk raw (tanpa mirror)
                                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                                    context.restore();
 
                                     if (!this.faceApiLoaded) await this.loadModels();
 
@@ -1605,7 +1643,17 @@
                                     // Tampilkan foto di card kanan
                                     this.capturedPhotoPreview = this.capturedImage;
                                     this.has192D = false;
-                                    this.isSyncingMobile = true;
+
+                                    // Jika Echo terhubung, tunggu sinkronisasi mobile maksimal 6 detik
+                                    if (window.Echo && typeof window.Echo.channel === 'function') {
+                                        this.isSyncingMobile = true;
+                                        if (this.syncTimeout) clearTimeout(this.syncTimeout);
+                                        this.syncTimeout = setTimeout(() => {
+                                            this.isSyncingMobile = false;
+                                        }, 6000);
+                                    } else {
+                                        this.isSyncingMobile = false;
+                                    }
 
                                     // Tutup modal dan matikan kamera
                                     this.stopCamera();
