@@ -17,6 +17,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Events\PersonnelPhotoUpdated;
 
 new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -273,6 +274,13 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
             $personnel->update($updateData);
 
+            PersonnelPhotoUpdated::dispatch(
+                $personnel->id,
+                $personnel->opd_id,
+                $personnel->name,
+                asset('storage/' . $path)
+            );
+
             $this->oldFoto = $path;
             $this->reset('foto');
             $this->face_descriptor_mobile = '';
@@ -325,6 +333,15 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
         $personnel = Personnel::findOrFail($this->personnelId);
         $personnel->update($data);
+
+        if (isset($data['foto'])) {
+            PersonnelPhotoUpdated::dispatch(
+                $personnel->id,
+                $personnel->opd_id,
+                $personnel->name,
+                asset('storage/' . $data['foto'])
+            );
+        }
 
         $licenseMsg = '';
         if ($this->auto_create_device) {

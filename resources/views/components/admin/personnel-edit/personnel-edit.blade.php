@@ -531,10 +531,17 @@
                                                 </span>
                                             @endif
 
-                                            {{-- 192D Mobile Status --}}
-                                            @if ($face_descriptor_mobile)
+                                            {{-- 192D Mobile Status (Real-time synced via Reverb) --}}
+                                            <template x-if="isSyncingMobile">
+                                                <span class="badge badge-warning badge-xs gap-1 py-1.5 px-2 text-[10px] animate-pulse"
+                                                    title="Menunggu ekstraksi 192-D otomatis dari HP Admin...">
+                                                    <span class="loading loading-spinner loading-xs scale-75"></span>
+                                                    Syncing 192D...
+                                                </span>
+                                            </template>
+                                            <template x-if="!isSyncingMobile && has192D">
                                                 <span class="badge badge-info badge-xs gap-1 py-1.5 px-2 text-[10px]"
-                                                    title="192-D Vector dari MobileFaceNet HP lama">
+                                                    title="192-D Vector dari MobileFaceNet HP siap">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -543,12 +550,13 @@
                                                     </svg>
                                                     192D Mobile Ready
                                                 </span>
-                                            @else
+                                            </template>
+                                            <template x-if="!isSyncingMobile && !has192D">
                                                 <span class="badge badge-ghost badge-xs gap-1 py-1.5 px-2 text-[10px]"
                                                     title="192-D belum disinkron dari mobile">
                                                     192D Belum Sync
                                                 </span>
-                                            @endif
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
@@ -969,6 +977,20 @@
                                 pitch: '-'
                             },
                             isPoseValid: false,
+                            has192D: {{ !empty($face_descriptor_mobile) ? 'true' : 'false' }},
+                            isSyncingMobile: false,
+
+                            init() {
+                                if (window.Echo) {
+                                    window.Echo.channel('personnel-biometrics')
+                                        .listen('PersonnelVectorUpdated', (e) => {
+                                            if (e.personnel_id == {{ $personnelId }}) {
+                                                this.has192D = true;
+                                                this.isSyncingMobile = false;
+                                            }
+                                        });
+                                }
+                            },
 
                             async startCamera() {
                                 this.isStartingCamera = true;
@@ -1582,6 +1604,8 @@
 
                                     // Tampilkan foto di card kanan
                                     this.capturedPhotoPreview = this.capturedImage;
+                                    this.has192D = false;
+                                    this.isSyncingMobile = true;
 
                                     // Tutup modal dan matikan kamera
                                     this.stopCamera();

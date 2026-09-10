@@ -13,6 +13,8 @@ use App\Services\JwtService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Event;
+use App\Events\PersonnelVectorUpdated;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -154,6 +156,8 @@ class AdminAbsensiApiTest extends TestCase
 
     public function test_admin_can_update_face_descriptor_mobile_with_valid_data(): void
     {
+        Event::fake([PersonnelVectorUpdated::class]);
+
         [$admin1, $token1] = $this->createAdminUser($this->opd1);
         $penugasan = \App\Models\Penugasan::create(['name' => 'Petugas Lapangan']);
 
@@ -179,6 +183,10 @@ class AdminAbsensiApiTest extends TestCase
             ->assertJsonPath('data.face_descriptor_mobile_count', 192);
 
         $this->assertEquals($valid192, $personnel->fresh()->face_descriptor_mobile);
+
+        Event::assertDispatched(PersonnelVectorUpdated::class, function ($event) use ($personnel) {
+            return $event->personnel_id === $personnel->id && $event->status === 'ready';
+        });
     }
 
     protected function generateDummyImageBase64(): string

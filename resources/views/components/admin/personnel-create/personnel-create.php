@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\Auth;
+use App\Events\PersonnelPhotoUpdated;
 use Illuminate\Support\Str;
 use App\Models\Opd;
 use App\Models\Penugasan;
@@ -220,6 +221,15 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
         }
 
         $personnel = Personnel::create($data);
+
+        if (!empty($personnel->foto)) {
+            PersonnelPhotoUpdated::dispatch(
+                $personnel->id,
+                $personnel->opd_id,
+                $personnel->name,
+                asset('storage/' . $personnel->foto)
+            );
+        }
 
         $licenseMsg = '';
         if ($this->auto_create_device) {

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Events\PersonnelVectorUpdated;
 
 class AdminAbsensiController extends Controller
 {
@@ -765,6 +766,12 @@ class AdminAbsensiController extends Controller
         $personnel->update([
             'face_descriptor_mobile' => $request->face_descriptor_mobile,
         ]);
+
+        PersonnelVectorUpdated::dispatch(
+            $personnel->id,
+            $personnel->opd_id,
+            'ready'
+        );
 
         return response()->json([
             'status' => 'success',
