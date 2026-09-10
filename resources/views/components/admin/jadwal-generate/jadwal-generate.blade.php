@@ -775,7 +775,7 @@
                             </svg>
                             <div class="text-[11px] opacity-70 leading-snug">
                                 Penjadwalan akan dilakukan secara bertahap (*staggered*) untuk memastikan pemerataan
-                                personel. Data absensi placeholder akan dibuat otomatis.
+                                personel. Data absensi placeholder akan dibuat otomatis. Jika personil sudah memiliki riwayat absensi terisi (misal riwayat Fleksibel), sistem secara aman hanya menautkan <b>jadwal_id</b> tanpa mengubah data presensi yang ada.
                             </div>
                         </div>
 
@@ -867,17 +867,13 @@
                                     class="badge badge-neutral font-bold">{{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }}
                                     - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}</span>.
                             </p>
-                            <div class="alert alert-error bg-error/5 text-[11px] py-3 rounded-xl border-error/20">
+                            <div class="alert alert-warning bg-warning/10 text-[11px] py-3 rounded-xl border-warning/20">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    class="stroke-error shrink-0 w-6 h-6">
+                                    class="stroke-warning shrink-0 w-6 h-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
-                                <span class="font-medium">Melanjutkan proses ini akan <span
-                                        class="underline font-bold">MENGHAPUS
-                                        PERMANEN</span> seluruh Jadwal, Absensi, dan <span
-                                        class="font-bold uppercase">FILE FOTO
-                                        ABSENSI</span> pada personel dan rentang tanggal tersebut.</span>
+                                <span class="font-medium">Jadwal pada rentang tanggal tersebut akan diatur ulang. <b>Data absensi yang sudah terisi dan file foto presensi tetap AMAN (tidak akan dihapus)</b>, melainkan otomatis ditautkan ke jadwal baru (<code>jadwal_id</code>). Hanya absensi kosong/placeholder yang belum terisi presensi yang akan di-reset.</span>
                             </div>
                             <div class="text-center">
                                 <p class="text-[11px] text-base-content/50 italic">Tindakan ini tidak dapat dibatalkan.
