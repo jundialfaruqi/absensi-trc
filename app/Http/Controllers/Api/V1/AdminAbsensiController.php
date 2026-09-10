@@ -551,7 +551,7 @@ class AdminAbsensiController extends Controller
             ]);
         }
 
-        $platform = $request->platform ?: 'Android (Admin App)';
+        $platform = $request->platform ?: 'android';
         $deviceName = $request->device_name ?: 'Admin Mobile';
         $uniqueId = $request->unique_device_id ?: 'admin-' . $user->id;
 

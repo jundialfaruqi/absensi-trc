@@ -164,7 +164,7 @@
                                         <div class="mt-2 flex flex-col gap-1">
                                             <div
                                                 class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
-                                                @if ($platformMasuk === 'android')
+                                                @if (str_contains(strtolower($platformMasuk ?? ''), 'android') || str_contains(strtolower($platformMasuk ?? ''), 'ios') || str_contains(strtolower($platformMasuk ?? ''), 'mobile'))
                                                     <div
                                                         class="flex items-center gap-1 text-base-content/75 font-semibold text-[10px]">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -243,7 +243,7 @@
                                         <div class="mt-2 flex flex-col gap-1">
                                             <div
                                                 class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-1.5">
-                                                @if ($platformPulang === 'android')
+                                                @if (str_contains(strtolower($platformPulang ?? ''), 'android') || str_contains(strtolower($platformPulang ?? ''), 'ios') || str_contains(strtolower($platformPulang ?? ''), 'mobile'))
                                                     <div
                                                         class="flex items-center gap-1 text-base-content/75 font-semibold text-[10px]">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
