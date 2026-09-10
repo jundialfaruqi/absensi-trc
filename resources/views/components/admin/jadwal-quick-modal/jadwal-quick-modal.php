@@ -79,16 +79,6 @@ new class extends Component
 
         $selectedShift = \App\Models\Shift::find($this->quickShiftId);
 
-        // Cek apakah absensi terkait sudah memiliki data yang bukan default
-        $existingAbsensi = Absensi::where('personnel_id', $this->quickPersonnelId)
-            ->where('tanggal', $this->quickDate)
-            ->first();
-
-        if ($existingAbsensi && ($existingAbsensi->jam_masuk || $existingAbsensi->jam_pulang || $existingAbsensi->foto_masuk || $existingAbsensi->foto_pulang)) {
-            $this->dispatch('toast', type: 'error', title: 'Gagal', message: 'Jadwal tidak bisa diubah karena sudah memiliki data absensi yang terisi.');
-            return;
-        }
-
         $jadwal = Jadwal::updateOrCreate(
             ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
             [
@@ -99,15 +89,44 @@ new class extends Component
             ]
         );
 
-        $absensi = \App\Models\Absensi::updateOrCreate(
-            ['personnel_id' => $this->quickPersonnelId, 'tanggal' => $this->quickDate],
-            [
+        $existingAbsensi = Absensi::where('personnel_id', $this->quickPersonnelId)
+            ->where('tanggal', $this->quickDate)
+            ->first();
+
+        $hasFilledAbsensi = $existingAbsensi && (
+            $existingAbsensi->jam_masuk ||
+            $existingAbsensi->jam_pulang ||
+            $existingAbsensi->foto_masuk ||
+            $existingAbsensi->foto_pulang ||
+            $existingAbsensi->cuti_id ||
+            in_array($existingAbsensi->status, ['HADIR', 'TELAT', 'IZIN', 'SAKIT', 'CUTI', 'DINAS'])
+        );
+
+        if ($hasFilledAbsensi) {
+            // Data absensi riil sudah ada (misal dari mode Flexible sebelumnya):
+            // HANYA update kolom jadwal_id saja, jangan merubah data lain apapun dan TANPA merubah timestamps (updated_at/created_at)
+            \Illuminate\Support\Facades\DB::table('absensis')
+                ->where('id', $existingAbsensi->id)
+                ->update(['jadwal_id' => $jadwal->id]);
+        } elseif ($existingAbsensi) {
+            // Placeholder absensi kosong: update status default
+            $existingAbsensi->update([
                 'jadwal_id' => $jadwal->id,
                 'status' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
                 'status_masuk' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
                 'status_pulang' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
-            ]
-        );
+            ]);
+        } else {
+            // Belum ada data absensi: buat placeholder baru
+            \App\Models\Absensi::create([
+                'personnel_id' => $this->quickPersonnelId,
+                'tanggal' => $this->quickDate,
+                'jadwal_id' => $jadwal->id,
+                'status' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status_masuk' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
+                'status_pulang' => $this->quickStatus === 'SHIFT' ? 'ALPA' : ($selectedShift->keterangan ?? 'OFF'),
+            ]);
+        }
 
         $this->dispatch('close-modal', id: 'quick-add-modal');
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal berhasil disimpan.');
@@ -179,6 +198,15 @@ new class extends Component
         return Jadwal::with('shift')
             ->where('personnel_id', $this->quickPersonnelId)
             ->whereDate('tanggal', $this->quickDate)
+            ->first();
+    }
+
+    #[Computed]
+    public function existingAbsensi()
+    {
+        if (!$this->quickPersonnelId || !$this->quickDate) return null;
+        return Absensi::where('personnel_id', $this->quickPersonnelId)
+            ->where('tanggal', $this->quickDate)
             ->first();
     }
 

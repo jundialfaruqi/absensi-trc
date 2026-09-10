@@ -78,6 +78,24 @@
                 @if ($activeTab === 'quick')
                     <form wire:submit="saveQuickJadwal">
                         <div class="space-y-6">
+                            {{-- Info Alert jika data absensi sudah terisi sebelumnya --}}
+                            @if ($this->existingAbsensi && ($this->existingAbsensi->jam_masuk || $this->existingAbsensi->jam_pulang || $this->existingAbsensi->foto_masuk || $this->existingAbsensi->foto_pulang))
+                                <div class="alert alert-info bg-info/10 border-info/20 text-xs py-2 px-3 rounded-xl flex items-start gap-2.5 shadow-2xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-info shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div class="space-y-0.5">
+                                        <p class="font-bold text-info">Data Absensi Tersedia</p>
+                                        <p class="text-[11px] text-base-content/80">
+                                            Personil memiliki data absen pada tanggal ini 
+                                            (Masuk: <b>{{ $this->existingAbsensi->jam_masuk ? \Carbon\Carbon::parse($this->existingAbsensi->jam_masuk)->format('H:i') : '-' }}</b>, 
+                                            Pulang: <b>{{ $this->existingAbsensi->jam_pulang ? \Carbon\Carbon::parse($this->existingAbsensi->jam_pulang)->format('H:i') : '-' }}</b>). 
+                                            Menyimpan jadwal hanya akan mengisi kolom <b>jadwal_id</b> tanpa mengubah data absensi atau waktu presensi yang sudah ada.
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
                             {{-- Status Selection --}}
                             <div class="form-control">
                                 <label class="label mb-1 px-1">
