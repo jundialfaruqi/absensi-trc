@@ -245,6 +245,46 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->validateOnly('foto');
     }
 
+    public function saveFotoDirectly(?string $descriptor = null): void
+    {
+        if (! Auth::user()->hasRole('super-admin')) {
+            if ($this->opd_id != Auth::user()->opd()?->id) {
+                abort(403, 'Unauthorized action.');
+            }
+        }
+
+        if ($this->foto) {
+            $path = $this->foto->store('personnel-fotos', 'public');
+
+            if ($this->oldFoto && Storage::disk('public')->exists($this->oldFoto)) {
+                Storage::disk('public')->delete($this->oldFoto);
+            }
+
+            $personnel = Personnel::findOrFail($this->personnelId);
+            $updateData = [
+                'foto' => $path,
+                'face_descriptor_mobile' => null,
+            ];
+
+            if ($descriptor) {
+                $updateData['face_descriptor'] = $descriptor;
+                $this->face_descriptor = $descriptor;
+            }
+
+            $personnel->update($updateData);
+
+            $this->oldFoto = $path;
+            $this->reset('foto');
+            $this->face_descriptor_mobile = '';
+
+            $this->dispatch('toast', [
+                'type' => 'success',
+                'title' => 'Foto Tersimpan',
+                'message' => 'Foto autentikasi berhasil disimpan ke database.',
+            ]);
+        }
+    }
+
     public function save()
     {
         if (! Auth::user()->hasRole('super-admin')) {
