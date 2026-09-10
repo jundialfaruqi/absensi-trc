@@ -584,6 +584,11 @@ new #[Title('Generate Jadwal Otomatis')] #[Layout('layouts::admin.app')] class e
             Personnel::whereIn('id', $pIds)->update(['regu' => null]);
         }
 
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Jadwal otomatis berhasil digenerate.'
+        ]);
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Jadwal otomatis berhasil digenerate.');
         return $this->redirectRoute('jadwal', navigate: true);
     }

@@ -141,6 +141,11 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
 
     public function finishImport()
     {
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Data Jadwal berhasil diimpor.'
+        ]);
         $this->dispatch('toast', type: 'success', title: 'Berhasil', message: 'Data Jadwal berhasil diimpor.');
         $this->reset(['file', 'importId', 'progress']);
         $this->showConfirmModal = false;
