@@ -1413,29 +1413,63 @@
                                             <span class="text-[10px] font-bold text-base-content" x-text="processingStatus"></span>
                                         </div>
                                     </div>
+                                    {{-- Error Message Siang 2 --}}
+                                    <template x-if="errorMessage && rawFileSiang2">
+                                        <span class="text-error text-[10px] block mt-1" x-text="errorMessage"></span>
+                                    </template>
                                     @error('fotoSiang2')
                                         <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
                                     @enderror
-                                    <template x-if="rawFileSiang2">
-                                        <div class="flex items-center gap-1 flex-wrap mt-1.5">
-                                            <span class="text-[10px] text-base-content/60 font-medium mr-0.5">Rasio:</span>
-                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
-                                                :class="cropRatioSiang2 === '16:9' ? 'border-warning bg-warning/15 ring-1 ring-warning font-bold text-warning-content' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioSiang2" value="16:9" @change="onCropRatioChange('fotoSiang2')" class="radio radio-xs radio-warning" />
+
+                                    {{-- Pilihan Crop Aspect Ratio Siang 2 --}}
+                                    <div class="pt-1">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="size-3 text-base-content/60" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
+                                                </svg>
+                                                Rasio Crop
+                                            </label>
+                                            <span class="text-[9px] text-base-content/50 font-medium">Maks. 100KB</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-1">
+                                            <label
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="cropRatioSiang2 === '16:9' ?
+                                                    'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioSiang2" value="16:9"
+                                                    @change="onCropRatioChange('fotoSiang2')"
+                                                    class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">16:9</span>
                                             </label>
-                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
-                                                :class="cropRatioSiang2 === '4:3' ? 'border-warning bg-warning/15 ring-1 ring-warning font-bold text-warning-content' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioSiang2" value="4:3" @change="onCropRatioChange('fotoSiang2')" class="radio radio-xs radio-warning" />
+
+                                            <label
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="cropRatioSiang2 === '4:3' ?
+                                                    'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioSiang2" value="4:3"
+                                                    @change="onCropRatioChange('fotoSiang2')"
+                                                    class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">4:3</span>
                                             </label>
-                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
-                                                :class="cropRatioSiang2 === 'original' ? 'border-warning bg-warning/15 ring-1 ring-warning font-bold text-warning-content' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioSiang2" value="original" @change="onCropRatioChange('fotoSiang2')" class="radio radio-xs radio-warning" />
+
+                                            <label
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="cropRatioSiang2 === 'original' ?
+                                                    'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioSiang2" value="original"
+                                                    @change="onCropRatioChange('fotoSiang2')"
+                                                    class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">Asli</span>
                                             </label>
                                         </div>
-                                    </template>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1720,29 +1754,63 @@
                                             <span class="text-[10px] font-bold text-base-content" x-text="processingStatus"></span>
                                         </div>
                                     </div>
+                                    {{-- Error Message Malam 2 --}}
+                                    <template x-if="errorMessage && rawFileMalam2">
+                                        <span class="text-error text-[10px] block mt-1" x-text="errorMessage"></span>
+                                    </template>
                                     @error('fotoMalam2')
                                         <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
                                     @enderror
-                                    <template x-if="rawFileMalam2">
-                                        <div class="flex items-center gap-1 flex-wrap mt-1.5">
-                                            <span class="text-[10px] text-base-content/60 font-medium mr-0.5">Rasio:</span>
-                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
-                                                :class="cropRatioMalam2 === '16:9' ? 'border-neutral-900 bg-neutral-900/10 ring-1 ring-neutral-900 font-bold text-neutral-900 dark:text-white' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioMalam2" value="16:9" @change="onCropRatioChange('fotoMalam2')" class="radio radio-xs radio-neutral" />
+
+                                    {{-- Pilihan Crop Aspect Ratio Malam 2 --}}
+                                    <div class="pt-1">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="size-3 text-base-content/60" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
+                                                </svg>
+                                                Rasio Crop
+                                            </label>
+                                            <span class="text-[9px] text-base-content/50 font-medium">Maks. 100KB</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-1">
+                                            <label
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="cropRatioMalam2 === '16:9' ?
+                                                    'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioMalam2" value="16:9"
+                                                    @change="onCropRatioChange('fotoMalam2')"
+                                                    class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">16:9</span>
                                             </label>
-                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
-                                                :class="cropRatioMalam2 === '4:3' ? 'border-neutral-900 bg-neutral-900/10 ring-1 ring-neutral-900 font-bold text-neutral-900 dark:text-white' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioMalam2" value="4:3" @change="onCropRatioChange('fotoMalam2')" class="radio radio-xs radio-neutral" />
+
+                                            <label
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="cropRatioMalam2 === '4:3' ?
+                                                    'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioMalam2" value="4:3"
+                                                    @change="onCropRatioChange('fotoMalam2')"
+                                                    class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">4:3</span>
                                             </label>
-                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
-                                                :class="cropRatioMalam2 === 'original' ? 'border-neutral-900 bg-neutral-900/10 ring-1 ring-neutral-900 font-bold text-neutral-900 dark:text-white' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioMalam2" value="original" @change="onCropRatioChange('fotoMalam2')" class="radio radio-xs radio-neutral" />
+
+                                            <label
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="cropRatioMalam2 === 'original' ?
+                                                    'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioMalam2" value="original"
+                                                    @change="onCropRatioChange('fotoMalam2')"
+                                                    class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">Asli</span>
                                             </label>
                                         </div>
-                                    </template>
+                                    </div>
                                 </div>
                             </div>
                         </div>
