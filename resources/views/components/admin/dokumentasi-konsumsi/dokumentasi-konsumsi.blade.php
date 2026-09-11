@@ -1058,8 +1058,8 @@
 
     {{-- ─── MODAL UPLOAD DOKUMENTASI KONSUMSI ────────────────────────────── --}}
     <dialog id="modal-upload-konsumsi"
-        class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999 {{ $showAddModal ? 'modal-open' : '' }}"
-        :class="{ 'modal-open': isKonsumsiModalOpen || @json($showAddModal) }"
+        class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999"
+        :class="{ 'modal-open': isKonsumsiModalOpen }"
         @keydown.escape.window="if (isKonsumsiModalOpen) closeKonsumsiModal()" x-cloak>
         <div class="modal-box max-w-xl rounded-2xl shadow-2xl border border-base-200 max-h-[90vh] overflow-y-auto"
             x-data="dokumentasiUploadModal()">
@@ -2852,6 +2852,10 @@
                 modalSesiClient: 'siang',
 
                 init() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire && wire.get('showAddModal')) {
+                        this.isKonsumsiModalOpen = true;
+                    }
                     this.$watch('$wire.showAddModal', (val) => {
                         this.isKonsumsiModalOpen = !!val;
                         if (!val) {
