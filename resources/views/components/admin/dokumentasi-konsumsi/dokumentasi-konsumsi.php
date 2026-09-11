@@ -138,6 +138,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 'siang' => 0,
                 'malam' => 0,
                 'total' => 0,
+                'auto_siang' => 0,
+                'auto_malam' => 0,
             ];
         }
 
@@ -159,9 +161,6 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             })
             ->get();
 
-        $totalSiang = 0;
-        $totalMalam = 0;
-
         foreach ($personnels as $personnel) {
             $absensiMap = $personnel->absensis->keyBy(fn ($a) => $a->tanggal->format('Y-m-d'));
             $jadwalMap = $personnel->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
@@ -180,16 +179,46 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                     $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
 
                     if (in_array('siang', $konsumsis)) {
-                        $daily[$date]['siang']++;
-                        $totalSiang++;
+                        $daily[$date]['auto_siang']++;
                     }
                     if (in_array('malam', $konsumsis)) {
-                        $daily[$date]['malam']++;
-                        $totalMalam++;
+                        $daily[$date]['auto_malam']++;
                     }
                 }
-                $daily[$date]['total'] = $daily[$date]['siang'] + $daily[$date]['malam'];
             }
+        }
+
+        // Ambil data riil dari tabel dokumentasi_konsumsi
+        $searchDates = array_unique(array_merge($dates, array_map(fn ($d) => $d . ' 00:00:00', $dates)));
+        $dokMap = DokumentasiKonsumsi::whereIn('tanggal', $searchDates)
+            ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
+            ->get()
+            ->keyBy(fn ($item) => \Carbon\Carbon::parse($item->tanggal)->format('Y-m-d'));
+
+        $totalSiang = 0;
+        $totalMalam = 0;
+
+        foreach ($dates as $date) {
+            $dok = $dokMap->get($date);
+
+            // Jika makan siang dari dokumentasi_konsumsi sudah ada (not null), pakai nilai itu.
+            // Jika belum ada atau masih null, tetap akumulasikan yang otomatis dari absensi.
+            $siang = ($dok !== null && $dok->jumlah_siang !== null)
+                ? (int) $dok->jumlah_siang
+                : $daily[$date]['auto_siang'];
+
+            // Jika makan malam dari dokumentasi_konsumsi sudah ada (not null), pakai nilai itu.
+            // Jika belum ada atau masih null, tetap akumulasikan yang otomatis dari absensi.
+            $malam = ($dok !== null && $dok->jumlah_malam !== null)
+                ? (int) $dok->jumlah_malam
+                : $daily[$date]['auto_malam'];
+
+            $daily[$date]['siang'] = $siang;
+            $daily[$date]['malam'] = $malam;
+            $daily[$date]['total'] = $siang + $malam;
+
+            $totalSiang += $siang;
+            $totalMalam += $malam;
         }
 
         return [
@@ -216,10 +245,12 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             ? ($this->selectedOpd ?: null)
             : Auth::user()->opd()?->id;
 
-        return DokumentasiKonsumsi::whereIn('tanggal', $dates)
+        $searchDates = array_unique(array_merge($dates, array_map(fn ($d) => $d . ' 00:00:00', $dates)));
+
+        return DokumentasiKonsumsi::whereIn('tanggal', $searchDates)
             ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
             ->get()
-            ->keyBy(fn ($item) => $item->tanggal->format('Y-m-d'));
+            ->keyBy(fn ($item) => \Carbon\Carbon::parse($item->tanggal)->format('Y-m-d'));
     }
 
     #[Computed]
@@ -474,8 +505,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     {
         if (isset($this->monthlySummary['daily'][$date])) {
             return [
-                'siang' => $this->monthlySummary['daily'][$date]['siang'] ?? 0,
-                'malam' => $this->monthlySummary['daily'][$date]['malam'] ?? 0,
+                'siang' => $this->monthlySummary['daily'][$date]['auto_siang'] ?? $this->monthlySummary['daily'][$date]['siang'] ?? 0,
+                'malam' => $this->monthlySummary['daily'][$date]['auto_malam'] ?? $this->monthlySummary['daily'][$date]['malam'] ?? 0,
             ];
         }
 
@@ -609,6 +640,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $this->existingFotoMalam2 = null;
         $this->uploadIteration++;
         unset($this->dokumentasiMap);
+        unset($this->monthlySummary);
 
         $this->dispatch('toast', [
             'type' => 'success',
@@ -825,6 +857,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $this->fotoMalam2 = null;
         $this->uploadIteration++;
         unset($this->dokumentasiMap);
+        unset($this->monthlySummary);
 
         $this->dispatch('toast', [
             'type' => 'success',

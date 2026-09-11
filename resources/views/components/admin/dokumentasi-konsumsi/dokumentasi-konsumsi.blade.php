@@ -248,7 +248,7 @@
                                 </td>
                                 @foreach ($dates as $date)
                                     @php
-                                        $countSiang = $summary['daily'][$date]['siang'] ?? 0;
+                                        $autoSiang = $summary['daily'][$date]['auto_siang'] ?? 0;
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         $dok = $dokMap->get($date);
                                         $fotoSiang = $dok?->foto_siang;
@@ -299,13 +299,13 @@
                                                         {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
                                                         <span
                                                             class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
-                                                            title="Jumlah dari data absensi: {{ $countSiang }}">
-                                                            {{ $countSiang }}
+                                                            title="Jumlah dari data absensi: {{ $autoSiang }}">
+                                                            {{ $autoSiang }}
                                                         </span>
-                                                    @elseif ($countSiang > 0)
+                                                    @elseif ($autoSiang > 0)
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
-                                                            {{ $countSiang }}
+                                                            {{ $autoSiang }}
                                                         </span>
                                                     @else
                                                         <span
@@ -337,13 +337,13 @@
                                                     {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
                                                     <span
                                                         class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
-                                                        title="Jumlah dari data absensi: {{ $countSiang }}">
-                                                        {{ $countSiang }}
+                                                        title="Jumlah dari data absensi: {{ $autoSiang }}">
+                                                        {{ $autoSiang }}
                                                     </span>
-                                                @elseif ($countSiang > 0)
+                                                @elseif ($autoSiang > 0)
                                                     <span
                                                         class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold group-hover:scale-105 transition-transform">
-                                                        {{ $countSiang }}
+                                                        {{ $autoSiang }}
                                                     </span>
                                                 @else
                                                     <span
@@ -367,7 +367,7 @@
                                 </td>
                                 @foreach ($dates as $date)
                                     @php
-                                        $countMalam = $summary['daily'][$date]['malam'] ?? 0;
+                                        $autoMalam = $summary['daily'][$date]['auto_malam'] ?? 0;
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         $dok = $dokMap->get($date);
                                         $fotoMalam = $dok?->foto_malam;
@@ -418,13 +418,13 @@
                                                         {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
                                                         <span
                                                             class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
-                                                            title="Jumlah dari data absensi: {{ $countMalam }}">
-                                                            {{ $countMalam }}
+                                                            title="Jumlah dari data absensi: {{ $autoMalam }}">
+                                                            {{ $autoMalam }}
                                                         </span>
-                                                    @elseif ($countMalam > 0)
+                                                    @elseif ($autoMalam > 0)
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
-                                                            {{ $countMalam }}
+                                                            {{ $autoMalam }}
                                                         </span>
                                                     @else
                                                         <span
@@ -456,13 +456,13 @@
                                                     {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
                                                     <span
                                                         class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
-                                                        title="Jumlah dari data absensi: {{ $countMalam }}">
-                                                        {{ $countMalam }}
+                                                        title="Jumlah dari data absensi: {{ $autoMalam }}">
+                                                        {{ $autoMalam }}
                                                     </span>
-                                                @elseif ($countMalam > 0)
+                                                @elseif ($autoMalam > 0)
                                                     <span
                                                         class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900/15 text-neutral-900 dark:text-neutral-100 text-xs font-bold group-hover:scale-105 transition-transform">
-                                                        {{ $countMalam }}
+                                                        {{ $autoMalam }}
                                                     </span>
                                                 @else
                                                     <span

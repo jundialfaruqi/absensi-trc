@@ -278,36 +278,37 @@ class ReportController extends Controller
             }
 
             // Override nilai SIANG/MALAM dari tabel dokumentasi_konsumsis jika tersedia
-            $dokRecords = DokumentasiKonsumsi::whereIn('tanggal', $dates)
+            $searchDates = array_unique(array_merge($dates, array_map(fn ($d) => $d . ' 00:00:00', $dates)));
+            $dokRecords = DokumentasiKonsumsi::whereIn('tanggal', $searchDates)
                 ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
                 ->get()
-                ->keyBy(fn ($item) => $item->tanggal->format('Y-m-d'));
+                ->keyBy(fn ($item) => \Carbon\Carbon::parse($item->tanggal)->format('Y-m-d'));
 
             foreach ($dates as $d) {
                 $dok = $dokRecords->get($d);
                 if ($dok !== null) {
-                    // Pakai nilai aktual dari dokumentasi (override absensi)
-                    $dailySummary[$d]['siang'] = $dok->jumlah_siang ?? 0;
-                    $dailySummary[$d]['malam'] = $dok->jumlah_malam ?? 0;
+                    // Pakai nilai aktual dari dokumentasi jika diisi (not null), jika null tetap pakai otomatis dari absensi
+                    if ($dok->jumlah_siang !== null) {
+                        $dailySummary[$d]['siang'] = (int) $dok->jumlah_siang;
+                    }
+                    if ($dok->jumlah_malam !== null) {
+                        $dailySummary[$d]['malam'] = (int) $dok->jumlah_malam;
+                    }
                     $dailySummary[$d]['total'] = $dailySummary[$d]['siang'] + $dailySummary[$d]['malam'];
-                } else {
-                    // Tidak ada record dokumentasi → tampilkan null (akan ditampilkan sebagai "-" di PDF)
-                    $dailySummary[$d]['siang'] = null;
-                    $dailySummary[$d]['malam'] = null;
-                    $dailySummary[$d]['total'] = null;
                 }
+                // Jika belum ada record dokumentasi ($dok === null), $dailySummary[$d] tetap mempertahankan hitungan otomatis dari absensi
             }
 
-            // Hitung ulang grand total dari dailySummary — null diabaikan
-            $totalSiangAll = array_sum(array_filter(array_column($dailySummary, 'siang'), fn ($v) => $v !== null));
-            $totalMalamAll = array_sum(array_filter(array_column($dailySummary, 'malam'), fn ($v) => $v !== null));
+            // Hitung ulang grand total dari dailySummary
+            $totalSiangAll = array_sum(array_column($dailySummary, 'siang'));
+            $totalMalamAll = array_sum(array_column($dailySummary, 'malam'));
 
             $opdName = $opdId ? Opd::find($opdId)->name : 'Semua OPD';
             $monthName = Carbon::create()->month($month)->translatedFormat('F');
 
             $dokumentasiList = [];
             if ($includeDokumentasi) {
-                $dokForPages = DokumentasiKonsumsi::whereIn('tanggal', $dates)
+                $dokForPages = DokumentasiKonsumsi::whereIn('tanggal', $searchDates)
                     ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
                     ->orderBy('tanggal', 'asc')
                     ->get();
