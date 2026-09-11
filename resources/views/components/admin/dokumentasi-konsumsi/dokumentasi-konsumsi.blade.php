@@ -2665,49 +2665,53 @@
                 <div class="pt-3 border-t border-base-200 flex items-center justify-between gap-2">
                     <div>
                         {{-- Tombol Hapus Dokumentasi (Tampil jika sesi saat ini memiliki foto tersimpan atau mode edit) --}}
-                        <template x-if="hasExistingCurrentPhoto">
-                            <button type="button"
-                                @click="if (confirm(hapusConfirmText)) { $wire.deleteDokumentasi(modalSesi); }"
-                                wire:loading.attr="disabled" wire:target="deleteDokumentasi,saveKonsumsi"
-                                class="btn btn-sm btn-error text-white gap-1.5 shadow-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                <span wire:loading.remove wire:target="deleteDokumentasi">Hapus</span>
-                                <span wire:loading wire:target="deleteDokumentasi"
-                                    class="loading loading-spinner loading-xs"></span>
-                            </button>
-                        </template>
+                        <button type="button"
+                            x-show="hasExistingCurrentPhoto"
+                            x-cloak
+                            wire:key="modal-btn-hapus-dokumentasi"
+                            @click="if (confirm(hapusConfirmText)) { $wire.deleteDokumentasi(modalSesi); }"
+                            wire:loading.attr="disabled" wire:target="deleteDokumentasi,saveKonsumsi"
+                            class="btn btn-sm btn-error text-white gap-1.5 shadow-xs">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span wire:loading.remove wire:target="deleteDokumentasi">Hapus</span>
+                            <span wire:loading wire:target="deleteDokumentasi"
+                                class="loading loading-spinner loading-xs"></span>
+                        </button>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <button type="button" @click="closeKonsumsiModal()"
                             class="btn btn-sm btn-ghost">Batal</button>
-                        <template x-if="isCurrentSesiLocked">
-                            <button type="button"
-                                @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', modalSesi, 'edit')"
-                                class="btn btn-sm btn-warning text-warning-content gap-1.5 shadow-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Beralih ke Form Edit
-                            </button>
-                        </template>
-                        <template x-if="!isCurrentSesiLocked">
-                            <button type="submit" class="btn btn-sm btn-primary text-white gap-1.5 shadow-xs"
-                                wire:loading.attr="disabled" :disabled="isProcessing"
-                                wire:target="fotoSiang,fotoMalam,saveKonsumsi,deleteDokumentasi">
-                                <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing"
-                                    x-text="submitButtonText"></span>
-                                <span wire:loading wire:target="saveKonsumsi"
-                                    class="loading loading-spinner loading-xs"></span>
-                                <span x-show="isProcessing" class="loading loading-spinner loading-xs"></span>
-                            </button>
-                        </template>
+                        <button type="button"
+                            x-show="isCurrentSesiLocked"
+                            x-cloak
+                            wire:key="modal-btn-beralih-edit"
+                            @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', modalSesi, 'edit')"
+                            class="btn btn-sm btn-warning text-warning-content gap-1.5 shadow-xs">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Beralih ke Form Edit
+                        </button>
+                        <button type="submit"
+                            x-show="!isCurrentSesiLocked"
+                            x-cloak
+                            wire:key="modal-btn-submit-konsumsi"
+                            class="btn btn-sm btn-primary text-white gap-1.5 shadow-xs"
+                            wire:loading.attr="disabled" :disabled="isProcessing"
+                            wire:target="fotoSiang,fotoMalam,saveKonsumsi,deleteDokumentasi">
+                            <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing"
+                                x-text="submitButtonText"></span>
+                            <span wire:loading wire:target="saveKonsumsi"
+                                class="loading loading-spinner loading-xs"></span>
+                            <span x-show="isProcessing" class="loading loading-spinner loading-xs"></span>
+                        </button>
                     </div>
                 </div>
             </form>
