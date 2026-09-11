@@ -152,6 +152,173 @@ class ReportController extends Controller
         }
     }
 
+    public function exportKonsumsiPdf(Request $request)
+    {
+        try {
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
+
+            $startDate = $request->get('startDate');
+            $endDate = $request->get('endDate');
+            $month = (int) $request->get('month', date('m'));
+            $year = (int) $request->get('year', date('Y'));
+            $search = $request->get('search');
+            $paperSize = $request->get('paperSize', 'a4');
+
+            $opdId = Auth::user()->hasRole('super-admin') ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
+
+            $dates = [];
+            if ($startDate && $endDate) {
+                $start = Carbon::parse($startDate);
+                $end = Carbon::parse($endDate);
+
+                if ($start->diffInDays($end) > 31) {
+                    $end = $start->copy()->addDays(31);
+                }
+
+                while ($start <= $end) {
+                    $dates[] = $start->format('Y-m-d');
+                    $start->addDay();
+                }
+            } else {
+                $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+                for ($i = 1; $i <= $daysInMonth; $i++) {
+                    $dates[] = Carbon::create($year, $month, $i)->format('Y-m-d');
+                }
+            }
+
+            // Get Personnel Data with Attendance and Schedule
+            $personnels = Personnel::with(['absensis' => function ($query) use ($dates) {
+                $query->whereIn('tanggal', $dates);
+            }, 'jadwals' => function ($query) use ($dates) {
+                $query->whereIn('tanggal', $dates)
+                    ->with('shift.konsumsis');
+            }, 'penugasan', 'opd'])
+                ->when($opdId, function ($q) use ($opdId) {
+                    $q->where('opd_id', $opdId);
+                })
+                ->when($search, function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                })
+                ->orderBy('name')
+                ->get();
+
+            // Transform maps for rapid lookup
+            $dailySummary = [];
+            foreach ($dates as $d) {
+                $dailySummary[$d] = [
+                    'siang' => 0,
+                    'malam' => 0,
+                    'total' => 0,
+                ];
+            }
+
+            $totalSiangAll = 0;
+            $totalMalamAll = 0;
+
+            foreach ($personnels as $p) {
+                $p->absensi_map = $p->absensis->keyBy(fn ($a) => $a->tanggal->format('Y-m-d'));
+                $p->jadwal_map = $p->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
+
+                $p->total_siang = 0;
+                $p->total_malam = 0;
+
+                foreach ($dates as $d) {
+                    $abs = $p->absensi_map->get($d);
+                    $jadwal = $p->jadwal_map->get($d);
+
+                    $isHadir = $abs && (
+                        $abs->status === 'HADIR' ||
+                        $abs->status === 'TELAT' ||
+                        !empty($abs->jam_masuk)
+                    );
+
+                    if ($isHadir && $jadwal && $jadwal->shift) {
+                        $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
+
+                        if (in_array('siang', $konsumsis)) {
+                            $p->total_siang++;
+                            $dailySummary[$d]['siang']++;
+                            $totalSiangAll++;
+                        }
+                        if (in_array('malam', $konsumsis)) {
+                            $p->total_malam++;
+                            $dailySummary[$d]['malam']++;
+                            $totalMalamAll++;
+                        }
+                    }
+                    $dailySummary[$d]['total'] = $dailySummary[$d]['siang'] + $dailySummary[$d]['malam'];
+                }
+            }
+
+            $opdName = $opdId ? Opd::find($opdId)->name : 'Semua OPD';
+            $monthName = Carbon::create()->month($month)->translatedFormat('F');
+
+            $data = [
+                'personnels' => $personnels,
+                'dates' => $dates,
+                'dailySummary' => $dailySummary,
+                'totalSiangAll' => $totalSiangAll,
+                'totalMalamAll' => $totalMalamAll,
+                'grandTotalAll' => $totalSiangAll + $totalMalamAll,
+                'month' => $month,
+                'year' => $year,
+                'monthName' => $monthName,
+                'opdName' => $opdName,
+                'startDate' => $startDate ?? $dates[0] ?? null,
+                'endDate' => $endDate ?? end($dates) ?? null,
+            ];
+
+            $paperFormat = $paperSize;
+            if ($paperSize === 'f4') {
+                $paperFormat = [0, 0, 609, 935];
+            }
+
+            $pdf = Pdf::loadView('reports.konsumsi-pdf', $data)
+                ->setPaper($paperFormat, 'landscape');
+
+            $filename = $this->generateKonsumsiExportFilename($request, 'pdf');
+
+            return $pdf->download($filename)->withHeaders([
+                'Access-Control-Expose-Headers' => 'X-Filename, Content-Disposition',
+                'X-Filename' => $filename,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'trace' => explode("\n", $e->getTraceAsString()),
+            ], 500);
+        }
+    }
+
+    private function generateKonsumsiExportFilename(Request $request, string $extension): string
+    {
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+
+        if ($startDate && $endDate) {
+            $startFormatted = Carbon::parse($startDate)->format('d-m-Y');
+            $endFormatted = Carbon::parse($endDate)->format('d-m-Y');
+
+            return "rekap_konsumsi_{$startFormatted}_{$endFormatted}.{$extension}";
+        }
+
+        if ($startDate) {
+            $startFormatted = Carbon::parse($startDate)->format('d-m-Y');
+
+            return "rekap_konsumsi_{$startFormatted}.{$extension}";
+        }
+
+        $month = (int) $request->get('month', date('m'));
+        $year = (int) $request->get('year', date('Y'));
+        $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+        $startFormatted = Carbon::create($year, $month, 1)->format('d-m-Y');
+        $endFormatted = Carbon::create($year, $month, $daysInMonth)->format('d-m-Y');
+
+        return "rekap_konsumsi_{$startFormatted}_{$endFormatted}.{$extension}";
+    }
+
     private function generateExportFilename(Request $request, string $extension): string
     {
         $startDate = $request->get('startDate');

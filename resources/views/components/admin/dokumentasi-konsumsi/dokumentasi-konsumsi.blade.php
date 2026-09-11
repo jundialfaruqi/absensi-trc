@@ -1,0 +1,1574 @@
+<div x-data="konsumsiAdminComponent()" wire:init="load">
+    {{-- ─── Page Header ───────────────────────────────────────────────────── --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-black uppercase">Dokumentasi Konsumsi</h1>
+            <p class="text-sm text-base-content/60 mt-1">Rekap dan Dokumentasi Konsumsi Makan Minum Personil</p>
+        </div>
+        <div class="text-sm breadcrumbs text-base-content/60 hidden md:block">
+            <ul>
+                <li><a href="{{ route('dashboard') }}">{{ config('app.name') }}</a></li>
+                <li>Overview</li>
+                <li><a href="{{ route('absensi') }}">Rekap Absensi</a></li>
+                <li>
+                    <span class="text-base-content font-bold">Dokumentasi Konsumsi</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {{-- ─── Tab Navigation Menu ─────────────────────────────────────────────── --}}
+    <div class="border-b border-base-300 mb-6">
+        <nav class="-mb-px flex space-x-6 sm:space-x-8" aria-label="Tabs">
+            <a href="{{ route('absensi') }}" wire:navigate
+                class="inline-flex items-center gap-2 py-3 px-1 border-b-4 text-sm transition-all border-transparent text-base-content/60 hover:text-base-content hover:border-base-300 font-medium cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <span>Rekap Absensi</span>
+            </a>
+
+            <a href="{{ route('dokumentasi-konsumsi') }}"
+                class="inline-flex items-center gap-2 py-3 px-1 border-b-4 text-sm transition-all border-primary text-primary font-bold cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Rekap Dokumentasi Konsumsi</span>
+            </a>
+        </nav>
+    </div>
+
+    {{-- Tombol action tambah dokumentasi konsumsi --}}
+    <div class="flex flex-col gap-4 mb-6">
+        <div class="flex flex-wrap gap-2 justify-start">
+            <button type="button" wire:click="openAddKonsumsiModal"
+                class="btn btn-sm md:btn-md btn-primary text-white gap-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                </svg>
+                <span>Upload Dokumentasi</span>
+            </button>
+        </div>
+    </div>
+
+    {{-- ─── Matrix Toolbar ──────────────────────────────────────────────────── --}}
+    <div class="flex flex-col gap-4 mb-6">
+        {{-- Filters and Actions --}}
+        <div class="flex flex-col md:flex-row justify-between gap-4">
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="join">
+                    <span
+                        class="btn btn-sm md:btn-md btn-disabled join-item text-base-content pointer-events-none rounded-left-md">Show</span>
+                    <select wire:model.live="perPage"
+                        class="select select-bordered select-sm md:select-md join-item w-20 rounded-end-md">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+                </div>
+
+                @if (auth()->user()->hasRole('super-admin'))
+                    <div class="w-full sm:w-auto">
+                        <select wire:model.live="selectedOpd"
+                            class="select select-bordered select-sm md:select-md w-full sm:w-64 bg-base-100">
+                            <option value="">Semua OPD (Filter)</option>
+                            @foreach ($this->opds as $opd)
+                                <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+
+                <form wire:submit.prevent="applyFilter" class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <div class="join w-full sm:w-auto">
+                        <div
+                            class="join-item flex items-center btn btn-sm md:btn-md btn-disabled pointer-events-none rounded-left-md px-3 text-[10px] uppercase text-base-content">
+                            Dari</div>
+                        <input type="date" id="startDate" wire:model="filterStartDate"
+                            class="input input-bordered input-sm md:input-md join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
+                        <div
+                            class="join-item flex items-center btn btn-sm md:btn-md btn-disabled pointer-events-none px-3 text-[10px] uppercase text-base-content">
+                            S/D</div>
+                        <input type="date" id="endDate" wire:model="filterEndDate"
+                            class="input input-bordered input-sm md:input-md join-item w-full sm:w-auto scheme-light dark:scheme-dark text-base-content/70" />
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="submit"
+                            class="btn btn-sm md:btn-md btn-primary gap-1.5 flex-1 sm:flex-initial shadow-sm">
+                            <span wire:loading.remove wire:target="applyFilter" class="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                <span>Terapkan</span>
+                            </span>
+                            <span wire:loading wire:target="applyFilter" class="flex items-center gap-1.5">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span>Terapkan</span>
+                            </span>
+                        </button>
+
+                        <button type="button" wire:click="resetFilters"
+                            class="btn btn-sm md:btn-md btn-outline border-base-300 text-base-content/70 hover:text-error hover:border-error gap-1.5 flex-1 sm:flex-initial"
+                            title="Reset filter tanggal">
+                            <span wire:loading.remove wire:target="resetFilters" class="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                <span>Reset</span>
+                            </span>
+                            <span wire:loading wire:target="resetFilters" class="flex items-center gap-1.5">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span>Reset</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex flex-wrap gap-2 justify-end">
+                <div class="join">
+                    <select wire:model.live="paperSize"
+                        class="select select-bordered select-sm md:select-md join-item">
+                        <option value="a4">Kertas A4</option>
+                        <option value="f4">Kertas F4 / Folio</option>
+                        <option value="legal">Kertas Legal</option>
+                    </select>
+                    <button type="button" @click="openExportModal('pdf')"
+                        class="btn btn-sm md:btn-md btn-neutral join-item gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                            <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
+                            <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" />
+                            <path d="M17 18h2" />
+                            <path d="M20 15h-3v6" />
+                            <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" />
+                        </svg>
+                        Export PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @php
+        $dates = $this->dates;
+        $summary = $this->monthlySummary;
+        $firstDate = !empty($dates) ? \Carbon\Carbon::parse($dates[0]) : \Carbon\Carbon::now();
+    @endphp
+
+    {{-- ─── TABEL 1: JUMLAH KONSUMSI PER BULAN ──────────────────────────────── --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden mb-6">
+        <div class="card-body p-0">
+            <div
+                class="px-4 pt-4 pb-2 border-base-200 flex flex-wrap items-center justify-between gap-3 bg-base-200/20">
+                <div class="flex items-center gap-2">
+                    <h2 class="font-bold text-sm md:text-base text-base-content uppercase">
+                        Tabel Jumlah Konsumsi Per Bulan ({{ $firstDate->translatedFormat('F Y') }})
+                    </h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-warning font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                        Siang: {{ number_format($summary['totalSiang']) }}
+                    </span>
+                    <span class="badge badge-info font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                        Malam: {{ number_format($summary['totalMalam']) }}
+                    </span>
+                    <span class="badge badge-neutral font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                        Total: {{ number_format($summary['grandTotal']) }} Porsi
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto overflow-y-auto">
+                <table class="table table-sm w-full border-separate border-spacing-0">
+                    <thead class="sticky top-0 z-30 bg-base-100 shadow-xs">
+                        <tr>
+                            <th
+                                class="sticky left-0 z-40 bg-base-100 border-b border-r border-t border-base-200 min-w-44 text-left align-middle font-black text-xs uppercase px-4">
+                                {{ $firstDate->translatedFormat('F Y') }}
+                            </th>
+                            @foreach ($dates as $date)
+                                @php
+                                    $carbonDate = \Carbon\Carbon::parse($date);
+                                    $isWeekend = $carbonDate->isWeekend();
+                                    $isToday = $carbonDate->isToday();
+                                @endphp
+                                <th
+                                    class="text-center border-b border-r border-t border-base-200 min-w-16 p-1.5 {{ $isToday ? 'bg-primary/10' : ($isWeekend ? 'bg-error/5 text-error' : '') }}">
+                                    <div class="text-[10px] uppercase opacity-60 leading-none mb-1">
+                                        {{ $carbonDate->translatedFormat('D') }}
+                                    </div>
+                                    <div class="text-xs font-bold">
+                                        {{ $carbonDate->format('d/m') }}
+                                    </div>
+                                </th>
+                            @endforeach
+                            <th
+                                class="text-center border-b border-t border-base-200 min-w-24 bg-base-200/50 align-middle font-black text-xs uppercase">
+                                TOTAL
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!$readyToLoad)
+                            <tr>
+                                <td colspan="{{ count($dates) + 2 }}" class="text-center py-8">
+                                    <span class="loading loading-spinner loading-md text-primary"></span>
+                                    <p class="text-xs text-base-content/60 mt-2">Memuat data konsumsi...</p>
+                                </td>
+                            </tr>
+                        @else
+                            {{-- Baris 1: SIANG --}}
+                            <tr class="hover:bg-warning/5 transition-colors">
+                                <td
+                                    class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4">
+                                    SIANG
+                                </td>
+                                @foreach ($dates as $date)
+                                    @php
+                                        $countSiang = $summary['daily'][$date]['siang'] ?? 0;
+                                        $isToday = \Carbon\Carbon::parse($date)->isToday();
+                                    @endphp
+                                    <td
+                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }}">
+                                        @if ($countSiang > 0)
+                                            <span
+                                                class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold">
+                                                {{ $countSiang }}
+                                            </span>
+                                        @else
+                                            <span class="text-base-content/25 text-xs">0</span>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td
+                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-warning/15 text-warning-content">
+                                    {{ number_format($summary['totalSiang']) }}
+                                </td>
+                            </tr>
+
+                            {{-- Baris 2: MALAM --}}
+                            <tr class="hover:bg-info/5 transition-colors">
+                                <td
+                                    class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4">
+                                    MALAM
+                                </td>
+                                @foreach ($dates as $date)
+                                    @php
+                                        $countMalam = $summary['daily'][$date]['malam'] ?? 0;
+                                        $isToday = \Carbon\Carbon::parse($date)->isToday();
+                                    @endphp
+                                    <td
+                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }}">
+                                        @if ($countMalam > 0)
+                                            <span
+                                                class="inline-flex items-center justify-center size-6 rounded-full bg-info/20 text-info-content text-xs font-bold">
+                                                {{ $countMalam }}
+                                            </span>
+                                        @else
+                                            <span class="text-base-content/25 text-xs">0</span>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                <td
+                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-info/15 text-info-content">
+                                    {{ number_format($summary['totalMalam']) }}
+                                </td>
+                            </tr>
+
+                            {{-- Baris TOTAL --}}
+                            <tr class="bg-base-200/50 font-black">
+                                <td
+                                    class="sticky left-0 z-20 bg-base-200 border-b border-r border-base-200 text-xs py-3 px-4 uppercase text-base-content">
+                                    TOTAL KONSUMSI
+                                </td>
+                                @foreach ($dates as $date)
+                                    @php
+                                        $countTotal = $summary['daily'][$date]['total'] ?? 0;
+                                        $isToday = \Carbon\Carbon::parse($date)->isToday();
+                                    @endphp
+                                    <td
+                                        class="text-center border-b border-r border-base-200 p-2 font-black text-xs {{ $isToday ? 'bg-primary/15' : '' }}">
+                                        {{ $countTotal }}
+                                    </td>
+                                @endforeach
+                                <td
+                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-base-300 text-base-content">
+                                    {{ number_format($summary['grandTotal']) }}
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- ─── TABEL 2: RINCIAN KONSUMSI PER PERSONEL ────────────────────────── --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden mb-8">
+        <div class="card-body p-0">
+            <div class="px-4 pt-4 pb-2 flex flex-wrap items-center justify-between gap-3 bg-base-200/20">
+                <div>
+                    <h2 class="font-bold text-sm md:text-base text-base-content uppercase">
+                        Rincian Konsumsi Per Personil
+                    </h2>
+                    <p class="text-xs text-base-content/60 mt-0.5">
+                        Menampilkan jatah konsumsi personil berdasarkan kehadiran dan shift tugas
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-base-content/70">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="size-2.5 rounded-full bg-warning"></span> Siang (S)
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="size-2.5 rounded-full bg-info"></span> Malam (M)
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="size-2.5 rounded-full bg-success"></span> 24 Jam (S+M)
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
+                <table class="table table-sm w-full border-separate border-spacing-0">
+                    <thead class="sticky top-0 z-30 bg-base-100 shadow-xs">
+                        <tr>
+                            <th rowspan="2"
+                                class="sticky left-0 z-40 bg-base-100 border-b border-t border-r border-base-200 min-w-56 text-left align-middle px-4 py-3">
+                                <span class="font-bold text-xs uppercase">Personnel</span>
+                            </th>
+                            @foreach ($dates as $date)
+                                @php
+                                    $carbonDate = \Carbon\Carbon::parse($date);
+                                    $isToday = $carbonDate->isToday();
+                                    $isWeekend = $carbonDate->isWeekend();
+                                @endphp
+                                <th rowspan="2"
+                                    class="text-center border-b border-r border-t border-base-200 min-w-16 p-1.5 align-middle {{ $isToday ? 'bg-primary/10' : ($isWeekend ? 'bg-error/5 text-error' : '') }}">
+                                    <div class="text-[10px] uppercase opacity-60 leading-none mb-1">
+                                        {{ $carbonDate->translatedFormat('D') }}
+                                    </div>
+                                    <div class="text-xs font-bold">
+                                        {{ $carbonDate->format('d/m') }}
+                                    </div>
+                                </th>
+                            @endforeach
+                            <th colspan="3"
+                                class="text-center border-b border-t border-base-200 bg-base-200/50 p-1.5 font-bold text-xs">
+                                TOTAL
+                            </th>
+                        </tr>
+                        <tr>
+                            <th
+                                class="text-center border-b border-r border-base-200 bg-warning/10 text-warning-content font-bold text-[10px] p-1">
+                                SIANG
+                            </th>
+                            <th
+                                class="text-center border-b border-r border-base-200 bg-info/10 text-info-content font-bold text-[10px] p-1">
+                                MALAM
+                            </th>
+                            <th class="text-center border-b border-base-200 bg-base-200 font-bold text-[10px] p-1">
+                                JML
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!$readyToLoad)
+                            @for ($i = 0; $i < 5; $i++)
+                                <tr>
+                                    <td class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 p-3">
+                                        <div class="flex items-center gap-3 animate-pulse">
+                                            <div class="size-8 rounded-full bg-base-300"></div>
+                                            <div class="space-y-1.5 flex-1">
+                                                <div class="h-3 bg-base-300 rounded w-24"></div>
+                                                <div class="h-2 bg-base-200 rounded w-16"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    @foreach ($dates as $d)
+                                        <td class="border-b border-r border-base-200 p-2 text-center">
+                                            <div class="size-5 bg-base-200 rounded-full mx-auto animate-pulse"></div>
+                                        </td>
+                                    @endforeach
+                                    <td class="border-b border-r border-base-200 bg-warning/5"></td>
+                                    <td class="border-b border-r border-base-200 bg-info/5"></td>
+                                    <td class="border-b border-base-200 bg-base-200/20"></td>
+                                </tr>
+                            @endfor
+                        @else
+                            @forelse ($this->personnels as $personnel)
+                                <tr class="hover:bg-base-200/30 transition-colors">
+                                    {{-- Kolom Sticky Personnel --}}
+                                    <td
+                                        class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 px-4 py-2.5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="avatar shrink-0">
+                                                <div class="size-8 rounded-full ring-1 ring-base-300">
+                                                    @if ($personnel->foto)
+                                                        <img src="{{ asset('storage/' . $personnel->foto) }}"
+                                                            alt="{{ $personnel->name }}" />
+                                                    @else
+                                                        <div
+                                                            class="bg-primary/10 text-primary flex items-center justify-center font-bold text-xs h-full w-full">
+                                                            {{ strtoupper(substr($personnel->name, 0, 1)) }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="min-w-0 max-w-44">
+                                                <div class="font-bold text-xs text-base-content truncate"
+                                                    title="{{ $personnel->name }}">
+                                                    {{ $personnel->name }}
+                                                </div>
+                                                <div
+                                                    class="flex items-center gap-1.5 text-[10px] text-base-content/60 mt-0.5">
+                                                    @if ($personnel->regu)
+                                                        <span class="badge badge-ghost badge-xs font-semibold">
+                                                            {{ $personnel->regu }}
+                                                        </span>
+                                                    @endif
+                                                    <span
+                                                        class="truncate">{{ $personnel->penugasan?->name ?? '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {{-- Kolom Tanggal --}}
+                                    @foreach ($dates as $date)
+                                        @php
+                                            $abs = $personnel->absensi_map->get($date);
+                                            $jadwal = $personnel->jadwal_map->get($date);
+
+                                            $isHadir =
+                                                $abs &&
+                                                ($abs->status === 'HADIR' ||
+                                                    $abs->status === 'TELAT' ||
+                                                    !empty($abs->jam_masuk));
+
+                                            $isToday = \Carbon\Carbon::parse($date)->isToday();
+
+                                            $cellType = 'none';
+                                            if ($isHadir && $jadwal && $jadwal->shift) {
+                                                $konsumsis = $jadwal->shift->konsumsis
+                                                    ->pluck('nama')
+                                                    ->map(fn($k) => strtolower(trim($k)))
+                                                    ->toArray();
+                                                $hasSiang = in_array('siang', $konsumsis);
+                                                $hasMalam = in_array('malam', $konsumsis);
+
+                                                if ($hasSiang && $hasMalam) {
+                                                    $cellType = 'both';
+                                                } elseif ($hasSiang) {
+                                                    $cellType = 'siang';
+                                                } elseif ($hasMalam) {
+                                                    $cellType = 'malam';
+                                                } else {
+                                                    $cellType = 'hadir-no-meal';
+                                                }
+                                            } elseif (
+                                                $abs &&
+                                                in_array($abs->status, ['ALPA', 'IZIN', 'SAKIT', 'CUTI'])
+                                            ) {
+                                                $cellType = strtolower($abs->status);
+                                            }
+                                        @endphp
+                                        <td
+                                            class="text-center border-b border-r border-base-200 p-1.5 {{ $isToday ? 'bg-primary/5' : '' }}">
+                                            @if ($cellType === 'both')
+                                                <span
+                                                    class="badge badge-success badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    title="24 Jam (Siang & Malam)">
+                                                    S+M
+                                                </span>
+                                            @elseif ($cellType === 'siang')
+                                                <span
+                                                    class="badge badge-warning badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    title="Konsumsi Siang">
+                                                    S
+                                                </span>
+                                            @elseif ($cellType === 'malam')
+                                                <span
+                                                    class="badge badge-info badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    title="Konsumsi Malam">
+                                                    M
+                                                </span>
+                                            @elseif ($cellType === 'hadir-no-meal')
+                                                <span class="text-base-content/40 text-xs font-semibold"
+                                                    title="Hadir (Tanpa Jatah Konsumsi)">
+                                                    ✓
+                                                </span>
+                                            @elseif ($cellType === 'alpa')
+                                                <span class="text-error font-bold text-[10px]" title="Alpa">A</span>
+                                            @elseif ($cellType === 'izin')
+                                                <span class="text-info font-bold text-[10px]" title="Izin">I</span>
+                                            @elseif ($cellType === 'sakit')
+                                                <span class="text-warning font-bold text-[10px]"
+                                                    title="Sakit">S</span>
+                                            @elseif ($cellType === 'cuti')
+                                                <span class="text-purple-600 font-bold text-[10px]"
+                                                    title="Cuti">C</span>
+                                            @else
+                                                <span class="text-base-content/20 text-xs">-</span>
+                                            @endif
+                                        </td>
+                                    @endforeach
+
+                                    {{-- Kolom Summary Personel --}}
+                                    <td
+                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs bg-warning/5 text-warning-content">
+                                        {{ $personnel->total_siang }}
+                                    </td>
+                                    <td
+                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs bg-info/5 text-info-content">
+                                        {{ $personnel->total_malam }}
+                                    </td>
+                                    <td
+                                        class="text-center border-b border-base-200 p-2 font-black text-xs bg-base-200/40">
+                                        {{ $personnel->total_konsumsi }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="{{ count($dates) + 4 }}"
+                                        class="text-center py-10 text-base-content/60">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="size-10 mx-auto opacity-30 mb-2" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="font-medium text-sm">Tidak ada data personel ditemukan</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Pagination Links --}}
+            <div class="ps-4 pb-4 pr-4 pt-2 bg-base-50">
+                @if ($readyToLoad)
+                    {{ $this->personnels->links('components.admin.pagination') }}
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- ─── MODAL EXPORT PDF ────────────────────────────────────────────────── --}}
+    <dialog class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999"
+        :class="{ 'modal-open': showExportModal }">
+        <div class="modal-box max-w-lg rounded-2xl shadow-2xl border border-base-200">
+            {{-- Header Modal --}}
+            <div class="flex items-start justify-between pb-3 border-b border-base-200">
+                <div class="flex items-center gap-3">
+                    <div class="text-base-content">
+                        <template x-if="exportStatus === 'success'">
+                            <div class="size-9 rounded-xl bg-success/15 text-success flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </template>
+                        <template x-if="exportStatus === 'error'">
+                            <div class="size-9 rounded-xl bg-error/15 text-error flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                        </template>
+                        <template x-if="exportStatus === 'processing'">
+                            <div class="size-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center">
+                                <span class="loading loading-spinner loading-sm text-primary"></span>
+                            </div>
+                        </template>
+                        <template x-if="exportStatus === 'idle'">
+                            <div class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                    <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
+                                    <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" />
+                                    <path d="M17 18h2" />
+                                    <path d="M20 15h-3v6" />
+                                    <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" />
+                                </svg>
+                            </div>
+                        </template>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-base-content"
+                            x-text="exportStatus === 'processing' ? 'Memproses Dokumen' : (exportStatus === 'success' ? 'Export Berhasil' : (exportStatus === 'error' ? 'Export Gagal' : 'Konfirmasi Unduh PDF'))">
+                        </h3>
+                        <p class="text-xs text-base-content/60"
+                            x-text="exportStatus === 'processing' ? 'Mohon tunggu sejenak hingga file PDF selesai digenerate' : (exportStatus === 'success' ? 'File laporan dokumentasi konsumsi siap digunakan' : (exportStatus === 'error' ? 'Terjadi kendala saat memproses dokumen' : 'Unduh Rekap Dokumentasi Konsumsi format PDF'))">
+                        </p>
+                    </div>
+                </div>
+                <button type="button" @click="closeExportModal()" :disabled="exportStatus === 'processing'"
+                    class="btn btn-sm btn-ghost btn-circle text-base-content/50 hover:text-base-content disabled:opacity-30">✕</button>
+            </div>
+
+            {{-- Body Modal --}}
+            <div class="py-4 text-sm">
+                {{-- State: Idle --}}
+                <div x-show="exportStatus === 'idle'" class="space-y-4">
+                    <div class="bg-base-200/60 rounded-xl p-3 space-y-2 border border-base-200">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-base-content/60">Format File:</span>
+                            <span class="font-bold uppercase text-primary">PDF Document (.pdf)</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-base-content/60">Ukuran Kertas:</span>
+                            <span class="font-bold uppercase" x-text="exportPaperSize.toUpperCase()"></span>
+                        </div>
+                    </div>
+
+                    {{-- Target OPD --}}
+                    @if (auth()->user()->hasRole('super-admin'))
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-base-content/70">
+                                Target OPD
+                            </label>
+                            <select x-model="exportOpdId" class="select select-bordered w-full text-xs bg-base-100">
+                                <option value="">Semua OPD</option>
+                                @foreach ($this->opds as $opd)
+                                    <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @else
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-base-content/70">
+                                Target OPD
+                            </label>
+                            <input type="text" value="{{ auth()->user()->opd()?->name ?? 'OPD Anda' }}" disabled
+                                class="input input-bordered w-full text-xs bg-base-200/60 text-base-content/70 cursor-not-allowed" />
+                        </div>
+                    @endif
+
+                    {{-- Ubah Range Tanggal --}}
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-base-content/70">
+                            Atur Periode Tanggal
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="label text-xs py-1 text-base-content/60 font-medium">Dari Tanggal</label>
+                                <input type="date" x-model="exportStartDate"
+                                    class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" />
+                            </div>
+                            <div>
+                                <label class="label text-xs py-1 text-base-content/60 font-medium">Sampai
+                                    Tanggal</label>
+                                <input type="date" x-model="exportEndDate"
+                                    class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" />
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-base-content/50 italic flex items-center gap-1 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Rentang tanggal maksimal 31 hari.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- State: Processing --}}
+                <div x-show="exportStatus === 'processing'" class="py-6 space-y-4">
+                    <div class="w-full bg-base-200 rounded-full h-3 overflow-hidden">
+                        <div class="bg-primary h-3 rounded-full transition-all duration-300"
+                            :style="'width: ' + exportProgress + '%'"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-base-content/60">
+                        <span x-text="exportStatusText">Mempersiapkan data...</span>
+                        <span class="font-bold font-mono" x-text="exportProgress + '%'"></span>
+                    </div>
+                </div>
+
+                {{-- State: Success --}}
+                <div x-show="exportStatus === 'success'" class="py-6 space-y-3 text-center">
+                    <div
+                        class="size-16 rounded-full bg-success/15 text-success mx-auto flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-8" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <p class="font-semibold text-base text-base-content">Dokumen Berhasil Dibuat!</p>
+                    <p class="text-xs text-base-content/60 font-mono" x-text="exportedFilename"></p>
+                </div>
+
+                {{-- State: Error --}}
+                <div x-show="exportStatus === 'error'" class="py-6 space-y-3 text-center">
+                    <div class="size-16 rounded-full bg-error/15 text-error mx-auto flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-8" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <p class="font-semibold text-base text-error">Terjadi Kesalahan</p>
+                    <p class="text-xs text-base-content/60 max-w-sm mx-auto" x-text="exportErrorMessage"></p>
+                </div>
+            </div>
+
+            {{-- Footer Modal --}}
+            <div class="pt-3 border-t border-base-200 flex items-center justify-end gap-2">
+                <template x-if="exportStatus === 'idle'">
+                    <div class="flex gap-2">
+                        <button type="button" @click="closeExportModal()"
+                            class="btn btn-sm btn-ghost">Batal</button>
+                        <button type="button" @click="startExport()"
+                            class="btn btn-sm btn-primary text-white gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>Unduh Sekarang</span>
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="exportStatus === 'success'">
+                    <div class="flex gap-2">
+                        <button type="button" @click="triggerRedownload()" class="btn btn-sm btn-outline gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Unduh Ulang
+                        </button>
+                        <button type="button" @click="closeExportModal()"
+                            class="btn btn-sm btn-neutral">Tutup</button>
+                    </div>
+                </template>
+
+                <template x-if="exportStatus === 'error'">
+                    <div class="flex gap-2">
+                        <button type="button" @click="startExport()"
+                            class="btn btn-sm btn-error text-white gap-1.5">
+                            Coba Lagi
+                        </button>
+                        <button type="button" @click="closeExportModal()"
+                            class="btn btn-sm btn-ghost">Tutup</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </dialog>
+
+    {{-- ─── MODAL UPLOAD DOKUMENTASI KONSUMSI ────────────────────────────── --}}
+    <dialog
+        class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999 {{ $showAddModal ? 'modal-open' : '' }}">
+        <div class="modal-box max-w-lg rounded-2xl shadow-2xl border border-base-200 max-h-[90vh] overflow-y-auto"
+            x-data="dokumentasiUploadModal()">
+            {{-- Header Modal --}}
+            <div class="flex items-start justify-between pb-3 border-b border-base-200">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-base-content">Upload Dokumentasi Konsumsi</h3>
+                        <p class="text-xs text-base-content/60">Unggah bukti foto dan jumlah porsi konsumsi</p>
+                    </div>
+                </div>
+                <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
+                    class="btn btn-sm btn-ghost btn-circle text-base-content/50 hover:text-base-content">✕</button>
+            </div>
+
+            <form wire:submit="saveKonsumsi" class="py-4 space-y-4 text-sm">
+                {{-- 1. Input Tanggal --}}
+                <div>
+                    <label class="label text-xs py-1 text-base-content/80 font-bold">1. Tanggal Dokumentasi</label>
+                    <input type="date" wire:model.live="uploadTanggal"
+                        class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" required />
+                </div>
+
+                {{-- 2. Radio Button Pilihan Sesi Konsumsi --}}
+                <div>
+                    <label class="label text-xs py-1 text-base-content/80 font-bold">2. Pilih Sesi Konsumsi</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label
+                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }}">
+                            <input type="radio" wire:model.live="sesiKonsumsi" value="siang"
+                                class="radio radio-sm radio-warning" />
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="size-2 rounded-full bg-warning shrink-0"></span>
+                                    <span class="text-xs font-bold text-base-content">Makan Siang</span>
+                                </div>
+                                <div class="text-[11px] text-base-content/60 mt-0.5">
+                                    Tersedia: <span
+                                        class="font-bold text-warning-content">{{ $this->calculatedSiang }}</span>
+                                    porsi
+                                </div>
+                            </div>
+                        </label>
+
+                        <label
+                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-info bg-info/10 ring-2 ring-info/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }}">
+                            <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
+                                class="radio radio-sm radio-info" />
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="size-2 rounded-full bg-info shrink-0"></span>
+                                    <span class="text-xs font-bold text-base-content">Makan Malam</span>
+                                </div>
+                                <div class="text-[11px] text-base-content/60 mt-0.5">
+                                    Tersedia: <span
+                                        class="font-bold text-info-content">{{ $this->calculatedMalam }}</span> porsi
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                @php
+                    $maxSiang = $this->calculatedSiang;
+                    $maxMalam = $this->calculatedMalam;
+                @endphp
+
+                {{-- 3. Form Input Sesi Makan Siang (Tampil Jika Sesi Siang Dipilih) --}}
+                @if ($sesiKonsumsi === 'siang')
+                    <div class="p-4 bg-warning/5 border border-warning/20 rounded-2xl space-y-4">
+                        {{-- Input Jumlah Siang --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                    <span class="size-2 rounded-full bg-warning"></span>
+                                    Jumlah Porsi Makan Siang
+                                </label>
+                                <span class="badge badge-warning badge-sm font-bold text-[11px]">
+                                    Maks. {{ $maxSiang }} Porsi
+                                </span>
+                            </div>
+                            <input type="number" wire:model.live="jumlahSiang" min="0"
+                                max="{{ $maxSiang }}"
+                                x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
+                                placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})" required />
+                            @error('jumlahSiang')
+                                <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                            <p class="text-[11px] text-base-content/60 mt-1">
+                                *Jumlah porsi tidak boleh lebih dari {{ $maxSiang }} (total konsumsi makan siang
+                                terdata pada tanggal ini).
+                            </p>
+                        </div>
+
+                        {{-- Pilihan Crop Aspect Ratio --}}
+                        <div class="space-y-1.5 pt-3 border-t border-warning/15">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
+                                    </svg>
+                                    Pilihan Crop Aspect Ratio
+                                </label>
+                                <span class="text-[10px] text-base-content/60 font-medium">Auto WebP & Maks. 100KB</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                    :class="cropRatio === '16:9' ? 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                    <input type="radio" x-model="cropRatio" value="16:9" @change="onCropRatioChange('fotoSiang')" class="radio radio-xs radio-warning" />
+                                    <span class="text-xs">16 : 9</span>
+                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
+                                </label>
+
+                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                    :class="cropRatio === '4:3' ? 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                    <input type="radio" x-model="cropRatio" value="4:3" @change="onCropRatioChange('fotoSiang')" class="radio radio-xs radio-warning" />
+                                    <span class="text-xs">4 : 3</span>
+                                </label>
+
+                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                    :class="cropRatio === 'original' ? 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                    <input type="radio" x-model="cropRatio" value="original" @change="onCropRatioChange('fotoSiang')" class="radio radio-xs radio-warning" />
+                                    <span class="text-xs">Original</span>
+                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Upload Foto Makan Siang --}}
+                        <div class="space-y-1.5 pt-2 border-t border-warning/15">
+                            <label class="label text-xs py-0 text-base-content/70 font-medium">Upload Foto Dokumentasi
+                                Makan Siang</label>
+                            <input type="file" wire:key="foto-siang-{{ $uploadIteration }}"
+                                @change="onFileChange($event, 'fotoSiang')"
+                                accept="image/jpeg,image/png,image/jpg,image/webp"
+                                class="file-input file-input-bordered file-input-sm w-full text-xs" />
+
+                            {{-- Status Processing WebP & Resize --}}
+                            <div x-show="isProcessing" class="text-xs text-warning flex items-center gap-1.5 mt-1.5 font-medium animate-pulse">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span x-text="processingStatus"></span>
+                            </div>
+
+                            <template x-if="errorMessage">
+                                <span class="text-error text-xs block mt-1" x-text="errorMessage"></span>
+                            </template>
+                            @error('fotoSiang')
+                                <span class="text-error text-xs block mt-1">{{ $message }}</span>
+                            @enderror
+
+                            {{-- Preview Foto Baru yang Baru Diproses / Diupload --}}
+                            <div x-show="processedPreviewSiang" class="relative mt-2 rounded-xl overflow-hidden border border-warning/40 aspect-video max-h-40 bg-base-200 shadow-inner">
+                                <img :src="processedPreviewSiang" alt="Preview Foto Siang"
+                                    class="w-full h-full object-cover" />
+                                <div class="absolute top-2 left-2 flex items-center gap-1.5">
+                                    <span class="badge badge-warning badge-xs font-bold shadow-xs">
+                                        WebP • <span x-text="processedSizeSiang"></span> • Maks 100KB Terpenuhi
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-2 right-2">
+                                    <button type="button" @click="clearPhoto('fotoSiang')" class="btn btn-2xs btn-error text-white shadow-xs">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Status Foto Tersimpan di Database --}}
+                            @if ($existingFotoSiang)
+                                <div x-show="!processedPreviewSiang"
+                                    class="mt-2 p-2.5 rounded-xl bg-base-200/60 border border-base-300 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <div class="size-10 rounded-lg overflow-hidden shrink-0 border border-base-300 bg-base-100">
+                                            <img src="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                alt="Foto Siang Tersimpan" class="w-full h-full object-cover" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="size-1.5 rounded-full bg-success"></span>
+                                                <span class="text-xs font-bold text-base-content">Foto Sudah Tersimpan di Database</span>
+                                            </div>
+                                            <p class="text-[11px] text-base-content/60 truncate">Pilih file baru di atas jika ingin mengganti</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ asset('storage/' . $existingFotoSiang) }}" target="_blank"
+                                        class="btn btn-xs btn-ghost border border-base-300 hover:bg-base-100 shrink-0 gap-1 text-[11px]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Lihat
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- 4. Form Input Sesi Makan Malam (Tampil Jika Sesi Malam Dipilih) --}}
+                @if ($sesiKonsumsi === 'malam')
+                    <div class="p-4 bg-info/5 border border-info/20 rounded-2xl space-y-4">
+                        {{-- Input Jumlah Malam --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                    <span class="size-2 rounded-full bg-info"></span>
+                                    Jumlah Porsi Makan Malam
+                                </label>
+                                <span class="badge badge-info badge-sm font-bold text-[11px]">
+                                    Maks. {{ $maxMalam }} Porsi
+                                </span>
+                            </div>
+                            <input type="number" wire:model.live="jumlahMalam" min="0"
+                                max="{{ $maxMalam }}"
+                                x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                class="input input-bordered input-sm w-full text-xs font-bold focus:border-info focus:outline-info"
+                                placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})" required />
+                            @error('jumlahMalam')
+                                <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                            <p class="text-[11px] text-base-content/60 mt-1">
+                                *Jumlah porsi tidak boleh lebih dari {{ $maxMalam }} (total konsumsi makan malam
+                                terdata pada tanggal ini).
+                            </p>
+                        </div>
+
+                        {{-- Pilihan Crop Aspect Ratio --}}
+                        <div class="space-y-1.5 pt-3 border-t border-info/15">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
+                                    </svg>
+                                    Pilihan Crop Aspect Ratio
+                                </label>
+                                <span class="text-[10px] text-base-content/60 font-medium">Auto WebP & Maks. 100KB</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                    :class="cropRatio === '16:9' ? 'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                    <input type="radio" x-model="cropRatio" value="16:9" @change="onCropRatioChange('fotoMalam')" class="radio radio-xs radio-info" />
+                                    <span class="text-xs">16 : 9</span>
+                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
+                                </label>
+
+                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                    :class="cropRatio === '4:3' ? 'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                    <input type="radio" x-model="cropRatio" value="4:3" @change="onCropRatioChange('fotoMalam')" class="radio radio-xs radio-info" />
+                                    <span class="text-xs">4 : 3</span>
+                                </label>
+
+                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                    :class="cropRatio === 'original' ? 'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                    <input type="radio" x-model="cropRatio" value="original" @change="onCropRatioChange('fotoMalam')" class="radio radio-xs radio-info" />
+                                    <span class="text-xs">Original</span>
+                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Upload Foto Makan Malam --}}
+                        <div class="space-y-1.5 pt-2 border-t border-info/15">
+                            <label class="label text-xs py-0 text-base-content/70 font-medium">Upload Foto Dokumentasi
+                                Makan Malam</label>
+                            <input type="file" wire:key="foto-malam-{{ $uploadIteration }}"
+                                @change="onFileChange($event, 'fotoMalam')"
+                                accept="image/jpeg,image/png,image/jpg,image/webp"
+                                class="file-input file-input-bordered file-input-sm w-full text-xs" />
+
+                            {{-- Status Processing WebP & Resize --}}
+                            <div x-show="isProcessing" class="text-xs text-info flex items-center gap-1.5 mt-1.5 font-medium animate-pulse">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span x-text="processingStatus"></span>
+                            </div>
+
+                            <template x-if="errorMessage">
+                                <span class="text-error text-xs block mt-1" x-text="errorMessage"></span>
+                            </template>
+                            @error('fotoMalam')
+                                <span class="text-error text-xs block mt-1">{{ $message }}</span>
+                            @enderror
+
+                            {{-- Preview Foto Baru yang Baru Diproses / Diupload --}}
+                            <div x-show="processedPreviewMalam" class="relative mt-2 rounded-xl overflow-hidden border border-info/40 aspect-video max-h-40 bg-base-200 shadow-inner">
+                                <img :src="processedPreviewMalam" alt="Preview Foto Malam"
+                                    class="w-full h-full object-cover" />
+                                <div class="absolute top-2 left-2 flex items-center gap-1.5">
+                                    <span class="badge badge-info badge-xs font-bold shadow-xs">
+                                        WebP • <span x-text="processedSizeMalam"></span> • Maks 100KB Terpenuhi
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-2 right-2">
+                                    <button type="button" @click="clearPhoto('fotoMalam')" class="btn btn-2xs btn-error text-white shadow-xs">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Status Foto Tersimpan di Database --}}
+                            @if ($existingFotoMalam)
+                                <div x-show="!processedPreviewMalam"
+                                    class="mt-2 p-2.5 rounded-xl bg-base-200/60 border border-base-300 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <div class="size-10 rounded-lg overflow-hidden shrink-0 border border-base-300 bg-base-100">
+                                            <img src="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                alt="Foto Malam Tersimpan" class="w-full h-full object-cover" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="size-1.5 rounded-full bg-success"></span>
+                                                <span class="text-xs font-bold text-base-content">Foto Sudah Tersimpan di Database</span>
+                                            </div>
+                                            <p class="text-[11px] text-base-content/60 truncate">Pilih file baru di atas jika ingin mengganti</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ asset('storage/' . $existingFotoMalam) }}" target="_blank"
+                                        class="btn btn-xs btn-ghost border border-base-300 hover:bg-base-100 shrink-0 gap-1 text-[11px]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Lihat
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Footer Modal --}}
+                <div class="pt-3 border-t border-base-200 flex items-center justify-end gap-2">
+                    <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
+                        class="btn btn-sm btn-ghost">Batal</button>
+                    <button type="submit" class="btn btn-sm btn-primary text-white gap-1.5"
+                        wire:loading.attr="disabled" :disabled="isProcessing" wire:target="fotoSiang,fotoMalam,saveKonsumsi">
+                        <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing">
+                            Simpan {{ $sesiKonsumsi === 'siang' ? 'Makan Siang' : 'Makan Malam' }}
+                        </span>
+                        <span wire:loading wire:target="saveKonsumsi"
+                            class="loading loading-spinner loading-xs"></span>
+                        <span x-show="isProcessing"
+                            class="loading loading-spinner loading-xs"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    {{-- ─── ALPINE JAVASCRIPT COMPONENT ────────────────────────────────────── --}}
+    <script>
+        function konsumsiAdminComponent() {
+            return {
+                showExportModal: false,
+                exportStartDate: @entangle('startDate').live,
+                exportEndDate: @entangle('endDate').live,
+                exportOpdId: @entangle('selectedOpd').live,
+                exportPaperSize: @entangle('paperSize').live,
+                exportStatus: 'idle',
+                exportProgress: 0,
+                exportStatusText: '',
+                exportErrorMessage: '',
+                downloadBlobUrl: null,
+                exportedFilename: '',
+
+                openExportModal(type) {
+                    this.exportStatus = 'idle';
+                    this.exportProgress = 0;
+                    this.exportStatusText = '';
+                    this.exportErrorMessage = '';
+                    this.downloadBlobUrl = null;
+                    this.exportedFilename = '';
+
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        this.exportStartDate = wire.get('startDate') || wire.get('filterStartDate') || '';
+                        this.exportEndDate = wire.get('endDate') || wire.get('filterEndDate') || '';
+                        this.exportOpdId = wire.get('selectedOpd') || '';
+                        this.exportPaperSize = wire.get('paperSize') || 'a4';
+                    }
+
+                    this.showExportModal = true;
+                },
+
+                closeExportModal() {
+                    if (this.exportStatus === 'processing') return;
+                    this.showExportModal = false;
+                },
+
+                async startExport() {
+                    this.exportStatus = 'processing';
+                    this.exportProgress = 10;
+                    this.exportStatusText = 'Mempersiapkan data dokumentasi konsumsi...';
+
+                    let progressTimer = setInterval(() => {
+                        if (this.exportProgress < 85) {
+                            this.exportProgress += Math.floor(Math.random() * 12) + 5;
+                            if (this.exportProgress > 40 && this.exportProgress < 70) {
+                                this.exportStatusText = 'Menghitung rekapitulasi porsi & shift...';
+                            } else if (this.exportProgress >= 70) {
+                                this.exportStatusText = 'Menyusun berkas PDF...';
+                            }
+                        }
+                    }, 400);
+
+                    try {
+                        let base = '{{ route('dokumentasi-konsumsi.export-pdf') }}';
+                        let params = new URLSearchParams();
+
+                        if (this.exportStartDate) params.append('startDate', this.exportStartDate);
+                        if (this.exportEndDate) params.append('endDate', this.exportEndDate);
+                        if (this.exportOpdId) params.append('opd_id', this.exportOpdId);
+                        if (this.exportPaperSize) params.append('paperSize', this.exportPaperSize);
+
+                        const fullUrl = base + (params.toString() ? '?' + params.toString() : '');
+
+                        const response = await fetch(fullUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/pdf, application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        clearInterval(progressTimer);
+
+                        if (!response.ok) {
+                            let errorMsg = 'Gagal mengekspor file (' + response.status + ' ' + response.statusText +
+                                ')';
+                            try {
+                                const errData = await response.json();
+                                if (errData.message) errorMsg = errData.message;
+                            } catch (e) {}
+                            throw new Error(errorMsg);
+                        }
+
+                        this.exportProgress = 95;
+                        this.exportStatusText = 'Menyiapkan unduhan...';
+
+                        let filename = response.headers.get('X-Filename');
+                        const disposition = response.headers.get('Content-Disposition');
+                        if (!filename && disposition) {
+                            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                            if (matches != null && matches[1]) {
+                                filename = matches[1].replace(/['"]/g, '').trim();
+                            }
+                        }
+                        if (!filename) {
+                            const formatIndo = (d) => {
+                                if (!d) return '';
+                                const parts = d.split('-');
+                                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : d;
+                            };
+                            const sDate = formatIndo(this.exportStartDate);
+                            const eDate = formatIndo(this.exportEndDate);
+                            filename = 'rekap_konsumsi_' + (sDate && eDate ? `${sDate}_${eDate}` : (sDate || '')) +
+                                '.pdf';
+                        }
+
+                        const blob = await response.blob();
+                        this.exportProgress = 100;
+                        this.exportStatusText = 'Selesai!';
+
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        this.downloadBlobUrl = blobUrl;
+                        this.exportedFilename = filename;
+
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        this.exportStatus = 'success';
+                    } catch (err) {
+                        clearInterval(progressTimer);
+                        this.exportStatus = 'error';
+                        this.exportErrorMessage = err.message || 'Terjadi kesalahan saat memproses export.';
+                    }
+                },
+
+                triggerRedownload() {
+                    if (this.downloadBlobUrl && this.exportedFilename) {
+                        const a = document.createElement('a');
+                        a.href = this.downloadBlobUrl;
+                        a.download = this.exportedFilename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+                }
+            };
+        }
+
+        function dokumentasiUploadModal() {
+            return {
+                cropRatio: '16:9',
+                rawFileSiang: null,
+                rawFileMalam: null,
+                processedPreviewSiang: null,
+                processedPreviewMalam: null,
+                processedSizeSiang: null,
+                processedSizeMalam: null,
+                isProcessing: false,
+                processingStatus: '',
+                errorMessage: '',
+
+                init() {
+                    this.$watch('$wire.showAddModal', (val) => {
+                        if (!val) {
+                            this.resetAll();
+                        }
+                    });
+                    this.$watch('$wire.uploadTanggal', () => {
+                        this.resetAll();
+                    });
+                },
+
+                async onFileChange(event, target) {
+                    const file = event.target.files && event.target.files[0];
+                    if (!file) return;
+
+                    if (!file.type.match(/^image\//i)) {
+                        this.errorMessage = 'File yang dipilih harus berupa format gambar (JPG, JPEG, PNG, WEBP).';
+                        return;
+                    }
+
+                    this.errorMessage = '';
+                    if (target === 'fotoSiang') {
+                        this.rawFileSiang = file;
+                    } else {
+                        this.rawFileMalam = file;
+                    }
+
+                    await this.processAndUpload(target);
+                },
+
+                async onCropRatioChange(target) {
+                    const file = (target === 'fotoSiang') ? this.rawFileSiang : this.rawFileMalam;
+                    if (file) {
+                        await this.processAndUpload(target);
+                    }
+                },
+
+                async processAndUpload(target) {
+                    const file = (target === 'fotoSiang') ? this.rawFileSiang : this.rawFileMalam;
+                    if (!file) return;
+
+                    this.isProcessing = true;
+                    this.errorMessage = '';
+                    this.processingStatus = 'Mengubah format ke WebP & menyesuaikan ukuran (Maks. 100KB)...';
+
+                    try {
+                        const webpFile = await this.cropAndCompressToWebp(file, this.cropRatio);
+
+                        const previewUrl = URL.createObjectURL(webpFile);
+                        const sizeKb = (webpFile.size / 1024).toFixed(1) + ' KB';
+
+                        if (target === 'fotoSiang') {
+                            if (this.processedPreviewSiang) URL.revokeObjectURL(this.processedPreviewSiang);
+                            this.processedPreviewSiang = previewUrl;
+                            this.processedSizeSiang = sizeKb;
+                        } else {
+                            if (this.processedPreviewMalam) URL.revokeObjectURL(this.processedPreviewMalam);
+                            this.processedPreviewMalam = previewUrl;
+                            this.processedSizeMalam = sizeKb;
+                        }
+
+                        this.processingStatus = 'Mengunggah gambar terkompresi...';
+
+                        const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                        if (wire) {
+                            wire.upload(target, webpFile,
+                                () => {
+                                    this.isProcessing = false;
+                                    this.processingStatus = '';
+                                },
+                                (err) => {
+                                    this.isProcessing = false;
+                                    this.processingStatus = '';
+                                    this.errorMessage = 'Gagal mengunggah foto ke server. Silakan coba lagi.';
+                                    console.error(err);
+                                },
+                                (e) => {
+                                    if (e.detail && e.detail.progress) {
+                                        this.processingStatus = `Mengunggah gambar... ${e.detail.progress}%`;
+                                    }
+                                }
+                            );
+                        } else {
+                            this.isProcessing = false;
+                            this.processingStatus = '';
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        this.isProcessing = false;
+                        this.processingStatus = '';
+                        this.errorMessage = 'Terjadi kesalahan saat memproses gambar: ' + (err.message || 'Error');
+                    }
+                },
+
+                cropAndCompressToWebp(file, ratio) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onerror = () => reject(new Error('Gagal membaca file gambar.'));
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.onerror = () => reject(new Error('Gagal memuat gambar ke browser.'));
+                            img.onload = async () => {
+                                try {
+                                    const origW = img.naturalWidth || img.width;
+                                    const origH = img.naturalHeight || img.height;
+
+                                    let sx = 0, sy = 0, sw = origW, sh = origH;
+
+                                    if (ratio === '16:9') {
+                                        const targetRatio = 16 / 9;
+                                        const curRatio = origW / origH;
+                                        if (curRatio > targetRatio) {
+                                            sw = Math.round(origH * targetRatio);
+                                            sh = origH;
+                                            sx = Math.round((origW - sw) / 2);
+                                            sy = 0;
+                                        } else {
+                                            sw = origW;
+                                            sh = Math.round(origW / targetRatio);
+                                            sx = 0;
+                                            sy = Math.round((origH - sh) / 2);
+                                        }
+                                    } else if (ratio === '4:3') {
+                                        const targetRatio = 4 / 3;
+                                        const curRatio = origW / origH;
+                                        if (curRatio > targetRatio) {
+                                            sw = Math.round(origH * targetRatio);
+                                            sh = origH;
+                                            sx = Math.round((origW - sw) / 2);
+                                            sy = 0;
+                                        } else {
+                                            sw = origW;
+                                            sh = Math.round(origW / targetRatio);
+                                            sx = 0;
+                                            sy = Math.round((origH - sh) / 2);
+                                        }
+                                    }
+
+                                    let destW = sw;
+                                    let destH = sh;
+                                    const maxDim = 1280;
+                                    if (destW > maxDim || destH > maxDim) {
+                                        if (destW > destH) {
+                                            destH = Math.round((destH * maxDim) / destW);
+                                            destW = maxDim;
+                                        } else {
+                                            destW = Math.round((destW * maxDim) / destH);
+                                            destH = maxDim;
+                                        }
+                                    }
+
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = destW;
+                                    canvas.height = destH;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, destW, destH);
+
+                                    const maxBytes = 100 * 1024;
+                                    let currentCanvas = canvas;
+                                    let quality = 0.85;
+
+                                    while (true) {
+                                        const blob = await new Promise((res) => {
+                                            currentCanvas.toBlob(res, 'image/webp', quality);
+                                        });
+
+                                        if (!blob) {
+                                            throw new Error('Gagal menghasilkan format WebP.');
+                                        }
+
+                                        if (blob.size <= maxBytes) {
+                                            const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+                                            const webpFile = new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+                                            resolve(webpFile);
+                                            return;
+                                        }
+
+                                        if (quality > 0.3) {
+                                            quality = Math.max(0.2, quality - 0.12);
+                                        } else {
+                                            if (currentCanvas.width > 350 && currentCanvas.height > 250) {
+                                                const nextW = Math.round(currentCanvas.width * 0.8);
+                                                const nextH = Math.round(currentCanvas.height * 0.8);
+                                                const scaledCvs = document.createElement('canvas');
+                                                scaledCvs.width = nextW;
+                                                scaledCvs.height = nextH;
+                                                const sCtx = scaledCvs.getContext('2d');
+                                                sCtx.drawImage(currentCanvas, 0, 0, nextW, nextH);
+                                                currentCanvas = scaledCvs;
+                                                quality = 0.75;
+                                            } else {
+                                                quality = Math.max(0.05, quality - 0.05);
+                                                if (quality <= 0.05) {
+                                                    const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+                                                    const webpFile = new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+                                                    resolve(webpFile);
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e) {
+                                    reject(e);
+                                }
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                },
+
+                clearPhoto(target) {
+                    if (target === 'fotoSiang') {
+                        this.rawFileSiang = null;
+                        if (this.processedPreviewSiang) {
+                            URL.revokeObjectURL(this.processedPreviewSiang);
+                            this.processedPreviewSiang = null;
+                        }
+                        this.processedSizeSiang = null;
+                    } else {
+                        this.rawFileMalam = null;
+                        if (this.processedPreviewMalam) {
+                            URL.revokeObjectURL(this.processedPreviewMalam);
+                            this.processedPreviewMalam = null;
+                        }
+                        this.processedSizeMalam = null;
+                    }
+
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        wire.set(target, null);
+                    }
+
+                    const inputEl = document.querySelector(target === 'fotoSiang' ? 'input[wire\\:key^="foto-siang"]' : 'input[wire\\:key^="foto-malam"]');
+                    if (inputEl) {
+                        inputEl.value = '';
+                    }
+                },
+
+                resetAll() {
+                    this.rawFileSiang = null;
+                    this.rawFileMalam = null;
+                    if (this.processedPreviewSiang) {
+                        URL.revokeObjectURL(this.processedPreviewSiang);
+                        this.processedPreviewSiang = null;
+                    }
+                    if (this.processedPreviewMalam) {
+                        URL.revokeObjectURL(this.processedPreviewMalam);
+                        this.processedPreviewMalam = null;
+                    }
+                    this.processedSizeSiang = null;
+                    this.processedSizeMalam = null;
+                    this.cropRatio = '16:9';
+                    this.isProcessing = false;
+                    this.processingStatus = '';
+                    this.errorMessage = '';
+
+                    const inputs = document.querySelectorAll('input[wire\\:key^="foto-"]');
+                    inputs.forEach(input => {
+                        input.value = '';
+                    });
+                }
+            };
+        }
+    </script>
+</div>

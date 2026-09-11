@@ -104,7 +104,7 @@ Route::group([
         ->middleware('permission:manajemen-absensi')
         ->name('absensi');
 
-    Route::livewire('/dokumentasi-konsumsi', 'admin::dokumentasi-konsumsi',)
+    Route::livewire('/dokumentasi-konsumsi', 'admin::dokumentasi-konsumsi')
         ->middleware('permission:lihat-dokumentasi-konsumsi')
         ->name('dokumentasi-konsumsi');
 
@@ -160,6 +160,10 @@ Route::group([
     Route::get('/absensi/export-excel', [App\Http\Controllers\Admin\ReportController::class, 'exportAbsensiExcel'])
         ->middleware('permission:manajemen-absensi')
         ->name('absensi.export-excel');
+
+    Route::get('/dokumentasi-konsumsi/export-pdf', [App\Http\Controllers\Admin\ReportController::class, 'exportKonsumsiPdf'])
+        ->middleware('permission:lihat-dokumentasi-konsumsi')
+        ->name('dokumentasi-konsumsi.export-pdf');
 
     Route::get('/jadwal/download-template', function () {
         $month = request('month', date('m'));
