@@ -558,8 +558,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 Storage::disk('public')->delete($record->foto_siang);
             }
             $record->foto_siang = null;
-            $record->jumlah_siang = 0;
-            if (empty($record->foto_malam) && (int)$record->jumlah_malam === 0) {
+            $record->jumlah_siang = null;
+            if (empty($record->foto_malam) && $record->jumlah_malam === null) {
                 $record->delete();
             } else {
                 $record->save();
@@ -570,8 +570,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 Storage::disk('public')->delete($record->foto_malam);
             }
             $record->foto_malam = null;
-            $record->jumlah_malam = 0;
-            if (empty($record->foto_siang) && (int)$record->jumlah_siang === 0) {
+            $record->jumlah_malam = null;
+            if (empty($record->foto_siang) && $record->jumlah_siang === null) {
                 $record->delete();
             } else {
                 $record->save();
@@ -721,7 +721,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             $dataToUpdate['jumlah_siang'] = $this->jumlahSiang;
             $dataToUpdate['foto_siang'] = $pathSiang;
         } else {
-            $dataToUpdate['jumlah_siang'] = $record?->jumlah_siang ?? 0;
+            $dataToUpdate['jumlah_siang'] = $record?->jumlah_siang ?? null;
             $dataToUpdate['foto_siang'] = $record?->foto_siang ?? null;
         }
 
@@ -736,7 +736,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             $dataToUpdate['jumlah_malam'] = $this->jumlahMalam;
             $dataToUpdate['foto_malam'] = $pathMalam;
         } else {
-            $dataToUpdate['jumlah_malam'] = $record?->jumlah_malam ?? 0;
+            $dataToUpdate['jumlah_malam'] = $record?->jumlah_malam ?? null;
             $dataToUpdate['foto_malam'] = $record?->foto_malam ?? null;
         }
 
