@@ -197,22 +197,40 @@
             border: 1px solid #cbd5e1;
         }
 
-        .dok-img {
+        .dok-card {
             width: 100%;
-            border-radius: 0px;
-            border: 1px solid #94a3b8;
-            display: block;
+            height: 210pt;
+            background-color: #ffffff;
+            border: none;
+            text-align: center;
+            overflow: hidden;
+            margin-bottom: 6px;
             box-sizing: border-box;
         }
 
+        .dok-card-last {
+            margin-bottom: 0;
+        }
+
+        .dok-img {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
         .no-photo {
-            padding: 40px 10px;
+            height: 210pt;
+            line-height: 210pt;
             color: #94a3b8;
             font-size: 9px;
             font-style: italic;
             background-color: #f1f5f9;
             border: 1px dashed #cbd5e1;
             border-radius: 0px;
+            text-align: center;
+            box-sizing: border-box;
         }
 
         .dok-footer {
@@ -437,7 +455,7 @@
                             </div>
                             <div class="dok-photos">
                                 @if ($item['foto_siang'])
-                                    <div style="margin-bottom: 6px;">
+                                    <div class="dok-card {{ empty($item['foto_siang_2']) ? 'dok-card-last' : '' }}">
                                         <img src="{{ $item['foto_siang'] }}" class="dok-img" />
                                     </div>
                                 @else
@@ -445,7 +463,7 @@
                                 @endif
 
                                 @if ($item['foto_siang_2'])
-                                    <div>
+                                    <div class="dok-card dok-card-last">
                                         <img src="{{ $item['foto_siang_2'] }}" class="dok-img" />
                                     </div>
                                 @endif
@@ -459,7 +477,7 @@
                             </div>
                             <div class="dok-photos">
                                 @if ($item['foto_malam'])
-                                    <div style="margin-bottom: 6px;">
+                                    <div class="dok-card {{ empty($item['foto_malam_2']) ? 'dok-card-last' : '' }}">
                                         <img src="{{ $item['foto_malam'] }}" class="dok-img" />
                                     </div>
                                 @else
@@ -467,7 +485,7 @@
                                 @endif
 
                                 @if ($item['foto_malam_2'])
-                                    <div>
+                                    <div class="dok-card dok-card-last">
                                         <img src="{{ $item['foto_malam_2'] }}" class="dok-img" />
                                     </div>
                                 @endif
