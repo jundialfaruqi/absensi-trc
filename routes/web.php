@@ -104,6 +104,10 @@ Route::group([
         ->middleware('permission:manajemen-absensi')
         ->name('absensi');
 
+    Route::livewire('/dokumentasi-konsumsi', 'admin::dokumentasi-konsumsi',)
+        ->middleware('permission:lihat-dokumentasi-konsumsi')
+        ->name('dokumentasi-konsumsi');
+
     Route::livewire('/absensi/log', 'admin::absensi-log')
         ->middleware('permission:manajemen-absensi')
         ->name('absensi.log');

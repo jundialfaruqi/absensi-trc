@@ -18,8 +18,37 @@
         </div>
     </div>
 
-    {{-- ─── Matrix Toolbar ──────────────────────────────────────────────────── --}}
-    <div class="flex flex-col gap-4 mb-6">
+    {{-- ─── Tab Navigation Menu ─────────────────────────────────────────────── --}}
+    <div class="border-b border-base-300 mb-6">
+        <nav class="-mb-px flex space-x-6 sm:space-x-8" aria-label="Tabs">
+            <a href="{{ route('absensi') }}" @click.prevent="activeTab = 'absensi'"
+                :class="activeTab === 'absensi' ? 'border-primary text-primary font-bold' : 'border-transparent text-base-content/60 hover:text-base-content hover:border-base-300 font-medium'"
+                class="inline-flex items-center gap-2 py-3 px-1 border-b-4 text-sm transition-all border-primary text-primary font-bold cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <span>Rekap Absensi</span>
+            </a>
+
+            <button type="button" @click="activeTab = 'konsumsi'"
+                :class="activeTab === 'konsumsi' ? 'border-primary text-primary font-bold' : 'border-transparent text-base-content/60 hover:text-base-content hover:border-base-300 font-medium'"
+                class="inline-flex items-center gap-2 py-3 px-1 border-b-4 text-sm transition-all border-transparent text-base-content/60 hover:text-base-content hover:border-base-300 font-medium cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Rekap Dokumentasi Konsumsi</span>
+            </button>
+        </nav>
+    </div>
+
+    {{-- ─── Rekap Absensi Content ───────────────────────────────────────────── --}}
+    <div x-show="activeTab === 'absensi'">
+        {{-- ─── Matrix Toolbar ──────────────────────────────────────────────────── --}}
+        <div class="flex flex-col gap-4 mb-6">
         {{-- Search Input --}}
         <div class="relative w-full sm:w-64">
             <input type="text" placeholder="Nama personnel..." wire:model.live.debounce.400ms="search"
@@ -592,6 +621,22 @@
             </div>
         </div>
     </div>
+    </div>
+
+    {{-- ─── Rekap Dokumentasi Konsumsi Placeholder ─────────────────────────── --}}
+    <div x-show="activeTab === 'konsumsi'" x-cloak class="bg-base-100 rounded-2xl border border-base-200 p-12 text-center my-6">
+        <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-8" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        </div>
+        <h3 class="text-base font-bold text-base-content">Rekap Dokumentasi Konsumsi</h3>
+        <p class="text-sm text-base-content/60 max-w-md mx-auto mt-1">
+            Menu dokumentasi konsumsi sedang disiapkan.
+        </p>
+    </div>
 
     <livewire:admin::absensi-edit-modal />
 
@@ -980,6 +1025,7 @@
     <script>
         function absensiAdminComponent() {
             return {
+                activeTab: 'absensi',
                 previewUrl: null,
                 showPreview: false,
                 previewX: 0,

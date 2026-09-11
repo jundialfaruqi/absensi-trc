@@ -123,3 +123,21 @@ test('export modal initiates download via startExport with progress and file pat
         ->assertSee('x-text="exportedFilename"', false)
         ->assertSee('Unduh Ulang');
 });
+
+test('admin absensi component renders navigation tabs for Rekap Absensi and Rekap Dokumentasi Konsumsi with active border and primary text', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi')
+        ->assertSee('Rekap Absensi')
+        ->assertSee('Rekap Dokumentasi Konsumsi')
+        ->assertSee('border-primary text-primary', false)
+        ->assertSee('border-b-4', false)
+        ->assertSee("activeTab === 'absensi'", false)
+        ->assertSee("activeTab === 'konsumsi'", false)
+        ->call('load')
+        ->assertSee('border-primary text-primary', false)
+        ->assertSee('border-b-4', false);
+});
+
