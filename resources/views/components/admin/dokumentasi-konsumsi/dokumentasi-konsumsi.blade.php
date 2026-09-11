@@ -1297,7 +1297,7 @@
                                 {{-- Card Foto Siang --}}
                                 <div class="relative overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
                                     :class="processedPreviewSiang ? 'border-warning ring-2 ring-warning/30 bg-neutral-900' :
-                                        '{{ $existingFotoSiang ? 'border-warning/40 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/70 bg-base-100/60 hover:bg-warning/5' }}'">
+                                        '{{ $existingFotoSiang ? 'border-warning/40 bg-neutral-900' : 'border-dashed border-base-300 hover:border-warning/70 bg-base-100/60 hover:bg-warning/5' }}'">
 
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
                                     <template x-if="processedPreviewSiang">
@@ -1308,7 +1308,7 @@
                                                 :class="{
                                                     'w-full': cropRatioSiang === 'original' ||
                                                         cropRatioSiang === '16:9',
-                                                    'aspect-[4/3] w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
+                                                    'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
                                                 }">
                                                 <img :src="processedPreviewSiang" alt="Preview Foto Siang"
                                                     class="w-full h-full transition-all duration-300"
@@ -1360,42 +1360,44 @@
                                     <template x-if="!processedPreviewSiang">
                                         <div class="w-full h-full relative">
                                             @if ($existingFotoSiang)
-                                                <img src="{{ asset('storage/' . $existingFotoSiang) }}"
-                                                    alt="Foto Konsumsi Siang"
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                <div class="absolute top-2 left-2 z-10">
-                                                    <span
-                                                        class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
-                                                        <span class="size-1.5 rounded-full bg-success"></span>
-                                                        Tersimpan
-                                                    </span>
-                                                </div>
-                                                {{-- Overlay saat hover --}}
-                                                <div
-                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                    <a href="{{ asset('storage/' . $existingFotoSiang) }}"
-                                                        target="_blank"
-                                                        class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                        Lihat
-                                                    </a>
-                                                    <button type="button" @click.stop="pickFile('siang', true)"
-                                                        class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                        Ubah Foto
-                                                    </button>
+                                                <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                    <img src="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                        alt="Foto Konsumsi Siang"
+                                                        class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                    <div class="absolute top-2 left-2 z-10">
+                                                        <span
+                                                            class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                            <span class="size-1.5 rounded-full bg-success"></span>
+                                                            Tersimpan
+                                                        </span>
+                                                    </div>
+                                                    {{-- Overlay saat hover --}}
+                                                    <div
+                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                            target="_blank"
+                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                                stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            Lihat
+                                                        </a>
+                                                        <button type="button" @click.stop="pickFile('siang', true)"
+                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                                stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                            Ubah Foto
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             @else
                                                 <div @click="pickFile('siang', false)"
@@ -1471,8 +1473,8 @@
                                             :class="cropRatioSiang === '16:9' ?
                                                 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang" value="16:9"
-                                                @change="onCropRatioChange('fotoSiang')"
+                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang"
+                                                value="16:9" @change="onCropRatioChange('fotoSiang')"
                                                 class="radio radio-xs radio-warning" />
                                             <span class="text-[10px]">16:9</span>
                                         </label>
@@ -1482,8 +1484,8 @@
                                             :class="cropRatioSiang === '4:3' ?
                                                 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang" value="4:3"
-                                                @change="onCropRatioChange('fotoSiang')"
+                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang"
+                                                value="4:3" @change="onCropRatioChange('fotoSiang')"
                                                 class="radio radio-xs radio-warning" />
                                             <span class="text-[10px]">4:3</span>
                                         </label>
@@ -1493,8 +1495,8 @@
                                             :class="cropRatioSiang === 'original' ?
                                                 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang" value="original"
-                                                @change="onCropRatioChange('fotoSiang')"
+                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang"
+                                                value="original" @change="onCropRatioChange('fotoSiang')"
                                                 class="radio radio-xs radio-warning" />
                                             <span class="text-[10px]">Asli</span>
                                         </label>
@@ -1527,7 +1529,7 @@
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewSiang2 ?
                                             'border-warning/70 ring-1 ring-warning/30 bg-neutral-900' :
-                                            '{{ $existingFotoSiang2 ? 'border-warning/30 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/50 bg-base-100/60 hover:bg-warning/5' }}'">
+                                            '{{ $existingFotoSiang2 ? 'border-warning/30 bg-neutral-900' : 'border-dashed border-base-300 hover:border-warning/50 bg-base-100/60 hover:bg-warning/5' }}'">
                                         <template x-if="processedPreviewSiang2">
                                             <div
                                                 class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
@@ -1535,11 +1537,12 @@
                                                     :class="{
                                                         'w-full': cropRatioSiang2 === 'original' ||
                                                             cropRatioSiang2 === '16:9',
-                                                        'aspect-[4/3] w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
+                                                        'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
                                                     }">
                                                     <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
                                                         class="w-full h-full transition-all duration-300"
-                                                        :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                        :class="cropRatioSiang2 === 'original' ? 'object-contain' :
+                                                            'object-cover'" />
                                                 </div>
 
                                                 <div
@@ -1567,16 +1570,18 @@
                                         <template x-if="!processedPreviewSiang2">
                                             <div class="w-full h-full relative">
                                                 @if ($existingFotoSiang2)
-                                                    <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
-                                                        alt="Foto Siang 2"
-                                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                    <div
-                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                        <a href="{{ asset('storage/' . $existingFotoSiang2) }}"
-                                                            target="_blank"
-                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
-                                                        <button type="button" @click.stop="pickFile('siang2', true)"
-                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
+                                                    <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                        <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                            alt="Foto Siang 2"
+                                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                        <div
+                                                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                            <a href="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                                target="_blank"
+                                                                class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
+                                                            <button type="button" @click.stop="pickFile('siang2', true)"
+                                                                class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
+                                                        </div>
                                                     </div>
                                                 @else
                                                     <div @click="pickFile('siang2', false)"
@@ -1634,8 +1639,8 @@
                                                 :class="cropRatioSiang2 === '16:9' ?
                                                     'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2" value="16:9"
-                                                    @change="onCropRatioChange('fotoSiang2')"
+                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2"
+                                                    value="16:9" @change="onCropRatioChange('fotoSiang2')"
                                                     class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">16:9</span>
                                             </label>
@@ -1645,8 +1650,8 @@
                                                 :class="cropRatioSiang2 === '4:3' ?
                                                     'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2" value="4:3"
-                                                    @change="onCropRatioChange('fotoSiang2')"
+                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2"
+                                                    value="4:3" @change="onCropRatioChange('fotoSiang2')"
                                                     class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">4:3</span>
                                             </label>
@@ -1656,8 +1661,8 @@
                                                 :class="cropRatioSiang2 === 'original' ?
                                                     'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2" value="original"
-                                                    @change="onCropRatioChange('fotoSiang2')"
+                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2"
+                                                    value="original" @change="onCropRatioChange('fotoSiang2')"
                                                     class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">Asli</span>
                                             </label>
@@ -1695,7 +1700,7 @@
                                 <div class="relative overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
                                     :class="processedPreviewMalam ?
                                         'border-neutral-900 ring-2 ring-neutral-900/30 bg-neutral-900' :
-                                        '{{ $existingFotoMalam ? 'border-neutral-900/40 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/70 bg-base-100/60 hover:bg-neutral-900/5' }}'">
+                                        '{{ $existingFotoMalam ? 'border-neutral-900/40 bg-neutral-900' : 'border-dashed border-base-300 hover:border-neutral-900/70 bg-base-100/60 hover:bg-neutral-900/5' }}'">
 
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
                                     <template x-if="processedPreviewMalam">
@@ -1756,42 +1761,44 @@
                                     <template x-if="!processedPreviewMalam">
                                         <div class="w-full h-full relative">
                                             @if ($existingFotoMalam)
-                                                <img src="{{ asset('storage/' . $existingFotoMalam) }}"
-                                                    alt="Foto Konsumsi Malam"
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                <div class="absolute top-2 left-2 z-10">
-                                                    <span
-                                                        class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
-                                                        <span class="size-1.5 rounded-full bg-success"></span>
-                                                        Tersimpan
-                                                    </span>
-                                                </div>
-                                                {{-- Overlay saat hover --}}
-                                                <div
-                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                    <a href="{{ asset('storage/' . $existingFotoMalam) }}"
-                                                        target="_blank"
-                                                        class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                        Lihat
-                                                    </a>
-                                                    <button type="button" @click.stop="pickFile('malam', true)"
-                                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                            fill="none" viewBox="0 0 24 24"
-                                                            stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                        Ubah Foto
-                                                    </button>
+                                                <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                    <img src="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                        alt="Foto Konsumsi Malam"
+                                                        class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                    <div class="absolute top-2 left-2 z-10">
+                                                        <span
+                                                            class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                            <span class="size-1.5 rounded-full bg-success"></span>
+                                                            Tersimpan
+                                                        </span>
+                                                    </div>
+                                                    {{-- Overlay saat hover --}}
+                                                    <div
+                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                            target="_blank"
+                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                                stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            Lihat
+                                                        </a>
+                                                        <button type="button" @click.stop="pickFile('malam', true)"
+                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                                stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                            Ubah Foto
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             @else
                                                 <div @click="pickFile('malam', false)"
@@ -1869,8 +1876,8 @@
                                             :class="cropRatioMalam === '16:9' ?
                                                 'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam" value="16:9"
-                                                @change="onCropRatioChange('fotoMalam')"
+                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam"
+                                                value="16:9" @change="onCropRatioChange('fotoMalam')"
                                                 class="radio radio-xs radio-neutral" />
                                             <span class="text-[10px]">16:9</span>
                                         </label>
@@ -1880,8 +1887,8 @@
                                             :class="cropRatioMalam === '4:3' ?
                                                 'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam" value="4:3"
-                                                @change="onCropRatioChange('fotoMalam')"
+                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam"
+                                                value="4:3" @change="onCropRatioChange('fotoMalam')"
                                                 class="radio radio-xs radio-neutral" />
                                             <span class="text-[10px]">4:3</span>
                                         </label>
@@ -1891,8 +1898,8 @@
                                             :class="cropRatioMalam === 'original' ?
                                                 'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam" value="original"
-                                                @change="onCropRatioChange('fotoMalam')"
+                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam"
+                                                value="original" @change="onCropRatioChange('fotoMalam')"
                                                 class="radio radio-xs radio-neutral" />
                                             <span class="text-[10px]">Asli</span>
                                         </label>
@@ -1925,7 +1932,7 @@
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewMalam2 ?
                                             'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-neutral-900' :
-                                            '{{ $existingFotoMalam2 ? 'border-neutral-900/30 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/50 bg-base-100/60 hover:bg-neutral-900/5' }}'">
+                                            '{{ $existingFotoMalam2 ? 'border-neutral-900/30 bg-neutral-900' : 'border-dashed border-base-300 hover:border-neutral-900/50 bg-base-100/60 hover:bg-neutral-900/5' }}'">
                                         <template x-if="processedPreviewMalam2">
                                             <div
                                                 class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
@@ -1937,7 +1944,8 @@
                                                     }">
                                                     <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
                                                         class="w-full h-full transition-all duration-300"
-                                                        :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                        :class="cropRatioMalam2 === 'original' ? 'object-contain' :
+                                                            'object-cover'" />
                                                 </div>
 
                                                 <div
@@ -1965,17 +1973,19 @@
                                         <template x-if="!processedPreviewMalam2">
                                             <div class="w-full h-full relative">
                                                 @if ($existingFotoMalam2)
-                                                    <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
-                                                        alt="Foto Malam 2"
-                                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                    <div
-                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                        <a href="{{ asset('storage/' . $existingFotoMalam2) }}"
-                                                            target="_blank"
-                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
-                                                        <button type="button"
-                                                            @click.stop="pickFile('malam2', true)"
-                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
+                                                    <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                        <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                            alt="Foto Malam 2"
+                                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                        <div
+                                                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                            <a href="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                                target="_blank"
+                                                                class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
+                                                            <button type="button"
+                                                                @click.stop="pickFile('malam2', true)"
+                                                                class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
+                                                        </div>
                                                     </div>
                                                 @else
                                                     <div @click="pickFile('malam2', false)"
@@ -2035,7 +2045,8 @@
                                                 :class="cropRatioMalam2 === '16:9' ?
                                                     'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" name="ratio_malam2" x-model="cropRatioMalam2" value="16:9"
+                                                <input type="radio" name="ratio_malam2"
+                                                    x-model="cropRatioMalam2" value="16:9"
                                                     @change="onCropRatioChange('fotoMalam2')"
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">16:9</span>
@@ -2046,7 +2057,8 @@
                                                 :class="cropRatioMalam2 === '4:3' ?
                                                     'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" name="ratio_malam2" x-model="cropRatioMalam2" value="4:3"
+                                                <input type="radio" name="ratio_malam2"
+                                                    x-model="cropRatioMalam2" value="4:3"
                                                     @change="onCropRatioChange('fotoMalam2')"
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">4:3</span>
@@ -2057,7 +2069,8 @@
                                                 :class="cropRatioMalam2 === 'original' ?
                                                     'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" name="ratio_malam2" x-model="cropRatioMalam2" value="original"
+                                                <input type="radio" name="ratio_malam2"
+                                                    x-model="cropRatioMalam2" value="original"
                                                     @change="onCropRatioChange('fotoMalam2')"
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">Asli</span>
