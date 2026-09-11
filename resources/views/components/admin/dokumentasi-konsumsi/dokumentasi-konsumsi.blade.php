@@ -1311,8 +1311,9 @@
                                                     'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
                                                 }">
                                                 <img :src="processedPreviewSiang" alt="Preview Foto Siang"
-                                                    class="w-full h-full transition-all duration-300"
-                                                    :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'" />
+                                                    class="w-full h-full"
+                                                    :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'"
+                                                    :style="getTransformStyle('fotoSiang')" />
                                             </div>
 
                                             {{-- Badge Info Ukuran & Ratio --}}
@@ -1324,8 +1325,7 @@
                                                 </span>
                                                 <span
                                                     class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                    <span
-                                                        x-text="cropRatioSiang === 'original' ? 'Asli' : (cropRatioSiang === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                    <span x-text="getBadgeRatioText('fotoSiang')"></span>
                                                 </span>
                                             </div>
 
@@ -1371,8 +1371,9 @@
                                                         }">
                                                         <img src="{{ asset('storage/' . $existingFotoSiang) }}"
                                                             alt="Foto Konsumsi Siang"
-                                                            class="w-full h-full transition-all duration-300"
-                                                            :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'" />
+                                                            class="w-full h-full"
+                                                            :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'"
+                                                            :style="getTransformStyle('fotoSiang')" />
                                                     </div>
                                                     {{-- Badge Info Tersimpan & Ratio --}}
                                                     <div
@@ -1384,8 +1385,7 @@
                                                         </span>
                                                         <span
                                                             class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                            <span
-                                                                x-text="cropRatioSiang === 'original' ? 'Asli' : (cropRatioSiang === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                            <span x-text="getBadgeRatioText('fotoSiang')"></span>
                                                         </span>
                                                     </div>
                                                     {{-- Overlay saat hover --}}
@@ -1518,6 +1518,68 @@
                                             <span class="text-[10px]">Asli</span>
                                         </label>
                                     </div>
+
+                                    {{-- Orientasi Foto Siang (Rotate & Flip) --}}
+                                    <div class="mt-1.5 pt-1.5 border-t border-base-200/60">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[10.5px] font-bold text-base-content/80 flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Putar & Balik
+                                            </label>
+                                            <button type="button"
+                                                x-show="rotateSiang !== 0 || flipHSiang || flipVSiang"
+                                                x-transition
+                                                @click="resetOrientation('fotoSiang')"
+                                                class="text-[9.5px] text-error hover:underline flex items-center gap-0.5 font-medium cursor-pointer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Reset
+                                            </button>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-1">
+                                            {{-- Putar 90° --}}
+                                            <button type="button"
+                                                @click="rotatePhoto('fotoSiang')"
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="rotateSiang > 0 ?
+                                                    'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                <span class="text-[10px]" x-text="rotateSiang > 0 ? (rotateSiang + '°') : 'Putar 90°'"></span>
+                                            </button>
+
+                                            {{-- Flip Horizontal --}}
+                                            <button type="button"
+                                                @click="toggleFlipPhoto('fotoSiang', 'H')"
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="flipHSiang ?
+                                                    'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                </svg>
+                                                <span class="text-[10px]">Flip H</span>
+                                            </button>
+
+                                            {{-- Flip Vertikal --}}
+                                            <button type="button"
+                                                @click="toggleFlipPhoto('fotoSiang', 'V')"
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="flipVSiang ?
+                                                    'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+                                                </svg>
+                                                <span class="text-[10px]">Flip V</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Foto ke-2 Siang (opsional) --}}
@@ -1557,9 +1619,10 @@
                                                         'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
                                                     }">
                                                     <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
-                                                        class="w-full h-full transition-all duration-300"
+                                                        class="w-full h-full"
                                                         :class="cropRatioSiang2 === 'original' ? 'object-contain' :
-                                                            'object-cover'" />
+                                                            'object-cover'"
+                                                        :style="getTransformStyle('fotoSiang2')" />
                                                 </div>
 
                                                 <div
@@ -1570,8 +1633,7 @@
                                                     </span>
                                                     <span
                                                         class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                        <span
-                                                            x-text="cropRatioSiang2 === 'original' ? 'Asli' : (cropRatioSiang2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                        <span x-text="getBadgeRatioText('fotoSiang2')"></span>
                                                     </span>
                                                 </div>
 
@@ -1598,8 +1660,9 @@
                                                             }">
                                                             <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
                                                                 alt="Foto Siang 2"
-                                                                class="w-full h-full transition-all duration-300"
-                                                                :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                                class="w-full h-full"
+                                                                :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'"
+                                                                :style="getTransformStyle('fotoSiang2')" />
                                                         </div>
                                                         {{-- Badge Info Tersimpan & Ratio --}}
                                                         <div
@@ -1611,8 +1674,7 @@
                                                             </span>
                                                             <span
                                                                 class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                                <span
-                                                                    x-text="cropRatioSiang2 === 'original' ? 'Asli' : (cropRatioSiang2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                                <span x-text="getBadgeRatioText('fotoSiang2')"></span>
                                                             </span>
                                                         </div>
                                                         <div
@@ -1709,6 +1771,68 @@
                                                 <span class="text-[10px]">Asli</span>
                                             </label>
                                         </div>
+
+                                        {{-- Orientasi Foto Siang 2 (Rotate & Flip) --}}
+                                        <div class="mt-1.5 pt-1.5 border-t border-base-200/60">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[10.5px] font-bold text-base-content/80 flex items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    Putar & Balik
+                                                </label>
+                                                <button type="button"
+                                                    x-show="rotateSiang2 !== 0 || flipHSiang2 || flipVSiang2"
+                                                    x-transition
+                                                    @click="resetOrientation('fotoSiang2')"
+                                                    class="text-[9.5px] text-error hover:underline flex items-center gap-0.5 font-medium cursor-pointer">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Reset
+                                                </button>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-1">
+                                                {{-- Putar 90° --}}
+                                                <button type="button"
+                                                    @click="rotatePhoto('fotoSiang2')"
+                                                    class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                    :class="rotateSiang2 > 0 ?
+                                                        'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                        'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    <span class="text-[10px]" x-text="rotateSiang2 > 0 ? (rotateSiang2 + '°') : 'Putar 90°'"></span>
+                                                </button>
+
+                                                {{-- Flip Horizontal --}}
+                                                <button type="button"
+                                                    @click="toggleFlipPhoto('fotoSiang2', 'H')"
+                                                    class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                    :class="flipHSiang2 ?
+                                                        'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                        'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                    <span class="text-[10px]">Flip H</span>
+                                                </button>
+
+                                                {{-- Flip Vertikal --}}
+                                                <button type="button"
+                                                    @click="toggleFlipPhoto('fotoSiang2', 'V')"
+                                                    class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                    :class="flipVSiang2 ?
+                                                        'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                                        'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+                                                    </svg>
+                                                    <span class="text-[10px]">Flip V</span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1755,8 +1879,9 @@
                                                     'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam === '4:3'
                                                 }">
                                                 <img :src="processedPreviewMalam" alt="Preview Foto Malam"
-                                                    class="w-full h-full transition-all duration-300"
-                                                    :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'" />
+                                                    class="w-full h-full"
+                                                    :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'"
+                                                    :style="getTransformStyle('fotoMalam')" />
                                             </div>
 
                                             <div
@@ -1767,8 +1892,7 @@
                                                 </span>
                                                 <span
                                                     class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                    <span
-                                                        x-text="cropRatioMalam === 'original' ? 'Asli' : (cropRatioMalam === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                    <span x-text="getBadgeRatioText('fotoMalam')"></span>
                                                 </span>
                                             </div>
 
@@ -1814,8 +1938,9 @@
                                                         }">
                                                         <img src="{{ asset('storage/' . $existingFotoMalam) }}"
                                                             alt="Foto Konsumsi Malam"
-                                                            class="w-full h-full transition-all duration-300"
-                                                            :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'" />
+                                                            class="w-full h-full"
+                                                            :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'"
+                                                            :style="getTransformStyle('fotoMalam')" />
                                                     </div>
                                                     {{-- Badge Info Tersimpan & Ratio --}}
                                                     <div
@@ -1827,8 +1952,7 @@
                                                         </span>
                                                         <span
                                                             class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                            <span
-                                                                x-text="cropRatioMalam === 'original' ? 'Asli' : (cropRatioMalam === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                            <span x-text="getBadgeRatioText('fotoMalam')"></span>
                                                         </span>
                                                     </div>
                                                     {{-- Overlay saat hover --}}
@@ -1963,6 +2087,68 @@
                                             <span class="text-[10px]">Asli</span>
                                         </label>
                                     </div>
+
+                                    {{-- Orientasi Foto Malam (Rotate & Flip) --}}
+                                    <div class="mt-1.5 pt-1.5 border-t border-base-200/60">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[10.5px] font-bold text-base-content/80 flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-neutral-900 dark:text-neutral-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Putar & Balik
+                                            </label>
+                                            <button type="button"
+                                                x-show="rotateMalam !== 0 || flipHMalam || flipVMalam"
+                                                x-transition
+                                                @click="resetOrientation('fotoMalam')"
+                                                class="text-[9.5px] text-error hover:underline flex items-center gap-0.5 font-medium cursor-pointer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Reset
+                                            </button>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-1">
+                                            {{-- Putar 90° --}}
+                                            <button type="button"
+                                                @click="rotatePhoto('fotoMalam')"
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="rotateMalam > 0 ?
+                                                    'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                <span class="text-[10px]" x-text="rotateMalam > 0 ? (rotateMalam + '°') : 'Putar 90°'"></span>
+                                            </button>
+
+                                            {{-- Flip Horizontal --}}
+                                            <button type="button"
+                                                @click="toggleFlipPhoto('fotoMalam', 'H')"
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="flipHMalam ?
+                                                    'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                </svg>
+                                                <span class="text-[10px]">Flip H</span>
+                                            </button>
+
+                                            {{-- Flip Vertikal --}}
+                                            <button type="button"
+                                                @click="toggleFlipPhoto('fotoMalam', 'V')"
+                                                class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                :class="flipVMalam ?
+                                                    'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                    'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+                                                </svg>
+                                                <span class="text-[10px]">Flip V</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Foto ke-2 Malam (opsional) --}}
@@ -2002,9 +2188,10 @@
                                                         'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam2 === '4:3'
                                                     }">
                                                     <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
-                                                        class="w-full h-full transition-all duration-300"
+                                                        class="w-full h-full"
                                                         :class="cropRatioMalam2 === 'original' ? 'object-contain' :
-                                                            'object-cover'" />
+                                                            'object-cover'"
+                                                        :style="getTransformStyle('fotoMalam2')" />
                                                 </div>
 
                                                 <div
@@ -2015,8 +2202,7 @@
                                                     </span>
                                                     <span
                                                         class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                        <span
-                                                            x-text="cropRatioMalam2 === 'original' ? 'Asli' : (cropRatioMalam2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                        <span x-text="getBadgeRatioText('fotoMalam2')"></span>
                                                     </span>
                                                 </div>
 
@@ -2043,8 +2229,9 @@
                                                             }">
                                                             <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
                                                                 alt="Foto Malam 2"
-                                                                class="w-full h-full transition-all duration-300"
-                                                                :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                                class="w-full h-full"
+                                                                :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'"
+                                                                :style="getTransformStyle('fotoMalam2')" />
                                                         </div>
                                                         {{-- Badge Info Tersimpan & Ratio --}}
                                                         <div
@@ -2056,8 +2243,7 @@
                                                             </span>
                                                             <span
                                                                 class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                                <span
-                                                                    x-text="cropRatioMalam2 === 'original' ? 'Asli' : (cropRatioMalam2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                                <span x-text="getBadgeRatioText('fotoMalam2')"></span>
                                                             </span>
                                                         </div>
                                                         <div
@@ -2158,6 +2344,68 @@
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">Asli</span>
                                             </label>
+                                        </div>
+
+                                        {{-- Orientasi Foto Malam 2 (Rotate & Flip) --}}
+                                        <div class="mt-1.5 pt-1.5 border-t border-base-200/60">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[10.5px] font-bold text-base-content/80 flex items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-neutral-900 dark:text-neutral-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    Putar & Balik
+                                                </label>
+                                                <button type="button"
+                                                    x-show="rotateMalam2 !== 0 || flipHMalam2 || flipVMalam2"
+                                                    x-transition
+                                                    @click="resetOrientation('fotoMalam2')"
+                                                    class="text-[9.5px] text-error hover:underline flex items-center gap-0.5 font-medium cursor-pointer">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Reset
+                                                </button>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-1">
+                                                {{-- Putar 90° --}}
+                                                <button type="button"
+                                                    @click="rotatePhoto('fotoMalam2')"
+                                                    class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                    :class="rotateMalam2 > 0 ?
+                                                        'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                        'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    <span class="text-[10px]" x-text="rotateMalam2 > 0 ? (rotateMalam2 + '°') : 'Putar 90°'"></span>
+                                                </button>
+
+                                                {{-- Flip Horizontal --}}
+                                                <button type="button"
+                                                    @click="toggleFlipPhoto('fotoMalam2', 'H')"
+                                                    class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                    :class="flipHMalam2 ?
+                                                        'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                        'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                    <span class="text-[10px]">Flip H</span>
+                                                </button>
+
+                                                {{-- Flip Vertikal --}}
+                                                <button type="button"
+                                                    @click="toggleFlipPhoto('fotoMalam2', 'V')"
+                                                    class="cursor-pointer border rounded-lg py-1 px-1 flex items-center justify-center gap-1 transition-all text-center"
+                                                    :class="flipVMalam2 ?
+                                                        'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
+                                                        'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+                                                    </svg>
+                                                    <span class="text-[10px]">Flip V</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2850,9 +3098,41 @@
         function dokumentasiUploadModal() {
             return {
                 cropRatioSiang: 'original',
+                rotateSiang: 0,
+                flipHSiang: false,
+                flipVSiang: false,
+                uploadedRatioSiang: null,
+                uploadedRotateSiang: null,
+                uploadedFlipHSiang: null,
+                uploadedFlipVSiang: null,
+
                 cropRatioSiang2: 'original',
+                rotateSiang2: 0,
+                flipHSiang2: false,
+                flipVSiang2: false,
+                uploadedRatioSiang2: null,
+                uploadedRotateSiang2: null,
+                uploadedFlipHSiang2: null,
+                uploadedFlipVSiang2: null,
+
                 cropRatioMalam: 'original',
+                rotateMalam: 0,
+                flipHMalam: false,
+                flipVMalam: false,
+                uploadedRatioMalam: null,
+                uploadedRotateMalam: null,
+                uploadedFlipHMalam: null,
+                uploadedFlipVMalam: null,
+
                 cropRatioMalam2: 'original',
+                rotateMalam2: 0,
+                flipHMalam2: false,
+                flipVMalam2: false,
+                uploadedRatioMalam2: null,
+                uploadedRotateMalam2: null,
+                uploadedFlipHMalam2: null,
+                uploadedFlipVMalam2: null,
+
                 cropRatio: 'original',
                 rawFileSiang: null,
                 rawFileSiang2: null,
@@ -2862,10 +3142,6 @@
                 compressedOriginalSiang2: null,
                 compressedOriginalMalam: null,
                 compressedOriginalMalam2: null,
-                uploadedRatioSiang: null,
-                uploadedRatioSiang2: null,
-                uploadedRatioMalam: null,
-                uploadedRatioMalam2: null,
                 processedPreviewSiang: null,
                 processedPreviewSiang2: null,
                 processedPreviewMalam: null,
@@ -2906,19 +3182,43 @@
                     if (target === 'fotoSiang') {
                         this.rawFileSiang = file;
                         this.cropRatioSiang = 'original';
+                        this.rotateSiang = 0;
+                        this.flipHSiang = false;
+                        this.flipVSiang = false;
                         this.uploadedRatioSiang = null;
+                        this.uploadedRotateSiang = null;
+                        this.uploadedFlipHSiang = null;
+                        this.uploadedFlipVSiang = null;
                     } else if (target === 'fotoSiang2') {
                         this.rawFileSiang2 = file;
                         this.cropRatioSiang2 = 'original';
+                        this.rotateSiang2 = 0;
+                        this.flipHSiang2 = false;
+                        this.flipVSiang2 = false;
                         this.uploadedRatioSiang2 = null;
+                        this.uploadedRotateSiang2 = null;
+                        this.uploadedFlipHSiang2 = null;
+                        this.uploadedFlipVSiang2 = null;
                     } else if (target === 'fotoMalam') {
                         this.rawFileMalam = file;
                         this.cropRatioMalam = 'original';
+                        this.rotateMalam = 0;
+                        this.flipHMalam = false;
+                        this.flipVMalam = false;
                         this.uploadedRatioMalam = null;
+                        this.uploadedRotateMalam = null;
+                        this.uploadedFlipHMalam = null;
+                        this.uploadedFlipVMalam = null;
                     } else {
                         this.rawFileMalam2 = file;
                         this.cropRatioMalam2 = 'original';
+                        this.rotateMalam2 = 0;
+                        this.flipHMalam2 = false;
+                        this.flipVMalam2 = false;
                         this.uploadedRatioMalam2 = null;
+                        this.uploadedRotateMalam2 = null;
+                        this.uploadedFlipHMalam2 = null;
+                        this.uploadedFlipVMalam2 = null;
                     }
 
                     await this.generateCompressedOriginalPreview(target);
@@ -2927,6 +3227,119 @@
                 onCropRatioChange(target) {
                     // Preview updates reactively in CSS via Alpine :class.
                     // No crop or upload occurs here.
+                },
+
+                rotatePhoto(target) {
+                    if (target === 'fotoSiang') this.rotateSiang = (this.rotateSiang + 90) % 360;
+                    else if (target === 'fotoSiang2') this.rotateSiang2 = (this.rotateSiang2 + 90) % 360;
+                    else if (target === 'fotoMalam') this.rotateMalam = (this.rotateMalam + 90) % 360;
+                    else if (target === 'fotoMalam2') this.rotateMalam2 = (this.rotateMalam2 + 90) % 360;
+                },
+
+                toggleFlipPhoto(target, dir = 'H') {
+                    if (dir === 'H') {
+                        if (target === 'fotoSiang') this.flipHSiang = !this.flipHSiang;
+                        else if (target === 'fotoSiang2') this.flipHSiang2 = !this.flipHSiang2;
+                        else if (target === 'fotoMalam') this.flipHMalam = !this.flipHMalam;
+                        else if (target === 'fotoMalam2') this.flipHMalam2 = !this.flipHMalam2;
+                    } else {
+                        if (target === 'fotoSiang') this.flipVSiang = !this.flipVSiang;
+                        else if (target === 'fotoSiang2') this.flipVSiang2 = !this.flipVSiang2;
+                        else if (target === 'fotoMalam') this.flipVMalam = !this.flipVMalam;
+                        else if (target === 'fotoMalam2') this.flipVMalam2 = !this.flipVMalam2;
+                    }
+                },
+
+                resetOrientation(target) {
+                    if (target === 'fotoSiang') {
+                        this.rotateSiang = 0;
+                        this.flipHSiang = false;
+                        this.flipVSiang = false;
+                    } else if (target === 'fotoSiang2') {
+                        this.rotateSiang2 = 0;
+                        this.flipHSiang2 = false;
+                        this.flipVSiang2 = false;
+                    } else if (target === 'fotoMalam') {
+                        this.rotateMalam = 0;
+                        this.flipHMalam = false;
+                        this.flipVMalam = false;
+                    } else if (target === 'fotoMalam2') {
+                        this.rotateMalam2 = 0;
+                        this.flipHMalam2 = false;
+                        this.flipVMalam2 = false;
+                    }
+                },
+
+                getTransformStyle(target) {
+                    let r = 0, fH = false, fV = false, ratio = 'original';
+                    if (target === 'fotoSiang') {
+                        r = this.rotateSiang;
+                        fH = this.flipHSiang;
+                        fV = this.flipVSiang;
+                        ratio = this.cropRatioSiang;
+                    } else if (target === 'fotoSiang2') {
+                        r = this.rotateSiang2;
+                        fH = this.flipHSiang2;
+                        fV = this.flipVSiang2;
+                        ratio = this.cropRatioSiang2;
+                    } else if (target === 'fotoMalam') {
+                        r = this.rotateMalam;
+                        fH = this.flipHMalam;
+                        fV = this.flipVMalam;
+                        ratio = this.cropRatioMalam;
+                    } else if (target === 'fotoMalam2') {
+                        r = this.rotateMalam2;
+                        fH = this.flipHMalam2;
+                        fV = this.flipVMalam2;
+                        ratio = this.cropRatioMalam2;
+                    }
+
+                    if (r === 0 && !fH && !fV) {
+                        return 'transform-origin: center center; transition: transform 0.3s ease;';
+                    }
+
+                    let scaleAspect = 1;
+                    if (r === 90 || r === 270) {
+                        if (ratio === '16:9') scaleAspect = 1.7778;
+                        else if (ratio === '4:3') scaleAspect = 1.3333;
+                        else scaleAspect = 0.5625;
+                    }
+
+                    const scaleX = fH ? -1 : 1;
+                    const scaleY = fV ? -1 : 1;
+                    return `transform-origin: center center; transition: transform 0.3s ease; transform: scale(${scaleAspect}) rotate(${r}deg) scale(${scaleX}, ${scaleY});`;
+                },
+
+                getBadgeRatioText(target) {
+                    let ratio = 'original', r = 0, fH = false, fV = false;
+                    if (target === 'fotoSiang') {
+                        ratio = this.cropRatioSiang;
+                        r = this.rotateSiang;
+                        fH = this.flipHSiang;
+                        fV = this.flipVSiang;
+                    } else if (target === 'fotoSiang2') {
+                        ratio = this.cropRatioSiang2;
+                        r = this.rotateSiang2;
+                        fH = this.flipHSiang2;
+                        fV = this.flipVSiang2;
+                    } else if (target === 'fotoMalam') {
+                        ratio = this.cropRatioMalam;
+                        r = this.rotateMalam;
+                        fH = this.flipHMalam;
+                        fV = this.flipVMalam;
+                    } else if (target === 'fotoMalam2') {
+                        ratio = this.cropRatioMalam2;
+                        r = this.rotateMalam2;
+                        fH = this.flipHMalam2;
+                        fV = this.flipVMalam2;
+                    }
+
+                    let label = ratio === 'original' ? 'Asli' : (ratio === '16:9' ? 'Review 16:9' : 'Review 4:3');
+                    if (r !== 0) label += ` • ${r}°`;
+                    if (fH && fV) label += ' • Flip HV';
+                    else if (fH) label += ' • Flip H';
+                    else if (fV) label += ' • Flip V';
+                    return label;
                 },
 
                 async generateCompressedOriginalPreview(target) {
@@ -3005,8 +3418,14 @@
                             raw: this.rawFileSiang,
                             existing: wire.get('existingFotoSiang') || wire.existingFotoSiang,
                             ratio: this.cropRatioSiang || 'original',
+                            rotate: this.rotateSiang || 0,
+                            flipH: !!this.flipHSiang,
+                            flipV: !!this.flipVSiang,
                             compressedOriginal: this.compressedOriginalSiang,
                             uploadedRatio: this.uploadedRatioSiang,
+                            uploadedRotate: this.uploadedRotateSiang,
+                            uploadedFlipH: this.uploadedFlipHSiang,
+                            uploadedFlipV: this.uploadedFlipVSiang,
                         },
                         {
                             key: 'fotoSiang2',
@@ -3014,8 +3433,14 @@
                             raw: this.rawFileSiang2,
                             existing: wire.get('existingFotoSiang2') || wire.existingFotoSiang2,
                             ratio: this.cropRatioSiang2 || 'original',
+                            rotate: this.rotateSiang2 || 0,
+                            flipH: !!this.flipHSiang2,
+                            flipV: !!this.flipVSiang2,
                             compressedOriginal: this.compressedOriginalSiang2,
                             uploadedRatio: this.uploadedRatioSiang2,
+                            uploadedRotate: this.uploadedRotateSiang2,
+                            uploadedFlipH: this.uploadedFlipHSiang2,
+                            uploadedFlipV: this.uploadedFlipVSiang2,
                         },
                         {
                             key: 'fotoMalam',
@@ -3023,8 +3448,14 @@
                             raw: this.rawFileMalam,
                             existing: wire.get('existingFotoMalam') || wire.existingFotoMalam,
                             ratio: this.cropRatioMalam || 'original',
+                            rotate: this.rotateMalam || 0,
+                            flipH: !!this.flipHMalam,
+                            flipV: !!this.flipVMalam,
                             compressedOriginal: this.compressedOriginalMalam,
                             uploadedRatio: this.uploadedRatioMalam,
+                            uploadedRotate: this.uploadedRotateMalam,
+                            uploadedFlipH: this.uploadedFlipHMalam,
+                            uploadedFlipV: this.uploadedFlipVMalam,
                         },
                         {
                             key: 'fotoMalam2',
@@ -3032,17 +3463,29 @@
                             raw: this.rawFileMalam2,
                             existing: wire.get('existingFotoMalam2') || wire.existingFotoMalam2,
                             ratio: this.cropRatioMalam2 || 'original',
+                            rotate: this.rotateMalam2 || 0,
+                            flipH: !!this.flipHMalam2,
+                            flipV: !!this.flipVMalam2,
                             compressedOriginal: this.compressedOriginalMalam2,
                             uploadedRatio: this.uploadedRatioMalam2,
+                            uploadedRotate: this.uploadedRotateMalam2,
+                            uploadedFlipH: this.uploadedFlipHMalam2,
+                            uploadedFlipV: this.uploadedFlipVMalam2,
                         },
                     ];
 
                     const toProcess = targets.filter(t => {
+                        const isTransformed = (t.ratio !== 'original') || (t.rotate !== 0) || t.flipH || t.flipV;
+                        const isAlreadyUploaded = (t.uploadedRatio === t.ratio) &&
+                                                  (t.uploadedRotate === t.rotate) &&
+                                                  (t.uploadedFlipH === t.flipH) &&
+                                                  (t.uploadedFlipV === t.flipV) &&
+                                                  !!wire.get(t.key);
                         if (t.raw) {
-                            return t.uploadedRatio !== t.ratio || !wire.get(t.key);
+                            return !isAlreadyUploaded;
                         }
-                        if (t.existing && t.ratio !== 'original') {
-                            return t.uploadedRatio !== t.ratio || !wire.get(t.key);
+                        if (t.existing && isTransformed) {
+                            return !isAlreadyUploaded;
                         }
                         return false;
                     });
@@ -3054,19 +3497,24 @@
                                 this.currentProcessingTarget = item.key;
                                 let webpFile;
 
+                                const ratioLabel = item.ratio === 'original' ? 'asli' : item.ratio;
+                                let transDesc = ratioLabel;
+                                if (item.rotate !== 0) transDesc += `, putar ${item.rotate}°`;
+                                if (item.flipH && item.flipV) transDesc += ', flip HV';
+                                else if (item.flipH) transDesc += ', flip H';
+                                else if (item.flipV) transDesc += ', flip V';
+
                                 if (item.raw) {
-                                    if (item.ratio === 'original' && item.compressedOriginal) {
+                                    if (item.ratio === 'original' && item.rotate === 0 && !item.flipH && !item.flipV && item.compressedOriginal) {
                                         webpFile = item.compressedOriginal;
                                     } else {
-                                        const ratioLabel = item.ratio === 'original' ? 'asli' : item.ratio;
                                         this.processingStatus =
-                                            `Meng-crop ${item.label} (${ratioLabel}) & kompresi (Maks. 100KB)...`;
-                                        webpFile = await this.cropAndCompressToWebp(item.raw, item.ratio);
+                                            `Memproses ${item.label} (${transDesc}) & kompresi (Maks. 100KB)...`;
+                                        webpFile = await this.cropAndCompressToWebp(item.raw, item.ratio, item.rotate, item.flipH, item.flipV);
                                     }
                                 } else if (item.existing) {
-                                    const ratioLabel = item.ratio;
                                     this.processingStatus =
-                                        `Mengambil & meng-crop ${item.label} (${ratioLabel}) (Maks. 100KB)...`;
+                                        `Mengambil & memproses ${item.label} (${transDesc}) (Maks. 100KB)...`;
                                     const imageUrl = `${storageBase}/${item.existing}`;
                                     const response = await fetch(imageUrl);
                                     if (!response.ok) {
@@ -3077,7 +3525,7 @@
                                     const fileObj = new File([blob], fileName, {
                                         type: blob.type || 'image/webp'
                                     });
-                                    webpFile = await this.cropAndCompressToWebp(fileObj, item.ratio);
+                                    webpFile = await this.cropAndCompressToWebp(fileObj, item.ratio, item.rotate, item.flipH, item.flipV);
                                 }
 
                                 this.processingStatus = `Mengunggah ${item.label}...`;
@@ -3085,14 +3533,27 @@
                                 await new Promise((resolve, reject) => {
                                     wire.upload(item.key, webpFile,
                                         () => {
-                                            if (item.key === 'fotoSiang') this.uploadedRatioSiang = item
-                                                .ratio;
-                                            else if (item.key === 'fotoSiang2') this.uploadedRatioSiang2 =
-                                                item.ratio;
-                                            else if (item.key === 'fotoMalam') this.uploadedRatioMalam =
-                                                item.ratio;
-                                            else if (item.key === 'fotoMalam2') this.uploadedRatioMalam2 =
-                                                item.ratio;
+                                            if (item.key === 'fotoSiang') {
+                                                this.uploadedRatioSiang = item.ratio;
+                                                this.uploadedRotateSiang = item.rotate;
+                                                this.uploadedFlipHSiang = item.flipH;
+                                                this.uploadedFlipVSiang = item.flipV;
+                                            } else if (item.key === 'fotoSiang2') {
+                                                this.uploadedRatioSiang2 = item.ratio;
+                                                this.uploadedRotateSiang2 = item.rotate;
+                                                this.uploadedFlipHSiang2 = item.flipH;
+                                                this.uploadedFlipVSiang2 = item.flipV;
+                                            } else if (item.key === 'fotoMalam') {
+                                                this.uploadedRatioMalam = item.ratio;
+                                                this.uploadedRotateMalam = item.rotate;
+                                                this.uploadedFlipHMalam = item.flipH;
+                                                this.uploadedFlipVMalam = item.flipV;
+                                            } else if (item.key === 'fotoMalam2') {
+                                                this.uploadedRatioMalam2 = item.ratio;
+                                                this.uploadedRotateMalam2 = item.rotate;
+                                                this.uploadedFlipHMalam2 = item.flipH;
+                                                this.uploadedFlipVMalam2 = item.flipV;
+                                            }
                                             resolve();
                                         },
                                         (err) => reject(err),
@@ -3141,7 +3602,7 @@
                     wire.saveKonsumsi();
                 },
 
-                cropAndCompressToWebp(file, ratio) {
+                cropAndCompressToWebp(file, ratio, rotate = 0, flipH = false, flipV = false) {
                     return new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onerror = () => reject(new Error('Gagal membaca file gambar.'));
@@ -3153,41 +3614,74 @@
                                     const origW = img.naturalWidth || img.width;
                                     const origH = img.naturalHeight || img.height;
 
+                                    let srcImg = img;
+                                    let srcW = origW;
+                                    let srcH = origH;
+
+                                    // 1. Orientasi Canvas (Rotate & Flip)
+                                    if (rotate !== 0 || flipH || flipV) {
+                                        const isSwapped = (rotate === 90 || rotate === 270);
+                                        const orientedW = isSwapped ? origH : origW;
+                                        const orientedH = isSwapped ? origW : origH;
+
+                                        const orientedCanvas = document.createElement('canvas');
+                                        orientedCanvas.width = orientedW;
+                                        orientedCanvas.height = orientedH;
+                                        const oCtx = orientedCanvas.getContext('2d');
+
+                                        oCtx.translate(orientedW / 2, orientedH / 2);
+                                        if (rotate !== 0) {
+                                            oCtx.rotate((rotate * Math.PI) / 180);
+                                        }
+                                        const scaleX = flipH ? -1 : 1;
+                                        const scaleY = flipV ? -1 : 1;
+                                        if (scaleX !== 1 || scaleY !== 1) {
+                                            oCtx.scale(scaleX, scaleY);
+                                        }
+                                        oCtx.drawImage(img, -origW / 2, -origH / 2, origW, origH);
+
+                                        srcImg = orientedCanvas;
+                                        srcW = orientedW;
+                                        srcH = orientedH;
+                                    }
+
+                                    // 2. Crop Aspect Ratio
                                     let sx = 0,
                                         sy = 0,
-                                        sw = origW,
-                                        sh = origH;
+                                        sw = srcW,
+                                        sh = srcH;
 
                                     if (ratio === '16:9') {
                                         const targetRatio = 16 / 9;
-                                        const curRatio = origW / origH;
+                                        const curRatio = srcW / srcH;
                                         if (curRatio > targetRatio) {
-                                            sw = Math.round(origH * targetRatio);
-                                            sh = origH;
-                                            sx = Math.round((origW - sw) / 2);
+                                            sw = Math.round(srcH * targetRatio);
+                                            sh = srcH;
+                                            sx = Math.round((srcW - sw) / 2);
                                             sy = 0;
                                         } else {
-                                            sw = origW;
-                                            sh = Math.round(origW / targetRatio);
+                                            sw = srcW;
+                                            sh = Math.round(srcW / targetRatio);
                                             sx = 0;
-                                            sy = Math.round((origH - sh) / 2);
+                                            sy = Math.round((srcH - sh) / 2);
                                         }
                                     } else if (ratio === '4:3') {
                                         const targetRatio = 4 / 3;
-                                        const curRatio = origW / origH;
+                                        const curRatio = srcW / srcH;
                                         if (curRatio > targetRatio) {
-                                            sw = Math.round(origH * targetRatio);
-                                            sh = origH;
-                                            sx = Math.round((origW - sw) / 2);
+                                            sw = Math.round(srcH * targetRatio);
+                                            sh = srcH;
+                                            sx = Math.round((srcW - sw) / 2);
                                             sy = 0;
                                         } else {
-                                            sw = origW;
-                                            sh = Math.round(origW / targetRatio);
+                                            sw = srcW;
+                                            sh = Math.round(srcW / targetRatio);
                                             sx = 0;
-                                            sy = Math.round((origH - sh) / 2);
+                                            sy = Math.round((srcH - sh) / 2);
                                         }
                                     }
 
+                                    // 3. Batasi dimensi maksimum
                                     let destW = sw;
                                     let destH = sh;
                                     const maxDim = 1280;
@@ -3205,8 +3699,9 @@
                                     canvas.width = destW;
                                     canvas.height = destH;
                                     const ctx = canvas.getContext('2d');
-                                    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, destW, destH);
+                                    ctx.drawImage(srcImg, sx, sy, sw, sh, 0, 0, destW, destH);
 
+                                    // 4. Kompresi ke format WebP maks. 100KB
                                     const maxBytes = 100 * 1024;
                                     let currentCanvas = canvas;
                                     let quality = 0.85;
@@ -3348,19 +3843,43 @@
                     if (target === 'fotoSiang') {
                         this.processedSizeSiang = null;
                         this.cropRatioSiang = 'original';
+                        this.rotateSiang = 0;
+                        this.flipHSiang = false;
+                        this.flipVSiang = false;
                         this.uploadedRatioSiang = null;
+                        this.uploadedRotateSiang = null;
+                        this.uploadedFlipHSiang = null;
+                        this.uploadedFlipVSiang = null;
                     } else if (target === 'fotoSiang2') {
                         this.processedSizeSiang2 = null;
                         this.cropRatioSiang2 = 'original';
+                        this.rotateSiang2 = 0;
+                        this.flipHSiang2 = false;
+                        this.flipVSiang2 = false;
                         this.uploadedRatioSiang2 = null;
+                        this.uploadedRotateSiang2 = null;
+                        this.uploadedFlipHSiang2 = null;
+                        this.uploadedFlipVSiang2 = null;
                     } else if (target === 'fotoMalam') {
                         this.processedSizeMalam = null;
                         this.cropRatioMalam = 'original';
+                        this.rotateMalam = 0;
+                        this.flipHMalam = false;
+                        this.flipVMalam = false;
                         this.uploadedRatioMalam = null;
+                        this.uploadedRotateMalam = null;
+                        this.uploadedFlipHMalam = null;
+                        this.uploadedFlipVMalam = null;
                     } else if (target === 'fotoMalam2') {
                         this.processedSizeMalam2 = null;
                         this.cropRatioMalam2 = 'original';
+                        this.rotateMalam2 = 0;
+                        this.flipHMalam2 = false;
+                        this.flipVMalam2 = false;
                         this.uploadedRatioMalam2 = null;
+                        this.uploadedRotateMalam2 = null;
+                        this.uploadedFlipHMalam2 = null;
+                        this.uploadedFlipVMalam2 = null;
                     }
 
                     if (this.$refs[refMap[target]]) this.$refs[refMap[target]].value = '';
@@ -3395,6 +3914,18 @@
                     this.uploadedRatioSiang2 = null;
                     this.uploadedRatioMalam = null;
                     this.uploadedRatioMalam2 = null;
+                    this.uploadedRotateSiang = null;
+                    this.uploadedRotateSiang2 = null;
+                    this.uploadedRotateMalam = null;
+                    this.uploadedRotateMalam2 = null;
+                    this.uploadedFlipHSiang = null;
+                    this.uploadedFlipHSiang2 = null;
+                    this.uploadedFlipHMalam = null;
+                    this.uploadedFlipHMalam2 = null;
+                    this.uploadedFlipVSiang = null;
+                    this.uploadedFlipVSiang2 = null;
+                    this.uploadedFlipVMalam = null;
+                    this.uploadedFlipVMalam2 = null;
 
                     if (this.processedPreviewSiang) {
                         URL.revokeObjectURL(this.processedPreviewSiang);
@@ -3421,6 +3952,18 @@
                     this.cropRatioMalam = 'original';
                     this.cropRatioMalam2 = 'original';
                     this.cropRatio = 'original';
+                    this.rotateSiang = 0;
+                    this.rotateSiang2 = 0;
+                    this.rotateMalam = 0;
+                    this.rotateMalam2 = 0;
+                    this.flipHSiang = false;
+                    this.flipHSiang2 = false;
+                    this.flipHMalam = false;
+                    this.flipHMalam2 = false;
+                    this.flipVSiang = false;
+                    this.flipVSiang2 = false;
+                    this.flipVMalam = false;
+                    this.flipVMalam2 = false;
                     this.isProcessing = false;
                     this.currentProcessingTarget = null;
                     this.processingStatus = '';

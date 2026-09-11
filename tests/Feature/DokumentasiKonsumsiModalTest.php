@@ -74,7 +74,11 @@ test('openEditKonsumsiModal opens modal with edit mode and loads existing data',
         ->assertSet('sesiKonsumsi', 'siang')
         ->assertSet('existingFotoSiang', 'dokumentasi-konsumsi/test_siang.webp')
         ->assertSeeHtml("cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'")
-        ->assertSeeHtml("x-text=\"cropRatioSiang === 'original' ? 'Asli' : (cropRatioSiang === '16:9' ? 'Review 16:9' : 'Review 4:3')\"")
+        ->assertSeeHtml("x-text=\"getBadgeRatioText('fotoSiang')\"")
+        ->assertSeeHtml("rotatePhoto('fotoSiang')")
+        ->assertSeeHtml("toggleFlipPhoto('fotoSiang', 'H')")
+        ->assertSeeHtml("toggleFlipPhoto('fotoSiang', 'V')")
+        ->assertSeeHtml("resetOrientation('fotoSiang')")
         ->call('closeAddKonsumsiModal')
         ->assertSet('showAddModal', false);
 });
