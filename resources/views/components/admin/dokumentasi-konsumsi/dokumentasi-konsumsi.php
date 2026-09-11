@@ -434,7 +434,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             ? ($this->selectedOpd ?: null)
             : Auth::user()->opd()?->id;
 
-        $record = DokumentasiKonsumsi::where('tanggal', $this->uploadTanggal)
+        $record = DokumentasiKonsumsi::whereDate('tanggal', $this->uploadTanggal)
             ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
             ->first();
 
@@ -547,7 +547,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             ? ($this->selectedOpd ?: null)
             : Auth::user()->opd()?->id;
 
-        $record = DokumentasiKonsumsi::where('tanggal', $this->uploadTanggal)
+        $record = DokumentasiKonsumsi::whereDate('tanggal', $this->uploadTanggal)
             ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
             ->first();
 
@@ -622,7 +622,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             ? ($this->selectedOpd ?: null)
             : Auth::user()->opd()?->id;
 
-        $record = DokumentasiKonsumsi::where('tanggal', $this->uploadTanggal)
+        $record = DokumentasiKonsumsi::whereDate('tanggal', $this->uploadTanggal)
             ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
             ->first();
 

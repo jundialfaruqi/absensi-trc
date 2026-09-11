@@ -394,7 +394,7 @@
                                                 </div>
 
                                                 {{-- Icon Ceklist di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -408,7 +408,7 @@
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
-                                                    class="relative z-[3] w-full h-full flex flex-col items-center justify-center p-1">
+                                                    class="relative z-3 w-full h-full flex flex-col items-center justify-center p-1">
                                                     @if ($hasDokMalam)
                                                         {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
                                                         <span
@@ -1040,24 +1040,25 @@
     <dialog id="modal-upload-konsumsi"
         class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999 {{ $showAddModal ? 'modal-open' : '' }}"
         :class="{ 'modal-open': isKonsumsiModalOpen || @json($showAddModal) }"
-        @keydown.escape.window="if (isKonsumsiModalOpen) closeKonsumsiModal()"
-        x-cloak>
+        @keydown.escape.window="if (isKonsumsiModalOpen) closeKonsumsiModal()" x-cloak>
         <div class="modal-box max-w-xl rounded-2xl shadow-2xl border border-base-200 max-h-[90vh] overflow-y-auto"
             x-data="dokumentasiUploadModal()">
             {{-- Header Modal --}}
             <div class="flex items-start justify-between pb-3 border-b border-base-200">
                 <div class="flex items-center gap-3">
-                    <div
-                        class="size-10 rounded-full flex items-center justify-center shrink-0"
-                        :class="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') === 'edit' ? 'bg-warning/15 text-warning-content' : 'bg-primary/10 text-primary'">
-                        <template x-if="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') === 'edit'">
+                    <div class="size-10 rounded-full flex items-center justify-center shrink-0"
+                        :class="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') === 'edit' ?
+                            'bg-warning/15 text-warning-content' : 'bg-primary/10 text-primary'">
+                        <template
+                            x-if="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') === 'edit'">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </template>
-                        <template x-if="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') !== 'edit'">
+                        <template
+                            x-if="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') !== 'edit'">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1069,12 +1070,16 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-base text-base-content">
-                            <span x-show="isKonsumsiModalLoading" x-text="modalModeClient === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi'"></span>
-                            <span x-show="!isKonsumsiModalLoading">{{ $modalMode === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi' }}</span>
+                            <span x-show="isKonsumsiModalLoading"
+                                x-text="modalModeClient === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi'"></span>
+                            <span
+                                x-show="!isKonsumsiModalLoading">{{ $modalMode === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi' }}</span>
                         </h3>
                         <p class="text-xs text-base-content/60">
-                            <span x-show="isKonsumsiModalLoading" x-text="modalModeClient === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi'"></span>
-                            <span x-show="!isKonsumsiModalLoading">{{ $modalMode === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi' }}</span>
+                            <span x-show="isKonsumsiModalLoading"
+                                x-text="modalModeClient === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi'"></span>
+                            <span
+                                x-show="!isKonsumsiModalLoading">{{ $modalMode === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi' }}</span>
                         </p>
                     </div>
                 </div>
@@ -1087,8 +1092,10 @@
                 {{-- 1. Tanggal Dokumentasi Skeleton --}}
                 <div class="space-y-1.5">
                     <div class="h-3 bg-base-300 rounded w-36"></div>
-                    <div class="h-10 bg-base-200/80 rounded-lg w-full border border-base-300/60 flex items-center px-3">
-                        <div class="h-3.5 bg-base-300 rounded w-32" x-text="modalDateClient ? formatDateClient(modalDateClient) : ''"></div>
+                    <div
+                        class="h-10 bg-base-200/80 rounded-lg w-full border border-base-300/60 flex items-center px-3">
+                        <div class="h-3.5 bg-base-300 rounded w-32"
+                            x-text="modalDateClient ? formatDateClient(modalDateClient) : ''"></div>
                     </div>
                 </div>
 
@@ -1123,21 +1130,24 @@
                 <div class="space-y-2">
                     <div class="h-3 bg-base-300 rounded w-32"></div>
                     <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                        <div class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
+                        <div
+                            class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
                             <div class="size-4 rounded-full bg-base-300 shrink-0"></div>
                             <div class="space-y-1 flex-1">
                                 <div class="h-3 bg-base-300 rounded w-10"></div>
                                 <div class="h-2.5 bg-base-300/70 rounded w-16"></div>
                             </div>
                         </div>
-                        <div class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
+                        <div
+                            class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
                             <div class="size-4 rounded-full bg-base-300 shrink-0"></div>
                             <div class="space-y-1 flex-1">
                                 <div class="h-3 bg-base-300 rounded w-12"></div>
                                 <div class="h-2.5 bg-base-300/70 rounded w-16"></div>
                             </div>
                         </div>
-                        <div class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
+                        <div
+                            class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
                             <div class="size-4 rounded-full bg-base-300 shrink-0"></div>
                             <div class="space-y-1 flex-1">
                                 <div class="h-3 bg-base-300 rounded w-14"></div>
@@ -1176,11 +1186,13 @@
                 <div class="space-y-2">
                     <div class="h-3 bg-base-300 rounded w-40"></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
+                        <div
+                            class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
                             <div class="h-3.5 bg-base-300 rounded w-20"></div>
                             <div class="h-4 bg-base-300 rounded w-14"></div>
                         </div>
-                        <div class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
+                        <div
+                            class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
                             <div class="h-3.5 bg-base-300 rounded w-20"></div>
                             <div class="h-4 bg-base-300 rounded w-14"></div>
                         </div>
@@ -1742,7 +1754,8 @@
                                                     {{-- Overlay saat hover --}}
                                                     <div
                                                         class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
-                                                        <button type="button" @click.stop="pickFile('malam', false)"
+                                                        <button type="button"
+                                                            @click.stop="pickFile('malam', false)"
                                                             class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
                                                                 fill="none" viewBox="0 0 24 24"
@@ -1778,7 +1791,8 @@
                                 {{-- Pilihan Crop Aspect Ratio Malam --}}
                                 <div class="pt-1">
                                     <div class="flex items-center justify-between mb-1">
-                                        <label class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                        <label
+                                            class="text-[11px] font-bold text-base-content flex items-center gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="size-3 text-base-content/60" viewBox="0 0 24 24"
                                                 fill="none" stroke="currentColor" stroke-width="2">
