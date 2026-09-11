@@ -272,8 +272,8 @@
                                                     class="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors">
                                                 </div>
 
-                                                {{-- Icon Ceklist / Foto-2 badge di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none flex flex-col items-end gap-0.5">
+                                                {{-- Icon Ceklist di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -283,23 +283,11 @@
                                                                 d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </span>
-                                                    @if ($fotoSiang2)
-                                                        <span class="inline-flex items-center justify-center size-3 rounded-full bg-warning/90 text-warning-content text-[7px] font-black shadow-xs"
-                                                            title="Ada 2 foto">2</span>
-                                                    @endif
                                                 </div>
-
-                                                {{-- Foto ke-2 thumbnail pojok kiri bawah --}}
-                                                @if ($fotoSiang2)
-                                                    <img src="{{ asset('storage/' . $fotoSiang2) }}"
-                                                        alt="Foto Siang 2"
-                                                        class="absolute bottom-0.5 left-0.5 z-[2] size-5 rounded object-cover ring-1 ring-white/60 shadow pointer-events-none"
-                                                        loading="lazy" />
-                                                @endif
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
-                                                    class="relative z-[3] w-full h-full flex flex-col items-center justify-center p-1">
+                                                    class="relative z-3 w-full h-full flex flex-col items-center justify-center p-1">
                                                     @if ($hasDokSiang)
                                                         {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
                                                         <span
@@ -331,7 +319,7 @@
                                                 title="Tambah Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-warning/15 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-warning group-hover:text-warning-content text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
@@ -403,8 +391,8 @@
                                                     class="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors">
                                                 </div>
 
-                                                {{-- Icon Ceklist / Foto-2 badge di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none flex flex-col items-end gap-0.5">
+                                                {{-- Icon Ceklist di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -414,19 +402,7 @@
                                                                 d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </span>
-                                                    @if ($fotoMalam2)
-                                                        <span class="inline-flex items-center justify-center size-3 rounded-full bg-neutral-900 text-white text-[7px] font-black shadow-xs"
-                                                            title="Ada 2 foto">2</span>
-                                                    @endif
                                                 </div>
-
-                                                {{-- Foto ke-2 thumbnail pojok kiri bawah --}}
-                                                @if ($fotoMalam2)
-                                                    <img src="{{ asset('storage/' . $fotoMalam2) }}"
-                                                        alt="Foto Malam 2"
-                                                        class="absolute bottom-0.5 left-0.5 z-[2] size-5 rounded object-cover ring-1 ring-white/60 shadow pointer-events-none"
-                                                        loading="lazy" />
-                                                @endif
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
@@ -912,8 +888,10 @@
                         </label>
                         <div class="space-y-2">
                             {{-- Checklist: Rekapitulasi Jumlah Porsi Konsumsi --}}
-                            <label class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
-                                :class="exportIncludeRekap ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                            <label
+                                class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
+                                :class="exportIncludeRekap ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' :
+                                    'border-base-200 bg-base-100 hover:bg-base-200/50'">
                                 <input type="checkbox" x-model="exportIncludeRekap"
                                     class="checkbox checkbox-sm checkbox-primary mt-0.5" />
                                 <div class="flex-1 min-w-0">
@@ -927,8 +905,10 @@
                             </label>
 
                             {{-- Checklist: Rincian Konsumsi Per Personel --}}
-                            <label class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
-                                :class="exportIncludeRincian ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                            <label
+                                class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
+                                :class="exportIncludeRincian ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' :
+                                    'border-base-200 bg-base-100 hover:bg-base-200/50'">
                                 <input type="checkbox" x-model="exportIncludeRincian"
                                     class="checkbox checkbox-sm checkbox-primary mt-0.5" />
                                 <div class="flex-1 min-w-0">
@@ -1354,12 +1334,14 @@
                                             Foto 2 <span class="text-base-content/40 font-normal">(opsional)</span>
                                         </span>
                                         <template x-if="processedPreviewSiang2">
-                                            <span class="badge badge-warning badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                            <span
+                                                class="badge badge-warning badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
                                         </template>
                                         <template x-if="!processedPreviewSiang2">
                                             <span>
                                                 @if ($existingFotoSiang2)
-                                                    <span class="badge badge-warning badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                                    <span
+                                                        class="badge badge-warning badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
                                                 @else
                                                     <span class="text-[10px] text-base-content/40">–</span>
                                                 @endif
@@ -1368,13 +1350,15 @@
                                     </div>
                                     <div class="relative rounded-xl overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
-                                        :class="processedPreviewSiang2 ? 'border-warning/70 ring-1 ring-warning/30 bg-base-100' :
+                                        :class="processedPreviewSiang2 ?
+                                            'border-warning/70 ring-1 ring-warning/30 bg-base-100' :
                                             '{{ $existingFotoSiang2 ? 'border-warning/30 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/50 bg-base-100/60 hover:bg-warning/5' }}'">
                                         <template x-if="processedPreviewSiang2">
                                             <div class="w-full h-full relative">
                                                 <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
                                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                <div
+                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                     <button type="button" @click.stop="pickFile('siang2', false)"
                                                         class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
                                                     <button type="button" @click.stop="clearPhoto('fotoSiang2')"
@@ -1388,8 +1372,10 @@
                                                     <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
                                                         alt="Foto Siang 2"
                                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                        <a href="{{ asset('storage/' . $existingFotoSiang2) }}" target="_blank"
+                                                    <div
+                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                            target="_blank"
                                                             class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
                                                         <button type="button" @click.stop="pickFile('siang2', true)"
                                                             class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
@@ -1397,12 +1383,18 @@
                                                 @else
                                                     <div @click="pickFile('siang2', false)"
                                                         class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                        <div class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                        <div
+                                                            class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M12 4v16m8-8H4" />
                                                             </svg>
                                                         </div>
-                                                        <span class="text-[10px] text-base-content/50 group-hover:text-warning-content transition-colors">Tambah Foto 2</span>
+                                                        <span
+                                                            class="text-[10px] text-base-content/50 group-hover:text-warning-content transition-colors">Tambah
+                                                            Foto 2</span>
                                                     </div>
                                                 @endif
                                             </div>
@@ -1410,7 +1402,8 @@
                                         <div x-show="currentProcessingTarget === 'fotoSiang2'"
                                             class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
                                             <span class="loading loading-spinner loading-xs text-warning mb-1"></span>
-                                            <span class="text-[10px] font-bold text-base-content" x-text="processingStatus"></span>
+                                            <span class="text-[10px] font-bold text-base-content"
+                                                x-text="processingStatus"></span>
                                         </div>
                                     </div>
                                     {{-- Error Message Siang 2 --}}
@@ -1424,7 +1417,8 @@
                                     {{-- Pilihan Crop Aspect Ratio Siang 2 --}}
                                     <div class="pt-1">
                                         <div class="flex items-center justify-between mb-1">
-                                            <label class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                            <label
+                                                class="text-[11px] font-bold text-base-content flex items-center gap-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                     class="size-3 text-base-content/60" viewBox="0 0 24 24"
                                                     fill="none" stroke="currentColor" stroke-width="2">
@@ -1433,7 +1427,8 @@
                                                 </svg>
                                                 Rasio Crop
                                             </label>
-                                            <span class="text-[9px] text-base-content/50 font-medium">Maks. 100KB</span>
+                                            <span class="text-[9px] text-base-content/50 font-medium">Maks.
+                                                100KB</span>
                                         </div>
                                         <div class="grid grid-cols-3 gap-1">
                                             <label
@@ -1695,12 +1690,14 @@
                                             Foto 2 <span class="text-base-content/40 font-normal">(opsional)</span>
                                         </span>
                                         <template x-if="processedPreviewMalam2">
-                                            <span class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                            <span
+                                                class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
                                         </template>
                                         <template x-if="!processedPreviewMalam2">
                                             <span>
                                                 @if ($existingFotoMalam2)
-                                                    <span class="badge bg-neutral-900 text-white border-0 badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                                    <span
+                                                        class="badge bg-neutral-900 text-white border-0 badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
                                                 @else
                                                     <span class="text-[10px] text-base-content/40">–</span>
                                                 @endif
@@ -1709,13 +1706,15 @@
                                     </div>
                                     <div class="relative rounded-xl overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
-                                        :class="processedPreviewMalam2 ? 'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-base-100' :
+                                        :class="processedPreviewMalam2 ?
+                                            'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-base-100' :
                                             '{{ $existingFotoMalam2 ? 'border-neutral-900/30 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/50 bg-base-100/60 hover:bg-neutral-900/5' }}'">
                                         <template x-if="processedPreviewMalam2">
                                             <div class="w-full h-full relative">
                                                 <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
                                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                <div
+                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                     <button type="button" @click.stop="pickFile('malam2', false)"
                                                         class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
                                                     <button type="button" @click.stop="clearPhoto('fotoMalam2')"
@@ -1729,34 +1728,46 @@
                                                     <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
                                                         alt="Foto Malam 2"
                                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                        <a href="{{ asset('storage/' . $existingFotoMalam2) }}" target="_blank"
+                                                    <div
+                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                            target="_blank"
                                                             class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
-                                                        <button type="button" @click.stop="pickFile('malam2', true)"
+                                                        <button type="button"
+                                                            @click.stop="pickFile('malam2', true)"
                                                             class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
                                                     </div>
                                                 @else
                                                     <div @click="pickFile('malam2', false)"
                                                         class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                        <div class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                        <div
+                                                            class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M12 4v16m8-8H4" />
                                                             </svg>
                                                         </div>
-                                                        <span class="text-[10px] text-base-content/50 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Tambah Foto 2</span>
+                                                        <span
+                                                            class="text-[10px] text-base-content/50 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Tambah
+                                                            Foto 2</span>
                                                     </div>
                                                 @endif
                                             </div>
                                         </template>
                                         <div x-show="currentProcessingTarget === 'fotoMalam2'"
                                             class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
-                                            <span class="loading loading-spinner loading-xs text-neutral-900 mb-1"></span>
-                                            <span class="text-[10px] font-bold text-base-content" x-text="processingStatus"></span>
+                                            <span
+                                                class="loading loading-spinner loading-xs text-neutral-900 mb-1"></span>
+                                            <span class="text-[10px] font-bold text-base-content"
+                                                x-text="processingStatus"></span>
                                         </div>
                                     </div>
                                     {{-- Error Message Malam 2 --}}
                                     <template x-if="errorMessage && rawFileMalam2">
-                                        <span class="text-error text-[10px] block mt-1" x-text="errorMessage"></span>
+                                        <span class="text-error text-[10px] block mt-1"
+                                            x-text="errorMessage"></span>
                                     </template>
                                     @error('fotoMalam2')
                                         <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
@@ -1765,7 +1776,8 @@
                                     {{-- Pilihan Crop Aspect Ratio Malam 2 --}}
                                     <div class="pt-1">
                                         <div class="flex items-center justify-between mb-1">
-                                            <label class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                            <label
+                                                class="text-[11px] font-bold text-base-content flex items-center gap-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                     class="size-3 text-base-content/60" viewBox="0 0 24 24"
                                                     fill="none" stroke="currentColor" stroke-width="2">
@@ -1774,7 +1786,8 @@
                                                 </svg>
                                                 Rasio Crop
                                             </label>
-                                            <span class="text-[9px] text-base-content/50 font-medium">Maks. 100KB</span>
+                                            <span class="text-[9px] text-base-content/50 font-medium">Maks.
+                                                100KB</span>
                                         </div>
                                         <div class="grid grid-cols-3 gap-1">
                                             <label
@@ -1987,7 +2000,8 @@
                                     </button>
                                 </div>
                             @else
-                                <div class="p-3.5 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-2">
+                                <div
+                                    class="p-3.5 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-2">
                                     <div class="flex items-center justify-between">
                                         <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
                                             <span class="size-2 rounded-full bg-neutral-900"></span>
@@ -2068,7 +2082,8 @@
                                     max="{{ $maxSiang }}"
                                     x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
                                     class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
-                                    placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})" required />
+                                    placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})"
+                                    required />
                                 @error('jumlahSiang')
                                     <span class="text-error text-xs mt-1 block">{{ $message }}</span>
                                 @enderror
@@ -2240,14 +2255,18 @@
                     try {
                         const parts = dStr.split('-');
                         if (parts.length === 3) {
-                            const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+                            const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS',
+                                'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
+                            ];
                             const mIndex = parseInt(parts[1], 10) - 1;
                             if (mIndex >= 0 && mIndex < 12) {
                                 return months[mIndex] + ' ' + parts[0];
                             }
                         }
                         const d = new Date(dStr);
-                        const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+                        const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS',
+                            'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
+                        ];
                         return months[d.getMonth()] + ' ' + d.getFullYear();
                     } catch (e) {
                         return '{{ strtoupper(\Carbon\Carbon::now()->translatedFormat('F Y')) }}';
@@ -2690,18 +2709,24 @@
                             const tgl = wire.get('uploadTanggal') || wire.uploadTanggal;
                             wire.openEditKonsumsiModal(tgl, sesi);
                             setTimeout(() => {
-                                if (sesi === 'siang' && this.$refs.fileInputSiang) this.$refs.fileInputSiang.click();
-                                if (sesi === 'malam' && this.$refs.fileInputMalam) this.$refs.fileInputMalam.click();
-                                if (sesi === 'siang2' && this.$refs.fileInputSiang2) this.$refs.fileInputSiang2.click();
-                                if (sesi === 'malam2' && this.$refs.fileInputMalam2) this.$refs.fileInputMalam2.click();
+                                if (sesi === 'siang' && this.$refs.fileInputSiang) this.$refs.fileInputSiang
+                                    .click();
+                                if (sesi === 'malam' && this.$refs.fileInputMalam) this.$refs.fileInputMalam
+                                    .click();
+                                if (sesi === 'siang2' && this.$refs.fileInputSiang2) this.$refs.fileInputSiang2
+                                    .click();
+                                if (sesi === 'malam2' && this.$refs.fileInputMalam2) this.$refs.fileInputMalam2
+                                    .click();
                             }, 250);
                             return;
                         }
 
                         // Auto-detect sesiKonsumsi only for main foto (not foto2)
                         if (sesi === 'siang' || sesi === 'malam') {
-                            const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') || wire.fotoSiang));
-                            const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') || wire.fotoMalam));
+                            const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') ||
+                                wire.fotoSiang));
+                            const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
+                                wire.fotoMalam));
                             if ((sesi === 'malam' && hasSiang) || (sesi === 'siang' && hasMalam)) {
                                 wire.set('sesiKonsumsi', 'keduanya');
                             } else {
@@ -2771,10 +2796,22 @@
                     this.rawFileSiang2 = null;
                     this.rawFileMalam = null;
                     this.rawFileMalam2 = null;
-                    if (this.processedPreviewSiang) { URL.revokeObjectURL(this.processedPreviewSiang); this.processedPreviewSiang = null; }
-                    if (this.processedPreviewSiang2) { URL.revokeObjectURL(this.processedPreviewSiang2); this.processedPreviewSiang2 = null; }
-                    if (this.processedPreviewMalam) { URL.revokeObjectURL(this.processedPreviewMalam); this.processedPreviewMalam = null; }
-                    if (this.processedPreviewMalam2) { URL.revokeObjectURL(this.processedPreviewMalam2); this.processedPreviewMalam2 = null; }
+                    if (this.processedPreviewSiang) {
+                        URL.revokeObjectURL(this.processedPreviewSiang);
+                        this.processedPreviewSiang = null;
+                    }
+                    if (this.processedPreviewSiang2) {
+                        URL.revokeObjectURL(this.processedPreviewSiang2);
+                        this.processedPreviewSiang2 = null;
+                    }
+                    if (this.processedPreviewMalam) {
+                        URL.revokeObjectURL(this.processedPreviewMalam);
+                        this.processedPreviewMalam = null;
+                    }
+                    if (this.processedPreviewMalam2) {
+                        URL.revokeObjectURL(this.processedPreviewMalam2);
+                        this.processedPreviewMalam2 = null;
+                    }
                     this.processedSizeSiang = null;
                     this.processedSizeMalam = null;
                     this.cropRatioSiang = '16:9';
