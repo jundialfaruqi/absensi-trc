@@ -1160,7 +1160,7 @@
                                 </div>
 
                                 {{-- Card Foto Siang --}}
-                                <div class="relative rounded-xl overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
+                                <div class="relative overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
                                     :class="processedPreviewSiang ? 'border-warning ring-2 ring-warning/30 bg-base-100' :
                                         '{{ $existingFotoSiang ? 'border-warning/40 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/70 bg-base-100/60 hover:bg-warning/5' }}'">
 
@@ -1369,7 +1369,7 @@
                                             </span>
                                         </template>
                                     </div>
-                                    <div class="relative rounded-xl overflow-hidden shadow-xs border transition-all duration-200 group"
+                                    <div class="relative overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewSiang2 ?
                                             'border-warning/70 ring-1 ring-warning/30 bg-base-100' :
@@ -1515,7 +1515,7 @@
                                 </div>
 
                                 {{-- Card Foto Malam --}}
-                                <div class="relative rounded-xl overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
+                                <div class="relative overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
                                     :class="processedPreviewMalam ?
                                         'border-neutral-900 ring-2 ring-neutral-900/30 bg-base-100' :
                                         '{{ $existingFotoMalam ? 'border-neutral-900/40 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/70 bg-base-100/60 hover:bg-neutral-900/5' }}'">
@@ -1725,7 +1725,7 @@
                                             </span>
                                         </template>
                                     </div>
-                                    <div class="relative rounded-xl overflow-hidden shadow-xs border transition-all duration-200 group"
+                                    <div class="relative overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewMalam2 ?
                                             'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-base-100' :
@@ -1857,7 +1857,7 @@
                     <div class="grid grid-cols-3 gap-2 sm:gap-3">
                         {{-- Radio Siang --}}
                         <label
-                            class="cursor-pointer border rounded-2xl p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang ? 'opacity-95' : '' }}">
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang ? 'opacity-95' : '' }}">
                             <input type="radio" wire:model.live="sesiKonsumsi" value="siang"
                                 class="radio radio-xs sm:radio-sm radio-warning shrink-0" />
                             <div class="flex-1 min-w-0">
@@ -1879,7 +1879,7 @@
 
                         {{-- Radio Malam --}}
                         <label
-                            class="cursor-pointer border rounded-2xl p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
                             <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
                                 class="radio radio-xs sm:radio-sm radio-neutral shrink-0" />
                             <div class="flex-1 min-w-0">
@@ -1901,7 +1901,7 @@
 
                         {{-- Radio Keduanya (Siang & Malam) --}}
                         <label
-                            class="cursor-pointer border rounded-2xl p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'keduanya' ? 'border-primary bg-primary/10 ring-2 ring-primary/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang && $existingFotoMalam ? 'opacity-95' : '' }}">
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'keduanya' ? 'border-primary bg-primary/10 ring-2 ring-primary/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang && $existingFotoMalam ? 'opacity-95' : '' }}">
                             <input type="radio" wire:model.live="sesiKonsumsi" value="keduanya"
                                 class="radio radio-xs sm:radio-sm radio-primary shrink-0" />
                             <div class="flex-1 min-w-0">
@@ -2097,7 +2097,7 @@
                                         <span class="size-2 rounded-full bg-warning"></span>
                                         Jumlah Porsi Makan Siang
                                     </label>
-                                    <span class="badge badge-warning badge-sm font-bold text-[11px]">
+                                    <span class="badge badge-warning badge-sm font-bold text-[11px] rounded-none">
                                         Maks. {{ $maxSiang }} Porsi
                                     </span>
                                 </div>
@@ -2166,7 +2166,7 @@
                                         Jumlah Porsi Makan Malam
                                     </label>
                                     <span
-                                        class="badge bg-neutral-900 text-white border-0 badge-sm font-bold text-[11px]">
+                                        class="badge bg-neutral-900 text-white rounded-none border-0 badge-sm font-bold text-[11px]">
                                         Maks. {{ $maxMalam }} Porsi
                                     </span>
                                 </div>
