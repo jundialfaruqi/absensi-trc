@@ -270,7 +270,7 @@
                                                 </div>
 
                                                 {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-20 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -284,7 +284,7 @@
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
-                                                    class="relative z-10 w-full h-full flex flex-col items-center justify-center p-1">
+                                                    class="relative z-[3] w-full h-full flex flex-col items-center justify-center p-1">
                                                     @if ($countSiang > 0)
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
@@ -304,7 +304,7 @@
                                                 title="Tambah Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-warning/15 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-10 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-warning group-hover:text-warning-content text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
@@ -362,7 +362,7 @@
                                                 </div>
 
                                                 {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-20 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -376,7 +376,7 @@
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
-                                                    class="relative z-10 w-full h-full flex flex-col items-center justify-center p-1">
+                                                    class="relative z-[3] w-full h-full flex flex-col items-center justify-center p-1">
                                                     @if ($countMalam > 0)
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
@@ -396,7 +396,7 @@
                                                 title="Tambah Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-neutral-900/10 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-10 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-neutral-900 group-hover:text-white text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
@@ -2104,9 +2104,9 @@
                             wire.openEditKonsumsiModal(tgl, sesi);
                             setTimeout(() => {
                                 if (sesi === 'siang' && this.$refs.fileInputSiang) this.$refs.fileInputSiang
-                            .click();
+                                    .click();
                                 if (sesi === 'malam' && this.$refs.fileInputMalam) this.$refs.fileInputMalam
-                            .click();
+                                    .click();
                             }, 250);
                             return;
                         }
