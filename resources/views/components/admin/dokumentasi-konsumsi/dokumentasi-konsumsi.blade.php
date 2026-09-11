@@ -864,23 +864,43 @@
                             <div>
                                 <label class="label text-xs py-1 text-base-content/60 font-medium">Dari Tanggal</label>
                                 <input type="date" x-model="exportStartDate"
+                                    :class="isCrossMonthExport ? 'input-error border-error focus:border-error text-error' : ''"
                                     class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" />
                             </div>
                             <div>
                                 <label class="label text-xs py-1 text-base-content/60 font-medium">Sampai
                                     Tanggal</label>
                                 <input type="date" x-model="exportEndDate"
+                                    :class="isCrossMonthExport ? 'input-error border-error focus:border-error text-error' : ''"
                                     class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" />
                             </div>
                         </div>
-                        <p class="text-[11px] text-base-content/50 italic flex items-center gap-1 mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Rentang tanggal maksimal 31 hari.
-                        </p>
+
+                        {{-- Alert jika rentang tanggal melintasi bulan --}}
+                        <template x-if="isCrossMonthExport">
+                            <div class="p-3 bg-error/10 border border-error/30 rounded-xl flex items-start gap-2.5 text-error text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 shrink-0 mt-0.5 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <div class="flex-1 min-w-0">
+                                    <span class="font-bold block">Periode Melintasi Bulan!</span>
+                                    <span class="text-[11px] text-error/90 mt-0.5 block leading-relaxed">
+                                        Cetak dokumentasi hanya bisa dilakukan bulanan (dalam satu bulan yang sama). Silakan sesuaikan tanggal awal dan akhir.
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="!isCrossMonthExport">
+                            <p class="text-[11px] text-base-content/50 italic flex items-center gap-1 mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Rentang tanggal maksimal 31 hari dalam satu bulan yang sama.
+                            </p>
+                        </template>
                     </div>
 
                     {{-- Checklist Pilihan Bagian Laporan --}}
@@ -995,7 +1015,7 @@
                         <button type="button" @click="closeExportModal()"
                             class="btn btn-sm btn-ghost">Batal</button>
                         <button type="button" @click="startExport()"
-                            :disabled="!exportIncludeRekap && !exportIncludeRincian && !exportIncludeDokumentasi"
+                            :disabled="(!exportIncludeRekap && !exportIncludeRincian && !exportIncludeDokumentasi) || isCrossMonthExport"
                             class="btn btn-sm btn-primary text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2911,6 +2931,13 @@
                 downloadBlobUrl: null,
                 exportedFilename: '',
 
+                get isCrossMonthExport() {
+                    if (!this.exportStartDate || !this.exportEndDate) return false;
+                    const s = this.exportStartDate.substring(0, 7);
+                    const e = this.exportEndDate.substring(0, 7);
+                    return s !== e;
+                },
+
                 get exportMonthYearLabel() {
                     let dStr = this.exportStartDate || this.exportEndDate;
                     if (!dStr) return '{{ strtoupper(\Carbon\Carbon::now()->translatedFormat('F Y')) }}';
@@ -2964,6 +2991,12 @@
 
                 async startExport() {
                     if (!this.exportIncludeRekap && !this.exportIncludeRincian && !this.exportIncludeDokumentasi) {
+                        return;
+                    }
+
+                    if (this.isCrossMonthExport) {
+                        this.exportStatus = 'error';
+                        this.exportErrorMessage = 'Cetak dokumentasi hanya bisa dilakukan bulanan (dalam satu bulan yang sama).';
                         return;
                     }
 

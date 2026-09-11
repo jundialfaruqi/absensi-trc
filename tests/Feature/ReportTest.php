@@ -550,3 +550,34 @@ test('authenticated user can export dokumentasi foto PDF from database', functio
     $response->assertHeader('x-filename', 'dokumentasi_foto_konsumsi_01-09-2026_01-09-2026.pdf');
 });
 
+test('export konsumsi PDF returns 422 if date range crosses months', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $response = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-08-25',
+        'endDate' => '2026-09-05',
+    ]));
+
+    $response->assertStatus(422);
+    $response->assertJson([
+        'error' => true,
+        'message' => 'Cetak dokumentasi hanya bisa dilakukan bulanan (dalam 1 bulan yang sama).',
+    ]);
+});
+
+test('export konsumsi PDF returns 422 if startDate is after endDate', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $response = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-10',
+        'endDate' => '2026-09-05',
+    ]));
+
+    $response->assertStatus(422);
+    $response->assertJson([
+        'error' => true,
+        'message' => 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.',
+    ]);
+});

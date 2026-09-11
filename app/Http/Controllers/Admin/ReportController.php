@@ -181,6 +181,23 @@ class ReportController extends Controller
                 $start = Carbon::parse($startDate);
                 $end = Carbon::parse($endDate);
 
+                if ($start->format('Y-m') !== $end->format('Y-m')) {
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'Cetak dokumentasi hanya bisa dilakukan bulanan (dalam 1 bulan yang sama).',
+                    ], 422);
+                }
+
+                if ($start > $end) {
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.',
+                    ], 422);
+                }
+
+                $month = (int) $start->format('m');
+                $year = (int) $start->format('Y');
+
                 if ($start->diffInDays($end) > 31) {
                     $end = $start->copy()->addDays(31);
                 }
