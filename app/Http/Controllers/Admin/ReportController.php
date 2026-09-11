@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\DokumentasiKonsumsi;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AbsensiExport;
 
@@ -257,6 +258,31 @@ class ReportController extends Controller
                     $dailySummary[$d]['total'] = $dailySummary[$d]['siang'] + $dailySummary[$d]['malam'];
                 }
             }
+
+            // Override nilai SIANG/MALAM dari tabel dokumentasi_konsumsis jika tersedia
+            $dokRecords = DokumentasiKonsumsi::whereIn('tanggal', $dates)
+                ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
+                ->get()
+                ->keyBy(fn ($item) => $item->tanggal->format('Y-m-d'));
+
+            foreach ($dates as $d) {
+                $dok = $dokRecords->get($d);
+                if ($dok !== null) {
+                    // Pakai nilai aktual dari dokumentasi (override absensi)
+                    $dailySummary[$d]['siang'] = $dok->jumlah_siang ?? 0;
+                    $dailySummary[$d]['malam'] = $dok->jumlah_malam ?? 0;
+                    $dailySummary[$d]['total'] = $dailySummary[$d]['siang'] + $dailySummary[$d]['malam'];
+                } else {
+                    // Tidak ada record dokumentasi → tampilkan null (akan ditampilkan sebagai "-" di PDF)
+                    $dailySummary[$d]['siang'] = null;
+                    $dailySummary[$d]['malam'] = null;
+                    $dailySummary[$d]['total'] = null;
+                }
+            }
+
+            // Hitung ulang grand total dari dailySummary — null diabaikan
+            $totalSiangAll = array_sum(array_filter(array_column($dailySummary, 'siang'), fn ($v) => $v !== null));
+            $totalMalamAll = array_sum(array_filter(array_column($dailySummary, 'malam'), fn ($v) => $v !== null));
 
             $opdName = $opdId ? Opd::find($opdId)->name : 'Semua OPD';
             $monthName = Carbon::create()->month($month)->translatedFormat('F');

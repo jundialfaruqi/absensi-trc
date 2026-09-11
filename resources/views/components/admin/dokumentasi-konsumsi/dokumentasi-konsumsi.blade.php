@@ -250,6 +250,8 @@
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         $dok = $dokMap->get($date);
                                         $fotoSiang = $dok?->foto_siang;
+                                        $dokSiang = $dok?->jumlah_siang; // nilai aktual dari dokumentasi_konsumsis
+                                        $hasDokSiang = $dok !== null && $dokSiang !== null;
                                     @endphp
                                     <td
                                         class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }} align-middle relative">
@@ -270,7 +272,7 @@
                                                 </div>
 
                                                 {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -284,8 +286,20 @@
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
-                                                    class="relative z-3 w-full h-full flex flex-col items-center justify-center p-1">
-                                                    @if ($countSiang > 0)
+                                                    class="relative z-[3] w-full h-full flex flex-col items-center justify-center p-1">
+                                                    @if ($hasDokSiang)
+                                                        {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
+                                                        <span
+                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
+                                                            {{ $dokSiang }}
+                                                        </span>
+                                                        {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                        <span
+                                                            class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
+                                                            title="Jumlah dari data absensi: {{ $countSiang }}">
+                                                            {{ $countSiang }}
+                                                        </span>
+                                                    @elseif ($countSiang > 0)
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
                                                             {{ $countSiang }}
@@ -304,14 +318,26 @@
                                                 title="Tambah Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-warning/15 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-warning group-hover:text-warning-content text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
                                                     </span>
                                                 </div>
 
-                                                @if ($countSiang > 0)
+                                                @if ($hasDokSiang)
+                                                    {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold group-hover:scale-105 transition-transform">
+                                                        {{ $dokSiang }}
+                                                    </span>
+                                                    {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                    <span
+                                                        class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
+                                                        title="Jumlah dari data absensi: {{ $countSiang }}">
+                                                        {{ $countSiang }}
+                                                    </span>
+                                                @elseif ($countSiang > 0)
                                                     <span
                                                         class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold group-hover:scale-105 transition-transform">
                                                         {{ $countSiang }}
@@ -342,6 +368,8 @@
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         $dok = $dokMap->get($date);
                                         $fotoMalam = $dok?->foto_malam;
+                                        $dokMalam = $dok?->jumlah_malam; // nilai aktual dari dokumentasi_konsumsis
+                                        $hasDokMalam = $dok !== null && $dokMalam !== null;
                                     @endphp
                                     <td
                                         class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }} align-middle relative">
@@ -362,7 +390,7 @@
                                                 </div>
 
                                                 {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -376,8 +404,20 @@
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
-                                                    class="relative z-3 w-full h-full flex flex-col items-center justify-center p-1">
-                                                    @if ($countMalam > 0)
+                                                    class="relative z-[3] w-full h-full flex flex-col items-center justify-center p-1">
+                                                    @if ($hasDokMalam)
+                                                        {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
+                                                        <span
+                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
+                                                            {{ $dokMalam }}
+                                                        </span>
+                                                        {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                        <span
+                                                            class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
+                                                            title="Jumlah dari data absensi: {{ $countMalam }}">
+                                                            {{ $countMalam }}
+                                                        </span>
+                                                    @elseif ($countMalam > 0)
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
                                                             {{ $countMalam }}
@@ -396,14 +436,26 @@
                                                 title="Tambah Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-neutral-900/10 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-neutral-900 group-hover:text-white text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
                                                     </span>
                                                 </div>
 
-                                                @if ($countMalam > 0)
+                                                @if ($hasDokMalam)
+                                                    {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900/15 text-neutral-900 dark:text-neutral-100 text-xs font-bold group-hover:scale-105 transition-transform">
+                                                        {{ $dokMalam }}
+                                                    </span>
+                                                    {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                    <span
+                                                        class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
+                                                        title="Jumlah dari data absensi: {{ $countMalam }}">
+                                                        {{ $countMalam }}
+                                                    </span>
+                                                @elseif ($countMalam > 0)
                                                     <span
                                                         class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900/15 text-neutral-900 dark:text-neutral-100 text-xs font-bold group-hover:scale-105 transition-transform">
                                                         {{ $countMalam }}
