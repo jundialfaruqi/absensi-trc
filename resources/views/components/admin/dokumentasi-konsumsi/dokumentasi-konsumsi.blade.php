@@ -1360,15 +1360,32 @@
                                     <template x-if="!processedPreviewSiang">
                                         <div class="w-full h-full relative">
                                             @if ($existingFotoSiang)
-                                                <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                    <img src="{{ asset('storage/' . $existingFotoSiang) }}"
-                                                        alt="Foto Konsumsi Siang"
-                                                        class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-                                                    <div class="absolute top-2 left-2 z-10">
+                                                <div
+                                                    class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                    {{-- Ratio Review Container --}}
+                                                    <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                        :class="{
+                                                            'w-full': cropRatioSiang === 'original' ||
+                                                                cropRatioSiang === '16:9',
+                                                            'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
+                                                        }">
+                                                        <img src="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                            alt="Foto Konsumsi Siang"
+                                                            class="w-full h-full transition-all duration-300"
+                                                            :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'" />
+                                                    </div>
+                                                    {{-- Badge Info Tersimpan & Ratio --}}
+                                                    <div
+                                                        class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                         <span
                                                             class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
                                                             <span class="size-1.5 rounded-full bg-success"></span>
                                                             Tersimpan
+                                                        </span>
+                                                        <span
+                                                            class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                            <span
+                                                                x-text="cropRatioSiang === 'original' ? 'Asli' : (cropRatioSiang === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
                                                         </span>
                                                     </div>
                                                     {{-- Overlay saat hover --}}
@@ -1378,8 +1395,8 @@
                                                             target="_blank"
                                                             class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                                stroke-width="2">
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1390,8 +1407,8 @@
                                                         <button type="button" @click.stop="pickFile('siang', true)"
                                                             class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                                stroke-width="2">
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                             </svg>
@@ -1570,16 +1587,41 @@
                                         <template x-if="!processedPreviewSiang2">
                                             <div class="w-full h-full relative">
                                                 @if ($existingFotoSiang2)
-                                                    <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                        <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
-                                                            alt="Foto Siang 2"
-                                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                    <div
+                                                        class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                        {{-- Ratio Review Container --}}
+                                                        <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                            :class="{
+                                                                'w-full': cropRatioSiang2 === 'original' ||
+                                                                    cropRatioSiang2 === '16:9',
+                                                                'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
+                                                            }">
+                                                            <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                                alt="Foto Siang 2"
+                                                                class="w-full h-full transition-all duration-300"
+                                                                :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                        </div>
+                                                        {{-- Badge Info Tersimpan & Ratio --}}
+                                                        <div
+                                                            class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                                            <span
+                                                                class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                                <span class="size-1.5 rounded-full bg-success"></span>
+                                                                Tersimpan
+                                                            </span>
+                                                            <span
+                                                                class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                                <span
+                                                                    x-text="cropRatioSiang2 === 'original' ? 'Asli' : (cropRatioSiang2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                            </span>
+                                                        </div>
                                                         <div
                                                             class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                             <a href="{{ asset('storage/' . $existingFotoSiang2) }}"
                                                                 target="_blank"
                                                                 class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
-                                                            <button type="button" @click.stop="pickFile('siang2', true)"
+                                                            <button type="button"
+                                                                @click.stop="pickFile('siang2', true)"
                                                                 class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
                                                         </div>
                                                     </div>
@@ -1710,7 +1752,7 @@
                                                 :class="{
                                                     'w-full': cropRatioMalam === 'original' ||
                                                         cropRatioMalam === '16:9',
-                                                    'aspect-[4/3] w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam === '4:3'
+                                                    'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam === '4:3'
                                                 }">
                                                 <img :src="processedPreviewMalam" alt="Preview Foto Malam"
                                                     class="w-full h-full transition-all duration-300"
@@ -1761,15 +1803,32 @@
                                     <template x-if="!processedPreviewMalam">
                                         <div class="w-full h-full relative">
                                             @if ($existingFotoMalam)
-                                                <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                    <img src="{{ asset('storage/' . $existingFotoMalam) }}"
-                                                        alt="Foto Konsumsi Malam"
-                                                        class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-                                                    <div class="absolute top-2 left-2 z-10">
+                                                <div
+                                                    class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                    {{-- Ratio Review Container --}}
+                                                    <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                        :class="{
+                                                            'w-full': cropRatioMalam === 'original' ||
+                                                                cropRatioMalam === '16:9',
+                                                            'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400 shadow-2xl': cropRatioMalam === '4:3'
+                                                        }">
+                                                        <img src="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                            alt="Foto Konsumsi Malam"
+                                                            class="w-full h-full transition-all duration-300"
+                                                            :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'" />
+                                                    </div>
+                                                    {{-- Badge Info Tersimpan & Ratio --}}
+                                                    <div
+                                                        class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                         <span
                                                             class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
                                                             <span class="size-1.5 rounded-full bg-success"></span>
                                                             Tersimpan
+                                                        </span>
+                                                        <span
+                                                            class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                            <span
+                                                                x-text="cropRatioMalam === 'original' ? 'Asli' : (cropRatioMalam === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
                                                         </span>
                                                     </div>
                                                     {{-- Overlay saat hover --}}
@@ -1779,8 +1838,8 @@
                                                             target="_blank"
                                                             class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                                stroke-width="2">
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1791,8 +1850,8 @@
                                                         <button type="button" @click.stop="pickFile('malam', true)"
                                                             class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                                stroke-width="2">
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                             </svg>
@@ -1940,7 +1999,7 @@
                                                     :class="{
                                                         'w-full': cropRatioMalam2 === 'original' ||
                                                             cropRatioMalam2 === '16:9',
-                                                        'aspect-[4/3] w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam2 === '4:3'
+                                                        'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam2 === '4:3'
                                                     }">
                                                     <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
                                                         class="w-full h-full transition-all duration-300"
@@ -1973,10 +2032,34 @@
                                         <template x-if="!processedPreviewMalam2">
                                             <div class="w-full h-full relative">
                                                 @if ($existingFotoMalam2)
-                                                    <div class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                        <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
-                                                            alt="Foto Malam 2"
-                                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                    <div
+                                                        class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                        {{-- Ratio Review Container --}}
+                                                        <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                            :class="{
+                                                                'w-full': cropRatioMalam2 === 'original' ||
+                                                                    cropRatioMalam2 === '16:9',
+                                                                'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400 shadow-2xl': cropRatioMalam2 === '4:3'
+                                                            }">
+                                                            <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                                alt="Foto Malam 2"
+                                                                class="w-full h-full transition-all duration-300"
+                                                                :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                        </div>
+                                                        {{-- Badge Info Tersimpan & Ratio --}}
+                                                        <div
+                                                            class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                                            <span
+                                                                class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                                <span class="size-1.5 rounded-full bg-success"></span>
+                                                                Tersimpan
+                                                            </span>
+                                                            <span
+                                                                class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                                <span
+                                                                    x-text="cropRatioMalam2 === 'original' ? 'Asli' : (cropRatioMalam2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                            </span>
+                                                        </div>
                                                         <div
                                                             class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                             <a href="{{ asset('storage/' . $existingFotoMalam2) }}"
@@ -2914,11 +2997,13 @@
                     if (!wire) return;
 
                     this.errorMessage = '';
+                    const storageBase = "{{ asset('storage') }}";
 
                     const targets = [{
                             key: 'fotoSiang',
                             label: 'Foto Siang',
                             raw: this.rawFileSiang,
+                            existing: wire.get('existingFotoSiang') || wire.existingFotoSiang,
                             ratio: this.cropRatioSiang || 'original',
                             compressedOriginal: this.compressedOriginalSiang,
                             uploadedRatio: this.uploadedRatioSiang,
@@ -2927,6 +3012,7 @@
                             key: 'fotoSiang2',
                             label: 'Foto Siang 2',
                             raw: this.rawFileSiang2,
+                            existing: wire.get('existingFotoSiang2') || wire.existingFotoSiang2,
                             ratio: this.cropRatioSiang2 || 'original',
                             compressedOriginal: this.compressedOriginalSiang2,
                             uploadedRatio: this.uploadedRatioSiang2,
@@ -2935,6 +3021,7 @@
                             key: 'fotoMalam',
                             label: 'Foto Malam',
                             raw: this.rawFileMalam,
+                            existing: wire.get('existingFotoMalam') || wire.existingFotoMalam,
                             ratio: this.cropRatioMalam || 'original',
                             compressedOriginal: this.compressedOriginalMalam,
                             uploadedRatio: this.uploadedRatioMalam,
@@ -2943,13 +3030,22 @@
                             key: 'fotoMalam2',
                             label: 'Foto Malam 2',
                             raw: this.rawFileMalam2,
+                            existing: wire.get('existingFotoMalam2') || wire.existingFotoMalam2,
                             ratio: this.cropRatioMalam2 || 'original',
                             compressedOriginal: this.compressedOriginalMalam2,
                             uploadedRatio: this.uploadedRatioMalam2,
                         },
                     ];
 
-                    const toProcess = targets.filter(t => t.raw && (t.uploadedRatio !== t.ratio || !wire.get(t.key)));
+                    const toProcess = targets.filter(t => {
+                        if (t.raw) {
+                            return t.uploadedRatio !== t.ratio || !wire.get(t.key);
+                        }
+                        if (t.existing && t.ratio !== 'original') {
+                            return t.uploadedRatio !== t.ratio || !wire.get(t.key);
+                        }
+                        return false;
+                    });
 
                     if (toProcess.length > 0) {
                         this.isProcessing = true;
@@ -2958,13 +3054,30 @@
                                 this.currentProcessingTarget = item.key;
                                 let webpFile;
 
-                                if (item.ratio === 'original' && item.compressedOriginal) {
-                                    webpFile = item.compressedOriginal;
-                                } else {
-                                    const ratioLabel = item.ratio === 'original' ? 'asli' : item.ratio;
+                                if (item.raw) {
+                                    if (item.ratio === 'original' && item.compressedOriginal) {
+                                        webpFile = item.compressedOriginal;
+                                    } else {
+                                        const ratioLabel = item.ratio === 'original' ? 'asli' : item.ratio;
+                                        this.processingStatus =
+                                            `Meng-crop ${item.label} (${ratioLabel}) & kompresi (Maks. 100KB)...`;
+                                        webpFile = await this.cropAndCompressToWebp(item.raw, item.ratio);
+                                    }
+                                } else if (item.existing) {
+                                    const ratioLabel = item.ratio;
                                     this.processingStatus =
-                                        `Meng-crop ${item.label} (${ratioLabel}) & kompresi (Maks. 100KB)...`;
-                                    webpFile = await this.cropAndCompressToWebp(item.raw, item.ratio);
+                                        `Mengambil & meng-crop ${item.label} (${ratioLabel}) (Maks. 100KB)...`;
+                                    const imageUrl = `${storageBase}/${item.existing}`;
+                                    const response = await fetch(imageUrl);
+                                    if (!response.ok) {
+                                        throw new Error(`Gagal memuat ${item.label} dari server.`);
+                                    }
+                                    const blob = await response.blob();
+                                    const fileName = item.existing.split('/').pop() || `${item.key}.webp`;
+                                    const fileObj = new File([blob], fileName, {
+                                        type: blob.type || 'image/webp'
+                                    });
+                                    webpFile = await this.cropAndCompressToWebp(fileObj, item.ratio);
                                 }
 
                                 this.processingStatus = `Mengunggah ${item.label}...`;
@@ -3006,13 +3119,23 @@
                         }
                     }
 
-                    // Pastikan sesiKonsumsi otomatis set ke 'keduanya' jika ada siang dan malam
+                    // Pastikan sesiKonsumsi otomatis disesuaikan jika ada sesi yang diunggah
                     const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') ||
                         wire.fotoSiang));
                     const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
                         wire.fotoMalam));
                     if (hasSiang && hasMalam && (wire.get('sesiKonsumsi') || wire.sesiKonsumsi) !== 'keduanya') {
                         wire.set('sesiKonsumsi', 'keduanya');
+                    } else if (hasSiang && !hasMalam) {
+                        const curSesi = wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
+                        if (curSesi === 'malam') {
+                            wire.set('sesiKonsumsi', (wire.get('existingFotoMalam') || wire.existingFotoMalam) ? 'keduanya' : 'siang');
+                        }
+                    } else if (!hasSiang && hasMalam) {
+                        const curSesi = wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
+                        if (curSesi === 'siang') {
+                            wire.set('sesiKonsumsi', (wire.get('existingFotoSiang') || wire.existingFotoSiang) ? 'keduanya' : 'malam');
+                        }
                     }
 
                     wire.saveKonsumsi();

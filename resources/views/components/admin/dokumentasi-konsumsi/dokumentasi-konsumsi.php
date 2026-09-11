@@ -653,7 +653,15 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             }
         } else {
             // Mode 'edit'
-            if ($this->sesiKonsumsi === 'siang') {
+            if ($hasNewSiang && !$hasNewMalam && $this->sesiKonsumsi === 'malam') {
+                $saveSiang = true;
+                $saveMalam = !empty($record?->foto_malam);
+                $this->sesiKonsumsi = $saveMalam ? 'keduanya' : 'siang';
+            } elseif (!$hasNewSiang && $hasNewMalam && $this->sesiKonsumsi === 'siang') {
+                $saveSiang = !empty($record?->foto_siang);
+                $saveMalam = true;
+                $this->sesiKonsumsi = $saveSiang ? 'keduanya' : 'malam';
+            } elseif ($this->sesiKonsumsi === 'siang') {
                 $saveSiang = true;
                 $saveMalam = false;
             } elseif ($this->sesiKonsumsi === 'malam') {
