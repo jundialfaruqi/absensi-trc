@@ -45,7 +45,7 @@
     {{-- Tombol action tambah dokumentasi konsumsi --}}
     <div class="flex flex-col gap-4 mb-6">
         <div class="flex flex-wrap gap-2 justify-start">
-            <button type="button" wire:click="openAddKonsumsiModal"
+            <button type="button" @click="openKonsumsiModalInstantly(null, 'siang', 'create')"
                 class="btn btn-sm md:btn-md btn-primary text-white gap-2 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
@@ -259,7 +259,7 @@
                                     <td
                                         class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }} align-middle relative">
                                         @if ($fotoSiang)
-                                            <div wire:click="openEditKonsumsiModal('{{ $date }}', 'siang')"
+                                            <div @click="openKonsumsiModalInstantly('{{ $date }}', 'siang', 'edit')"
                                                 role="button" tabindex="0"
                                                 title="Edit Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk mengedit"
                                                 class="relative w-full h-12 flex items-center justify-center overflow-hidden group cursor-pointer hover:opacity-90 select-none">
@@ -316,7 +316,7 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <div wire:click="openAddKonsumsiModal('{{ $date }}', 'siang')"
+                                            <div @click="openKonsumsiModalInstantly('{{ $date }}', 'siang', 'create')"
                                                 role="button" tabindex="0"
                                                 title="Tambah Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-warning/15 transition-colors select-none">
@@ -378,7 +378,7 @@
                                     <td
                                         class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }} align-middle relative">
                                         @if ($fotoMalam)
-                                            <div wire:click="openEditKonsumsiModal('{{ $date }}', 'malam')"
+                                            <div @click="openKonsumsiModalInstantly('{{ $date }}', 'malam', 'edit')"
                                                 role="button" tabindex="0"
                                                 title="Edit Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk mengedit"
                                                 class="relative w-full h-12 flex items-center justify-center overflow-hidden group cursor-pointer hover:opacity-90 select-none">
@@ -435,12 +435,12 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <div wire:click="openAddKonsumsiModal('{{ $date }}', 'malam')"
+                                            <div @click="openKonsumsiModalInstantly('{{ $date }}', 'malam', 'create')"
                                                 role="button" tabindex="0"
                                                 title="Tambah Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
                                                 class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-neutral-900/10 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
+                                                <div class="absolute top-1 right-1 z-2 pointer-events-none">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-neutral-900 group-hover:text-white text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
@@ -1037,22 +1037,27 @@
     </dialog>
 
     {{-- ─── MODAL UPLOAD DOKUMENTASI KONSUMSI ────────────────────────────── --}}
-    <dialog
-        class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999 {{ $showAddModal ? 'modal-open' : '' }}">
+    <dialog id="modal-upload-konsumsi"
+        class="modal modal-bottom sm:modal-middle backdrop-blur-xs z-99999 {{ $showAddModal ? 'modal-open' : '' }}"
+        :class="{ 'modal-open': isKonsumsiModalOpen || @json($showAddModal) }"
+        @keydown.escape.window="if (isKonsumsiModalOpen) closeKonsumsiModal()"
+        x-cloak>
         <div class="modal-box max-w-xl rounded-2xl shadow-2xl border border-base-200 max-h-[90vh] overflow-y-auto"
             x-data="dokumentasiUploadModal()">
             {{-- Header Modal --}}
             <div class="flex items-start justify-between pb-3 border-b border-base-200">
                 <div class="flex items-center gap-3">
                     <div
-                        class="size-10 rounded-full {{ $modalMode === 'edit' ? 'bg-warning/15 text-warning-content' : 'bg-primary/10 text-primary' }} flex items-center justify-center shrink-0">
-                        @if ($modalMode === 'edit')
+                        class="size-10 rounded-full flex items-center justify-center shrink-0"
+                        :class="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') === 'edit' ? 'bg-warning/15 text-warning-content' : 'bg-primary/10 text-primary'">
+                        <template x-if="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') === 'edit'">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                        @else
+                        </template>
+                        <template x-if="(isKonsumsiModalLoading ? modalModeClient : '{{ $modalMode }}') !== 'edit'">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1060,22 +1065,139 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                             </svg>
-                        @endif
+                        </template>
                     </div>
                     <div>
                         <h3 class="font-bold text-base text-base-content">
-                            {{ $modalMode === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi' }}
+                            <span x-show="isKonsumsiModalLoading" x-text="modalModeClient === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi'"></span>
+                            <span x-show="!isKonsumsiModalLoading">{{ $modalMode === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi' }}</span>
                         </h3>
                         <p class="text-xs text-base-content/60">
-                            {{ $modalMode === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi' }}
+                            <span x-show="isKonsumsiModalLoading" x-text="modalModeClient === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi'"></span>
+                            <span x-show="!isKonsumsiModalLoading">{{ $modalMode === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi' }}</span>
                         </p>
                     </div>
                 </div>
-                <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
+                <button type="button" @click="closeKonsumsiModal()"
                     class="btn btn-sm btn-ghost btn-circle text-base-content/50 hover:text-base-content">✕</button>
             </div>
 
-            <form wire:submit="saveKonsumsi" class="py-4 space-y-4 text-sm">
+            {{-- ─── SKELETON LOADER DI DALAM MODAL ──────────────────────────────── --}}
+            <div x-show="isKonsumsiModalLoading" class="py-4 space-y-4 animate-pulse">
+                {{-- 1. Tanggal Dokumentasi Skeleton --}}
+                <div class="space-y-1.5">
+                    <div class="h-3 bg-base-300 rounded w-36"></div>
+                    <div class="h-10 bg-base-200/80 rounded-lg w-full border border-base-300/60 flex items-center px-3">
+                        <div class="h-3.5 bg-base-300 rounded w-32" x-text="modalDateClient ? formatDateClient(modalDateClient) : ''"></div>
+                    </div>
+                </div>
+
+                {{-- Status Card Skeleton --}}
+                <div class="bg-base-200/60 border border-base-300/60 rounded-2xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="size-4 bg-base-300 rounded"></div>
+                            <div class="h-3.5 bg-base-300 rounded w-40"></div>
+                        </div>
+                        <div class="h-5 bg-base-300 rounded w-20"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-base-300/60">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="h-3 bg-base-300 rounded w-14"></div>
+                                <div class="h-3 bg-base-300 rounded w-10"></div>
+                            </div>
+                            <div class="h-24 bg-base-300/60 rounded-xl"></div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="h-3 bg-base-300 rounded w-14"></div>
+                                <div class="h-3 bg-base-300 rounded w-10"></div>
+                            </div>
+                            <div class="h-24 bg-base-300/60 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 2. Sesi Konsumsi Radio Cards Skeleton --}}
+                <div class="space-y-2">
+                    <div class="h-3 bg-base-300 rounded w-32"></div>
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                        <div class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
+                            <div class="size-4 rounded-full bg-base-300 shrink-0"></div>
+                            <div class="space-y-1 flex-1">
+                                <div class="h-3 bg-base-300 rounded w-10"></div>
+                                <div class="h-2.5 bg-base-300/70 rounded w-16"></div>
+                            </div>
+                        </div>
+                        <div class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
+                            <div class="size-4 rounded-full bg-base-300 shrink-0"></div>
+                            <div class="space-y-1 flex-1">
+                                <div class="h-3 bg-base-300 rounded w-12"></div>
+                                <div class="h-2.5 bg-base-300/70 rounded w-16"></div>
+                            </div>
+                        </div>
+                        <div class="h-14 bg-base-200/80 rounded border border-base-300/60 flex items-center gap-2.5 p-2.5">
+                            <div class="size-4 rounded-full bg-base-300 shrink-0"></div>
+                            <div class="space-y-1 flex-1">
+                                <div class="h-3 bg-base-300 rounded w-14"></div>
+                                <div class="h-2.5 bg-base-300/70 rounded w-16"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 3. Form Upload Foto Skeleton --}}
+                <div class="space-y-2">
+                    <div class="h-3 bg-base-300 rounded w-44"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-2 p-3 bg-base-200/40 rounded-xl border border-base-300/60">
+                            <div class="flex justify-between items-center">
+                                <div class="h-3 bg-base-300 rounded w-20"></div>
+                                <div class="h-4 bg-base-300 rounded w-12"></div>
+                            </div>
+                            <div class="aspect-video bg-base-300/60 rounded flex items-center justify-center">
+                                <div class="size-8 rounded-full bg-base-200/80"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2 p-3 bg-base-200/40 rounded-xl border border-base-300/60">
+                            <div class="flex justify-between items-center">
+                                <div class="h-3 bg-base-300 rounded w-20"></div>
+                                <div class="h-4 bg-base-300 rounded w-12"></div>
+                            </div>
+                            <div class="aspect-video bg-base-300/60 rounded flex items-center justify-center">
+                                <div class="size-8 rounded-full bg-base-200/80"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 4. Jumlah Porsi Konsumsi Skeleton --}}
+                <div class="space-y-2">
+                    <div class="h-3 bg-base-300 rounded w-40"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
+                            <div class="h-3.5 bg-base-300 rounded w-20"></div>
+                            <div class="h-4 bg-base-300 rounded w-14"></div>
+                        </div>
+                        <div class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
+                            <div class="h-3.5 bg-base-300 rounded w-20"></div>
+                            <div class="h-4 bg-base-300 rounded w-14"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 5. Footer Buttons Skeleton --}}
+                <div class="pt-3 border-t border-base-200 flex items-center justify-between">
+                    <div class="h-8 bg-base-200 rounded w-16"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="h-8 bg-base-200 rounded w-16"></div>
+                        <div class="h-8 bg-primary/30 rounded w-32"></div>
+                    </div>
+                </div>
+            </div>
+
+            <form x-show="!isKonsumsiModalLoading" wire:submit="saveKonsumsi" class="py-4 space-y-4 text-sm" x-cloak>
                 {{-- Hidden File Inputs --}}
                 <input type="file" x-ref="fileInputSiang" wire:key="foto-siang-{{ $uploadIteration }}"
                     @change="onFileChange($event, 'fotoSiang')" accept="image/jpeg,image/png,image/jpg,image/webp"
@@ -1965,7 +2087,7 @@
                                         </p>
                                     </div>
                                     <button type="button"
-                                        wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'siang')"
+                                        @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
                                         class="btn btn-xs btn-warning text-warning-content w-full gap-1">
                                         Edit Siang
                                     </button>
@@ -2017,7 +2139,7 @@
                                         </p>
                                     </div>
                                     <button type="button"
-                                        wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'malam')"
+                                        @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
                                         class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white w-full gap-1">
                                         Edit Malam
                                     </button>
@@ -2071,7 +2193,7 @@
                             </p>
                             <div class="pt-1 flex flex-wrap items-center gap-2">
                                 <button type="button"
-                                    wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'siang')"
+                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
                                     class="btn btn-xs btn-warning text-warning-content gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2139,7 +2261,7 @@
                             </p>
                             <div class="pt-1 flex flex-wrap items-center gap-2">
                                 <button type="button"
-                                    wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'malam')"
+                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
                                     class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2217,11 +2339,11 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
+                        <button type="button" @click="closeKonsumsiModal()"
                             class="btn btn-sm btn-ghost">Batal</button>
                         @if ($isCurrentSesiLocked)
                             <button type="button"
-                                wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', '{{ $sesiKonsumsi }}')"
+                                @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', '{{ $sesiKonsumsi }}', 'edit')"
                                 class="btn btn-sm btn-warning text-warning-content gap-1.5 shadow-xs">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2252,12 +2374,87 @@
                 </div>
             </form>
         </div>
+        <form method="dialog" class="modal-backdrop">
+            <button type="button" @click="closeKonsumsiModal()">close</button>
+        </form>
     </dialog>
 
     {{-- ─── ALPINE JAVASCRIPT COMPONENT ────────────────────────────────────── --}}
     <script>
         function konsumsiAdminComponent() {
             return {
+                // State Modal Dokumentasi Konsumsi (Instant Open & Skeleton Loading)
+                isKonsumsiModalOpen: false,
+                isKonsumsiModalLoading: false,
+                modalModeClient: 'create',
+                modalDateClient: '',
+                modalSesiClient: 'siang',
+
+                init() {
+                    this.$watch('$wire.showAddModal', (val) => {
+                        this.isKonsumsiModalOpen = !!val;
+                        if (!val) {
+                            this.isKonsumsiModalLoading = false;
+                        }
+                    });
+                },
+
+                formatDateClient(dStr) {
+                    if (!dStr) return '';
+                    try {
+                        const parts = dStr.split('-');
+                        if (parts.length === 3) {
+                            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus',
+                                'September', 'Oktober', 'November', 'Desember'
+                            ];
+                            const mIndex = parseInt(parts[1], 10) - 1;
+                            return `${parseInt(parts[2], 10)} ${months[mIndex]} ${parts[0]}`;
+                        }
+                        return dStr;
+                    } catch (e) {
+                        return dStr;
+                    }
+                },
+
+                openKonsumsiModalInstantly(date, sesi = 'siang', mode = 'create') {
+                    this.isKonsumsiModalOpen = true;
+                    this.isKonsumsiModalLoading = true;
+                    this.modalModeClient = mode;
+                    this.modalDateClient = date || '';
+                    this.modalSesiClient = sesi || 'siang';
+
+                    window.dispatchEvent(new CustomEvent('reset-upload-modal'));
+
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (!wire) return;
+
+                    const actionPromise = mode === 'edit' ?
+                        wire.openEditKonsumsiModal(date, sesi) :
+                        wire.openAddKonsumsiModal(date, sesi);
+
+                    if (actionPromise && typeof actionPromise.then === 'function') {
+                        actionPromise.then(() => {
+                            this.isKonsumsiModalLoading = false;
+                        }).catch(() => {
+                            this.isKonsumsiModalLoading = false;
+                        });
+                    } else {
+                        setTimeout(() => {
+                            this.isKonsumsiModalLoading = false;
+                        }, 300);
+                    }
+                },
+
+                closeKonsumsiModal() {
+                    this.isKonsumsiModalOpen = false;
+                    this.isKonsumsiModalLoading = false;
+                    window.dispatchEvent(new CustomEvent('reset-upload-modal'));
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        wire.closeAddKonsumsiModal();
+                    }
+                },
+
                 showExportModal: false,
                 exportStartDate: @entangle('startDate').live,
                 exportEndDate: @entangle('endDate').live,
@@ -2486,6 +2683,9 @@
                         }
                     });
                     this.$watch('$wire.uploadTanggal', () => {
+                        this.resetAll();
+                    });
+                    window.addEventListener('reset-upload-modal', () => {
                         this.resetAll();
                     });
                 },

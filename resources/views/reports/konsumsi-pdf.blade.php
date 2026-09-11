@@ -427,8 +427,6 @@
                 <div class="dok-header">
                     <h2>Dokumentasi Makan Minum Petugas Lapangan Bulan {{ $item['bulanTahun'] }}</h2>
                     <div class="dok-tanggal">Tanggal {{ $item['tanggalFormatted'] }}</div>
-                    <br>
-                    <br>
                 </div>
 
                 <table class="dok-table">
