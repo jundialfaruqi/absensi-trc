@@ -190,7 +190,7 @@
                     <span class="badge badge-warning font-bold text-xs gap-1 py-3 px-3 shadow-xs">
                         Siang: {{ number_format($summary['totalSiang']) }}
                     </span>
-                    <span class="badge badge-info font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                    <span class="badge bg-neutral-900 text-white border-0 font-bold text-xs gap-1 py-3 px-3 shadow-xs">
                         Malam: {{ number_format($summary['totalMalam']) }}
                     </span>
                     <span class="badge badge-neutral font-bold text-xs gap-1 py-3 px-3 shadow-xs">
@@ -331,7 +331,7 @@
                             </tr>
 
                             {{-- Baris 2: MALAM --}}
-                            <tr class="hover:bg-info/5 transition-colors">
+                            <tr class="hover:bg-neutral-900/5 transition-colors">
                                 <td
                                     class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4 align-middle">
                                     MALAM
@@ -379,7 +379,7 @@
                                                     class="relative z-10 w-full h-full flex flex-col items-center justify-center p-1">
                                                     @if ($countMalam > 0)
                                                         <span
-                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-info text-info-content text-xs font-black shadow-md ring-1 ring-white/40">
+                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
                                                             {{ $countMalam }}
                                                         </span>
                                                     @else
@@ -394,18 +394,18 @@
                                             <div wire:click="openAddKonsumsiModal('{{ $date }}', 'malam')"
                                                 role="button" tabindex="0"
                                                 title="Tambah Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
-                                                class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-info/15 transition-colors select-none">
+                                                class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-neutral-900/10 transition-colors select-none">
                                                 {{-- Teks + Melayang di Sudut Kanan Atas --}}
                                                 <div class="absolute top-1 right-1 z-10 pointer-events-none">
                                                     <span
-                                                        class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-info group-hover:text-white text-xs font-bold leading-none shadow-2xs transition-colors">
+                                                        class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-neutral-900 group-hover:text-white text-xs font-bold leading-none shadow-2xs transition-colors">
                                                         +
                                                     </span>
                                                 </div>
 
                                                 @if ($countMalam > 0)
                                                     <span
-                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-info/20 text-info-content text-xs font-bold group-hover:scale-105 transition-transform">
+                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900/15 text-neutral-900 dark:text-neutral-100 text-xs font-bold group-hover:scale-105 transition-transform">
                                                         {{ $countMalam }}
                                                     </span>
                                                 @else
@@ -417,7 +417,7 @@
                                     </td>
                                 @endforeach
                                 <td
-                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-info/15 text-info-content align-middle">
+                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-neutral-900/10 text-neutral-900 dark:text-neutral-100 align-middle">
                                     {{ number_format($summary['totalMalam']) }}
                                 </td>
                             </tr>
@@ -467,7 +467,7 @@
                         <span class="size-2.5 rounded-full bg-warning"></span> Siang (S)
                     </span>
                     <span class="inline-flex items-center gap-1.5">
-                        <span class="size-2.5 rounded-full bg-info"></span> Malam (M)
+                        <span class="size-2.5 rounded-full bg-neutral-900"></span> Malam (M)
                     </span>
                     <span class="inline-flex items-center gap-1.5">
                         <span class="size-2.5 rounded-full bg-success"></span> 24 Jam (S+M)
@@ -510,7 +510,7 @@
                                 SIANG
                             </th>
                             <th
-                                class="text-center border-b border-r border-base-200 bg-info/10 text-info-content font-bold text-[10px] p-1">
+                                class="text-center border-b border-r border-base-200 bg-neutral-900/10 text-neutral-900 dark:text-neutral-100 font-bold text-[10px] p-1">
                                 MALAM
                             </th>
                             <th class="text-center border-b border-base-200 bg-base-200 font-bold text-[10px] p-1">
@@ -537,7 +537,7 @@
                                         </td>
                                     @endforeach
                                     <td class="border-b border-r border-base-200 bg-warning/5"></td>
-                                    <td class="border-b border-r border-base-200 bg-info/5"></td>
+                                    <td class="border-b border-r border-base-200 bg-neutral-900/5"></td>
                                     <td class="border-b border-base-200 bg-base-200/20"></td>
                                 </tr>
                             @endfor
@@ -635,7 +635,7 @@
                                                 </span>
                                             @elseif ($cellType === 'malam')
                                                 <span
-                                                    class="badge badge-info badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    class="badge bg-neutral-900 text-white border-0 badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
                                                     title="Konsumsi Malam">
                                                     M
                                                 </span>
@@ -666,7 +666,7 @@
                                         {{ $personnel->total_siang }}
                                     </td>
                                     <td
-                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs bg-info/5 text-info-content">
+                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs bg-neutral-900/5 text-neutral-900 dark:text-neutral-100">
                                         {{ $personnel->total_malam }}
                                     </td>
                                     <td
@@ -1140,17 +1140,17 @@
                             {{-- Kolom Malam --}}
                             <div class="space-y-1.5">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-info-content flex items-center gap-1">
-                                        <span class="size-2 rounded-full bg-info"></span>
+                                    <span class="text-xs font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-1">
+                                        <span class="size-2 rounded-full bg-neutral-900"></span>
                                         Malam
                                     </span>
                                     <template x-if="processedPreviewMalam">
-                                        <span class="badge badge-info badge-xs font-bold text-[10px] shadow-2xs">Foto Baru</span>
+                                        <span class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] shadow-2xs">Foto Baru</span>
                                     </template>
                                     <template x-if="!processedPreviewMalam">
                                         <span>
                                             @if ($existingFotoMalam)
-                                                <span class="badge badge-info badge-xs font-semibold text-[10px]">Tersimpan</span>
+                                                <span class="badge bg-neutral-900 text-white border-0 badge-xs font-semibold text-[10px]">Tersimpan</span>
                                             @else
                                                 <span class="text-[10px] text-base-content/50">Belum Ada</span>
                                             @endif
@@ -1160,7 +1160,7 @@
 
                                 {{-- Card Foto Malam --}}
                                 <div class="relative rounded-xl overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
-                                     :class="processedPreviewMalam ? 'border-info ring-2 ring-info/30 bg-base-100' : '{{ $existingFotoMalam ? 'border-info/40 bg-base-100' : 'border-dashed border-base-300 hover:border-info/70 bg-base-100/60 hover:bg-info/5' }}'">
+                                     :class="processedPreviewMalam ? 'border-neutral-900 ring-2 ring-neutral-900/30 bg-base-100' : '{{ $existingFotoMalam ? 'border-neutral-900/40 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/70 bg-base-100/60 hover:bg-neutral-900/5' }}'">
                                     
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
                                     <template x-if="processedPreviewMalam">
@@ -1168,7 +1168,7 @@
                                             <img :src="processedPreviewMalam" alt="Preview Foto Malam"
                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                             <div class="absolute top-2 left-2 z-10">
-                                                <span class="badge bg-info text-white border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                <span class="badge bg-neutral-900 text-white border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
                                                     WebP • <span x-text="processedSizeMalam"></span>
                                                 </span>
                                             </div>
@@ -1176,7 +1176,7 @@
                                             <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                 <button type="button"
                                                     @click.stop="pickFile('malam', false)"
-                                                    class="btn btn-xs btn-info text-white font-bold shadow-md gap-1">
+                                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                                     </svg>
@@ -1218,7 +1218,7 @@
                                                     </a>
                                                     <button type="button"
                                                         @click.stop="pickFile('malam', true)"
-                                                        class="btn btn-xs btn-info text-white font-bold shadow-md gap-1">
+                                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -1228,19 +1228,19 @@
                                             @else
                                                 <div @click="pickFile('malam', false)"
                                                     class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                    <div class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-info/20 group-hover:text-info transition-colors">
+                                                    <div class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                                         </svg>
                                                     </div>
-                                                    <span class="text-[11px] font-semibold text-base-content/70 group-hover:text-info transition-colors">Upload Foto Malam</span>
+                                                    <span class="text-[11px] font-semibold text-base-content/70 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Upload Foto Malam</span>
                                                     <span class="text-[9px] text-base-content/40">Klik atau arahkan kursor</span>
 
                                                     {{-- Overlay saat hover --}}
                                                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
                                                         <button type="button"
                                                             @click.stop="pickFile('malam', false)"
-                                                            class="btn btn-xs btn-info text-white font-bold shadow-md gap-1">
+                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                                             </svg>
@@ -1255,7 +1255,7 @@
                                     {{-- Loading / Processing Spinner Overlay --}}
                                     <div x-show="isProcessing && rawFileMalam"
                                         class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
-                                        <span class="loading loading-spinner loading-sm text-info mb-1"></span>
+                                        <span class="loading loading-spinner loading-sm text-neutral-900 mb-1"></span>
                                         <span class="text-[10px] font-bold text-base-content leading-tight px-1" x-text="processingStatus"></span>
                                     </div>
                                 </div>
@@ -1306,16 +1306,16 @@
                         </label>
 
                         <label
-                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-info bg-info/10 ring-2 ring-info/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
+                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
                             <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
-                                class="radio radio-sm radio-info" />
+                                class="radio radio-sm radio-neutral checked:bg-neutral-900" />
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-1.5">
                                     <div class="flex items-center gap-1.5">
                                         <span class="text-xs font-bold text-base-content">Malam</span>
                                     </div>
                                     @if ($existingFotoMalam)
-                                        <span class="badge badge-info badge-xs font-bold text-[9px] gap-0.5">
+                                        <span class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[9px] gap-0.5">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5"
                                                 viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd"
@@ -1328,7 +1328,7 @@
                                 </div>
                                 <div class="text-[11px] text-base-content/60 mt-0.5">
                                     Tersedia: <span
-                                        class="font-bold text-info-content">{{ $this->calculatedMalam }}</span> porsi
+                                        class="font-bold text-neutral-900 dark:text-neutral-100">{{ $this->calculatedMalam }}</span> porsi
                                 </div>
                             </div>
                         </label>
@@ -1374,7 +1374,7 @@
                                 </button>
                                 @if (!$existingFotoMalam)
                                     <button type="button" wire:click="$set('sesiKonsumsi', 'malam')"
-                                        class="btn btn-xs btn-info text-white gap-1">
+                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
                                         Pindah ke Input Makan Malam &rarr;
                                     </button>
                                 @endif
@@ -1467,8 +1467,8 @@
                 @if ($sesiKonsumsi === 'malam')
                     @if ($modalMode === 'create' && $existingFotoMalam)
                         {{-- Notifikasi Bahwa Dokumentasi Malam Sudah Tersimpan Pada Mode Tambah --}}
-                        <div class="p-4 bg-info/10 border border-info/30 rounded-2xl space-y-2.5">
-                            <div class="flex items-center gap-2.5 text-info-content font-bold text-xs">
+                        <div class="p-4 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2.5">
+                            <div class="flex items-center gap-2.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -1481,7 +1481,7 @@
                             </p>
                             <div class="pt-1 flex flex-wrap items-center gap-2">
                                 <button type="button" wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'malam')"
-                                    class="btn btn-xs btn-info text-white gap-1">
+                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
@@ -1496,22 +1496,22 @@
                             </div>
                         </div>
                     @else
-                        <div class="p-4 bg-info/5 border border-info/20 rounded-2xl space-y-4">
+                        <div class="p-4 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-4">
                             {{-- Input Jumlah Malam --}}
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
                                     <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                        <span class="size-2 rounded-full bg-info"></span>
+                                        <span class="size-2 rounded-full bg-neutral-900"></span>
                                         Jumlah Porsi Makan Malam
                                     </label>
-                                    <span class="badge badge-info badge-sm font-bold text-[11px]">
+                                    <span class="badge bg-neutral-900 text-white border-0 badge-sm font-bold text-[11px]">
                                         Maks. {{ $maxMalam }} Porsi
                                     </span>
                                 </div>
                                 <input type="number" wire:model.live="jumlahMalam" min="0"
                                     max="{{ $maxMalam }}"
                                     x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-info focus:outline-info"
+                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
                                     placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})" required />
                                 @error('jumlahMalam')
                                     <span class="text-error text-xs mt-1 block">{{ $message }}</span>
@@ -1522,7 +1522,7 @@
                             </div>
 
                             {{-- Pilihan Crop Aspect Ratio --}}
-                            <div class="space-y-1.5 pt-3 border-t border-info/15">
+                            <div class="space-y-1.5 pt-3 border-t border-neutral-900/15">
                                 <div class="flex items-center justify-between">
                                     <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70"
@@ -1539,11 +1539,11 @@
                                     <label
                                         class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
                                         :class="cropRatio === '16:9' ?
-                                            'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' :
+                                            'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                             'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
                                         <input type="radio" x-model="cropRatio" value="16:9"
                                             @change="onCropRatioChange('fotoMalam')"
-                                            class="radio radio-xs radio-info" />
+                                            class="radio radio-xs radio-neutral checked:bg-neutral-900" />
                                         <span class="text-xs">16 : 9</span>
                                         <span
                                             class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
@@ -1552,22 +1552,22 @@
                                     <label
                                         class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
                                         :class="cropRatio === '4:3' ?
-                                            'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' :
+                                            'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                             'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
                                         <input type="radio" x-model="cropRatio" value="4:3"
                                             @change="onCropRatioChange('fotoMalam')"
-                                            class="radio radio-xs radio-info" />
+                                            class="radio radio-xs radio-neutral checked:bg-neutral-900" />
                                         <span class="text-xs">4 : 3</span>
                                     </label>
 
                                     <label
                                         class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
                                         :class="cropRatio === 'original' ?
-                                            'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' :
+                                            'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                             'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
                                         <input type="radio" x-model="cropRatio" value="original"
                                             @change="onCropRatioChange('fotoMalam')"
-                                            class="radio radio-xs radio-info" />
+                                            class="radio radio-xs radio-neutral checked:bg-neutral-900" />
                                         <span class="text-xs">Original</span>
                                         <span
                                             class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
