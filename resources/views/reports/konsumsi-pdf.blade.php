@@ -123,6 +123,105 @@
             page-break-after: always;
         }
 
+        .dok-page {
+            width: 100%;
+        }
+
+        .dok-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .dok-header h2 {
+            margin: 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #1e293b;
+        }
+
+        .dok-tanggal {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 3px;
+            color: #334155;
+        }
+
+        .dok-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 12px 0;
+            border: none;
+            table-layout: fixed;
+            margin: 0;
+        }
+
+        .dok-col {
+            width: 50%;
+            vertical-align: top;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .dok-col-siang {
+            background-color: #fffdf5;
+            border-color: #fde68a;
+        }
+
+        .dok-col-malam {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .dok-col-title {
+            font-weight: bold;
+            font-size: 11px;
+            padding: 5px 8px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .title-siang {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .title-malam {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+        }
+
+        .dok-img {
+            border-radius: 4px;
+            border: 1px solid #94a3b8;
+            display: inline-block;
+            max-width: 96%;
+        }
+
+        .no-photo {
+            padding: 40px 10px;
+            color: #94a3b8;
+            font-size: 9px;
+            font-style: italic;
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dok-footer {
+            text-align: right;
+            font-size: 7px;
+            color: #94a3b8;
+            font-style: italic;
+            margin-top: 6px;
+        }
+
         @page {
             margin: 0.8cm;
         }
@@ -130,14 +229,16 @@
 </head>
 
 <body>
-    <div class="header">
-        <h1>REKAPITULASI DOKUMENTASI KONSUMSI MAKAN MINUM</h1>
-        <p>OPD: {{ $opdName }}</p>
-        @if (count($dates) > 0)
-            <p>Periode: {{ \Carbon\Carbon::parse($dates[0])->translatedFormat('d F Y') }} s/d
-                {{ \Carbon\Carbon::parse(end($dates))->translatedFormat('d F Y') }}</p>
-        @endif
-    </div>
+    @if (($includeRekap ?? true) || ($includeRincian ?? false))
+        <div class="header">
+            <h1>REKAPITULASI DOKUMENTASI KONSUMSI MAKAN MINUM</h1>
+            <p>OPD: {{ $opdName }}</p>
+            @if (count($dates) > 0)
+                <p>Periode: {{ \Carbon\Carbon::parse($dates[0])->translatedFormat('d F Y') }} s/d
+                    {{ \Carbon\Carbon::parse(end($dates))->translatedFormat('d F Y') }}</p>
+            @endif
+        </div>
+    @endif
 
     {{-- ─── TABEL 1: REKAP JUMLAH KONSUMSI PER BULAN ──────────────────────── --}}
     @if ($includeRekap ?? true)
@@ -288,22 +389,110 @@
         </table>
     @endif
 
-    <div class="summary-info">
-        @if ($includeRincian ?? false)
-            <strong>Keterangan Simbol:</strong> 
-            <strong>S</strong>: Konsumsi Siang | 
-            <strong>M</strong>: Konsumsi Malam | 
-            <strong>S+M</strong>: Konsumsi Siang & Malam (Shift 24 Jam) | 
-            <strong>-</strong>: Libur / Tidak Ada Jadwal | 
-            <strong>A/I/S/C</strong>: Alpa / Izin / Sakit / Cuti (Tidak berhak konsumsi)
-            <br>
-        @endif
-        Dokumen ini dibuat otomatis melalui sistem absensitrc.pekanbaru.go.id
-    </div>
+    @if (($includeRekap ?? true) || ($includeRincian ?? false))
+        <div class="summary-info">
+            @if ($includeRincian ?? false)
+                <strong>Keterangan Simbol:</strong> 
+                <strong>S</strong>: Konsumsi Siang | 
+                <strong>M</strong>: Konsumsi Malam | 
+                <strong>S+M</strong>: Konsumsi Siang & Malam (Shift 24 Jam) | 
+                <strong>-</strong>: Libur / Tidak Ada Jadwal | 
+                <strong>A/I/S/C</strong>: Alpa / Izin / Sakit / Cuti (Tidak berhak konsumsi)
+                <br>
+            @endif
+            Dokumen ini dibuat otomatis melalui sistem absensitrc.pekanbaru.go.id
+        </div>
 
-    <div class="footer">
-        Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB
-    </div>
+        <div class="footer">
+            Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB
+        </div>
+    @endif
+
+    {{-- ─── TABEL 3: DOKUMENTASI FOTO KONSUMSI (1 HALAMAN PER 1 TANGGAL) ──── --}}
+    @if ($includeDokumentasi ?? false)
+        @forelse ($dokumentasiList ?? [] as $item)
+            @if (($includeRekap ?? false) || ($includeRincian ?? false) || !$loop->first)
+                <div class="page-break"></div>
+            @endif
+
+            @php
+                $hasTwoPhotos = ($item['foto_siang'] && $item['foto_siang_2']) || ($item['foto_malam'] && $item['foto_malam_2']);
+                $imgMaxHeight = $hasTwoPhotos ? '175px' : '360px';
+            @endphp
+
+            <div class="dok-page">
+                <div class="dok-header">
+                    <h2>Dokumentasi Makan Minum Petugas Lapangan Bulan {{ $item['bulanTahun'] }}</h2>
+                    <div class="dok-tanggal">Tanggal {{ $item['tanggalFormatted'] }}</div>
+                </div>
+
+                <table class="dok-table">
+                    <tr>
+                        {{-- Kolom Siang --}}
+                        <td class="dok-col dok-col-siang">
+                            <div class="dok-col-title title-siang">
+                                Siang : {{ $item['jumlah_siang'] }} bungkus
+                            </div>
+                            <div class="dok-photos">
+                                @if ($item['foto_siang'])
+                                    <div style="margin-bottom: 6px;">
+                                        <img src="{{ $item['foto_siang'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                    </div>
+                                @else
+                                    <div class="no-photo">(Tidak ada foto siang)</div>
+                                @endif
+
+                                @if ($item['foto_siang_2'])
+                                    <div>
+                                        <img src="{{ $item['foto_siang_2'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                    </div>
+                                @endif
+                            </div>
+                        </td>
+
+                        {{-- Kolom Malam --}}
+                        <td class="dok-col dok-col-malam">
+                            <div class="dok-col-title title-malam">
+                                Malam : {{ $item['jumlah_malam'] }} Bungkus
+                            </div>
+                            <div class="dok-photos">
+                                @if ($item['foto_malam'])
+                                    <div style="margin-bottom: 6px;">
+                                        <img src="{{ $item['foto_malam'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                    </div>
+                                @else
+                                    <div class="no-photo">(Tidak ada foto malam)</div>
+                                @endif
+
+                                @if ($item['foto_malam_2'])
+                                    <div>
+                                        <img src="{{ $item['foto_malam_2'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                    </div>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="dok-footer">
+                    Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB
+                </div>
+            </div>
+        @empty
+            @if (($includeRekap ?? false) || ($includeRincian ?? false))
+                <div class="page-break"></div>
+            @endif
+            <div class="dok-header">
+                <h2>Dokumentasi Makan Minum Petugas Lapangan Bulan {{ $monthName }} {{ $year }}</h2>
+            </div>
+            <div style="text-align: center; padding: 50px 20px; color: #64748b; font-size: 11px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 20px;">
+                Tidak ada data dokumentasi foto pada periode yang dipilih.
+            </div>
+            <div class="dok-footer">
+                Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB
+            </div>
+        @endforelse
+    @endif
 </body>
 
 </html>

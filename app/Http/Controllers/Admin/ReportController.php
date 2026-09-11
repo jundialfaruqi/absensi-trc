@@ -167,9 +167,10 @@ class ReportController extends Controller
             $paperSize = $request->get('paperSize', 'a4');
             $includeRekap = $request->has('include_rekap') ? $request->boolean('include_rekap') : true;
             $includeRincian = $request->has('include_rincian') ? $request->boolean('include_rincian') : false;
+            $includeDokumentasi = $request->has('include_dokumentasi') ? $request->boolean('include_dokumentasi') : false;
 
             // Pastikan minimal salah satu aktif
-            if (!$includeRekap && !$includeRincian) {
+            if (!$includeRekap && !$includeRincian && !$includeDokumentasi) {
                 $includeRekap = true;
             }
 
@@ -287,6 +288,41 @@ class ReportController extends Controller
             $opdName = $opdId ? Opd::find($opdId)->name : 'Semua OPD';
             $monthName = Carbon::create()->month($month)->translatedFormat('F');
 
+            $dokumentasiList = [];
+            if ($includeDokumentasi) {
+                $dokForPages = DokumentasiKonsumsi::whereIn('tanggal', $dates)
+                    ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
+                    ->orderBy('tanggal', 'asc')
+                    ->get();
+
+                $resolvePath = function (?string $path) {
+                    if (!$path) return null;
+                    $fullPath = public_path('storage/' . $path);
+                    return file_exists($fullPath) ? $fullPath : null;
+                };
+
+                foreach ($dokForPages as $record) {
+                    $hasPhoto = !empty($record->foto_siang) || !empty($record->foto_siang_2) || !empty($record->foto_malam) || !empty($record->foto_malam_2);
+                    $hasPorsi = ($record->jumlah_siang !== null && $record->jumlah_siang > 0) || ($record->jumlah_malam !== null && $record->jumlah_malam > 0);
+
+                    if ($hasPhoto || $hasPorsi) {
+                        $tgl = Carbon::parse($record->tanggal);
+                        $dokumentasiList[] = [
+                            'date' => $record->tanggal->format('Y-m-d'),
+                            'tanggalFormatted' => $tgl->translatedFormat('d F Y'),
+                            'bulanTahun' => $tgl->translatedFormat('F Y'),
+                            'jumlah_siang' => $record->jumlah_siang ?? 0,
+                            'foto_siang' => $resolvePath($record->foto_siang),
+                            'foto_siang_2' => $resolvePath($record->foto_siang_2),
+                            'jumlah_malam' => $record->jumlah_malam ?? 0,
+                            'foto_malam' => $resolvePath($record->foto_malam),
+                            'foto_malam_2' => $resolvePath($record->foto_malam_2),
+                            'keterangan' => $record->keterangan,
+                        ];
+                    }
+                }
+            }
+
             $data = [
                 'personnels' => $personnels,
                 'dates' => $dates,
@@ -302,6 +338,8 @@ class ReportController extends Controller
                 'endDate' => $endDate ?? end($dates) ?? null,
                 'includeRekap' => $includeRekap,
                 'includeRincian' => $includeRincian,
+                'includeDokumentasi' => $includeDokumentasi,
+                'dokumentasiList' => $dokumentasiList,
             ];
 
             $paperFormat = $paperSize;
@@ -333,11 +371,20 @@ class ReportController extends Controller
         $endDate = $request->get('endDate');
         $includeRekap = $request->has('include_rekap') ? $request->boolean('include_rekap') : true;
         $includeRincian = $request->has('include_rincian') ? $request->boolean('include_rincian') : false;
+        $includeDokumentasi = $request->has('include_dokumentasi') ? $request->boolean('include_dokumentasi') : false;
 
         $prefix = 'rekap_konsumsi';
-        if (!$includeRekap && $includeRincian) {
+        if ($includeDokumentasi && !$includeRekap && !$includeRincian) {
+            $prefix = 'dokumentasi_foto_konsumsi';
+        } elseif (!$includeRekap && $includeRincian && !$includeDokumentasi) {
             $prefix = 'rincian_konsumsi_personel';
-        } elseif ($includeRekap && $includeRincian) {
+        } elseif ($includeRekap && $includeRincian && $includeDokumentasi) {
+            $prefix = 'laporan_lengkap_konsumsi';
+        } elseif ($includeRekap && $includeDokumentasi && !$includeRincian) {
+            $prefix = 'rekap_dan_dokumentasi_konsumsi';
+        } elseif ($includeRincian && $includeDokumentasi && !$includeRekap) {
+            $prefix = 'rincian_dan_dokumentasi_konsumsi';
+        } elseif ($includeRekap && $includeRincian && !$includeDokumentasi) {
             $prefix = 'rekap_dan_rincian_konsumsi';
         }
 

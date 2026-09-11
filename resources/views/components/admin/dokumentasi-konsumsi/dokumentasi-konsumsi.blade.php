@@ -187,13 +187,13 @@
                     </h2>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="badge badge-warning font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                    <span class="badge badge-warning font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
                         Siang: {{ number_format($summary['totalSiang']) }}
                     </span>
-                    <span class="badge bg-neutral text-white font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                    <span class="badge bg-neutral text-white font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
                         Malam: {{ number_format($summary['totalMalam']) }}
                     </span>
-                    <span class="badge badge-neutral font-bold text-xs gap-1 py-3 px-3 shadow-xs">
+                    <span class="badge badge-neutral font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
                         Total: {{ number_format($summary['grandTotal']) }} Porsi
                     </span>
                 </div>
@@ -677,19 +677,19 @@
                                             class="text-center border-b border-r border-base-200 p-1.5 {{ $isToday ? 'bg-primary/5' : '' }}">
                                             @if ($cellType === 'both')
                                                 <span
-                                                    class="badge badge-success badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    class="badge badge-success badge-xs rounded-none font-black text-[9px] px-1.5 py-2 shadow-xs"
                                                     title="24 Jam (Siang & Malam)">
                                                     S+M
                                                 </span>
                                             @elseif ($cellType === 'siang')
                                                 <span
-                                                    class="badge badge-warning badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    class="badge badge-warning badge-xs rounded-none font-black text-[9px] px-1.5 py-2 shadow-xs"
                                                     title="Konsumsi Siang">
                                                     S
                                                 </span>
                                             @elseif ($cellType === 'malam')
                                                 <span
-                                                    class="badge bg-neutral-900 text-white border-0 badge-xs font-black text-[9px] px-1.5 py-2 shadow-xs"
+                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-black text-[9px] px-1.5 py-2 shadow-xs"
                                                     title="Konsumsi Malam">
                                                     M
                                                 </span>
@@ -920,8 +920,26 @@
                                     </p>
                                 </div>
                             </label>
+
+                            {{-- Checklist: Dokumentasi Foto Konsumsi --}}
+                            <label
+                                class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
+                                :class="exportIncludeDokumentasi ?
+                                    'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' :
+                                    'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                                <input type="checkbox" x-model="exportIncludeDokumentasi"
+                                    class="checkbox checkbox-sm checkbox-primary mt-0.5" />
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold text-base-content">
+                                        DOKUMENTASI FOTO KONSUMSI
+                                    </div>
+                                    <p class="text-[11px] text-base-content/60 mt-0.5 leading-relaxed">
+                                        Dokumentasi bukti foto makan siang dan makan malam (1 halaman per tanggal).
+                                    </p>
+                                </div>
+                            </label>
                         </div>
-                        <template x-if="!exportIncludeRekap && !exportIncludeRincian">
+                        <template x-if="!exportIncludeRekap && !exportIncludeRincian && !exportIncludeDokumentasi">
                             <span class="text-error text-xs block font-medium mt-1">
                                 *Pilih minimal salah satu bagian laporan di atas untuk diunduh.
                             </span>
@@ -975,7 +993,7 @@
                         <button type="button" @click="closeExportModal()"
                             class="btn btn-sm btn-ghost">Batal</button>
                         <button type="button" @click="startExport()"
-                            :disabled="!exportIncludeRekap && !exportIncludeRincian"
+                            :disabled="!exportIncludeRekap && !exportIncludeRincian && !exportIncludeDokumentasi"
                             class="btn btn-sm btn-primary text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1098,16 +1116,17 @@
                             </div>
                             @if ($existingFotoSiang && $existingFotoMalam)
                                 <span
-                                    class="badge badge-success badge-xs font-bold text-[10px] gap-1 py-2 px-2 shadow-2xs">
+                                    class="badge badge-success badge-xs rounded-none font-bold text-[10px] gap-1 py-2 px-2 shadow-2xs">
                                     Lengkap
                                 </span>
                             @elseif (!$existingFotoSiang && !$existingFotoMalam)
                                 <span
-                                    class="badge badge-ghost badge-xs font-medium text-[10px] text-base-content/60 py-2 px-2">
+                                    class="badge badge-ghost badge-xs rounded-none font-medium text-[10px] text-base-content/60 py-2 px-2">
                                     Belum Ada Data
                                 </span>
                             @else
-                                <span class="badge badge-warning badge-xs font-bold text-[10px] py-2 px-2 shadow-2xs">
+                                <span
+                                    class="badge badge-warning badge-xs  rounded-none font-bold text-[10px] py-2 px-2 shadow-2xs">
                                     Sebagian
                                 </span>
                             @endif
@@ -1123,14 +1142,14 @@
                                     </span>
                                     <template x-if="processedPreviewSiang">
                                         <span
-                                            class="badge badge-warning badge-xs font-bold text-[10px] shadow-2xs">Foto
+                                            class="badge badge-warning badge-xs rounded-none font-bold text-[10px] shadow-2xs">Foto
                                             Baru</span>
                                     </template>
                                     <template x-if="!processedPreviewSiang">
                                         <span>
                                             @if ($existingFotoSiang)
                                                 <span
-                                                    class="badge badge-warning badge-xs font-semibold text-[10px]">Tersimpan</span>
+                                                    class="badge badge-warning badge-xs rounded-none font-semibold text-[10px]">Tersimpan</span>
                                             @else
                                                 <span class="text-[10px] text-base-content/50">Belum Ada</span>
                                             @endif
@@ -1190,7 +1209,7 @@
                                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                                 <div class="absolute top-2 left-2 z-10">
                                                     <span
-                                                        class="badge bg-black/75 text-white border-0 badge-xs text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                        class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
                                                         <span class="size-1.5 rounded-full bg-success"></span>
                                                         Tersimpan
                                                     </span>
@@ -1335,13 +1354,13 @@
                                         </span>
                                         <template x-if="processedPreviewSiang2">
                                             <span
-                                                class="badge badge-warning badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                                class="badge badge-warning badge-xs rounded-none font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
                                         </template>
                                         <template x-if="!processedPreviewSiang2">
                                             <span>
                                                 @if ($existingFotoSiang2)
                                                     <span
-                                                        class="badge badge-warning badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                                        class="badge badge-warning badge-xs rounded-none font-semibold text-[10px] opacity-80">Tersimpan</span>
                                                 @else
                                                     <span class="text-[10px] text-base-content/40">–</span>
                                                 @endif
@@ -1478,14 +1497,14 @@
                                     </span>
                                     <template x-if="processedPreviewMalam">
                                         <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] shadow-2xs">Foto
+                                            class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[10px] shadow-2xs">Foto
                                             Baru</span>
                                     </template>
                                     <template x-if="!processedPreviewMalam">
                                         <span>
                                             @if ($existingFotoMalam)
                                                 <span
-                                                    class="badge bg-neutral-900 text-white border-0 badge-xs font-semibold text-[10px]">Tersimpan</span>
+                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-semibold text-[10px]">Tersimpan</span>
                                             @else
                                                 <span class="text-[10px] text-base-content/50">Belum Ada</span>
                                             @endif
@@ -1506,7 +1525,7 @@
                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                             <div class="absolute top-2 left-2 z-10">
                                                 <span
-                                                    class="badge bg-neutral-900 text-white border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
                                                     WebP • <span x-text="processedSizeMalam"></span>
                                                 </span>
                                             </div>
@@ -1546,7 +1565,7 @@
                                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                                 <div class="absolute top-2 left-2 z-10">
                                                     <span
-                                                        class="badge bg-black/75 text-white border-0 badge-xs text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                        class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
                                                         <span class="size-1.5 rounded-full bg-success"></span>
                                                         Tersimpan
                                                     </span>
@@ -1691,13 +1710,13 @@
                                         </span>
                                         <template x-if="processedPreviewMalam2">
                                             <span
-                                                class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                                class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
                                         </template>
                                         <template x-if="!processedPreviewMalam2">
                                             <span>
                                                 @if ($existingFotoMalam2)
                                                     <span
-                                                        class="badge bg-neutral-900 text-white border-0 badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                                        class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-semibold text-[10px] opacity-80">Tersimpan</span>
                                                 @else
                                                     <span class="text-[10px] text-base-content/40">–</span>
                                                 @endif
@@ -1843,7 +1862,8 @@
                                 <div class="flex items-center justify-between gap-1">
                                     <span class="text-xs font-bold text-base-content">Siang</span>
                                     @if ($existingFotoSiang)
-                                        <span class="badge badge-warning badge-xs font-bold text-[8px] px-1 py-0.5">
+                                        <span
+                                            class="badge badge-warning badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
                                             Saved
                                         </span>
                                     @endif
@@ -1865,7 +1885,7 @@
                                     <span class="text-xs font-bold text-base-content">Malam</span>
                                     @if ($existingFotoMalam)
                                         <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[8px] px-1 py-0.5">
+                                            class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
                                             Saved
                                         </span>
                                     @endif
@@ -1886,7 +1906,8 @@
                                 <div class="flex items-center justify-between gap-1">
                                     <span class="text-xs font-bold text-base-content">Keduanya</span>
                                     @if ($existingFotoSiang && $existingFotoMalam)
-                                        <span class="badge badge-success badge-xs font-bold text-[8px] px-1 py-0.5">
+                                        <span
+                                            class="badge badge-success badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
                                             Lengkap
                                         </span>
                                     @endif
@@ -1954,7 +1975,7 @@
                                             <span class="size-2 rounded-full bg-warning"></span>
                                             Porsi Makan Siang
                                         </label>
-                                        <span class="badge badge-warning badge-xs font-bold text-[10px]">
+                                        <span class="badge badge-warning badge-xs font-bold text-[10px] rounded-none">
                                             Maks. {{ $maxSiang }}
                                         </span>
                                     </div>
@@ -2008,7 +2029,7 @@
                                             Porsi Makan Malam
                                         </label>
                                         <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px]">
+                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] rounded-none">
                                             Maks. {{ $maxMalam }}
                                         </span>
                                     </div>
@@ -2242,6 +2263,7 @@
                 exportPaperSize: @entangle('paperSize').live,
                 exportIncludeRekap: true,
                 exportIncludeRincian: false,
+                exportIncludeDokumentasi: false,
                 exportStatus: 'idle',
                 exportProgress: 0,
                 exportStatusText: '',
@@ -2282,6 +2304,7 @@
                     this.exportedFilename = '';
                     this.exportIncludeRekap = true;
                     this.exportIncludeRincian = false;
+                    this.exportIncludeDokumentasi = false;
 
                     const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                     if (wire) {
@@ -2300,7 +2323,7 @@
                 },
 
                 async startExport() {
-                    if (!this.exportIncludeRekap && !this.exportIncludeRincian) {
+                    if (!this.exportIncludeRekap && !this.exportIncludeRincian && !this.exportIncludeDokumentasi) {
                         return;
                     }
 
@@ -2329,6 +2352,7 @@
                         if (this.exportPaperSize) params.append('paperSize', this.exportPaperSize);
                         params.append('include_rekap', this.exportIncludeRekap ? '1' : '0');
                         params.append('include_rincian', this.exportIncludeRincian ? '1' : '0');
+                        params.append('include_dokumentasi', this.exportIncludeDokumentasi ? '1' : '0');
 
                         const fullUrl = base + (params.toString() ? '?' + params.toString() : '');
 
@@ -2371,11 +2395,25 @@
                             };
                             const sDate = formatIndo(this.exportStartDate);
                             const eDate = formatIndo(this.exportEndDate);
-                            let prefix = 'rekap_dan_rincian_konsumsi_';
-                            if (this.exportIncludeRekap && !this.exportIncludeRincian) {
-                                prefix = 'rekap_konsumsi_';
-                            } else if (!this.exportIncludeRekap && this.exportIncludeRincian) {
+                            let prefix = 'rekap_konsumsi_';
+                            if (this.exportIncludeDokumentasi && !this.exportIncludeRekap && !this
+                                .exportIncludeRincian) {
+                                prefix = 'dokumentasi_foto_konsumsi_';
+                            } else if (!this.exportIncludeRekap && this.exportIncludeRincian && !this
+                                .exportIncludeDokumentasi) {
                                 prefix = 'rincian_konsumsi_personel_';
+                            } else if (this.exportIncludeRekap && this.exportIncludeRincian && this
+                                .exportIncludeDokumentasi) {
+                                prefix = 'laporan_lengkap_konsumsi_';
+                            } else if (this.exportIncludeRekap && this.exportIncludeDokumentasi && !this
+                                .exportIncludeRincian) {
+                                prefix = 'rekap_dan_dokumentasi_konsumsi_';
+                            } else if (this.exportIncludeRincian && this.exportIncludeDokumentasi && !this
+                                .exportIncludeRekap) {
+                                prefix = 'rincian_dan_dokumentasi_konsumsi_';
+                            } else if (this.exportIncludeRekap && this.exportIncludeRincian && !this
+                                .exportIncludeDokumentasi) {
+                                prefix = 'rekap_dan_rincian_konsumsi_';
                             }
                             filename = prefix + (sDate && eDate ? `${sDate}_${eDate}` : (sDate || '')) +
                                 '.pdf';

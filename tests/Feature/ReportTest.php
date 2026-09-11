@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DokumentasiKonsumsi;
 use App\Models\Opd;
 use App\Models\Personnel;
 use App\Models\User;
@@ -432,5 +433,120 @@ test('export konsumsi PDF filename dynamically changes based on selected section
         'include_rincian' => 1,
     ]));
     $resRincian->assertHeader('x-filename', 'rincian_konsumsi_personel_01-09-2026_05-09-2026.pdf');
+
+    // Only dokumentasi selected
+    $resDok = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+        'include_rekap' => 0,
+        'include_rincian' => 0,
+        'include_dokumentasi' => 1,
+    ]));
+    $resDok->assertHeader('x-filename', 'dokumentasi_foto_konsumsi_01-09-2026_05-09-2026.pdf');
+
+    // All three selected
+    $resAll = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+        'include_rekap' => 1,
+        'include_rincian' => 1,
+        'include_dokumentasi' => 1,
+    ]));
+    $resAll->assertHeader('x-filename', 'laporan_lengkap_konsumsi_01-09-2026_05-09-2026.pdf');
+
+    // Rekap + Dokumentasi selected
+    $resRekapDok = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+        'include_rekap' => 1,
+        'include_rincian' => 0,
+        'include_dokumentasi' => 1,
+    ]));
+    $resRekapDok->assertHeader('x-filename', 'rekap_dan_dokumentasi_konsumsi_01-09-2026_05-09-2026.pdf');
+
+    // Rincian + Dokumentasi selected
+    $resRincianDok = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+        'include_rekap' => 0,
+        'include_rincian' => 1,
+        'include_dokumentasi' => 1,
+    ]));
+    $resRincianDok->assertHeader('x-filename', 'rincian_dan_dokumentasi_konsumsi_01-09-2026_05-09-2026.pdf');
+});
+
+test('export konsumsi PDF view renders dokumentasi foto section per date correctly', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $dates = ['2026-09-01'];
+
+    $dokumentasiList = [
+        [
+            'date' => '2026-09-01',
+            'tanggalFormatted' => '01 September 2026',
+            'bulanTahun' => 'September 2026',
+            'jumlah_siang' => 20,
+            'jumlah_malam' => 15,
+            'foto_siang' => null,
+            'foto_siang_2' => null,
+            'foto_malam' => null,
+            'foto_malam_2' => null,
+            'has_foto' => false,
+            'keterangan' => 'Uji Coba',
+        ],
+    ];
+
+    $html = view('reports.konsumsi-pdf', [
+        'personnels' => collect([]),
+        'dates' => $dates,
+        'dailySummary' => ['2026-09-01' => ['siang' => 20, 'malam' => 15, 'total' => 35]],
+        'totalSiangAll' => 20,
+        'totalMalamAll' => 15,
+        'grandTotalAll' => 35,
+        'month' => 9,
+        'year' => 2026,
+        'monthName' => 'September',
+        'opdName' => $opd->name,
+        'includeRekap' => false,
+        'includeRincian' => false,
+        'includeDokumentasi' => true,
+        'dokumentasiList' => $dokumentasiList,
+    ])->render();
+
+    // Verify Title & Subheader
+    expect($html)->toContain('Dokumentasi Makan Minum Petugas Lapangan Bulan September 2026');
+    expect($html)->toContain('Tanggal 01 September 2026');
+
+    // Verify Siang & Malam columns
+    expect($html)->toContain('Siang : 20 bungkus');
+    expect($html)->toContain('Malam : 15 Bungkus');
+
+    // Rekap/Rincian header should NOT be present when only dokumentasi is selected
+    expect($html)->not->toContain('REKAPITULASI DOKUMENTASI KONSUMSI MAKAN MINUM');
+});
+
+test('authenticated user can export dokumentasi foto PDF from database', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    DokumentasiKonsumsi::create([
+        'opd_id' => $opd->id,
+        'tanggal' => '2026-09-01',
+        'jumlah_siang' => 25,
+        'jumlah_malam' => 18,
+        'created_by' => $user->id,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-01',
+        'include_rekap' => 0,
+        'include_rincian' => 0,
+        'include_dokumentasi' => 1,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+    $response->assertHeader('x-filename', 'dokumentasi_foto_konsumsi_01-09-2026_01-09-2026.pdf');
 });
 
