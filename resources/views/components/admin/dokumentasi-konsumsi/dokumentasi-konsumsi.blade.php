@@ -190,10 +190,12 @@
                     <span class="badge badge-warning font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
                         Siang: {{ number_format($summary['totalSiang']) }}
                     </span>
-                    <span class="badge bg-neutral text-white font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
+                    <span
+                        class="badge badge-neutral text-white font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
                         Malam: {{ number_format($summary['totalMalam']) }}
                     </span>
-                    <span class="badge badge-neutral font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
+                    <span
+                        class="badge badge-neutral text-success font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
                         Total: {{ number_format($summary['grandTotal']) }} Porsi
                     </span>
                 </div>

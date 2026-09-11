@@ -161,7 +161,7 @@
             width: 50%;
             vertical-align: top;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            border-radius: 0px;
             padding: 8px;
             text-align: center;
         }
@@ -180,7 +180,7 @@
             font-weight: bold;
             font-size: 11px;
             padding: 5px 8px;
-            border-radius: 4px;
+            border-radius: 0px;
             text-align: center;
             margin-bottom: 8px;
         }
@@ -198,10 +198,11 @@
         }
 
         .dok-img {
-            border-radius: 4px;
+            width: 100%;
+            border-radius: 0px;
             border: 1px solid #94a3b8;
-            display: inline-block;
-            max-width: 96%;
+            display: block;
+            box-sizing: border-box;
         }
 
         .no-photo {
@@ -211,7 +212,7 @@
             font-style: italic;
             background-color: #f1f5f9;
             border: 1px dashed #cbd5e1;
-            border-radius: 4px;
+            border-radius: 0px;
         }
 
         .dok-footer {
@@ -242,7 +243,8 @@
 
     {{-- ─── TABEL 1: REKAP JUMLAH KONSUMSI PER BULAN ──────────────────────── --}}
     @if ($includeRekap ?? true)
-        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi ({{ $monthName }} {{ $year }})</div>
+        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi
+            ({{ $monthName }} {{ $year }})</div>
         <table>
             <thead>
                 <tr>
@@ -257,7 +259,8 @@
                             $isWeekend = $carbonDate->isWeekend();
                             $dayName = substr($carbonDate->translatedFormat('D'), 0, 3);
                         @endphp
-                        <th class="date-column" style="{{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
+                        <th class="date-column"
+                            style="{{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
                             <div style="font-size: 5px; opacity: 0.8;">{{ $dayName }}</div>
                             <div style="font-size: 7px; font-weight: bold;">{{ $carbonDate->format('d') }}</div>
                         </th>
@@ -291,11 +294,13 @@
                     <td style="text-align: left; font-weight: bold; padding-left: 6px;">TOTAL</td>
                     @foreach ($dates as $date)
                         @php $valTotal = $dailySummary[$date]['total'] ?? null; @endphp
-                        <td class="date-column" style="font-weight: bold; {{ $valTotal === null ? 'color: #94a3b8; font-weight: normal;' : '' }}">
+                        <td class="date-column"
+                            style="font-weight: bold; {{ $valTotal === null ? 'color: #94a3b8; font-weight: normal;' : '' }}">
                             {{ $valTotal !== null ? $valTotal : '-' }}
                         </td>
                     @endforeach
-                    <td class="summary-column" style="font-weight: bold; background-color: #e2e8f0;">{{ $grandTotalAll }}</td>
+                    <td class="summary-column" style="font-weight: bold; background-color: #e2e8f0;">
+                        {{ $grandTotalAll }}</td>
                 </tr>
             </tbody>
         </table>
@@ -322,7 +327,8 @@
                             $carbonDate = \Carbon\Carbon::parse($date);
                             $isWeekend = $carbonDate->isWeekend();
                         @endphp
-                        <th class="date-column" style="font-size: 6px; {{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
+                        <th class="date-column"
+                            style="font-size: 6px; {{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
                             {{ $carbonDate->format('d') }}
                         </th>
                     @endforeach
@@ -342,17 +348,18 @@
                                 $abs = $personnel->absensi_map->get($date);
                                 $jadwal = $personnel->jadwal_map->get($date);
 
-                                $isHadir = $abs && (
-                                    $abs->status === 'HADIR' ||
-                                    $abs->status === 'TELAT' ||
-                                    !empty($abs->jam_masuk)
-                                );
+                                $isHadir =
+                                    $abs &&
+                                    ($abs->status === 'HADIR' || $abs->status === 'TELAT' || !empty($abs->jam_masuk));
 
                                 $cellText = '-';
                                 $cellClass = '';
 
                                 if ($isHadir && $jadwal && $jadwal->shift) {
-                                    $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
+                                    $konsumsis = $jadwal->shift->konsumsis
+                                        ->pluck('nama')
+                                        ->map(fn($k) => strtolower(trim($k)))
+                                        ->toArray();
                                     $hasSiang = in_array('siang', $konsumsis);
                                     $hasMalam = in_array('malam', $konsumsis);
 
@@ -376,7 +383,8 @@
                         @endforeach
                         <td class="summary-column">{{ $personnel->total_siang }}</td>
                         <td class="summary-column">{{ $personnel->total_malam }}</td>
-                        <td class="summary-column" style="font-weight: bold;">{{ $personnel->total_siang + $personnel->total_malam }}</td>
+                        <td class="summary-column" style="font-weight: bold;">
+                            {{ $personnel->total_siang + $personnel->total_malam }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -392,11 +400,11 @@
     @if (($includeRekap ?? true) || ($includeRincian ?? false))
         <div class="summary-info">
             @if ($includeRincian ?? false)
-                <strong>Keterangan Simbol:</strong> 
-                <strong>S</strong>: Konsumsi Siang | 
-                <strong>M</strong>: Konsumsi Malam | 
-                <strong>S+M</strong>: Konsumsi Siang & Malam (Shift 24 Jam) | 
-                <strong>-</strong>: Libur / Tidak Ada Jadwal | 
+                <strong>Keterangan Simbol:</strong>
+                <strong>S</strong>: Konsumsi Siang |
+                <strong>M</strong>: Konsumsi Malam |
+                <strong>S+M</strong>: Konsumsi Siang & Malam (Shift 24 Jam) |
+                <strong>-</strong>: Libur / Tidak Ada Jadwal |
                 <strong>A/I/S/C</strong>: Alpa / Izin / Sakit / Cuti (Tidak berhak konsumsi)
                 <br>
             @endif
@@ -415,15 +423,12 @@
                 <div class="page-break"></div>
             @endif
 
-            @php
-                $hasTwoPhotos = ($item['foto_siang'] && $item['foto_siang_2']) || ($item['foto_malam'] && $item['foto_malam_2']);
-                $imgMaxHeight = $hasTwoPhotos ? '175px' : '360px';
-            @endphp
-
             <div class="dok-page">
                 <div class="dok-header">
                     <h2>Dokumentasi Makan Minum Petugas Lapangan Bulan {{ $item['bulanTahun'] }}</h2>
                     <div class="dok-tanggal">Tanggal {{ $item['tanggalFormatted'] }}</div>
+                    <br>
+                    <br>
                 </div>
 
                 <table class="dok-table">
@@ -436,7 +441,7 @@
                             <div class="dok-photos">
                                 @if ($item['foto_siang'])
                                     <div style="margin-bottom: 6px;">
-                                        <img src="{{ $item['foto_siang'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                        <img src="{{ $item['foto_siang'] }}" class="dok-img" />
                                     </div>
                                 @else
                                     <div class="no-photo">(Tidak ada foto siang)</div>
@@ -444,7 +449,7 @@
 
                                 @if ($item['foto_siang_2'])
                                     <div>
-                                        <img src="{{ $item['foto_siang_2'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                        <img src="{{ $item['foto_siang_2'] }}" class="dok-img" />
                                     </div>
                                 @endif
                             </div>
@@ -458,7 +463,7 @@
                             <div class="dok-photos">
                                 @if ($item['foto_malam'])
                                     <div style="margin-bottom: 6px;">
-                                        <img src="{{ $item['foto_malam'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                        <img src="{{ $item['foto_malam'] }}" class="dok-img" />
                                     </div>
                                 @else
                                     <div class="no-photo">(Tidak ada foto malam)</div>
@@ -466,7 +471,7 @@
 
                                 @if ($item['foto_malam_2'])
                                     <div>
-                                        <img src="{{ $item['foto_malam_2'] }}" class="dok-img" style="max-height: {{ $imgMaxHeight }};" />
+                                        <img src="{{ $item['foto_malam_2'] }}" class="dok-img" />
                                     </div>
                                 @endif
                             </div>
@@ -485,7 +490,8 @@
             <div class="dok-header">
                 <h2>Dokumentasi Makan Minum Petugas Lapangan Bulan {{ $monthName }} {{ $year }}</h2>
             </div>
-            <div style="text-align: center; padding: 50px 20px; color: #64748b; font-size: 11px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 20px;">
+            <div
+                style="text-align: center; padding: 50px 20px; color: #64748b; font-size: 11px; border: 1px dashed #cbd5e1; border-radius: 0px; margin-top: 20px;">
                 Tidak ada data dokumentasi foto pada periode yang dipilih.
             </div>
             <div class="dok-footer">
