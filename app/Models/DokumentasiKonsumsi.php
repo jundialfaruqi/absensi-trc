@@ -14,8 +14,10 @@ class DokumentasiKonsumsi extends Model
         'tanggal',
         'jumlah_siang',
         'foto_siang',
+        'foto_siang_2',
         'jumlah_malam',
         'foto_malam',
+        'foto_malam_2',
         'keterangan',
         'created_by',
     ];

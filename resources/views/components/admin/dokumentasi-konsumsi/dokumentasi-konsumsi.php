@@ -47,9 +47,13 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     public ?int $jumlahSiang = 0;
     public ?int $jumlahMalam = 0;
     public $fotoSiang = null;
+    public $fotoSiang2 = null;
     public $fotoMalam = null;
+    public $fotoMalam2 = null;
     public ?string $existingFotoSiang = null;
+    public ?string $existingFotoSiang2 = null;
     public ?string $existingFotoMalam = null;
+    public ?string $existingFotoMalam2 = null;
     public int $uploadIteration = 0;
 
     protected $listeners = [
@@ -342,7 +346,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $this->uploadTanggal = $date ?: Carbon::now()->format('Y-m-d');
         $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam', 'keduanya']) ? $sesi : 'siang';
         $this->fotoSiang = null;
+        $this->fotoSiang2 = null;
         $this->fotoMalam = null;
+        $this->fotoMalam2 = null;
         $this->uploadIteration++;
         $this->resetValidation();
         $this->loadExistingDokumentasi();
@@ -355,7 +361,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $this->uploadTanggal = $date;
         $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam', 'keduanya']) ? $sesi : 'siang';
         $this->fotoSiang = null;
+        $this->fotoSiang2 = null;
         $this->fotoMalam = null;
+        $this->fotoMalam2 = null;
         $this->uploadIteration++;
         $this->resetValidation();
         $this->loadExistingDokumentasi();
@@ -368,7 +376,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     {
         $this->showAddModal = false;
         $this->fotoSiang = null;
+        $this->fotoSiang2 = null;
         $this->fotoMalam = null;
+        $this->fotoMalam2 = null;
         $this->modalMode = 'create';
         $this->uploadIteration++;
         $this->resetValidation();
@@ -377,7 +387,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     public function updatedUploadTanggal(): void
     {
         $this->fotoSiang = null;
+        $this->fotoSiang2 = null;
         $this->fotoMalam = null;
+        $this->fotoMalam2 = null;
         $this->uploadIteration++;
         $this->resetValidation();
         $this->loadExistingDokumentasi();
@@ -427,7 +439,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             ->first();
 
         $this->existingFotoSiang = $record?->foto_siang;
+        $this->existingFotoSiang2 = $record?->foto_siang_2;
         $this->existingFotoMalam = $record?->foto_malam;
+        $this->existingFotoMalam2 = $record?->foto_malam_2;
 
         $maxSiang = $this->calculatedSiang;
         $maxMalam = $this->calculatedMalam;
@@ -545,19 +559,21 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $sesi = $sesi ?: $this->sesiKonsumsi;
 
         if ($sesi === 'keduanya') {
-            if ($record->foto_siang && Storage::disk('public')->exists($record->foto_siang)) {
-                Storage::disk('public')->delete($record->foto_siang);
-            }
-            if ($record->foto_malam && Storage::disk('public')->exists($record->foto_malam)) {
-                Storage::disk('public')->delete($record->foto_malam);
+            foreach (['foto_siang', 'foto_siang_2', 'foto_malam', 'foto_malam_2'] as $col) {
+                if ($record->$col && Storage::disk('public')->exists($record->$col)) {
+                    Storage::disk('public')->delete($record->$col);
+                }
             }
             $record->delete();
             $sesiLabel = 'Makan Siang & Makan Malam';
         } elseif ($sesi === 'siang') {
-            if ($record->foto_siang && Storage::disk('public')->exists($record->foto_siang)) {
-                Storage::disk('public')->delete($record->foto_siang);
+            foreach (['foto_siang', 'foto_siang_2'] as $col) {
+                if ($record->$col && Storage::disk('public')->exists($record->$col)) {
+                    Storage::disk('public')->delete($record->$col);
+                }
             }
             $record->foto_siang = null;
+            $record->foto_siang_2 = null;
             $record->jumlah_siang = null;
             if (empty($record->foto_malam) && $record->jumlah_malam === null) {
                 $record->delete();
@@ -566,10 +582,13 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             }
             $sesiLabel = 'Makan Siang';
         } else {
-            if ($record->foto_malam && Storage::disk('public')->exists($record->foto_malam)) {
-                Storage::disk('public')->delete($record->foto_malam);
+            foreach (['foto_malam', 'foto_malam_2'] as $col) {
+                if ($record->$col && Storage::disk('public')->exists($record->$col)) {
+                    Storage::disk('public')->delete($record->$col);
+                }
             }
             $record->foto_malam = null;
+            $record->foto_malam_2 = null;
             $record->jumlah_malam = null;
             if (empty($record->foto_siang) && $record->jumlah_siang === null) {
                 $record->delete();
@@ -581,9 +600,13 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
 
         $this->showAddModal = false;
         $this->fotoSiang = null;
+        $this->fotoSiang2 = null;
         $this->fotoMalam = null;
+        $this->fotoMalam2 = null;
         $this->existingFotoSiang = null;
+        $this->existingFotoSiang2 = null;
         $this->existingFotoMalam = null;
+        $this->existingFotoMalam2 = null;
         $this->uploadIteration++;
         unset($this->dokumentasiMap);
 
@@ -658,15 +681,19 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
                 : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
             $rules['fotoSiang'] = $fotoSiangRule;
+            $rules['fotoSiang2'] = 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
 
             $messages['jumlahSiang.required'] = 'Jumlah porsi makan siang wajib diisi.';
             $messages['jumlahSiang.integer'] = 'Jumlah porsi makan siang harus berupa angka.';
             $messages['jumlahSiang.min'] = 'Jumlah porsi makan siang tidak boleh kurang dari 0.';
             $messages['jumlahSiang.max'] = "Jumlah porsi makan siang tidak boleh melebihi {$maxSiang} porsi (maksimal terdata pada tanggal ini).";
-            $messages['fotoSiang.required'] = 'Foto bukti makan siang wajib diunggah.';
-            $messages['fotoSiang.image'] = 'File foto makan siang harus berupa gambar.';
-            $messages['fotoSiang.mimes'] = 'Format foto makan siang harus berupa JPG, JPEG, PNG, atau WEBP.';
-            $messages['fotoSiang.max'] = 'Ukuran foto makan siang maksimal 2MB (2048 KB).';
+            $messages['fotoSiang.required'] = 'Foto 1 makan siang wajib diunggah.';
+            $messages['fotoSiang.image'] = 'File foto 1 makan siang harus berupa gambar.';
+            $messages['fotoSiang.mimes'] = 'Format foto 1 makan siang harus berupa JPG, JPEG, PNG, atau WEBP.';
+            $messages['fotoSiang.max'] = 'Ukuran foto 1 makan siang maksimal 2MB.';
+            $messages['fotoSiang2.image'] = 'File foto 2 makan siang harus berupa gambar.';
+            $messages['fotoSiang2.mimes'] = 'Format foto 2 makan siang harus berupa JPG, JPEG, PNG, atau WEBP.';
+            $messages['fotoSiang2.max'] = 'Ukuran foto 2 makan siang maksimal 2MB.';
         }
 
         if ($saveMalam) {
@@ -675,15 +702,19 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
                 : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
             $rules['fotoMalam'] = $fotoMalamRule;
+            $rules['fotoMalam2'] = 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
 
             $messages['jumlahMalam.required'] = 'Jumlah porsi makan malam wajib diisi.';
             $messages['jumlahMalam.integer'] = 'Jumlah porsi makan malam harus berupa angka.';
             $messages['jumlahMalam.min'] = 'Jumlah porsi makan malam tidak boleh kurang dari 0.';
             $messages['jumlahMalam.max'] = "Jumlah porsi makan malam tidak boleh melebihi {$maxMalam} porsi (maksimal terdata pada tanggal ini).";
-            $messages['fotoMalam.required'] = 'Foto bukti makan malam wajib diunggah.';
-            $messages['fotoMalam.image'] = 'File foto makan malam harus berupa gambar.';
-            $messages['fotoMalam.mimes'] = 'Format foto makan malam harus berupa JPG, JPEG, PNG, atau WEBP.';
-            $messages['fotoMalam.max'] = 'Ukuran foto makan malam maksimal 2MB (2048 KB).';
+            $messages['fotoMalam.required'] = 'Foto 1 makan malam wajib diunggah.';
+            $messages['fotoMalam.image'] = 'File foto 1 makan malam harus berupa gambar.';
+            $messages['fotoMalam.mimes'] = 'Format foto 1 makan malam harus berupa JPG, JPEG, PNG, atau WEBP.';
+            $messages['fotoMalam.max'] = 'Ukuran foto 1 makan malam maksimal 2MB.';
+            $messages['fotoMalam2.image'] = 'File foto 2 makan malam harus berupa gambar.';
+            $messages['fotoMalam2.mimes'] = 'Format foto 2 makan malam harus berupa JPG, JPEG, PNG, atau WEBP.';
+            $messages['fotoMalam2.max'] = 'Ukuran foto 2 makan malam maksimal 2MB.';
         }
 
         $this->validate($rules, $messages);
@@ -711,6 +742,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $targetDirectory = 'dokumentasi-konsumsi/' . $folderTanggal;
 
         if ($saveSiang) {
+            // Foto 1 Siang
             $pathSiang = $record?->foto_siang;
             if ($this->fotoSiang) {
                 if ($pathSiang && Storage::disk('public')->exists($pathSiang)) {
@@ -718,14 +750,25 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 }
                 $pathSiang = $this->fotoSiang->store($targetDirectory, 'public');
             }
+            // Foto 2 Siang (opsional)
+            $pathSiang2 = $record?->foto_siang_2;
+            if ($this->fotoSiang2) {
+                if ($pathSiang2 && Storage::disk('public')->exists($pathSiang2)) {
+                    Storage::disk('public')->delete($pathSiang2);
+                }
+                $pathSiang2 = $this->fotoSiang2->store($targetDirectory, 'public');
+            }
             $dataToUpdate['jumlah_siang'] = $this->jumlahSiang;
             $dataToUpdate['foto_siang'] = $pathSiang;
+            $dataToUpdate['foto_siang_2'] = $pathSiang2;
         } else {
             $dataToUpdate['jumlah_siang'] = $record?->jumlah_siang ?? null;
             $dataToUpdate['foto_siang'] = $record?->foto_siang ?? null;
+            $dataToUpdate['foto_siang_2'] = $record?->foto_siang_2 ?? null;
         }
 
         if ($saveMalam) {
+            // Foto 1 Malam
             $pathMalam = $record?->foto_malam;
             if ($this->fotoMalam) {
                 if ($pathMalam && Storage::disk('public')->exists($pathMalam)) {
@@ -733,11 +776,21 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 }
                 $pathMalam = $this->fotoMalam->store($targetDirectory, 'public');
             }
+            // Foto 2 Malam (opsional)
+            $pathMalam2 = $record?->foto_malam_2;
+            if ($this->fotoMalam2) {
+                if ($pathMalam2 && Storage::disk('public')->exists($pathMalam2)) {
+                    Storage::disk('public')->delete($pathMalam2);
+                }
+                $pathMalam2 = $this->fotoMalam2->store($targetDirectory, 'public');
+            }
             $dataToUpdate['jumlah_malam'] = $this->jumlahMalam;
             $dataToUpdate['foto_malam'] = $pathMalam;
+            $dataToUpdate['foto_malam_2'] = $pathMalam2;
         } else {
             $dataToUpdate['jumlah_malam'] = $record?->jumlah_malam ?? null;
             $dataToUpdate['foto_malam'] = $record?->foto_malam ?? null;
+            $dataToUpdate['foto_malam_2'] = $record?->foto_malam_2 ?? null;
         }
 
         DokumentasiKonsumsi::updateOrCreate(
@@ -759,7 +812,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $verb = $this->modalMode === 'edit' ? 'diperbarui' : 'disimpan';
         $this->showAddModal = false;
         $this->fotoSiang = null;
+        $this->fotoSiang2 = null;
         $this->fotoMalam = null;
+        $this->fotoMalam2 = null;
         $this->uploadIteration++;
         unset($this->dokumentasiMap);
 

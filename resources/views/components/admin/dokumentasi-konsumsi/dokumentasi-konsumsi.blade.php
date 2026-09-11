@@ -250,6 +250,7 @@
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         $dok = $dokMap->get($date);
                                         $fotoSiang = $dok?->foto_siang;
+                                        $fotoSiang2 = $dok?->foto_siang_2;
                                         $dokSiang = $dok?->jumlah_siang; // nilai aktual dari dokumentasi_konsumsis
                                         $hasDokSiang = $dok !== null && $dokSiang !== null;
                                     @endphp
@@ -271,8 +272,8 @@
                                                     class="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors">
                                                 </div>
 
-                                                {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
+                                                {{-- Icon Ceklist / Foto-2 badge di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none flex flex-col items-end gap-0.5">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -282,7 +283,19 @@
                                                                 d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </span>
+                                                    @if ($fotoSiang2)
+                                                        <span class="inline-flex items-center justify-center size-3 rounded-full bg-warning/90 text-warning-content text-[7px] font-black shadow-xs"
+                                                            title="Ada 2 foto">2</span>
+                                                    @endif
                                                 </div>
+
+                                                {{-- Foto ke-2 thumbnail pojok kiri bawah --}}
+                                                @if ($fotoSiang2)
+                                                    <img src="{{ asset('storage/' . $fotoSiang2) }}"
+                                                        alt="Foto Siang 2"
+                                                        class="absolute bottom-0.5 left-0.5 z-[2] size-5 rounded object-cover ring-1 ring-white/60 shadow pointer-events-none"
+                                                        loading="lazy" />
+                                                @endif
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
@@ -368,6 +381,7 @@
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                         $dok = $dokMap->get($date);
                                         $fotoMalam = $dok?->foto_malam;
+                                        $fotoMalam2 = $dok?->foto_malam_2;
                                         $dokMalam = $dok?->jumlah_malam; // nilai aktual dari dokumentasi_konsumsis
                                         $hasDokMalam = $dok !== null && $dokMalam !== null;
                                     @endphp
@@ -389,8 +403,8 @@
                                                     class="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors">
                                                 </div>
 
-                                                {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
-                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none">
+                                                {{-- Icon Ceklist / Foto-2 badge di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-[2] pointer-events-none flex flex-col items-end gap-0.5">
                                                     <span
                                                         class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
                                                         title="Dokumentasi sudah tersedia">
@@ -400,7 +414,19 @@
                                                                 d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </span>
+                                                    @if ($fotoMalam2)
+                                                        <span class="inline-flex items-center justify-center size-3 rounded-full bg-neutral-900 text-white text-[7px] font-black shadow-xs"
+                                                            title="Ada 2 foto">2</span>
+                                                    @endif
                                                 </div>
+
+                                                {{-- Foto ke-2 thumbnail pojok kiri bawah --}}
+                                                @if ($fotoMalam2)
+                                                    <img src="{{ asset('storage/' . $fotoMalam2) }}"
+                                                        alt="Foto Malam 2"
+                                                        class="absolute bottom-0.5 left-0.5 z-[2] size-5 rounded object-cover ring-1 ring-white/60 shadow pointer-events-none"
+                                                        loading="lazy" />
+                                                @endif
 
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
@@ -1054,8 +1080,14 @@
                 <input type="file" x-ref="fileInputSiang" wire:key="foto-siang-{{ $uploadIteration }}"
                     @change="onFileChange($event, 'fotoSiang')" accept="image/jpeg,image/png,image/jpg,image/webp"
                     class="hidden" />
+                <input type="file" x-ref="fileInputSiang2" wire:key="foto-siang2-{{ $uploadIteration }}"
+                    @change="onFileChange($event, 'fotoSiang2')" accept="image/jpeg,image/png,image/jpg,image/webp"
+                    class="hidden" />
                 <input type="file" x-ref="fileInputMalam" wire:key="foto-malam-{{ $uploadIteration }}"
                     @change="onFileChange($event, 'fotoMalam')" accept="image/jpeg,image/png,image/jpg,image/webp"
+                    class="hidden" />
+                <input type="file" x-ref="fileInputMalam2" wire:key="foto-malam2-{{ $uploadIteration }}"
+                    @change="onFileChange($event, 'fotoMalam2')" accept="image/jpeg,image/png,image/jpg,image/webp"
                     class="hidden" />
 
                 {{-- 1. Input Tanggal --}}
@@ -1248,7 +1280,7 @@
                                     </template>
 
                                     {{-- Loading / Processing Spinner Overlay --}}
-                                    <div x-show="isProcessing && rawFileSiang"
+                                    <div x-show="currentProcessingTarget === 'fotoSiang'"
                                         class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
                                         <span class="loading loading-spinner loading-sm text-warning mb-1"></span>
                                         <span class="text-[10px] font-bold text-base-content leading-tight px-1"
@@ -1312,6 +1344,98 @@
                                             <span class="text-[10px]">Asli</span>
                                         </label>
                                     </div>
+                                </div>
+
+                                {{-- Foto ke-2 Siang (opsional) --}}
+                                <div class="pt-1.5 border-t border-base-200/70">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                            <span class="size-1.5 rounded-full bg-warning opacity-60"></span>
+                                            Foto 2 <span class="text-base-content/40 font-normal">(opsional)</span>
+                                        </span>
+                                        <template x-if="processedPreviewSiang2">
+                                            <span class="badge badge-warning badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                        </template>
+                                        <template x-if="!processedPreviewSiang2">
+                                            <span>
+                                                @if ($existingFotoSiang2)
+                                                    <span class="badge badge-warning badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                                @else
+                                                    <span class="text-[10px] text-base-content/40">–</span>
+                                                @endif
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <div class="relative rounded-xl overflow-hidden shadow-xs border transition-all duration-200 group"
+                                        style="aspect-ratio:16/9"
+                                        :class="processedPreviewSiang2 ? 'border-warning/70 ring-1 ring-warning/30 bg-base-100' :
+                                            '{{ $existingFotoSiang2 ? 'border-warning/30 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/50 bg-base-100/60 hover:bg-warning/5' }}'">
+                                        <template x-if="processedPreviewSiang2">
+                                            <div class="w-full h-full relative">
+                                                <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                    <button type="button" @click.stop="pickFile('siang2', false)"
+                                                        class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
+                                                    <button type="button" @click.stop="clearPhoto('fotoSiang2')"
+                                                        class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">Batal</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="!processedPreviewSiang2">
+                                            <div class="w-full h-full relative">
+                                                @if ($existingFotoSiang2)
+                                                    <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                        alt="Foto Siang 2"
+                                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoSiang2) }}" target="_blank"
+                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
+                                                        <button type="button" @click.stop="pickFile('siang2', true)"
+                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
+                                                    </div>
+                                                @else
+                                                    <div @click="pickFile('siang2', false)"
+                                                        class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                        <div class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        </div>
+                                                        <span class="text-[10px] text-base-content/50 group-hover:text-warning-content transition-colors">Tambah Foto 2</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </template>
+                                        <div x-show="currentProcessingTarget === 'fotoSiang2'"
+                                            class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
+                                            <span class="loading loading-spinner loading-xs text-warning mb-1"></span>
+                                            <span class="text-[10px] font-bold text-base-content" x-text="processingStatus"></span>
+                                        </div>
+                                    </div>
+                                    @error('fotoSiang2')
+                                        <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
+                                    @enderror
+                                    <template x-if="rawFileSiang2">
+                                        <div class="flex items-center gap-1 flex-wrap mt-1.5">
+                                            <span class="text-[10px] text-base-content/60 font-medium mr-0.5">Rasio:</span>
+                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
+                                                :class="cropRatioSiang2 === '16:9' ? 'border-warning bg-warning/15 ring-1 ring-warning font-bold text-warning-content' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioSiang2" value="16:9" @change="onCropRatioChange('fotoSiang2')" class="radio radio-xs radio-warning" />
+                                                <span class="text-[10px]">16:9</span>
+                                            </label>
+                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
+                                                :class="cropRatioSiang2 === '4:3' ? 'border-warning bg-warning/15 ring-1 ring-warning font-bold text-warning-content' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioSiang2" value="4:3" @change="onCropRatioChange('fotoSiang2')" class="radio radio-xs radio-warning" />
+                                                <span class="text-[10px]">4:3</span>
+                                            </label>
+                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
+                                                :class="cropRatioSiang2 === 'original' ? 'border-warning bg-warning/15 ring-1 ring-warning font-bold text-warning-content' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioSiang2" value="original" @change="onCropRatioChange('fotoSiang2')" class="radio radio-xs radio-warning" />
+                                                <span class="text-[10px]">Asli</span>
+                                            </label>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
 
@@ -1463,7 +1587,7 @@
                                     </template>
 
                                     {{-- Loading / Processing Spinner Overlay --}}
-                                    <div x-show="isProcessing && rawFileMalam"
+                                    <div x-show="currentProcessingTarget === 'fotoMalam'"
                                         class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
                                         <span class="loading loading-spinner loading-sm text-neutral-900 mb-1"></span>
                                         <span class="text-[10px] font-bold text-base-content leading-tight px-1"
@@ -1527,6 +1651,98 @@
                                             <span class="text-[10px]">Asli</span>
                                         </label>
                                     </div>
+                                </div>
+
+                                {{-- Foto ke-2 Malam (opsional) --}}
+                                <div class="pt-1.5 border-t border-base-200/70">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-[11px] font-bold text-base-content flex items-center gap-1">
+                                            <span class="size-1.5 rounded-full bg-neutral-900 opacity-60"></span>
+                                            Foto 2 <span class="text-base-content/40 font-normal">(opsional)</span>
+                                        </span>
+                                        <template x-if="processedPreviewMalam2">
+                                            <span class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                        </template>
+                                        <template x-if="!processedPreviewMalam2">
+                                            <span>
+                                                @if ($existingFotoMalam2)
+                                                    <span class="badge bg-neutral-900 text-white border-0 badge-xs font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                                @else
+                                                    <span class="text-[10px] text-base-content/40">–</span>
+                                                @endif
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <div class="relative rounded-xl overflow-hidden shadow-xs border transition-all duration-200 group"
+                                        style="aspect-ratio:16/9"
+                                        :class="processedPreviewMalam2 ? 'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-base-100' :
+                                            '{{ $existingFotoMalam2 ? 'border-neutral-900/30 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/50 bg-base-100/60 hover:bg-neutral-900/5' }}'">
+                                        <template x-if="processedPreviewMalam2">
+                                            <div class="w-full h-full relative">
+                                                <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                    <button type="button" @click.stop="pickFile('malam2', false)"
+                                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
+                                                    <button type="button" @click.stop="clearPhoto('fotoMalam2')"
+                                                        class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">Batal</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="!processedPreviewMalam2">
+                                            <div class="w-full h-full relative">
+                                                @if ($existingFotoMalam2)
+                                                    <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                        alt="Foto Malam 2"
+                                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoMalam2) }}" target="_blank"
+                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
+                                                        <button type="button" @click.stop="pickFile('malam2', true)"
+                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
+                                                    </div>
+                                                @else
+                                                    <div @click="pickFile('malam2', false)"
+                                                        class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                        <div class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        </div>
+                                                        <span class="text-[10px] text-base-content/50 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Tambah Foto 2</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </template>
+                                        <div x-show="currentProcessingTarget === 'fotoMalam2'"
+                                            class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
+                                            <span class="loading loading-spinner loading-xs text-neutral-900 mb-1"></span>
+                                            <span class="text-[10px] font-bold text-base-content" x-text="processingStatus"></span>
+                                        </div>
+                                    </div>
+                                    @error('fotoMalam2')
+                                        <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
+                                    @enderror
+                                    <template x-if="rawFileMalam2">
+                                        <div class="flex items-center gap-1 flex-wrap mt-1.5">
+                                            <span class="text-[10px] text-base-content/60 font-medium mr-0.5">Rasio:</span>
+                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
+                                                :class="cropRatioMalam2 === '16:9' ? 'border-neutral-900 bg-neutral-900/10 ring-1 ring-neutral-900 font-bold text-neutral-900 dark:text-white' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioMalam2" value="16:9" @change="onCropRatioChange('fotoMalam2')" class="radio radio-xs radio-neutral" />
+                                                <span class="text-[10px]">16:9</span>
+                                            </label>
+                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
+                                                :class="cropRatioMalam2 === '4:3' ? 'border-neutral-900 bg-neutral-900/10 ring-1 ring-neutral-900 font-bold text-neutral-900 dark:text-white' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioMalam2" value="4:3" @change="onCropRatioChange('fotoMalam2')" class="radio radio-xs radio-neutral" />
+                                                <span class="text-[10px]">4:3</span>
+                                            </label>
+                                            <label class="cursor-pointer border rounded-md py-0.5 px-1.5 flex items-center gap-1 transition-all"
+                                                :class="cropRatioMalam2 === 'original' ? 'border-neutral-900 bg-neutral-900/10 ring-1 ring-neutral-900 font-bold text-neutral-900 dark:text-white' : 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
+                                                <input type="radio" x-model="cropRatioMalam2" value="original" @change="onCropRatioChange('fotoMalam2')" class="radio radio-xs radio-neutral" />
+                                                <span class="text-[10px]">Asli</span>
+                                            </label>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -2117,15 +2333,22 @@
         function dokumentasiUploadModal() {
             return {
                 cropRatioSiang: '16:9',
+                cropRatioSiang2: '16:9',
                 cropRatioMalam: '16:9',
+                cropRatioMalam2: '16:9',
                 cropRatio: '16:9',
                 rawFileSiang: null,
+                rawFileSiang2: null,
                 rawFileMalam: null,
+                rawFileMalam2: null,
                 processedPreviewSiang: null,
+                processedPreviewSiang2: null,
                 processedPreviewMalam: null,
+                processedPreviewMalam2: null,
                 processedSizeSiang: null,
                 processedSizeMalam: null,
                 isProcessing: false,
+                currentProcessingTarget: null,
                 processingStatus: '',
                 errorMessage: '',
 
@@ -2152,31 +2375,52 @@
                     this.errorMessage = '';
                     if (target === 'fotoSiang') {
                         this.rawFileSiang = file;
-                    } else {
+                    } else if (target === 'fotoSiang2') {
+                        this.rawFileSiang2 = file;
+                    } else if (target === 'fotoMalam') {
                         this.rawFileMalam = file;
+                    } else {
+                        this.rawFileMalam2 = file;
                     }
 
                     await this.processAndUpload(target);
                 },
 
                 async onCropRatioChange(target) {
-                    const file = (target === 'fotoSiang') ? this.rawFileSiang : this.rawFileMalam;
-                    if (file) {
+                    const rawMap = {
+                        fotoSiang: this.rawFileSiang,
+                        fotoSiang2: this.rawFileSiang2,
+                        fotoMalam: this.rawFileMalam,
+                        fotoMalam2: this.rawFileMalam2,
+                    };
+                    if (rawMap[target]) {
                         await this.processAndUpload(target);
                     }
                 },
 
                 async processAndUpload(target) {
-                    const file = (target === 'fotoSiang') ? this.rawFileSiang : this.rawFileMalam;
+                    const rawMap = {
+                        fotoSiang: this.rawFileSiang,
+                        fotoSiang2: this.rawFileSiang2,
+                        fotoMalam: this.rawFileMalam,
+                        fotoMalam2: this.rawFileMalam2,
+                    };
+                    const file = rawMap[target];
                     if (!file) return;
 
                     this.isProcessing = true;
+                    this.currentProcessingTarget = target;
                     this.errorMessage = '';
                     this.processingStatus = 'Mengubah format ke WebP & menyesuaikan ukuran (Maks. 100KB)...';
 
                     try {
-                        const ratio = (target === 'fotoSiang') ? (this.cropRatioSiang || '16:9') : (this
-                            .cropRatioMalam || '16:9');
+                        const ratioMap = {
+                            fotoSiang: this.cropRatioSiang || '16:9',
+                            fotoSiang2: this.cropRatioSiang2 || '16:9',
+                            fotoMalam: this.cropRatioMalam || '16:9',
+                            fotoMalam2: this.cropRatioMalam2 || '16:9',
+                        };
+                        const ratio = ratioMap[target];
                         const webpFile = await this.cropAndCompressToWebp(file, ratio);
 
                         const previewUrl = URL.createObjectURL(webpFile);
@@ -2186,10 +2430,16 @@
                             if (this.processedPreviewSiang) URL.revokeObjectURL(this.processedPreviewSiang);
                             this.processedPreviewSiang = previewUrl;
                             this.processedSizeSiang = sizeKb;
-                        } else {
+                        } else if (target === 'fotoSiang2') {
+                            if (this.processedPreviewSiang2) URL.revokeObjectURL(this.processedPreviewSiang2);
+                            this.processedPreviewSiang2 = previewUrl;
+                        } else if (target === 'fotoMalam') {
                             if (this.processedPreviewMalam) URL.revokeObjectURL(this.processedPreviewMalam);
                             this.processedPreviewMalam = previewUrl;
                             this.processedSizeMalam = sizeKb;
+                        } else {
+                            if (this.processedPreviewMalam2) URL.revokeObjectURL(this.processedPreviewMalam2);
+                            this.processedPreviewMalam2 = previewUrl;
                         }
 
                         this.processingStatus = 'Mengunggah gambar terkompresi...';
@@ -2199,6 +2449,7 @@
                             wire.upload(target, webpFile,
                                 () => {
                                     this.isProcessing = false;
+                                    this.currentProcessingTarget = null;
                                     this.processingStatus = '';
 
                                     // Jika kedua foto sudah ada, otomatis aktifkan sesi 'keduanya'
@@ -2210,6 +2461,7 @@
                                 },
                                 (err) => {
                                     this.isProcessing = false;
+                                    this.currentProcessingTarget = null;
                                     this.processingStatus = '';
                                     this.errorMessage = 'Gagal mengunggah foto ke server. Silakan coba lagi.';
                                     console.error(err);
@@ -2222,11 +2474,13 @@
                             );
                         } else {
                             this.isProcessing = false;
+                            this.currentProcessingTarget = null;
                             this.processingStatus = '';
                         }
                     } catch (err) {
                         console.error(err);
                         this.isProcessing = false;
+                        this.currentProcessingTarget = null;
                         this.processingStatus = '';
                         this.errorMessage = 'Terjadi kesalahan saat memproses gambar: ' + (err.message || 'Error');
                     }
@@ -2368,99 +2622,107 @@
                             const tgl = wire.get('uploadTanggal') || wire.uploadTanggal;
                             wire.openEditKonsumsiModal(tgl, sesi);
                             setTimeout(() => {
-                                if (sesi === 'siang' && this.$refs.fileInputSiang) this.$refs.fileInputSiang
-                                    .click();
-                                if (sesi === 'malam' && this.$refs.fileInputMalam) this.$refs.fileInputMalam
-                                    .click();
+                                if (sesi === 'siang' && this.$refs.fileInputSiang) this.$refs.fileInputSiang.click();
+                                if (sesi === 'malam' && this.$refs.fileInputMalam) this.$refs.fileInputMalam.click();
+                                if (sesi === 'siang2' && this.$refs.fileInputSiang2) this.$refs.fileInputSiang2.click();
+                                if (sesi === 'malam2' && this.$refs.fileInputMalam2) this.$refs.fileInputMalam2.click();
                             }, 250);
                             return;
                         }
 
-                        // Auto-detect sesiKonsumsi:
-                        // Jika sudah ada foto/file di sesi sebaliknya, set sesiKonsumsi ke 'keduanya'
-                        const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') ||
-                            wire.fotoSiang));
-                        const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
-                            wire.fotoMalam));
-
-                        if ((sesi === 'malam' && hasSiang) || (sesi === 'siang' && hasMalam)) {
-                            wire.set('sesiKonsumsi', 'keduanya');
-                        } else {
-                            wire.set('sesiKonsumsi', sesi);
+                        // Auto-detect sesiKonsumsi only for main foto (not foto2)
+                        if (sesi === 'siang' || sesi === 'malam') {
+                            const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') || wire.fotoSiang));
+                            const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') || wire.fotoMalam));
+                            if ((sesi === 'malam' && hasSiang) || (sesi === 'siang' && hasMalam)) {
+                                wire.set('sesiKonsumsi', 'keduanya');
+                            } else {
+                                wire.set('sesiKonsumsi', sesi);
+                            }
                         }
                     }
                     if (sesi === 'siang' && this.$refs.fileInputSiang) {
                         this.$refs.fileInputSiang.click();
+                    } else if (sesi === 'siang2' && this.$refs.fileInputSiang2) {
+                        this.$refs.fileInputSiang2.click();
                     } else if (sesi === 'malam' && this.$refs.fileInputMalam) {
                         this.$refs.fileInputMalam.click();
+                    } else if (sesi === 'malam2' && this.$refs.fileInputMalam2) {
+                        this.$refs.fileInputMalam2.click();
                     }
                 },
 
                 clearPhoto(target) {
-                    if (target === 'fotoSiang') {
-                        this.rawFileSiang = null;
-                        if (this.processedPreviewSiang) {
-                            URL.revokeObjectURL(this.processedPreviewSiang);
-                            this.processedPreviewSiang = null;
-                        }
-                        this.processedSizeSiang = null;
-                        if (this.$refs.fileInputSiang) {
-                            this.$refs.fileInputSiang.value = '';
-                        }
-                    } else {
-                        this.rawFileMalam = null;
-                        if (this.processedPreviewMalam) {
-                            URL.revokeObjectURL(this.processedPreviewMalam);
-                            this.processedPreviewMalam = null;
-                        }
-                        this.processedSizeMalam = null;
-                        if (this.$refs.fileInputMalam) {
-                            this.$refs.fileInputMalam.value = '';
-                        }
+                    const previewMap = {
+                        fotoSiang: 'processedPreviewSiang',
+                        fotoSiang2: 'processedPreviewSiang2',
+                        fotoMalam: 'processedPreviewMalam',
+                        fotoMalam2: 'processedPreviewMalam2',
+                    };
+                    const rawMap = {
+                        fotoSiang: 'rawFileSiang',
+                        fotoSiang2: 'rawFileSiang2',
+                        fotoMalam: 'rawFileMalam',
+                        fotoMalam2: 'rawFileMalam2',
+                    };
+                    const refMap = {
+                        fotoSiang: 'fileInputSiang',
+                        fotoSiang2: 'fileInputSiang2',
+                        fotoMalam: 'fileInputMalam',
+                        fotoMalam2: 'fileInputMalam2',
+                    };
+
+                    this[rawMap[target]] = null;
+                    if (this[previewMap[target]]) {
+                        URL.revokeObjectURL(this[previewMap[target]]);
+                        this[previewMap[target]] = null;
                     }
+                    if (target === 'fotoSiang') this.processedSizeSiang = null;
+                    if (target === 'fotoMalam') this.processedSizeMalam = null;
+                    if (this.$refs[refMap[target]]) this.$refs[refMap[target]].value = '';
 
                     const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                     if (wire) {
                         wire.set(target, null);
 
-                        const hasSiangRemaining = !!(this.rawFileSiang || this.processedPreviewSiang);
-                        const hasMalamRemaining = !!(this.rawFileMalam || this.processedPreviewMalam);
-                        if (hasSiangRemaining && !hasMalamRemaining) {
-                            wire.set('sesiKonsumsi', 'siang');
-                        } else if (!hasSiangRemaining && hasMalamRemaining) {
-                            wire.set('sesiKonsumsi', 'malam');
+                        // Adjust sesiKonsumsi only when clearing main foto
+                        if (target === 'fotoSiang' || target === 'fotoMalam') {
+                            const hasSiangRemaining = !!(this.rawFileSiang || this.processedPreviewSiang);
+                            const hasMalamRemaining = !!(this.rawFileMalam || this.processedPreviewMalam);
+                            if (hasSiangRemaining && !hasMalamRemaining) {
+                                wire.set('sesiKonsumsi', 'siang');
+                            } else if (!hasSiangRemaining && hasMalamRemaining) {
+                                wire.set('sesiKonsumsi', 'malam');
+                            }
                         }
-                    }
-
-                    const inputEl = document.querySelector(target === 'fotoSiang' ? 'input[wire\\:key^="foto-siang"]' :
-                        'input[wire\\:key^="foto-malam"]');
-                    if (inputEl) {
-                        inputEl.value = '';
                     }
                 },
 
                 resetAll() {
                     this.rawFileSiang = null;
+                    this.rawFileSiang2 = null;
                     this.rawFileMalam = null;
-                    if (this.processedPreviewSiang) {
-                        URL.revokeObjectURL(this.processedPreviewSiang);
-                        this.processedPreviewSiang = null;
-                    }
-                    if (this.processedPreviewMalam) {
-                        URL.revokeObjectURL(this.processedPreviewMalam);
-                        this.processedPreviewMalam = null;
-                    }
+                    this.rawFileMalam2 = null;
+                    if (this.processedPreviewSiang) { URL.revokeObjectURL(this.processedPreviewSiang); this.processedPreviewSiang = null; }
+                    if (this.processedPreviewSiang2) { URL.revokeObjectURL(this.processedPreviewSiang2); this.processedPreviewSiang2 = null; }
+                    if (this.processedPreviewMalam) { URL.revokeObjectURL(this.processedPreviewMalam); this.processedPreviewMalam = null; }
+                    if (this.processedPreviewMalam2) { URL.revokeObjectURL(this.processedPreviewMalam2); this.processedPreviewMalam2 = null; }
                     this.processedSizeSiang = null;
                     this.processedSizeMalam = null;
                     this.cropRatioSiang = '16:9';
+                    this.cropRatioSiang2 = '16:9';
                     this.cropRatioMalam = '16:9';
+                    this.cropRatioMalam2 = '16:9';
                     this.cropRatio = '16:9';
                     this.isProcessing = false;
+                    this.currentProcessingTarget = null;
                     this.processingStatus = '';
                     this.errorMessage = '';
 
                     if (this.$refs.fileInputSiang) this.$refs.fileInputSiang.value = '';
+                    if (this.$refs.fileInputSiang2) this.$refs.fileInputSiang2.value = '';
                     if (this.$refs.fileInputMalam) this.$refs.fileInputMalam.value = '';
+                    if (this.$refs.fileInputMalam2) this.$refs.fileInputMalam2.value = '';
 
                     const inputs = document.querySelectorAll('input[wire\\:key^="foto-"]');
                     inputs.forEach(input => {
