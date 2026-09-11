@@ -2731,17 +2731,35 @@
                 modalModeClient: 'create',
                 modalDateClient: '',
                 modalSesiClient: 'siang',
+                modalActionId: 0,
+                userWantsModalOpen: false,
 
                 init() {
                     const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                     if (wire && wire.get('showAddModal')) {
+                        this.userWantsModalOpen = true;
                         this.isKonsumsiModalOpen = true;
                     }
                     this.$watch('$wire.showAddModal', (val) => {
-                        this.isKonsumsiModalOpen = !!val;
-                        if (!val) {
+                        if (val) {
+                            this.userWantsModalOpen = true;
+                            this.isKonsumsiModalOpen = true;
                             this.isKonsumsiModalLoading = false;
+                        } else {
+                            // Abaikan response 'false' dari server jika user sudah meminta buka modal lagi
+                            if (!this.userWantsModalOpen) {
+                                this.isKonsumsiModalOpen = false;
+                                this.isKonsumsiModalLoading = false;
+                            }
                         }
+                    });
+
+                    window.addEventListener('close-konsumsi-modal', () => {
+                        this.modalActionId++;
+                        this.userWantsModalOpen = false;
+                        this.isKonsumsiModalOpen = false;
+                        this.isKonsumsiModalLoading = false;
+                        window.dispatchEvent(new CustomEvent('reset-upload-modal'));
                     });
                 },
 
@@ -2763,6 +2781,8 @@
                 },
 
                 openKonsumsiModalInstantly(date, sesi = 'siang', mode = 'create') {
+                    const currentActionId = ++this.modalActionId;
+                    this.userWantsModalOpen = true;
                     this.isKonsumsiModalOpen = true;
                     this.isKonsumsiModalLoading = true;
                     this.modalModeClient = mode;
@@ -2780,18 +2800,26 @@
 
                     if (actionPromise && typeof actionPromise.then === 'function') {
                         actionPromise.then(() => {
-                            this.isKonsumsiModalLoading = false;
+                            if (this.modalActionId === currentActionId && this.userWantsModalOpen) {
+                                this.isKonsumsiModalLoading = false;
+                            }
                         }).catch(() => {
-                            this.isKonsumsiModalLoading = false;
+                            if (this.modalActionId === currentActionId && this.userWantsModalOpen) {
+                                this.isKonsumsiModalLoading = false;
+                            }
                         });
                     } else {
                         setTimeout(() => {
-                            this.isKonsumsiModalLoading = false;
+                            if (this.modalActionId === currentActionId && this.userWantsModalOpen) {
+                                this.isKonsumsiModalLoading = false;
+                            }
                         }, 300);
                     }
                 },
 
                 closeKonsumsiModal() {
+                    ++this.modalActionId;
+                    this.userWantsModalOpen = false;
                     this.isKonsumsiModalOpen = false;
                     this.isKonsumsiModalLoading = false;
                     window.dispatchEvent(new CustomEvent('reset-upload-modal'));
@@ -3243,7 +3271,9 @@
                     });
                     this.$watch('$wire.showAddModal', (val) => {
                         if (!val) {
-                            this.resetAll();
+                            if (!this.userWantsModalOpen) {
+                                this.resetAll();
+                            }
                         } else {
                             const w = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                             if (w) {

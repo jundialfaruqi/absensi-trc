@@ -584,6 +584,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
 
         if (!$record) {
             $this->showAddModal = false;
+            $this->dispatch('close-konsumsi-modal');
             return;
         }
 
@@ -642,6 +643,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         unset($this->dokumentasiMap);
         unset($this->monthlySummary);
 
+        $this->dispatch('close-konsumsi-modal');
         $this->dispatch('toast', [
             'type' => 'success',
             'message' => "Dokumentasi {$sesiLabel} tanggal " . Carbon::parse($this->uploadTanggal)->translatedFormat('d F Y') . ' berhasil dihapus.'
@@ -859,6 +861,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         unset($this->dokumentasiMap);
         unset($this->monthlySummary);
 
+        $this->dispatch('close-konsumsi-modal');
         $this->dispatch('toast', [
             'type' => 'success',
             'message' => "Dokumentasi {$sesiLabel} tanggal " . Carbon::parse($this->uploadTanggal)->translatedFormat('d F Y') . " berhasil {$verb}."
