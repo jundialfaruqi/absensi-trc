@@ -167,12 +167,12 @@
         }
 
         .dok-col-siang {
-            background-color: #fffdf5;
+            background-color: #ffffff;
             border-color: #fde68a;
         }
 
         .dok-col-malam {
-            background-color: #f8fafc;
+            background-color: #ffffff;
             border-color: #cbd5e1;
         }
 
@@ -250,8 +250,8 @@
 <body>
     @if (($includeRekap ?? true) || ($includeRincian ?? false))
         <div class="header">
-            <h1>REKAPITULASI DOKUMENTASI KONSUMSI MAKAN MINUM</h1>
-            <p>OPD: {{ $opdName }}</p>
+            <h1>REKAPITULASI JUMLAH MAKAN MINUM</h1>
+            {{-- <p>OPD: {{ $opdName }}</p> --}}
             @if (count($dates) > 0)
                 <p>Periode: {{ \Carbon\Carbon::parse($dates[0])->translatedFormat('d F Y') }} s/d
                     {{ \Carbon\Carbon::parse(end($dates))->translatedFormat('d F Y') }}</p>
@@ -261,7 +261,8 @@
 
     {{-- ─── TABEL 1: REKAP JUMLAH KONSUMSI PER BULAN ──────────────────────── --}}
     @if ($includeRekap ?? true)
-        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi ({{ $monthName }} {{ $year }})</div>
+        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi
+            ({{ $monthName }} {{ $year }})</div>
         <table>
             <thead>
                 <tr>
@@ -414,7 +415,7 @@
         </table>
     @endif
 
-    @if (($includeRekap ?? true) || ($includeRincian ?? false))
+    {{-- @if (($includeRekap ?? true) || ($includeRincian ?? false))
         <div class="summary-info">
             @if ($includeRincian ?? false)
                 <strong>Keterangan Simbol:</strong>
@@ -431,7 +432,7 @@
         <div class="footer">
             Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB
         </div>
-    @endif
+    @endif --}}
 
     {{-- ─── TABEL 3: DOKUMENTASI FOTO KONSUMSI (1 HALAMAN PER 1 TANGGAL) ──── --}}
     @if ($includeDokumentasi ?? false)
@@ -494,9 +495,9 @@
                     </tr>
                 </table>
 
-                <div class="dok-footer">
+                {{-- <div class="dok-footer">
                     Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB
-                </div>
+                </div> --}}
             </div>
         @empty
             @if (($includeRekap ?? false) || ($includeRincian ?? false))
