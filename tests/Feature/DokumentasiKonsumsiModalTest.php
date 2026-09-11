@@ -182,3 +182,92 @@ test('monthlySummary synchronizes totals by prioritizing dokumentasi_konsumsi an
     expect($summary['grandTotal'])->toBe(37); // 35 + 2
 });
 
+test('modal session can be switched and deleteDokumentasi supports passing session', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $targetDate = Carbon::today()->format('Y-m-d');
+
+    $record = DokumentasiKonsumsi::create([
+        'opd_id' => $opd->id,
+        'tanggal' => $targetDate,
+        'foto_siang' => 'dokumentasi-konsumsi/test_siang.webp',
+        'jumlah_siang' => 5,
+        'foto_malam' => 'dokumentasi-konsumsi/test_malam.webp',
+        'jumlah_malam' => 7,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi')
+        ->set('selectedOpd', $opd->id)
+        ->call('openEditKonsumsiModal', $targetDate, 'siang')
+        ->assertSet('sesiKonsumsi', 'siang')
+        ->assertSeeHtml("selectSesi('siang')")
+        ->assertSeeHtml("selectSesi('malam')")
+        ->assertSeeHtml("selectSesi('keduanya')")
+        ->call('deleteDokumentasi', 'siang')
+        ->assertDispatched('toast');
+
+    $record->refresh();
+    expect($record->foto_siang)->toBeNull();
+    expect($record->jumlah_siang)->toBeNull();
+    expect($record->foto_malam)->toBe('dokumentasi-konsumsi/test_malam.webp');
+    expect($record->jumlah_malam)->toBe(7);
+});
+
+test('modal input jumlah renders dynamic max and onInputJumlah with quota argument', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $personnel = \App\Models\Personnel::create([
+        'name' => 'Doni',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'doni.jpg',
+        'email' => 'doni@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '654321',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $konsumsiSiang = \App\Models\Konsumsi::firstOrCreate(['nama' => 'Siang']);
+    $shift = \App\Models\Shift::create([
+        'name' => 'Shift Pagi',
+        'start_time' => '08:00:00',
+        'end_time' => '16:00:00',
+        'type' => 'shift',
+        'color' => '#3b82f6',
+    ]);
+    $shift->konsumsis()->attach([$konsumsiSiang->id]);
+
+    $targetDate = '2026-09-05';
+
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $targetDate,
+        'shift_id' => $shift->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $targetDate,
+        'status' => 'HADIR',
+        'jam_masuk' => '08:00:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi')
+        ->set('selectedOpd', $opd->id)
+        ->call('openAddKonsumsiModal', $targetDate, 'siang')
+        ->assertSeeHtml("onInputJumlah('siang', \$el, 1)")
+        ->assertSeeHtml('max="1"');
+});
+
+
+

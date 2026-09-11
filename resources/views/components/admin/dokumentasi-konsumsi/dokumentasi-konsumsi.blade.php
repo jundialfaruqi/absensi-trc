@@ -1260,8 +1260,12 @@
                     <div class="grid grid-cols-3 gap-2 sm:gap-3">
                         {{-- Radio Siang --}}
                         <label
-                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang ? 'opacity-95' : '' }}">
-                            <input type="radio" wire:model.live="sesiKonsumsi" value="siang"
+                            @click="selectSesi('siang')"
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $existingFotoSiang ? 'opacity-95' : '' }}"
+                            :class="modalSesi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                            <input type="radio" name="modal_sesi_radio" value="siang"
+                                :checked="modalSesi === 'siang'"
+                                @change="selectSesi('siang')"
                                 class="radio radio-xs sm:radio-sm radio-warning shrink-0" />
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-1">
@@ -1282,8 +1286,12 @@
 
                         {{-- Radio Malam --}}
                         <label
-                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
-                            <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
+                            @click="selectSesi('malam')"
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $existingFotoMalam ? 'opacity-95' : '' }}"
+                            :class="modalSesi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                            <input type="radio" name="modal_sesi_radio" value="malam"
+                                :checked="modalSesi === 'malam'"
+                                @change="selectSesi('malam')"
                                 class="radio radio-xs sm:radio-sm radio-neutral shrink-0" />
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-1">
@@ -1304,8 +1312,12 @@
 
                         {{-- Radio Keduanya (Siang & Malam) --}}
                         <label
-                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'keduanya' ? 'border-primary bg-primary/10 ring-2 ring-primary/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang && $existingFotoMalam ? 'opacity-95' : '' }}">
-                            <input type="radio" wire:model.live="sesiKonsumsi" value="keduanya"
+                            @click="selectSesi('keduanya')"
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $existingFotoSiang && $existingFotoMalam ? 'opacity-95' : '' }}"
+                            :class="modalSesi === 'keduanya' ? 'border-primary bg-primary/10 ring-2 ring-primary/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                            <input type="radio" name="modal_sesi_radio" value="keduanya"
+                                :checked="modalSesi === 'keduanya'"
+                                @change="selectSesi('keduanya')"
                                 class="radio radio-xs sm:radio-sm radio-primary shrink-0" />
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-1">
@@ -1331,265 +1343,143 @@
                 @php
                     $maxSiang = $this->calculatedSiang;
                     $maxMalam = $this->calculatedMalam;
-                    $isCurrentSesiLocked =
-                        $modalMode === 'create' &&
-                        (($sesiKonsumsi === 'siang' && $existingFotoSiang) ||
-                            ($sesiKonsumsi === 'malam' && $existingFotoMalam) ||
-                            ($sesiKonsumsi === 'keduanya' && $existingFotoSiang && $existingFotoMalam));
-                    $hasExistingCurrentPhoto = match ($sesiKonsumsi) {
-                        'siang' => (bool) $existingFotoSiang,
-                        'malam' => (bool) $existingFotoMalam,
-                        default => (bool) ($existingFotoSiang || $existingFotoMalam),
-                    };
                 @endphp
 
-                {{-- 3. Form Input Porsi Berdasarkan Sesi Terpilih --}}
+                {{-- 3. Form Input Porsi Berdasarkan Sesi Terpilih (Responsif & Instan di Client) --}}
+                <div class="grid gap-3"
+                    :class="modalSesi === 'keduanya' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'">
 
-                {{-- A. Jika Memilih Keduanya: Tampilkan Form Siang dan Malam Berdampingan --}}
-                @if ($sesiKonsumsi === 'keduanya')
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {{-- Card Input Porsi Siang --}}
-                        <div>
-                            @if ($modalMode === 'create' && $existingFotoSiang)
-                                <div
-                                    class="p-3.5 bg-warning/10 border border-warning/30 rounded-2xl space-y-2 h-full flex flex-col justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-1.5 text-warning-content font-bold text-xs">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            <span class="text-xs">Siang Sudah Tersimpan</span>
-                                        </div>
-                                        <p class="text-[11px] text-base-content/70 mt-1">
-                                            Dokumentasi siang sudah tersimpan ({{ $jumlahSiang }} porsi).
-                                        </p>
+                    {{-- Card Input Porsi Siang --}}
+                    <div x-show="modalSesi === 'siang' || modalSesi === 'keduanya'" x-cloak>
+                        @if ($modalMode === 'create' && $existingFotoSiang)
+                            <div
+                                class="p-3.5 bg-warning/10 border border-warning/30 rounded-2xl space-y-2.5 h-full flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center gap-1.5 text-warning-content font-bold text-xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                        <span class="text-xs">Siang Sudah Tersimpan</span>
                                     </div>
+                                    <p class="text-[11px] text-base-content/70 mt-1">
+                                        Dokumentasi siang sudah tersimpan ({{ $jumlahSiang }} porsi).
+                                    </p>
+                                </div>
+                                <div class="space-y-1.5 pt-1">
                                     <button type="button"
                                         @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
                                         class="btn btn-xs btn-warning text-warning-content w-full gap-1">
                                         Edit Siang
                                     </button>
+                                    @if (!$existingFotoMalam)
+                                        <button type="button"
+                                            x-show="modalSesi === 'siang'"
+                                            @click="selectSesi('malam')"
+                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white w-full gap-1">
+                                            Pindah ke Input Makan Malam &rarr;
+                                        </button>
+                                    @endif
                                 </div>
-                            @else
-                                <div class="p-3.5 bg-warning/5 border border-warning/20 rounded-2xl space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                            <span class="size-2 rounded-full bg-warning"></span>
-                                            Porsi Makan Siang
-                                        </label>
-                                        <span class="badge badge-warning badge-xs font-bold text-[10px] rounded-none">
-                                            Maks. {{ $maxSiang }}
-                                        </span>
+                            </div>
+                        @else
+                            <div class="p-3.5 bg-warning/5 border border-warning/20 rounded-2xl space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <span class="size-2 rounded-full bg-warning"></span>
+                                        Porsi Makan Siang
+                                    </label>
+                                    <span class="badge badge-warning badge-xs font-bold text-[10px] rounded-none">
+                                        Maks. {{ $maxSiang }}
+                                    </span>
+                                </div>
+                                <input type="number" x-ref="inputJumlahSiang" wire:model="jumlahSiang" min="0"
+                                    max="{{ $maxSiang }}"
+                                    @input="onInputJumlah('siang', $el, {{ (int) $maxSiang }})"
+                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
+                                    placeholder="Maks. {{ $maxSiang }}" required />
+                                <template x-if="warningSiang">
+                                    <span class="text-warning text-[10px] mt-1 block font-semibold animate-pulse" x-text="warningSiang"></span>
+                                </template>
+                                @error('jumlahSiang')
+                                    <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
+                                @enderror
+                                <p class="text-[10px] text-base-content/50">
+                                    *Total konsumsi: {{ $maxSiang }} porsi
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Card Input Porsi Malam --}}
+                    <div x-show="modalSesi === 'malam' || modalSesi === 'keduanya'" x-cloak>
+                        @if ($modalMode === 'create' && $existingFotoMalam)
+                            <div
+                                class="p-3.5 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2.5 h-full flex flex-col justify-between">
+                                <div>
+                                    <div
+                                        class="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                        <span class="text-xs">Malam Sudah Tersimpan</span>
                                     </div>
-                                    <input type="number" wire:model.live="jumlahSiang" min="0"
-                                        max="{{ $maxSiang }}"
-                                        x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                        class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
-                                        placeholder="Maks. {{ $maxSiang }}" required />
-                                    @error('jumlahSiang')
-                                        <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
-                                    @enderror
-                                    <p class="text-[10px] text-base-content/50">
-                                        *Total konsumsi: {{ $maxSiang }} porsi
+                                    <p class="text-[11px] text-base-content/70 mt-1">
+                                        Dokumentasi malam sudah tersimpan ({{ $jumlahMalam }} porsi).
                                     </p>
                                 </div>
-                            @endif
-                        </div>
-
-                        {{-- Card Input Porsi Malam --}}
-                        <div>
-                            @if ($modalMode === 'create' && $existingFotoMalam)
-                                <div
-                                    class="p-3.5 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2 h-full flex flex-col justify-between">
-                                    <div>
-                                        <div
-                                            class="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            <span class="text-xs">Malam Sudah Tersimpan</span>
-                                        </div>
-                                        <p class="text-[11px] text-base-content/70 mt-1">
-                                            Dokumentasi malam sudah tersimpan ({{ $jumlahMalam }} porsi).
-                                        </p>
-                                    </div>
+                                <div class="space-y-1.5 pt-1">
                                     <button type="button"
                                         @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
                                         class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white w-full gap-1">
                                         Edit Malam
                                     </button>
+                                    @if (!$existingFotoSiang)
+                                        <button type="button"
+                                            x-show="modalSesi === 'malam'"
+                                            @click="selectSesi('siang')"
+                                            class="btn btn-xs btn-warning text-warning-content w-full gap-1">
+                                            Pindah ke Input Makan Siang &rarr;
+                                        </button>
+                                    @endif
                                 </div>
-                            @else
-                                <div
-                                    class="p-3.5 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                            <span class="size-2 rounded-full bg-neutral-900"></span>
-                                            Porsi Makan Malam
-                                        </label>
-                                        <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] rounded-none">
-                                            Maks. {{ $maxMalam }}
-                                        </span>
-                                    </div>
-                                    <input type="number" wire:model.live="jumlahMalam" min="0"
-                                        max="{{ $maxMalam }}"
-                                        x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                        class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
-                                        placeholder="Maks. {{ $maxMalam }}" required />
-                                    @error('jumlahMalam')
-                                        <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
-                                    @enderror
-                                    <p class="text-[10px] text-base-content/50">
-                                        *Total konsumsi: {{ $maxMalam }} porsi
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                {{-- B. Form Input Sesi Makan Siang (Tampil Jika Sesi Siang Dipilih) --}}
-                @if ($sesiKonsumsi === 'siang')
-                    @if ($modalMode === 'create' && $existingFotoSiang)
-                        {{-- Notifikasi Bahwa Dokumentasi Siang Sudah Tersimpan Pada Mode Tambah --}}
-                        <div class="p-4 bg-warning/10 border border-warning/30 rounded-2xl space-y-2.5">
-                            <div class="flex items-center gap-2.5 text-warning-content font-bold text-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span class="text-sm">Dokumentasi Makan Siang Sudah Tersimpan</span>
                             </div>
-                            <p class="text-xs text-base-content/70 leading-relaxed">
-                                Dokumentasi makan siang untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika
-                                Anda ingin mengubah atau menghapusnya.
-                            </p>
-                            <div class="pt-1 flex flex-wrap items-center gap-2">
-                                <button type="button"
-                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
-                                    class="btn btn-xs btn-warning text-warning-content gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Edit Data Siang
-                                </button>
-                                @if (!$existingFotoMalam)
-                                    <button type="button" wire:click="$set('sesiKonsumsi', 'malam')"
-                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
-                                        Pindah ke Input Makan Malam &rarr;
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @else
-                        <div class="p-4 bg-warning/5 border border-warning/20 rounded-2xl space-y-4">
-                            {{-- Input Jumlah Siang --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                        <span class="size-2 rounded-full bg-warning"></span>
-                                        Jumlah Porsi Makan Siang
-                                    </label>
-                                    <span class="badge badge-warning badge-sm font-bold text-[11px] rounded-none">
-                                        Maks. {{ $maxSiang }} Porsi
-                                    </span>
-                                </div>
-                                <input type="number" wire:model.live="jumlahSiang" min="0"
-                                    max="{{ $maxSiang }}"
-                                    x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
-                                    placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})"
-                                    required />
-                                @error('jumlahSiang')
-                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
-                                @enderror
-                                <p class="text-[11px] text-base-content/60 mt-1">
-                                    *Jumlah porsi tidak boleh lebih dari {{ $maxSiang }} (total konsumsi makan
-                                    siang terdata pada tanggal ini).
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-                @endif
-
-                {{-- C. Form Input Sesi Makan Malam (Tampil Jika Sesi Malam Dipilih) --}}
-                @if ($sesiKonsumsi === 'malam')
-                    @if ($modalMode === 'create' && $existingFotoMalam)
-                        {{-- Notifikasi Bahwa Dokumentasi Malam Sudah Tersimpan Pada Mode Tambah --}}
-                        <div class="p-4 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2.5">
+                        @else
                             <div
-                                class="flex items-center gap-2.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span class="text-sm">Dokumentasi Makan Malam Sudah Tersimpan</span>
-                            </div>
-                            <p class="text-xs text-base-content/70 leading-relaxed">
-                                Dokumentasi makan malam untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika
-                                Anda ingin mengubah atau menghapusnya.
-                            </p>
-                            <div class="pt-1 flex flex-wrap items-center gap-2">
-                                <button type="button"
-                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
-                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Edit Data Malam
-                                </button>
-                                @if (!$existingFotoSiang)
-                                    <button type="button" wire:click="$set('sesiKonsumsi', 'siang')"
-                                        class="btn btn-xs btn-warning text-warning-content gap-1">
-                                        Pindah ke Input Makan Siang &rarr;
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @else
-                        <div class="p-4 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-4">
-                            {{-- Input Jumlah Malam --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
+                                class="p-3.5 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-2">
+                                <div class="flex items-center justify-between">
                                     <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
                                         <span class="size-2 rounded-full bg-neutral-900"></span>
-                                        Jumlah Porsi Makan Malam
+                                        Porsi Makan Malam
                                     </label>
                                     <span
-                                        class="badge bg-neutral-900 text-white rounded-none border-0 badge-sm font-bold text-[11px]">
-                                        Maks. {{ $maxMalam }} Porsi
+                                        class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] rounded-none">
+                                        Maks. {{ $maxMalam }}
                                     </span>
                                 </div>
-                                <input type="number" wire:model.live="jumlahMalam" min="0"
+                                <input type="number" x-ref="inputJumlahMalam" wire:model="jumlahMalam" min="0"
                                     max="{{ $maxMalam }}"
-                                    x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                    @input="onInputJumlah('malam', $el, {{ (int) $maxMalam }})"
                                     class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
-                                    placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})"
-                                    required />
+                                    placeholder="Maks. {{ $maxMalam }}" required />
+                                <template x-if="warningMalam">
+                                    <span class="text-warning text-[10px] mt-1 block font-semibold animate-pulse" x-text="warningMalam"></span>
+                                </template>
                                 @error('jumlahMalam')
-                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                                    <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
                                 @enderror
-                                <p class="text-[11px] text-base-content/60 mt-1">
-                                    *Jumlah porsi tidak boleh lebih dari {{ $maxMalam }} (total konsumsi makan
-                                    malam terdata pada tanggal ini).
+                                <p class="text-[10px] text-base-content/50">
+                                    *Total konsumsi: {{ $maxMalam }} porsi
                                 </p>
                             </div>
-                        </div>
-                    @endif
-                @endif
+                        @endif
+                    </div>
+                </div>
 
                 {{-- Card Grey: Status Dokumentasi Tanggal Terpilih --}}
                 @if ($uploadTanggal)
@@ -2775,16 +2665,9 @@
                 <div class="pt-3 border-t border-base-200 flex items-center justify-between gap-2">
                     <div>
                         {{-- Tombol Hapus Dokumentasi (Tampil jika sesi saat ini memiliki foto tersimpan atau mode edit) --}}
-                        @if ($hasExistingCurrentPhoto)
-                            @php
-                                $hapusText = match ($sesiKonsumsi) {
-                                    'siang' => 'makan siang',
-                                    'malam' => 'makan malam',
-                                    default => 'makan siang & malam',
-                                };
-                            @endphp
-                            <button type="button" wire:click="deleteDokumentasi"
-                                wire:confirm="Apakah Anda yakin ingin menghapus data dokumentasi {{ $hapusText }} tanggal {{ \Carbon\Carbon::parse($uploadTanggal)->translatedFormat('d F Y') }}?"
+                        <template x-if="hasExistingCurrentPhoto">
+                            <button type="button"
+                                @click="if (confirm(hapusConfirmText)) { $wire.deleteDokumentasi(modalSesi); }"
                                 wire:loading.attr="disabled" wire:target="deleteDokumentasi,saveKonsumsi"
                                 class="btn btn-sm btn-error text-white gap-1.5 shadow-xs">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
@@ -2796,15 +2679,15 @@
                                 <span wire:loading wire:target="deleteDokumentasi"
                                     class="loading loading-spinner loading-xs"></span>
                             </button>
-                        @endif
+                        </template>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <button type="button" @click="closeKonsumsiModal()"
                             class="btn btn-sm btn-ghost">Batal</button>
-                        @if ($isCurrentSesiLocked)
+                        <template x-if="isCurrentSesiLocked">
                             <button type="button"
-                                @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', '{{ $sesiKonsumsi }}', 'edit')"
+                                @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', modalSesi, 'edit')"
                                 class="btn btn-sm btn-warning text-warning-content gap-1.5 shadow-xs">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2813,24 +2696,18 @@
                                 </svg>
                                 Beralih ke Form Edit
                             </button>
-                        @else
+                        </template>
+                        <template x-if="!isCurrentSesiLocked">
                             <button type="submit" class="btn btn-sm btn-primary text-white gap-1.5 shadow-xs"
                                 wire:loading.attr="disabled" :disabled="isProcessing"
                                 wire:target="fotoSiang,fotoMalam,saveKonsumsi,deleteDokumentasi">
-                                <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing">
-                                    @if ($modalMode === 'edit')
-                                        Simpan Perubahan
-                                    @elseif ($sesiKonsumsi === 'keduanya' || ($fotoSiang && $fotoMalam))
-                                        Simpan Siang & Malam
-                                    @else
-                                        {{ 'Simpan ' . ($sesiKonsumsi === 'siang' ? 'Makan Siang' : 'Makan Malam') }}
-                                    @endif
-                                </span>
+                                <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing"
+                                    x-text="submitButtonText"></span>
                                 <span wire:loading wire:target="saveKonsumsi"
                                     class="loading loading-spinner loading-xs"></span>
                                 <span x-show="isProcessing" class="loading loading-spinner loading-xs"></span>
                             </button>
-                        @endif
+                        </template>
                     </div>
                 </div>
             </form>
@@ -3134,6 +3011,164 @@
 
         function dokumentasiUploadModal() {
             return {
+                modalSesi: 'siang',
+                hasExistingSiang: {{ $existingFotoSiang ? 'true' : 'false' }},
+                hasExistingMalam: {{ $existingFotoMalam ? 'true' : 'false' }},
+                modalMode: '{{ $modalMode }}',
+                uploadTanggalFormatted: '{{ \Carbon\Carbon::parse($uploadTanggal)->translatedFormat('d F Y') }}',
+
+                get currentModalMode() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    return (wire ? (wire.get('modalMode') || wire.modalMode) : null) || this.modalMode || 'create';
+                },
+
+                get currentHasExistingSiang() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        return !!(wire.get('existingFotoSiang') || wire.existingFotoSiang);
+                    }
+                    return !!this.hasExistingSiang;
+                },
+
+                get currentHasExistingMalam() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        return !!(wire.get('existingFotoMalam') || wire.existingFotoMalam);
+                    }
+                    return !!this.hasExistingMalam;
+                },
+
+                get isCurrentSesiLocked() {
+                    if (this.currentModalMode !== 'create') return false;
+                    if (this.modalSesi === 'siang') return this.currentHasExistingSiang;
+                    if (this.modalSesi === 'malam') return this.currentHasExistingMalam;
+                    if (this.modalSesi === 'keduanya') return this.currentHasExistingSiang && this.currentHasExistingMalam;
+                    return false;
+                },
+
+                get hasExistingCurrentPhoto() {
+                    if (this.modalSesi === 'siang') return this.currentHasExistingSiang;
+                    if (this.modalSesi === 'malam') return this.currentHasExistingMalam;
+                    return this.currentHasExistingSiang || this.currentHasExistingMalam;
+                },
+
+                get submitButtonText() {
+                    if (this.currentModalMode === 'edit') return 'Simpan Perubahan';
+                    if (this.modalSesi === 'keduanya' || (this.rawFileSiang && this.rawFileMalam)) return 'Simpan Siang & Malam';
+                    return this.modalSesi === 'siang' ? 'Simpan Makan Siang' : 'Simpan Makan Malam';
+                },
+
+                get hapusConfirmText() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    let tglFormatted = this.uploadTanggalFormatted;
+                    const tgl = wire ? (wire.get('uploadTanggal') || wire.uploadTanggal) : null;
+                    if (tgl && typeof formatDateClient === 'function') {
+                        tglFormatted = formatDateClient(tgl);
+                    }
+                    let sesi = 'makan siang & malam';
+                    if (this.modalSesi === 'siang') sesi = 'makan siang';
+                    if (this.modalSesi === 'malam') sesi = 'makan malam';
+                    return `Apakah Anda yakin ingin menghapus data dokumentasi ${sesi} tanggal ${tglFormatted}?`;
+                },
+
+                selectSesi(sesi) {
+                    this.modalSesi = sesi;
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        if (typeof wire.set === 'function') {
+                            wire.set('sesiKonsumsi', sesi, false);
+                        } else {
+                            wire.sesiKonsumsi = sesi;
+                        }
+                    }
+                },
+
+                warningSiang: '',
+                warningMalam: '',
+
+                getMax(sesi, el = null, explicitMax = null) {
+                    if (explicitMax !== null && explicitMax !== undefined && !isNaN(explicitMax) && explicitMax > 0) {
+                        return parseInt(explicitMax);
+                    }
+                    if (el) {
+                        const attrMax = parseInt(el.getAttribute('max') || el.max);
+                        if (!isNaN(attrMax) && attrMax > 0) return attrMax;
+                    }
+                    const inputRef = sesi === 'siang' ? this.$refs.inputJumlahSiang : this.$refs.inputJumlahMalam;
+                    if (inputRef) {
+                        const attrMax = parseInt(inputRef.getAttribute('max') || inputRef.max);
+                        if (!isNaN(attrMax) && attrMax > 0) return attrMax;
+                    }
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        const val = sesi === 'siang'
+                            ? (wire.get('calculatedSiang') ?? wire.calculatedSiang)
+                            : (wire.get('calculatedMalam') ?? wire.calculatedMalam);
+                        if (val !== undefined && val !== null && !isNaN(val) && val > 0) {
+                            return parseInt(val);
+                        }
+                    }
+                    if (explicitMax !== null && explicitMax !== undefined && !isNaN(explicitMax)) {
+                        return parseInt(explicitMax);
+                    }
+                    if (el) {
+                        const attrMax = parseInt(el.getAttribute('max') || el.max);
+                        if (!isNaN(attrMax)) return attrMax;
+                    }
+                    return 0;
+                },
+
+                onInputJumlah(sesi, el, explicitMax = null) {
+                    const max = this.getMax(sesi, el, explicitMax);
+                    let val = parseInt(el.value);
+
+                    if (isNaN(val)) {
+                        if (sesi === 'siang') this.warningSiang = '';
+                        else this.warningMalam = '';
+                        const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                        if (wire) {
+                            const prop = sesi === 'siang' ? 'jumlahSiang' : 'jumlahMalam';
+                            if (typeof wire.set === 'function') {
+                                wire.set(prop, null, false);
+                            } else {
+                                wire[prop] = null;
+                            }
+                        }
+                        return;
+                    }
+
+                    if (val > max) {
+                        el.value = max;
+                        val = max;
+                        const msg = `Porsi melebihi kuota maks (${max} porsi). Otomatis disesuaikan ke ${max}.`;
+                        if (sesi === 'siang') {
+                            this.warningSiang = msg;
+                            setTimeout(() => { this.warningSiang = ''; }, 3000);
+                        } else {
+                            this.warningMalam = msg;
+                            setTimeout(() => { this.warningMalam = ''; }, 3000);
+                        }
+                    } else if (val < 0) {
+                        el.value = 0;
+                        val = 0;
+                        if (sesi === 'siang') this.warningSiang = '';
+                        else this.warningMalam = '';
+                    } else {
+                        if (sesi === 'siang') this.warningSiang = '';
+                        else this.warningMalam = '';
+                    }
+
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        const prop = sesi === 'siang' ? 'jumlahSiang' : 'jumlahMalam';
+                        if (typeof wire.set === 'function') {
+                            wire.set(prop, val, false);
+                        } else {
+                            wire[prop] = val;
+                        }
+                    }
+                },
+
                 cropRatioSiang: 'original',
                 rotateSiang: 0,
                 flipHSiang: false,
@@ -3193,9 +3228,23 @@
                 errorMessage: '',
 
                 init() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        this.modalSesi = wire.get('sesiKonsumsi') || wire.sesiKonsumsi || 'siang';
+                    }
+                    this.$watch('$wire.sesiKonsumsi', (val) => {
+                        if (val && val !== this.modalSesi) {
+                            this.modalSesi = val;
+                        }
+                    });
                     this.$watch('$wire.showAddModal', (val) => {
                         if (!val) {
                             this.resetAll();
+                        } else {
+                            const w = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                            if (w) {
+                                this.modalSesi = w.get('sesiKonsumsi') || w.sesiKonsumsi || 'siang';
+                            }
                         }
                     });
                     this.$watch('$wire.uploadTanggal', () => {
@@ -3623,17 +3672,38 @@
                     const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
                         wire.fotoMalam));
                     if (hasSiang && hasMalam && (wire.get('sesiKonsumsi') || wire.sesiKonsumsi) !== 'keduanya') {
-                        wire.set('sesiKonsumsi', 'keduanya');
+                        wire.set('sesiKonsumsi', 'keduanya', false);
+                        this.modalSesi = 'keduanya';
                     } else if (hasSiang && !hasMalam) {
-                        const curSesi = wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
+                        const curSesi = this.modalSesi || wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
                         if (curSesi === 'malam') {
-                            wire.set('sesiKonsumsi', (wire.get('existingFotoMalam') || wire.existingFotoMalam) ? 'keduanya' : 'siang');
+                            const finalSesi = (wire.get('existingFotoMalam') || wire.existingFotoMalam) ? 'keduanya' : 'siang';
+                            wire.set('sesiKonsumsi', finalSesi, false);
+                            this.modalSesi = finalSesi;
+                        } else {
+                            wire.set('sesiKonsumsi', this.modalSesi, false);
                         }
                     } else if (!hasSiang && hasMalam) {
-                        const curSesi = wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
+                        const curSesi = this.modalSesi || wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
                         if (curSesi === 'siang') {
-                            wire.set('sesiKonsumsi', (wire.get('existingFotoSiang') || wire.existingFotoSiang) ? 'keduanya' : 'malam');
+                            const finalSesi = (wire.get('existingFotoSiang') || wire.existingFotoSiang) ? 'keduanya' : 'malam';
+                            wire.set('sesiKonsumsi', finalSesi, false);
+                            this.modalSesi = finalSesi;
+                        } else {
+                            wire.set('sesiKonsumsi', this.modalSesi, false);
                         }
+                    } else {
+                        wire.set('sesiKonsumsi', this.modalSesi, false);
+                    }
+
+                    // Pastikan nilai porsi dari input teks terupdate ke Livewire sebelum submit
+                    if (this.$refs.inputJumlahSiang && this.$refs.inputJumlahSiang.value !== '') {
+                        const sVal = parseInt(this.$refs.inputJumlahSiang.value);
+                        wire.set('jumlahSiang', isNaN(sVal) ? null : sVal, false);
+                    }
+                    if (this.$refs.inputJumlahMalam && this.$refs.inputJumlahMalam.value !== '') {
+                        const mVal = parseInt(this.$refs.inputJumlahMalam.value);
+                        wire.set('jumlahMalam', isNaN(mVal) ? null : mVal, false);
                     }
 
                     wire.saveKonsumsi();
@@ -3828,9 +3898,11 @@
                             const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
                                 wire.fotoMalam));
                             if ((sesi === 'malam' && hasSiang) || (sesi === 'siang' && hasMalam)) {
-                                wire.set('sesiKonsumsi', 'keduanya');
+                                wire.set('sesiKonsumsi', 'keduanya', false);
+                                this.modalSesi = 'keduanya';
                             } else {
-                                wire.set('sesiKonsumsi', sesi);
+                                wire.set('sesiKonsumsi', sesi, false);
+                                this.modalSesi = sesi;
                             }
                         }
                     }
@@ -3930,9 +4002,11 @@
                             const hasSiangRemaining = !!(this.rawFileSiang || this.processedPreviewSiang);
                             const hasMalamRemaining = !!(this.rawFileMalam || this.processedPreviewMalam);
                             if (hasSiangRemaining && !hasMalamRemaining) {
-                                wire.set('sesiKonsumsi', 'siang');
+                                wire.set('sesiKonsumsi', 'siang', false);
+                                this.modalSesi = 'siang';
                             } else if (!hasSiangRemaining && hasMalamRemaining) {
-                                wire.set('sesiKonsumsi', 'malam');
+                                wire.set('sesiKonsumsi', 'malam', false);
+                                this.modalSesi = 'malam';
                             }
                         }
                     }
@@ -4005,6 +4079,8 @@
                     this.currentProcessingTarget = null;
                     this.processingStatus = '';
                     this.errorMessage = '';
+                    this.warningSiang = '';
+                    this.warningMalam = '';
 
                     if (this.$refs.fileInputSiang) this.$refs.fileInputSiang.value = '';
                     if (this.$refs.fileInputSiang2) this.$refs.fileInputSiang2.value = '';
@@ -4015,6 +4091,11 @@
                     inputs.forEach(input => {
                         input.value = '';
                     });
+
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        this.modalSesi = wire.get('sesiKonsumsi') || wire.sesiKonsumsi || 'siang';
+                    }
                 }
             };
         }
