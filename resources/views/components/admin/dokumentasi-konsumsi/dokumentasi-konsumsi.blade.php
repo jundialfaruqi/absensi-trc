@@ -173,6 +173,7 @@
         $dates = $this->dates;
         $summary = $this->monthlySummary;
         $firstDate = !empty($dates) ? \Carbon\Carbon::parse($dates[0]) : \Carbon\Carbon::now();
+        $dokMap = $this->dokumentasiMap;
     @endphp
 
     {{-- ─── TABEL 1: JUMLAH KONSUMSI PER BULAN ──────────────────────────────── --}}
@@ -240,28 +241,91 @@
                             {{-- Baris 1: SIANG --}}
                             <tr class="hover:bg-warning/5 transition-colors">
                                 <td
-                                    class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4">
+                                    class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4 align-middle">
                                     SIANG
                                 </td>
                                 @foreach ($dates as $date)
                                     @php
                                         $countSiang = $summary['daily'][$date]['siang'] ?? 0;
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
+                                        $dok = $dokMap->get($date);
+                                        $fotoSiang = $dok?->foto_siang;
                                     @endphp
                                     <td
-                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }}">
-                                        @if ($countSiang > 0)
-                                            <span
-                                                class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold">
-                                                {{ $countSiang }}
-                                            </span>
+                                        class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }} align-middle relative">
+                                        @if ($fotoSiang)
+                                            <div wire:click="openEditKonsumsiModal('{{ $date }}', 'siang')"
+                                                role="button" tabindex="0"
+                                                title="Edit Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk mengedit"
+                                                class="relative w-full h-12 flex items-center justify-center overflow-hidden group cursor-pointer hover:opacity-90 select-none">
+                                                {{-- Background Foto --}}
+                                                <img src="{{ asset('storage/' . $fotoSiang) }}"
+                                                    alt="Dokumentasi Siang"
+                                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                    loading="lazy" />
+
+                                                {{-- Overlay Gelap Transparan agar angka tetap kontras & jelas --}}
+                                                <div
+                                                    class="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors">
+                                                </div>
+
+                                                {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-20 pointer-events-none">
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
+                                                        title="Dokumentasi sudah tersedia">
+                                                        <svg class="size-2.5 stroke-[3]" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+
+                                                {{-- Angka Porsi di Tengah --}}
+                                                <div
+                                                    class="relative z-10 w-full h-full flex flex-col items-center justify-center p-1">
+                                                    @if ($countSiang > 0)
+                                                        <span
+                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
+                                                            {{ $countSiang }}
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center justify-center size-5 rounded-full bg-black/60 text-white/90 text-[11px] font-bold ring-1 ring-white/20">
+                                                            0
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         @else
-                                            <span class="text-base-content/25 text-xs">0</span>
+                                            <div wire:click="openAddKonsumsiModal('{{ $date }}', 'siang')"
+                                                role="button" tabindex="0"
+                                                title="Tambah Dokumentasi Siang ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
+                                                class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-warning/15 transition-colors select-none">
+                                                {{-- Teks + Melayang di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-10 pointer-events-none">
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-warning group-hover:text-warning-content text-xs font-bold leading-none shadow-2xs transition-colors">
+                                                        +
+                                                    </span>
+                                                </div>
+
+                                                @if ($countSiang > 0)
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold group-hover:scale-105 transition-transform">
+                                                        {{ $countSiang }}
+                                                    </span>
+                                                @else
+                                                    <span
+                                                        class="text-base-content/25 text-xs group-hover:text-base-content/50 transition-colors">0</span>
+                                                @endif
+                                            </div>
                                         @endif
                                     </td>
                                 @endforeach
                                 <td
-                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-warning/15 text-warning-content">
+                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-warning/15 text-warning-content align-middle">
                                     {{ number_format($summary['totalSiang']) }}
                                 </td>
                             </tr>
@@ -269,28 +333,91 @@
                             {{-- Baris 2: MALAM --}}
                             <tr class="hover:bg-info/5 transition-colors">
                                 <td
-                                    class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4">
+                                    class="sticky left-0 z-20 bg-base-100 border-b border-r border-base-200 font-bold text-xs py-3 px-4 align-middle">
                                     MALAM
                                 </td>
                                 @foreach ($dates as $date)
                                     @php
                                         $countMalam = $summary['daily'][$date]['malam'] ?? 0;
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
+                                        $dok = $dokMap->get($date);
+                                        $fotoMalam = $dok?->foto_malam;
                                     @endphp
                                     <td
-                                        class="text-center border-b border-r border-base-200 p-2 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }}">
-                                        @if ($countMalam > 0)
-                                            <span
-                                                class="inline-flex items-center justify-center size-6 rounded-full bg-info/20 text-info-content text-xs font-bold">
-                                                {{ $countMalam }}
-                                            </span>
+                                        class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/5' : '' }} align-middle relative">
+                                        @if ($fotoMalam)
+                                            <div wire:click="openEditKonsumsiModal('{{ $date }}', 'malam')"
+                                                role="button" tabindex="0"
+                                                title="Edit Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk mengedit"
+                                                class="relative w-full h-12 flex items-center justify-center overflow-hidden group cursor-pointer hover:opacity-90 select-none">
+                                                {{-- Background Foto --}}
+                                                <img src="{{ asset('storage/' . $fotoMalam) }}"
+                                                    alt="Dokumentasi Malam"
+                                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                    loading="lazy" />
+
+                                                {{-- Overlay Gelap Transparan agar angka tetap kontras & jelas --}}
+                                                <div
+                                                    class="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors">
+                                                </div>
+
+                                                {{-- Icon Ceklist Melayang di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-20 pointer-events-none">
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-3.5 rounded-full bg-success text-white shadow-xs"
+                                                        title="Dokumentasi sudah tersedia">
+                                                        <svg class="size-2.5 stroke-[3]" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+
+                                                {{-- Angka Porsi di Tengah --}}
+                                                <div
+                                                    class="relative z-10 w-full h-full flex flex-col items-center justify-center p-1">
+                                                    @if ($countMalam > 0)
+                                                        <span
+                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-info text-info-content text-xs font-black shadow-md ring-1 ring-white/40">
+                                                            {{ $countMalam }}
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center justify-center size-5 rounded-full bg-black/60 text-white/90 text-[11px] font-bold ring-1 ring-white/20">
+                                                            0
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         @else
-                                            <span class="text-base-content/25 text-xs">0</span>
+                                            <div wire:click="openAddKonsumsiModal('{{ $date }}', 'malam')"
+                                                role="button" tabindex="0"
+                                                title="Tambah Dokumentasi Malam ({{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}) - Klik untuk menambah"
+                                                class="relative w-full h-12 flex items-center justify-center p-1 group cursor-pointer hover:bg-info/15 transition-colors select-none">
+                                                {{-- Teks + Melayang di Sudut Kanan Atas --}}
+                                                <div class="absolute top-1 right-1 z-10 pointer-events-none">
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-3.5 rounded-full bg-base-200/80 text-base-content/50 group-hover:bg-info group-hover:text-white text-xs font-bold leading-none shadow-2xs transition-colors">
+                                                        +
+                                                    </span>
+                                                </div>
+
+                                                @if ($countMalam > 0)
+                                                    <span
+                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-info/20 text-info-content text-xs font-bold group-hover:scale-105 transition-transform">
+                                                        {{ $countMalam }}
+                                                    </span>
+                                                @else
+                                                    <span
+                                                        class="text-base-content/25 text-xs group-hover:text-base-content/50 transition-colors">0</span>
+                                                @endif
+                                            </div>
                                         @endif
                                     </td>
                                 @endforeach
                                 <td
-                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-info/15 text-info-content">
+                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-info/15 text-info-content align-middle">
                                     {{ number_format($summary['totalMalam']) }}
                                 </td>
                             </tr>
@@ -796,18 +923,30 @@
             <div class="flex items-start justify-between pb-3 border-b border-base-200">
                 <div class="flex items-center gap-3">
                     <div
-                        class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                        </svg>
+                        class="size-10 rounded-xl {{ $modalMode === 'edit' ? 'bg-warning/15 text-warning-content' : 'bg-primary/10 text-primary' }} flex items-center justify-center shrink-0">
+                        @if ($modalMode === 'edit')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                            </svg>
+                        @endif
                     </div>
                     <div>
-                        <h3 class="font-bold text-base text-base-content">Upload Dokumentasi Konsumsi</h3>
-                        <p class="text-xs text-base-content/60">Unggah bukti foto dan jumlah porsi konsumsi</p>
+                        <h3 class="font-bold text-base text-base-content">
+                            {{ $modalMode === 'edit' ? 'Edit Dokumentasi Konsumsi' : 'Upload Dokumentasi Konsumsi' }}
+                        </h3>
+                        <p class="text-xs text-base-content/60">
+                            {{ $modalMode === 'edit' ? 'Perbarui porsi, ganti foto, atau hapus dokumentasi' : 'Unggah bukti foto dan jumlah porsi konsumsi' }}
+                        </p>
                     </div>
                 </div>
                 <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
@@ -815,25 +954,348 @@
             </div>
 
             <form wire:submit="saveKonsumsi" class="py-4 space-y-4 text-sm">
+                {{-- Hidden File Inputs --}}
+                <input type="file" x-ref="fileInputSiang" wire:key="foto-siang-{{ $uploadIteration }}"
+                    @change="onFileChange($event, 'fotoSiang')"
+                    accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" />
+                <input type="file" x-ref="fileInputMalam" wire:key="foto-malam-{{ $uploadIteration }}"
+                    @change="onFileChange($event, 'fotoMalam')"
+                    accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" />
+
                 {{-- 1. Input Tanggal --}}
                 <div>
                     <label class="label text-xs py-1 text-base-content/80 font-bold">1. Tanggal Dokumentasi</label>
                     <input type="date" wire:model.live="uploadTanggal"
-                        class="input input-bordered w-full text-xs scheme-light dark:scheme-dark" required />
+                        {{ $modalMode === 'edit' ? 'readonly' : '' }}
+                        class="input input-bordered w-full text-xs scheme-light dark:scheme-dark {{ $modalMode === 'edit' ? 'bg-base-200/60 cursor-not-allowed' : '' }}" required />
                 </div>
+
+                {{-- Card Grey: Status Dokumentasi Tanggal Terpilih --}}
+                @if ($uploadTanggal)
+                    @php
+                        $carbonTgl = \Carbon\Carbon::parse($uploadTanggal);
+                        $tglFormatted = $carbonTgl->translatedFormat('l, d-m-Y');
+                    @endphp
+                    <div class="bg-base-200/80 border border-base-300 rounded-2xl p-3.5 space-y-2.5 shadow-2xs">
+                        <div class="flex items-center justify-between">
+                            <div class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-base-content/70"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>Tanggal: <span
+                                        class="font-black text-base-content">{{ $tglFormatted }}</span></span>
+                            </div>
+                            @if ($existingFotoSiang && $existingFotoMalam)
+                                <span
+                                    class="badge badge-success badge-xs font-bold text-[10px] gap-1 py-2 px-2 shadow-2xs">
+                                    Lengkap
+                                </span>
+                            @elseif (!$existingFotoSiang && !$existingFotoMalam)
+                                <span
+                                    class="badge badge-ghost badge-xs font-medium text-[10px] text-base-content/60 py-2 px-2">
+                                    Belum Ada Data
+                                </span>
+                            @else
+                                <span class="badge badge-warning badge-xs font-bold text-[10px] py-2 px-2 shadow-2xs">
+                                    Sebagian
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-base-300">
+                            {{-- Kolom Siang --}}
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-warning-content flex items-center gap-1">
+                                        <span class="size-2 rounded-full bg-warning"></span>
+                                        Siang
+                                    </span>
+                                    <template x-if="processedPreviewSiang">
+                                        <span class="badge badge-warning badge-xs font-bold text-[10px] shadow-2xs">Foto Baru</span>
+                                    </template>
+                                    <template x-if="!processedPreviewSiang">
+                                        <span>
+                                            @if ($existingFotoSiang)
+                                                <span class="badge badge-warning badge-xs font-semibold text-[10px]">Tersimpan</span>
+                                            @else
+                                                <span class="text-[10px] text-base-content/50">Belum Ada</span>
+                                            @endif
+                                        </span>
+                                    </template>
+                                </div>
+
+                                {{-- Card Foto Siang --}}
+                                <div class="relative rounded-xl overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
+                                     :class="processedPreviewSiang ? 'border-warning ring-2 ring-warning/30 bg-base-100' : '{{ $existingFotoSiang ? 'border-warning/40 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/70 bg-base-100/60 hover:bg-warning/5' }}'">
+                                    
+                                    {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
+                                    <template x-if="processedPreviewSiang">
+                                        <div class="w-full h-full relative">
+                                            <img :src="processedPreviewSiang" alt="Preview Foto Siang"
+                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <div class="absolute top-2 left-2 z-10">
+                                                <span class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                    WebP • <span x-text="processedSizeSiang"></span>
+                                                </span>
+                                            </div>
+                                            {{-- Overlay saat hover --}}
+                                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                <button type="button"
+                                                    @click.stop="pickFile('siang', false)"
+                                                    class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                    </svg>
+                                                    Ubah Foto
+                                                </button>
+                                                <button type="button" @click.stop="clearPhoto('fotoSiang')"
+                                                    class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Batal
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- 2. State: Tidak ada foto baru, cek apakah ada foto tersimpan atau belum ada --}}
+                                    <template x-if="!processedPreviewSiang">
+                                        <div class="w-full h-full relative">
+                                            @if ($existingFotoSiang)
+                                                <img src="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                    alt="Foto Konsumsi Siang"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                <div class="absolute top-2 left-2 z-10">
+                                                    <span class="badge bg-black/75 text-white border-0 badge-xs text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                        <span class="size-1.5 rounded-full bg-success"></span>
+                                                        Tersimpan
+                                                    </span>
+                                                </div>
+                                                {{-- Overlay saat hover --}}
+                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                    <a href="{{ asset('storage/' . $existingFotoSiang) }}" target="_blank"
+                                                        class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                        Lihat
+                                                    </a>
+                                                    <button type="button"
+                                                        @click.stop="pickFile('siang', true)"
+                                                        class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        Ubah Foto
+                                                    </button>
+                                                </div>
+                                            @else
+                                                <div @click="pickFile('siang', false)"
+                                                    class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                    <div class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </div>
+                                                    <span class="text-[11px] font-semibold text-base-content/70 group-hover:text-warning-content transition-colors">Upload Foto Siang</span>
+                                                    <span class="text-[9px] text-base-content/40">Klik atau arahkan kursor</span>
+
+                                                    {{-- Overlay saat hover --}}
+                                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
+                                                        <button type="button"
+                                                            @click.stop="pickFile('siang', false)"
+                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                            </svg>
+                                                            Upload Foto
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </template>
+
+                                    {{-- Loading / Processing Spinner Overlay --}}
+                                    <div x-show="isProcessing && rawFileSiang"
+                                        class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
+                                        <span class="loading loading-spinner loading-sm text-warning mb-1"></span>
+                                        <span class="text-[10px] font-bold text-base-content leading-tight px-1" x-text="processingStatus"></span>
+                                    </div>
+                                </div>
+
+                                {{-- Error Message Siang --}}
+                                <template x-if="errorMessage && rawFileSiang">
+                                    <span class="text-error text-[10px] block mt-1" x-text="errorMessage"></span>
+                                </template>
+                                @error('fotoSiang')
+                                    <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- Kolom Malam --}}
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-info-content flex items-center gap-1">
+                                        <span class="size-2 rounded-full bg-info"></span>
+                                        Malam
+                                    </span>
+                                    <template x-if="processedPreviewMalam">
+                                        <span class="badge badge-info badge-xs font-bold text-[10px] shadow-2xs">Foto Baru</span>
+                                    </template>
+                                    <template x-if="!processedPreviewMalam">
+                                        <span>
+                                            @if ($existingFotoMalam)
+                                                <span class="badge badge-info badge-xs font-semibold text-[10px]">Tersimpan</span>
+                                            @else
+                                                <span class="text-[10px] text-base-content/50">Belum Ada</span>
+                                            @endif
+                                        </span>
+                                    </template>
+                                </div>
+
+                                {{-- Card Foto Malam --}}
+                                <div class="relative rounded-xl overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
+                                     :class="processedPreviewMalam ? 'border-info ring-2 ring-info/30 bg-base-100' : '{{ $existingFotoMalam ? 'border-info/40 bg-base-100' : 'border-dashed border-base-300 hover:border-info/70 bg-base-100/60 hover:bg-info/5' }}'">
+                                    
+                                    {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
+                                    <template x-if="processedPreviewMalam">
+                                        <div class="w-full h-full relative">
+                                            <img :src="processedPreviewMalam" alt="Preview Foto Malam"
+                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <div class="absolute top-2 left-2 z-10">
+                                                <span class="badge bg-info text-white border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                    WebP • <span x-text="processedSizeMalam"></span>
+                                                </span>
+                                            </div>
+                                            {{-- Overlay saat hover --}}
+                                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                <button type="button"
+                                                    @click.stop="pickFile('malam', false)"
+                                                    class="btn btn-xs btn-info text-white font-bold shadow-md gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                    </svg>
+                                                    Ubah Foto
+                                                </button>
+                                                <button type="button" @click.stop="clearPhoto('fotoMalam')"
+                                                    class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Batal
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- 2. State: Tidak ada foto baru, cek apakah ada foto tersimpan atau belum ada --}}
+                                    <template x-if="!processedPreviewMalam">
+                                        <div class="w-full h-full relative">
+                                            @if ($existingFotoMalam)
+                                                <img src="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                    alt="Foto Konsumsi Malam"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                <div class="absolute top-2 left-2 z-10">
+                                                    <span class="badge bg-black/75 text-white border-0 badge-xs text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                        <span class="size-1.5 rounded-full bg-success"></span>
+                                                        Tersimpan
+                                                    </span>
+                                                </div>
+                                                {{-- Overlay saat hover --}}
+                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                    <a href="{{ asset('storage/' . $existingFotoMalam) }}" target="_blank"
+                                                        class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                        Lihat
+                                                    </a>
+                                                    <button type="button"
+                                                        @click.stop="pickFile('malam', true)"
+                                                        class="btn btn-xs btn-info text-white font-bold shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        Ubah Foto
+                                                    </button>
+                                                </div>
+                                            @else
+                                                <div @click="pickFile('malam', false)"
+                                                    class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                    <div class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-info/20 group-hover:text-info transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </div>
+                                                    <span class="text-[11px] font-semibold text-base-content/70 group-hover:text-info transition-colors">Upload Foto Malam</span>
+                                                    <span class="text-[9px] text-base-content/40">Klik atau arahkan kursor</span>
+
+                                                    {{-- Overlay saat hover --}}
+                                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
+                                                        <button type="button"
+                                                            @click.stop="pickFile('malam', false)"
+                                                            class="btn btn-xs btn-info text-white font-bold shadow-md gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                            </svg>
+                                                            Upload Foto
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </template>
+
+                                    {{-- Loading / Processing Spinner Overlay --}}
+                                    <div x-show="isProcessing && rawFileMalam"
+                                        class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
+                                        <span class="loading loading-spinner loading-sm text-info mb-1"></span>
+                                        <span class="text-[10px] font-bold text-base-content leading-tight px-1" x-text="processingStatus"></span>
+                                    </div>
+                                </div>
+
+                                {{-- Error Message Malam --}}
+                                <template x-if="errorMessage && rawFileMalam">
+                                    <span class="text-error text-[10px] block mt-1" x-text="errorMessage"></span>
+                                </template>
+                                @error('fotoMalam')
+                                    <span class="text-error text-[10px] block mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- 2. Radio Button Pilihan Sesi Konsumsi --}}
                 <div>
                     <label class="label text-xs py-1 text-base-content/80 font-bold">2. Pilih Sesi Konsumsi</label>
                     <div class="grid grid-cols-2 gap-3">
                         <label
-                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }}">
+                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang ? 'opacity-95' : '' }}">
                             <input type="radio" wire:model.live="sesiKonsumsi" value="siang"
                                 class="radio radio-sm radio-warning" />
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="size-2 rounded-full bg-warning shrink-0"></span>
-                                    <span class="text-xs font-bold text-base-content">Makan Siang</span>
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-bold text-base-content">Siang</span>
+                                    </div>
+                                    @if ($existingFotoSiang)
+                                        <span class="badge badge-warning badge-xs font-bold text-[9px] gap-0.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Tersimpan
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="text-[11px] text-base-content/60 mt-0.5">
                                     Tersedia: <span
@@ -844,13 +1306,25 @@
                         </label>
 
                         <label
-                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-info bg-info/10 ring-2 ring-info/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }}">
+                            class="cursor-pointer border rounded-2xl p-3 flex items-center gap-3 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-info bg-info/10 ring-2 ring-info/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
                             <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
                                 class="radio radio-sm radio-info" />
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="size-2 rounded-full bg-info shrink-0"></span>
-                                    <span class="text-xs font-bold text-base-content">Makan Malam</span>
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-bold text-base-content">Malam</span>
+                                    </div>
+                                    @if ($existingFotoMalam)
+                                        <span class="badge badge-info badge-xs font-bold text-[9px] gap-0.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-2.5"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Tersimpan
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="text-[11px] text-base-content/60 mt-0.5">
                                     Tersedia: <span
@@ -859,289 +1333,294 @@
                             </div>
                         </label>
                     </div>
+                    @error('sesiKonsumsi')
+                        <span class="text-error text-xs block mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 @php
                     $maxSiang = $this->calculatedSiang;
                     $maxMalam = $this->calculatedMalam;
+                    $isCurrentSesiLocked =
+                        ($modalMode === 'create') &&
+                        (($sesiKonsumsi === 'siang' && $existingFotoSiang) ||
+                        ($sesiKonsumsi === 'malam' && $existingFotoMalam));
+                    $hasExistingCurrentPhoto = ($sesiKonsumsi === 'siang' ? $existingFotoSiang : $existingFotoMalam);
                 @endphp
 
                 {{-- 3. Form Input Sesi Makan Siang (Tampil Jika Sesi Siang Dipilih) --}}
                 @if ($sesiKonsumsi === 'siang')
-                    <div class="p-4 bg-warning/5 border border-warning/20 rounded-2xl space-y-4">
-                        {{-- Input Jumlah Siang --}}
-                        <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                    <span class="size-2 rounded-full bg-warning"></span>
-                                    Jumlah Porsi Makan Siang
-                                </label>
-                                <span class="badge badge-warning badge-sm font-bold text-[11px]">
-                                    Maks. {{ $maxSiang }} Porsi
-                                </span>
+                    @if ($modalMode === 'create' && $existingFotoSiang)
+                        {{-- Notifikasi Bahwa Dokumentasi Siang Sudah Tersimpan Pada Mode Tambah --}}
+                        <div class="p-4 bg-warning/10 border border-warning/30 rounded-2xl space-y-2.5">
+                            <div class="flex items-center gap-2.5 text-warning-content font-bold text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="text-sm">Dokumentasi Makan Siang Sudah Tersimpan</span>
                             </div>
-                            <input type="number" wire:model.live="jumlahSiang" min="0"
-                                max="{{ $maxSiang }}"
-                                x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
-                                placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})" required />
-                            @error('jumlahSiang')
-                                <span class="text-error text-xs mt-1 block">{{ $message }}</span>
-                            @enderror
-                            <p class="text-[11px] text-base-content/60 mt-1">
-                                *Jumlah porsi tidak boleh lebih dari {{ $maxSiang }} (total konsumsi makan siang
-                                terdata pada tanggal ini).
+                            <p class="text-xs text-base-content/70 leading-relaxed">
+                                Dokumentasi makan siang untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika Anda ingin mengubah atau menghapusnya.
                             </p>
-                        </div>
-
-                        {{-- Pilihan Crop Aspect Ratio --}}
-                        <div class="space-y-1.5 pt-3 border-t border-warning/15">
-                            <div class="flex items-center justify-between">
-                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
+                            <div class="pt-1 flex flex-wrap items-center gap-2">
+                                <button type="button" wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'siang')"
+                                    class="btn btn-xs btn-warning text-warning-content gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                    Pilihan Crop Aspect Ratio
-                                </label>
-                                <span class="text-[10px] text-base-content/60 font-medium">Auto WebP & Maks. 100KB</span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
-                                    :class="cropRatio === '16:9' ? 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
-                                    <input type="radio" x-model="cropRatio" value="16:9" @change="onCropRatioChange('fotoSiang')" class="radio radio-xs radio-warning" />
-                                    <span class="text-xs">16 : 9</span>
-                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
-                                </label>
-
-                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
-                                    :class="cropRatio === '4:3' ? 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
-                                    <input type="radio" x-model="cropRatio" value="4:3" @change="onCropRatioChange('fotoSiang')" class="radio radio-xs radio-warning" />
-                                    <span class="text-xs">4 : 3</span>
-                                </label>
-
-                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
-                                    :class="cropRatio === 'original' ? 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
-                                    <input type="radio" x-model="cropRatio" value="original" @change="onCropRatioChange('fotoSiang')" class="radio radio-xs radio-warning" />
-                                    <span class="text-xs">Original</span>
-                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
-                                </label>
+                                    Edit Data Siang
+                                </button>
+                                @if (!$existingFotoMalam)
+                                    <button type="button" wire:click="$set('sesiKonsumsi', 'malam')"
+                                        class="btn btn-xs btn-info text-white gap-1">
+                                        Pindah ke Input Makan Malam &rarr;
+                                    </button>
+                                @endif
                             </div>
                         </div>
-
-                        {{-- Upload Foto Makan Siang --}}
-                        <div class="space-y-1.5 pt-2 border-t border-warning/15">
-                            <label class="label text-xs py-0 text-base-content/70 font-medium">Upload Foto Dokumentasi
-                                Makan Siang</label>
-                            <input type="file" wire:key="foto-siang-{{ $uploadIteration }}"
-                                @change="onFileChange($event, 'fotoSiang')"
-                                accept="image/jpeg,image/png,image/jpg,image/webp"
-                                class="file-input file-input-bordered file-input-sm w-full text-xs" />
-
-                            {{-- Status Processing WebP & Resize --}}
-                            <div x-show="isProcessing" class="text-xs text-warning flex items-center gap-1.5 mt-1.5 font-medium animate-pulse">
-                                <span class="loading loading-spinner loading-xs"></span>
-                                <span x-text="processingStatus"></span>
-                            </div>
-
-                            <template x-if="errorMessage">
-                                <span class="text-error text-xs block mt-1" x-text="errorMessage"></span>
-                            </template>
-                            @error('fotoSiang')
-                                <span class="text-error text-xs block mt-1">{{ $message }}</span>
-                            @enderror
-
-                            {{-- Preview Foto Baru yang Baru Diproses / Diupload --}}
-                            <div x-show="processedPreviewSiang" class="relative mt-2 rounded-xl overflow-hidden border border-warning/40 aspect-video max-h-40 bg-base-200 shadow-inner">
-                                <img :src="processedPreviewSiang" alt="Preview Foto Siang"
-                                    class="w-full h-full object-cover" />
-                                <div class="absolute top-2 left-2 flex items-center gap-1.5">
-                                    <span class="badge badge-warning badge-xs font-bold shadow-xs">
-                                        WebP • <span x-text="processedSizeSiang"></span> • Maks 100KB Terpenuhi
+                    @else
+                        <div class="p-4 bg-warning/5 border border-warning/20 rounded-2xl space-y-4">
+                            {{-- Input Jumlah Siang --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <span class="size-2 rounded-full bg-warning"></span>
+                                        Jumlah Porsi Makan Siang
+                                    </label>
+                                    <span class="badge badge-warning badge-sm font-bold text-[11px]">
+                                        Maks. {{ $maxSiang }} Porsi
                                     </span>
                                 </div>
-                                <div class="absolute bottom-2 right-2">
-                                    <button type="button" @click="clearPhoto('fotoSiang')" class="btn btn-2xs btn-error text-white shadow-xs">
-                                        Hapus
-                                    </button>
-                                </div>
+                                <input type="number" wire:model.live="jumlahSiang" min="0"
+                                    max="{{ $maxSiang }}"
+                                    x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
+                                    placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})" required />
+                                @error('jumlahSiang')
+                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                                <p class="text-[11px] text-base-content/60 mt-1">
+                                    *Jumlah porsi tidak boleh lebih dari {{ $maxSiang }} (total konsumsi makan siang terdata pada tanggal ini).
+                                </p>
                             </div>
 
-                            {{-- Status Foto Tersimpan di Database --}}
-                            @if ($existingFotoSiang)
-                                <div x-show="!processedPreviewSiang"
-                                    class="mt-2 p-2.5 rounded-xl bg-base-200/60 border border-base-300 flex items-center justify-between gap-3">
-                                    <div class="flex items-center gap-2.5 min-w-0">
-                                        <div class="size-10 rounded-lg overflow-hidden shrink-0 border border-base-300 bg-base-100">
-                                            <img src="{{ asset('storage/' . $existingFotoSiang) }}"
-                                                alt="Foto Siang Tersimpan" class="w-full h-full object-cover" />
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="size-1.5 rounded-full bg-success"></span>
-                                                <span class="text-xs font-bold text-base-content">Foto Sudah Tersimpan di Database</span>
-                                            </div>
-                                            <p class="text-[11px] text-base-content/60 truncate">Pilih file baru di atas jika ingin mengganti</p>
-                                        </div>
-                                    </div>
-                                    <a href="{{ asset('storage/' . $existingFotoSiang) }}" target="_blank"
-                                        class="btn btn-xs btn-ghost border border-base-300 hover:bg-base-100 shrink-0 gap-1 text-[11px]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            {{-- Pilihan Crop Aspect Ratio --}}
+                            <div class="space-y-1.5 pt-3 border-t border-warning/15">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
                                         </svg>
-                                        Lihat
-                                    </a>
+                                        Pilihan Crop Aspect Ratio
+                                    </label>
+                                    <span class="text-[10px] text-base-content/60 font-medium">Auto WebP & Maks. 100KB</span>
                                 </div>
-                            @endif
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label
+                                        class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                        :class="cropRatio === '16:9' ?
+                                            'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                            'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                        <input type="radio" x-model="cropRatio" value="16:9"
+                                            @change="onCropRatioChange('fotoSiang')"
+                                            class="radio radio-xs radio-warning" />
+                                        <span class="text-xs">16 : 9</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
+                                    </label>
+
+                                    <label
+                                        class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                        :class="cropRatio === '4:3' ?
+                                            'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                            'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                        <input type="radio" x-model="cropRatio" value="4:3"
+                                            @change="onCropRatioChange('fotoSiang')"
+                                            class="radio radio-xs radio-warning" />
+                                        <span class="text-xs">4 : 3</span>
+                                    </label>
+
+                                    <label
+                                        class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                        :class="cropRatio === 'original' ?
+                                            'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
+                                            'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                        <input type="radio" x-model="cropRatio" value="original"
+                                            @change="onCropRatioChange('fotoSiang')"
+                                            class="radio radio-xs radio-warning" />
+                                        <span class="text-xs">Original</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @endif
 
                 {{-- 4. Form Input Sesi Makan Malam (Tampil Jika Sesi Malam Dipilih) --}}
                 @if ($sesiKonsumsi === 'malam')
-                    <div class="p-4 bg-info/5 border border-info/20 rounded-2xl space-y-4">
-                        {{-- Input Jumlah Malam --}}
-                        <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                    <span class="size-2 rounded-full bg-info"></span>
-                                    Jumlah Porsi Makan Malam
-                                </label>
-                                <span class="badge badge-info badge-sm font-bold text-[11px]">
-                                    Maks. {{ $maxMalam }} Porsi
-                                </span>
+                    @if ($modalMode === 'create' && $existingFotoMalam)
+                        {{-- Notifikasi Bahwa Dokumentasi Malam Sudah Tersimpan Pada Mode Tambah --}}
+                        <div class="p-4 bg-info/10 border border-info/30 rounded-2xl space-y-2.5">
+                            <div class="flex items-center gap-2.5 text-info-content font-bold text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="text-sm">Dokumentasi Makan Malam Sudah Tersimpan</span>
                             </div>
-                            <input type="number" wire:model.live="jumlahMalam" min="0"
-                                max="{{ $maxMalam }}"
-                                x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                class="input input-bordered input-sm w-full text-xs font-bold focus:border-info focus:outline-info"
-                                placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})" required />
-                            @error('jumlahMalam')
-                                <span class="text-error text-xs mt-1 block">{{ $message }}</span>
-                            @enderror
-                            <p class="text-[11px] text-base-content/60 mt-1">
-                                *Jumlah porsi tidak boleh lebih dari {{ $maxMalam }} (total konsumsi makan malam
-                                terdata pada tanggal ini).
+                            <p class="text-xs text-base-content/70 leading-relaxed">
+                                Dokumentasi makan malam untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika Anda ingin mengubah atau menghapusnya.
                             </p>
-                        </div>
-
-                        {{-- Pilihan Crop Aspect Ratio --}}
-                        <div class="space-y-1.5 pt-3 border-t border-info/15">
-                            <div class="flex items-center justify-between">
-                                <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
+                            <div class="pt-1 flex flex-wrap items-center gap-2">
+                                <button type="button" wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', 'malam')"
+                                    class="btn btn-xs btn-info text-white gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                    Pilihan Crop Aspect Ratio
-                                </label>
-                                <span class="text-[10px] text-base-content/60 font-medium">Auto WebP & Maks. 100KB</span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
-                                    :class="cropRatio === '16:9' ? 'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
-                                    <input type="radio" x-model="cropRatio" value="16:9" @change="onCropRatioChange('fotoMalam')" class="radio radio-xs radio-info" />
-                                    <span class="text-xs">16 : 9</span>
-                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
-                                </label>
-
-                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
-                                    :class="cropRatio === '4:3' ? 'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
-                                    <input type="radio" x-model="cropRatio" value="4:3" @change="onCropRatioChange('fotoMalam')" class="radio radio-xs radio-info" />
-                                    <span class="text-xs">4 : 3</span>
-                                </label>
-
-                                <label class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
-                                    :class="cropRatio === 'original' ? 'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' : 'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
-                                    <input type="radio" x-model="cropRatio" value="original" @change="onCropRatioChange('fotoMalam')" class="radio radio-xs radio-info" />
-                                    <span class="text-xs">Original</span>
-                                    <span class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
-                                </label>
+                                    Edit Data Malam
+                                </button>
+                                @if (!$existingFotoSiang)
+                                    <button type="button" wire:click="$set('sesiKonsumsi', 'siang')"
+                                        class="btn btn-xs btn-warning text-warning-content gap-1">
+                                        Pindah ke Input Makan Siang &rarr;
+                                    </button>
+                                @endif
                             </div>
                         </div>
-
-                        {{-- Upload Foto Makan Malam --}}
-                        <div class="space-y-1.5 pt-2 border-t border-info/15">
-                            <label class="label text-xs py-0 text-base-content/70 font-medium">Upload Foto Dokumentasi
-                                Makan Malam</label>
-                            <input type="file" wire:key="foto-malam-{{ $uploadIteration }}"
-                                @change="onFileChange($event, 'fotoMalam')"
-                                accept="image/jpeg,image/png,image/jpg,image/webp"
-                                class="file-input file-input-bordered file-input-sm w-full text-xs" />
-
-                            {{-- Status Processing WebP & Resize --}}
-                            <div x-show="isProcessing" class="text-xs text-info flex items-center gap-1.5 mt-1.5 font-medium animate-pulse">
-                                <span class="loading loading-spinner loading-xs"></span>
-                                <span x-text="processingStatus"></span>
-                            </div>
-
-                            <template x-if="errorMessage">
-                                <span class="text-error text-xs block mt-1" x-text="errorMessage"></span>
-                            </template>
-                            @error('fotoMalam')
-                                <span class="text-error text-xs block mt-1">{{ $message }}</span>
-                            @enderror
-
-                            {{-- Preview Foto Baru yang Baru Diproses / Diupload --}}
-                            <div x-show="processedPreviewMalam" class="relative mt-2 rounded-xl overflow-hidden border border-info/40 aspect-video max-h-40 bg-base-200 shadow-inner">
-                                <img :src="processedPreviewMalam" alt="Preview Foto Malam"
-                                    class="w-full h-full object-cover" />
-                                <div class="absolute top-2 left-2 flex items-center gap-1.5">
-                                    <span class="badge badge-info badge-xs font-bold shadow-xs">
-                                        WebP • <span x-text="processedSizeMalam"></span> • Maks 100KB Terpenuhi
+                    @else
+                        <div class="p-4 bg-info/5 border border-info/20 rounded-2xl space-y-4">
+                            {{-- Input Jumlah Malam --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <span class="size-2 rounded-full bg-info"></span>
+                                        Jumlah Porsi Makan Malam
+                                    </label>
+                                    <span class="badge badge-info badge-sm font-bold text-[11px]">
+                                        Maks. {{ $maxMalam }} Porsi
                                     </span>
                                 </div>
-                                <div class="absolute bottom-2 right-2">
-                                    <button type="button" @click="clearPhoto('fotoMalam')" class="btn btn-2xs btn-error text-white shadow-xs">
-                                        Hapus
-                                    </button>
-                                </div>
+                                <input type="number" wire:model.live="jumlahMalam" min="0"
+                                    max="{{ $maxMalam }}"
+                                    x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-info focus:outline-info"
+                                    placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})" required />
+                                @error('jumlahMalam')
+                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                                <p class="text-[11px] text-base-content/60 mt-1">
+                                    *Jumlah porsi tidak boleh lebih dari {{ $maxMalam }} (total konsumsi makan malam terdata pada tanggal ini).
+                                </p>
                             </div>
 
-                            {{-- Status Foto Tersimpan di Database --}}
-                            @if ($existingFotoMalam)
-                                <div x-show="!processedPreviewMalam"
-                                    class="mt-2 p-2.5 rounded-xl bg-base-200/60 border border-base-300 flex items-center justify-between gap-3">
-                                    <div class="flex items-center gap-2.5 min-w-0">
-                                        <div class="size-10 rounded-lg overflow-hidden shrink-0 border border-base-300 bg-base-100">
-                                            <img src="{{ asset('storage/' . $existingFotoMalam) }}"
-                                                alt="Foto Malam Tersimpan" class="w-full h-full object-cover" />
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="size-1.5 rounded-full bg-success"></span>
-                                                <span class="text-xs font-bold text-base-content">Foto Sudah Tersimpan di Database</span>
-                                            </div>
-                                            <p class="text-[11px] text-base-content/60 truncate">Pilih file baru di atas jika ingin mengganti</p>
-                                        </div>
-                                    </div>
-                                    <a href="{{ asset('storage/' . $existingFotoMalam) }}" target="_blank"
-                                        class="btn btn-xs btn-ghost border border-base-300 hover:bg-base-100 shrink-0 gap-1 text-[11px]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            {{-- Pilihan Crop Aspect Ratio --}}
+                            <div class="space-y-1.5 pt-3 border-t border-info/15">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-base-content/70"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 3v12a3 3 0 003 3h12M18 21V9a3 3 0 00-3-3H3" />
                                         </svg>
-                                        Lihat
-                                    </a>
+                                        Pilihan Crop Aspect Ratio
+                                    </label>
+                                    <span class="text-[10px] text-base-content/60 font-medium">Auto WebP & Maks. 100KB</span>
                                 </div>
-                            @endif
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label
+                                        class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                        :class="cropRatio === '16:9' ?
+                                            'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' :
+                                            'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                        <input type="radio" x-model="cropRatio" value="16:9"
+                                            @change="onCropRatioChange('fotoMalam')"
+                                            class="radio radio-xs radio-info" />
+                                        <span class="text-xs">16 : 9</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Default)</span>
+                                    </label>
+
+                                    <label
+                                        class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                        :class="cropRatio === '4:3' ?
+                                            'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' :
+                                            'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                        <input type="radio" x-model="cropRatio" value="4:3"
+                                            @change="onCropRatioChange('fotoMalam')"
+                                            class="radio radio-xs radio-info" />
+                                        <span class="text-xs">4 : 3</span>
+                                    </label>
+
+                                    <label
+                                        class="cursor-pointer border rounded-xl p-2 flex items-center gap-2 transition-all"
+                                        :class="cropRatio === 'original' ?
+                                            'border-info bg-info/15 ring-1 ring-info shadow-2xs font-bold text-info-content' :
+                                            'border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/80'">
+                                        <input type="radio" x-model="cropRatio" value="original"
+                                            @change="onCropRatioChange('fotoMalam')"
+                                            class="radio radio-xs radio-info" />
+                                        <span class="text-xs">Original</span>
+                                        <span
+                                            class="text-[10px] opacity-60 font-normal ml-auto hidden sm:inline">(Tanpa Crop)</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @endif
 
                 {{-- Footer Modal --}}
-                <div class="pt-3 border-t border-base-200 flex items-center justify-end gap-2">
-                    <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
-                        class="btn btn-sm btn-ghost">Batal</button>
-                    <button type="submit" class="btn btn-sm btn-primary text-white gap-1.5"
-                        wire:loading.attr="disabled" :disabled="isProcessing" wire:target="fotoSiang,fotoMalam,saveKonsumsi">
-                        <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing">
-                            Simpan {{ $sesiKonsumsi === 'siang' ? 'Makan Siang' : 'Makan Malam' }}
-                        </span>
-                        <span wire:loading wire:target="saveKonsumsi"
-                            class="loading loading-spinner loading-xs"></span>
-                        <span x-show="isProcessing"
-                            class="loading loading-spinner loading-xs"></span>
-                    </button>
+                <div class="pt-3 border-t border-base-200 flex items-center justify-between gap-2">
+                    <div>
+                        {{-- Tombol Hapus Dokumentasi (Tampil jika sesi saat ini memiliki foto tersimpan atau mode edit) --}}
+                        @if ($hasExistingCurrentPhoto)
+                            <button type="button"
+                                wire:click="deleteDokumentasi"
+                                wire:confirm="Apakah Anda yakin ingin menghapus data dokumentasi {{ $sesiKonsumsi === 'siang' ? 'makan siang' : 'makan malam' }} tanggal {{ \Carbon\Carbon::parse($uploadTanggal)->translatedFormat('d F Y') }}?"
+                                wire:loading.attr="disabled"
+                                wire:target="deleteDokumentasi,saveKonsumsi"
+                                class="btn btn-sm btn-error text-white gap-1.5 shadow-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span wire:loading.remove wire:target="deleteDokumentasi">Hapus</span>
+                                <span wire:loading wire:target="deleteDokumentasi" class="loading loading-spinner loading-xs"></span>
+                            </button>
+                        @endif
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" @click="resetAll()" wire:click="closeAddKonsumsiModal"
+                            class="btn btn-sm btn-ghost">Batal</button>
+                        @if ($isCurrentSesiLocked)
+                            <button type="button" wire:click="openEditKonsumsiModal('{{ $uploadTanggal }}', '{{ $sesiKonsumsi }}')" class="btn btn-sm btn-warning text-warning-content gap-1.5 shadow-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Beralih ke Form Edit
+                            </button>
+                        @else
+                            <button type="submit" class="btn btn-sm btn-primary text-white gap-1.5 shadow-xs"
+                                wire:loading.attr="disabled" :disabled="isProcessing"
+                                wire:target="fotoSiang,fotoMalam,saveKonsumsi,deleteDokumentasi">
+                                <span wire:loading.remove wire:target="saveKonsumsi" x-show="!isProcessing">
+                                    {{ $modalMode === 'edit' ? 'Simpan Perubahan' : 'Simpan ' . ($sesiKonsumsi === 'siang' ? 'Makan Siang' : 'Makan Malam') }}
+                                </span>
+                                <span wire:loading wire:target="saveKonsumsi"
+                                    class="loading loading-spinner loading-xs"></span>
+                                <span x-show="isProcessing" class="loading loading-spinner loading-xs"></span>
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </form>
         </div>
@@ -1412,7 +1891,10 @@
                                     const origW = img.naturalWidth || img.width;
                                     const origH = img.naturalHeight || img.height;
 
-                                    let sx = 0, sy = 0, sw = origW, sh = origH;
+                                    let sx = 0,
+                                        sy = 0,
+                                        sw = origW,
+                                        sh = origH;
 
                                     if (ratio === '16:9') {
                                         const targetRatio = 16 / 9;
@@ -1477,8 +1959,11 @@
                                         }
 
                                         if (blob.size <= maxBytes) {
-                                            const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
-                                            const webpFile = new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+                                            const baseName = file.name.replace(/\.[^/.]+$/, '').replace(
+                                                /[^a-zA-Z0-9_-]/g, '_');
+                                            const webpFile = new File([blob], `${baseName}.webp`, {
+                                                type: 'image/webp'
+                                            });
                                             resolve(webpFile);
                                             return;
                                         }
@@ -1486,7 +1971,8 @@
                                         if (quality > 0.3) {
                                             quality = Math.max(0.2, quality - 0.12);
                                         } else {
-                                            if (currentCanvas.width > 350 && currentCanvas.height > 250) {
+                                            if (currentCanvas.width > 350 && currentCanvas.height >
+                                                250) {
                                                 const nextW = Math.round(currentCanvas.width * 0.8);
                                                 const nextH = Math.round(currentCanvas.height * 0.8);
                                                 const scaledCvs = document.createElement('canvas');
@@ -1499,8 +1985,12 @@
                                             } else {
                                                 quality = Math.max(0.05, quality - 0.05);
                                                 if (quality <= 0.05) {
-                                                    const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
-                                                    const webpFile = new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+                                                    const baseName = file.name.replace(/\.[^/.]+$/, '')
+                                                        .replace(/[^a-zA-Z0-9_-]/g, '_');
+                                                    const webpFile = new File([blob],
+                                                        `${baseName}.webp`, {
+                                                            type: 'image/webp'
+                                                        });
                                                     resolve(webpFile);
                                                     return;
                                                 }
@@ -1517,6 +2007,28 @@
                     });
                 },
 
+                pickFile(sesi, isExisting = false) {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (wire) {
+                        const mode = wire.get('modalMode') || wire.modalMode;
+                        if (isExisting && mode === 'create') {
+                            const tgl = wire.get('uploadTanggal') || wire.uploadTanggal;
+                            wire.openEditKonsumsiModal(tgl, sesi);
+                            setTimeout(() => {
+                                if (sesi === 'siang' && this.$refs.fileInputSiang) this.$refs.fileInputSiang.click();
+                                if (sesi === 'malam' && this.$refs.fileInputMalam) this.$refs.fileInputMalam.click();
+                            }, 250);
+                            return;
+                        }
+                        wire.set('sesiKonsumsi', sesi);
+                    }
+                    if (sesi === 'siang' && this.$refs.fileInputSiang) {
+                        this.$refs.fileInputSiang.click();
+                    } else if (sesi === 'malam' && this.$refs.fileInputMalam) {
+                        this.$refs.fileInputMalam.click();
+                    }
+                },
+
                 clearPhoto(target) {
                     if (target === 'fotoSiang') {
                         this.rawFileSiang = null;
@@ -1525,6 +2037,9 @@
                             this.processedPreviewSiang = null;
                         }
                         this.processedSizeSiang = null;
+                        if (this.$refs.fileInputSiang) {
+                            this.$refs.fileInputSiang.value = '';
+                        }
                     } else {
                         this.rawFileMalam = null;
                         if (this.processedPreviewMalam) {
@@ -1532,6 +2047,9 @@
                             this.processedPreviewMalam = null;
                         }
                         this.processedSizeMalam = null;
+                        if (this.$refs.fileInputMalam) {
+                            this.$refs.fileInputMalam.value = '';
+                        }
                     }
 
                     const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
@@ -1539,7 +2057,8 @@
                         wire.set(target, null);
                     }
 
-                    const inputEl = document.querySelector(target === 'fotoSiang' ? 'input[wire\\:key^="foto-siang"]' : 'input[wire\\:key^="foto-malam"]');
+                    const inputEl = document.querySelector(target === 'fotoSiang' ? 'input[wire\\:key^="foto-siang"]' :
+                        'input[wire\\:key^="foto-malam"]');
                     if (inputEl) {
                         inputEl.value = '';
                     }
@@ -1562,6 +2081,9 @@
                     this.isProcessing = false;
                     this.processingStatus = '';
                     this.errorMessage = '';
+
+                    if (this.$refs.fileInputSiang) this.$refs.fileInputSiang.value = '';
+                    if (this.$refs.fileInputMalam) this.$refs.fileInputMalam.value = '';
 
                     const inputs = document.querySelectorAll('input[wire\\:key^="foto-"]');
                     inputs.forEach(input => {

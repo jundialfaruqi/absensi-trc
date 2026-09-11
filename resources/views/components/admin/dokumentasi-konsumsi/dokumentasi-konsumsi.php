@@ -41,6 +41,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
 
     // State untuk Modal Upload Dokumentasi Foto Konsumsi
     public bool $showAddModal = false;
+    public string $modalMode = 'create'; // 'create' atau 'edit'
     public string $uploadTanggal = '';
     public string $sesiKonsumsi = 'siang'; // 'siang' atau 'malam'
     public ?int $jumlahSiang = 0;
@@ -196,6 +197,28 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     }
 
     #[Computed]
+    public function dokumentasiMap()
+    {
+        if (!$this->readyToLoad) {
+            return collect();
+        }
+
+        $dates = $this->dates;
+        if (empty($dates)) {
+            return collect();
+        }
+
+        $opdId = Auth::user()->hasRole('super-admin')
+            ? ($this->selectedOpd ?: null)
+            : Auth::user()->opd()?->id;
+
+        return DokumentasiKonsumsi::whereIn('tanggal', $dates)
+            ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
+            ->get()
+            ->keyBy(fn ($item) => $item->tanggal->format('Y-m-d'));
+    }
+
+    #[Computed]
     public function personnels()
     {
         if (!$this->readyToLoad) {
@@ -313,10 +336,11 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $this->resetPage();
     }
 
-    public function openAddKonsumsiModal(): void
+    public function openAddKonsumsiModal(?string $date = null, string $sesi = 'siang'): void
     {
-        $this->uploadTanggal = Carbon::now()->format('Y-m-d');
-        $this->sesiKonsumsi = 'siang';
+        $this->modalMode = 'create';
+        $this->uploadTanggal = $date ?: Carbon::now()->format('Y-m-d');
+        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam']) ? $sesi : 'siang';
         $this->fotoSiang = null;
         $this->fotoMalam = null;
         $this->uploadIteration++;
@@ -325,11 +349,27 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $this->showAddModal = true;
     }
 
+    public function openEditKonsumsiModal(string $date, string $sesi = 'siang'): void
+    {
+        $this->modalMode = 'edit';
+        $this->uploadTanggal = $date;
+        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam']) ? $sesi : 'siang';
+        $this->fotoSiang = null;
+        $this->fotoMalam = null;
+        $this->uploadIteration++;
+        $this->resetValidation();
+        $this->loadExistingDokumentasi();
+        // Tetapkan sesi sesuai tombol yang di klik
+        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam']) ? $sesi : 'siang';
+        $this->showAddModal = true;
+    }
+
     public function closeAddKonsumsiModal(): void
     {
         $this->showAddModal = false;
         $this->fotoSiang = null;
         $this->fotoMalam = null;
+        $this->modalMode = 'create';
         $this->uploadIteration++;
         $this->resetValidation();
     }
@@ -403,6 +443,15 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         } else {
             $this->jumlahMalam = $maxMalam;
         }
+
+        // Jika dalam mode 'create' dan salah satu sesi sudah memiliki dokumentasi, arahkan ke sesi yang belum
+        if ($this->modalMode === 'create') {
+            if ($this->existingFotoSiang && !$this->existingFotoMalam) {
+                $this->sesiKonsumsi = 'malam';
+            } elseif (!$this->existingFotoSiang && $this->existingFotoMalam) {
+                $this->sesiKonsumsi = 'siang';
+            }
+        }
     }
 
     public function getCalculatedKonsumsi(string $date): array
@@ -472,42 +521,10 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         return $this->getCalculatedKonsumsi($this->uploadTanggal)['malam'] ?? 0;
     }
 
-    public function saveKonsumsi(): void
+    public function deleteDokumentasi(): void
     {
-        if ($this->sesiKonsumsi === 'siang') {
-            $max = $this->calculatedSiang;
-            $this->validate([
-                'uploadTanggal' => 'required|date',
-                'sesiKonsumsi' => 'required|in:siang,malam',
-                'jumlahSiang' => "required|integer|min:0|max:{$max}",
-                'fotoSiang' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            ], [
-                'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
-                'jumlahSiang.required' => 'Jumlah porsi makan siang wajib diisi.',
-                'jumlahSiang.integer' => 'Jumlah porsi harus berupa angka.',
-                'jumlahSiang.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
-                'jumlahSiang.max' => "Jumlah porsi makan siang tidak boleh melebihi {$max} porsi (maksimal terdata pada tanggal ini).",
-                'fotoSiang.image' => 'File foto makan siang harus berupa gambar.',
-                'fotoSiang.mimes' => 'Format foto makan siang harus berupa JPG, JPEG, PNG, atau WEBP.',
-                'fotoSiang.max' => 'Ukuran foto makan siang maksimal 2MB (2048 KB).',
-            ]);
-        } else {
-            $max = $this->calculatedMalam;
-            $this->validate([
-                'uploadTanggal' => 'required|date',
-                'sesiKonsumsi' => 'required|in:siang,malam',
-                'jumlahMalam' => "required|integer|min:0|max:{$max}",
-                'fotoMalam' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            ], [
-                'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
-                'jumlahMalam.required' => 'Jumlah porsi makan malam wajib diisi.',
-                'jumlahMalam.integer' => 'Jumlah porsi harus berupa angka.',
-                'jumlahMalam.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
-                'jumlahMalam.max' => "Jumlah porsi makan malam tidak boleh melebihi {$max} porsi (maksimal terdata pada tanggal ini).",
-                'fotoMalam.image' => 'File foto makan malam harus berupa gambar.',
-                'fotoMalam.mimes' => 'Format foto makan malam harus berupa JPG, JPEG, PNG, atau WEBP.',
-                'fotoMalam.max' => 'Ukuran foto makan malam maksimal 2MB (2048 KB).',
-            ]);
+        if (!$this->uploadTanggal) {
+            return;
         }
 
         $opdId = Auth::user()->hasRole('super-admin')
@@ -517,6 +534,120 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $record = DokumentasiKonsumsi::where('tanggal', $this->uploadTanggal)
             ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
             ->first();
+
+        if (!$record) {
+            $this->showAddModal = false;
+            return;
+        }
+
+        $sesi = $this->sesiKonsumsi;
+        $sesiLabel = $sesi === 'siang' ? 'Makan Siang' : 'Makan Malam';
+
+        if ($sesi === 'siang') {
+            if ($record->foto_siang && Storage::disk('public')->exists($record->foto_siang)) {
+                Storage::disk('public')->delete($record->foto_siang);
+            }
+            $record->foto_siang = null;
+            $record->jumlah_siang = 0;
+        } else {
+            if ($record->foto_malam && Storage::disk('public')->exists($record->foto_malam)) {
+                Storage::disk('public')->delete($record->foto_malam);
+            }
+            $record->foto_malam = null;
+            $record->jumlah_malam = 0;
+        }
+
+        // Jika kedua sesi sudah tidak memiliki foto dan jumlah 0, hapus record
+        if (empty($record->foto_siang) && empty($record->foto_malam) && (int)$record->jumlah_siang === 0 && (int)$record->jumlah_malam === 0) {
+            $record->delete();
+        } else {
+            $record->save();
+        }
+
+        $this->showAddModal = false;
+        $this->fotoSiang = null;
+        $this->fotoMalam = null;
+        $this->existingFotoSiang = null;
+        $this->existingFotoMalam = null;
+        $this->uploadIteration++;
+        unset($this->dokumentasiMap);
+
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'message' => "Dokumentasi {$sesiLabel} tanggal " . Carbon::parse($this->uploadTanggal)->translatedFormat('d F Y') . ' berhasil dihapus.'
+        ]);
+    }
+
+    public function saveKonsumsi(): void
+    {
+        $opdId = Auth::user()->hasRole('super-admin')
+            ? ($this->selectedOpd ?: null)
+            : Auth::user()->opd()?->id;
+
+        $record = DokumentasiKonsumsi::where('tanggal', $this->uploadTanggal)
+            ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
+            ->first();
+
+        if ($this->sesiKonsumsi === 'siang') {
+            $max = $this->calculatedSiang;
+            $hasExistingPhoto = !empty($record?->foto_siang);
+            $fotoRule = ($this->modalMode === 'create' || !$hasExistingPhoto)
+                ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
+                : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
+
+            $this->validate([
+                'uploadTanggal' => 'required|date',
+                'sesiKonsumsi' => 'required|in:siang,malam',
+                'jumlahSiang' => "required|integer|min:0|max:{$max}",
+                'fotoSiang' => $fotoRule,
+            ], [
+                'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
+                'jumlahSiang.required' => 'Jumlah porsi makan siang wajib diisi.',
+                'jumlahSiang.integer' => 'Jumlah porsi harus berupa angka.',
+                'jumlahSiang.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
+                'jumlahSiang.max' => "Jumlah porsi makan siang tidak boleh melebihi {$max} porsi (maksimal terdata pada tanggal ini).",
+                'fotoSiang.required' => 'Foto bukti makan siang wajib diunggah.',
+                'fotoSiang.image' => 'File foto makan siang harus berupa gambar.',
+                'fotoSiang.mimes' => 'Format foto makan siang harus berupa JPG, JPEG, PNG, atau WEBP.',
+                'fotoSiang.max' => 'Ukuran foto makan siang maksimal 2MB (2048 KB).',
+            ]);
+        } else {
+            $max = $this->calculatedMalam;
+            $hasExistingPhoto = !empty($record?->foto_malam);
+            $fotoRule = ($this->modalMode === 'create' || !$hasExistingPhoto)
+                ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
+                : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
+
+            $this->validate([
+                'uploadTanggal' => 'required|date',
+                'sesiKonsumsi' => 'required|in:siang,malam',
+                'jumlahMalam' => "required|integer|min:0|max:{$max}",
+                'fotoMalam' => $fotoRule,
+            ], [
+                'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
+                'jumlahMalam.required' => 'Jumlah porsi makan malam wajib diisi.',
+                'jumlahMalam.integer' => 'Jumlah porsi harus berupa angka.',
+                'jumlahMalam.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
+                'jumlahMalam.max' => "Jumlah porsi makan malam tidak boleh melebihi {$max} porsi (maksimal terdata pada tanggal ini).",
+                'fotoMalam.required' => 'Foto bukti makan malam wajib diunggah.',
+                'fotoMalam.image' => 'File foto makan malam harus berupa gambar.',
+                'fotoMalam.mimes' => 'Format foto makan malam harus berupa JPG, JPEG, PNG, atau WEBP.',
+                'fotoMalam.max' => 'Ukuran foto makan malam maksimal 2MB (2048 KB).',
+            ]);
+        }
+
+        // Jika modal dalam mode 'create' dan sesi sudah ada data tersimpan, larang overwrite
+        if ($this->modalMode === 'create') {
+            if ($this->sesiKonsumsi === 'siang' && $record?->foto_siang) {
+                $this->addError('sesiKonsumsi', 'Dokumentasi makan siang untuk tanggal ini sudah tersimpan. Silakan buka form edit untuk memperbaruinya.');
+                return;
+            }
+
+            if ($this->sesiKonsumsi === 'malam' && $record?->foto_malam) {
+                $this->addError('sesiKonsumsi', 'Dokumentasi makan malam untuk tanggal ini sudah tersimpan. Silakan buka form edit untuk memperbaruinya.');
+                return;
+            }
+        }
 
         $dataToUpdate = [
             'tanggal' => $this->uploadTanggal,
@@ -564,14 +695,16 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         );
 
         $sesiLabel = $this->sesiKonsumsi === 'siang' ? 'Makan Siang' : 'Makan Malam';
+        $verb = $this->modalMode === 'edit' ? 'diperbarui' : 'disimpan';
         $this->showAddModal = false;
         $this->fotoSiang = null;
         $this->fotoMalam = null;
         $this->uploadIteration++;
+        unset($this->dokumentasiMap);
 
         $this->dispatch('toast', [
             'type' => 'success',
-            'message' => "Dokumentasi {$sesiLabel} tanggal " . Carbon::parse($this->uploadTanggal)->translatedFormat('d F Y') . ' berhasil disimpan.'
+            'message' => "Dokumentasi {$sesiLabel} tanggal " . Carbon::parse($this->uploadTanggal)->translatedFormat('d F Y') . " berhasil {$verb}."
         ]);
     }
 
