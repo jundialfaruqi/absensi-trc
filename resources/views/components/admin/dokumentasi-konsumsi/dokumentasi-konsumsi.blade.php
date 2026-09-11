@@ -1209,7 +1209,8 @@
                 </div>
             </div>
 
-            <form x-show="!isKonsumsiModalLoading" wire:submit="saveKonsumsi" class="py-4 space-y-4 text-sm" x-cloak>
+            <form x-show="!isKonsumsiModalLoading" @submit.prevent="submitWithCrop()" class="py-4 space-y-4 text-sm"
+                x-cloak>
                 {{-- Hidden File Inputs --}}
                 <input type="file" x-ref="fileInputSiang" wire:key="foto-siang-{{ $uploadIteration }}"
                     @change="onFileChange($event, 'fotoSiang')" accept="image/jpeg,image/png,image/jpg,image/webp"
@@ -1295,20 +1296,39 @@
 
                                 {{-- Card Foto Siang --}}
                                 <div class="relative overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
-                                    :class="processedPreviewSiang ? 'border-warning ring-2 ring-warning/30 bg-base-100' :
+                                    :class="processedPreviewSiang ? 'border-warning ring-2 ring-warning/30 bg-neutral-900' :
                                         '{{ $existingFotoSiang ? 'border-warning/40 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/70 bg-base-100/60 hover:bg-warning/5' }}'">
 
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
                                     <template x-if="processedPreviewSiang">
-                                        <div class="w-full h-full relative">
-                                            <img :src="processedPreviewSiang" alt="Preview Foto Siang"
-                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                            <div class="absolute top-2 left-2 z-10">
+                                        <div
+                                            class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                            {{-- Ratio Review Container --}}
+                                            <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                :class="{
+                                                    'w-full': cropRatioSiang === 'original' ||
+                                                        cropRatioSiang === '16:9',
+                                                    'aspect-[4/3] w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
+                                                }">
+                                                <img :src="processedPreviewSiang" alt="Preview Foto Siang"
+                                                    class="w-full h-full transition-all duration-300"
+                                                    :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'" />
+                                            </div>
+
+                                            {{-- Badge Info Ukuran & Ratio --}}
+                                            <div
+                                                class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                 <span
                                                     class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
                                                     WebP • <span x-text="processedSizeSiang"></span>
                                                 </span>
+                                                <span
+                                                    class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                    <span
+                                                        x-text="cropRatioSiang === 'original' ? 'Asli' : (cropRatioSiang === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                </span>
                                             </div>
+
                                             {{-- Overlay saat hover --}}
                                             <div
                                                 class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
@@ -1451,7 +1471,7 @@
                                             :class="cropRatioSiang === '16:9' ?
                                                 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" x-model="cropRatioSiang" value="16:9"
+                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang" value="16:9"
                                                 @change="onCropRatioChange('fotoSiang')"
                                                 class="radio radio-xs radio-warning" />
                                             <span class="text-[10px]">16:9</span>
@@ -1462,7 +1482,7 @@
                                             :class="cropRatioSiang === '4:3' ?
                                                 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" x-model="cropRatioSiang" value="4:3"
+                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang" value="4:3"
                                                 @change="onCropRatioChange('fotoSiang')"
                                                 class="radio radio-xs radio-warning" />
                                             <span class="text-[10px]">4:3</span>
@@ -1473,7 +1493,7 @@
                                             :class="cropRatioSiang === 'original' ?
                                                 'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" x-model="cropRatioSiang" value="original"
+                                            <input type="radio" name="ratio_siang" x-model="cropRatioSiang" value="original"
                                                 @change="onCropRatioChange('fotoSiang')"
                                                 class="radio radio-xs radio-warning" />
                                             <span class="text-[10px]">Asli</span>
@@ -1506,12 +1526,35 @@
                                     <div class="relative overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewSiang2 ?
-                                            'border-warning/70 ring-1 ring-warning/30 bg-base-100' :
+                                            'border-warning/70 ring-1 ring-warning/30 bg-neutral-900' :
                                             '{{ $existingFotoSiang2 ? 'border-warning/30 bg-base-100' : 'border-dashed border-base-300 hover:border-warning/50 bg-base-100/60 hover:bg-warning/5' }}'">
                                         <template x-if="processedPreviewSiang2">
-                                            <div class="w-full h-full relative">
-                                                <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <div
+                                                class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                    :class="{
+                                                        'w-full': cropRatioSiang2 === 'original' ||
+                                                            cropRatioSiang2 === '16:9',
+                                                        'aspect-[4/3] w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
+                                                    }">
+                                                    <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
+                                                        class="w-full h-full transition-all duration-300"
+                                                        :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                </div>
+
+                                                <div
+                                                    class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                                    <span
+                                                        class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                        WebP • <span x-text="processedSizeSiang2"></span>
+                                                    </span>
+                                                    <span
+                                                        class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                        <span
+                                                            x-text="cropRatioSiang2 === 'original' ? 'Asli' : (cropRatioSiang2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                    </span>
+                                                </div>
+
                                                 <div
                                                     class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                     <button type="button" @click.stop="pickFile('siang2', false)"
@@ -1591,7 +1634,7 @@
                                                 :class="cropRatioSiang2 === '16:9' ?
                                                     'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioSiang2" value="16:9"
+                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2" value="16:9"
                                                     @change="onCropRatioChange('fotoSiang2')"
                                                     class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">16:9</span>
@@ -1602,7 +1645,7 @@
                                                 :class="cropRatioSiang2 === '4:3' ?
                                                     'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioSiang2" value="4:3"
+                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2" value="4:3"
                                                     @change="onCropRatioChange('fotoSiang2')"
                                                     class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">4:3</span>
@@ -1613,7 +1656,7 @@
                                                 :class="cropRatioSiang2 === 'original' ?
                                                     'border-warning bg-warning/15 ring-1 ring-warning shadow-2xs font-bold text-warning-content' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioSiang2" value="original"
+                                                <input type="radio" name="ratio_siang2" x-model="cropRatioSiang2" value="original"
                                                     @change="onCropRatioChange('fotoSiang2')"
                                                     class="radio radio-xs radio-warning" />
                                                 <span class="text-[10px]">Asli</span>
@@ -1651,20 +1694,37 @@
                                 {{-- Card Foto Malam --}}
                                 <div class="relative overflow-hidden aspect-video shadow-xs border transition-all duration-200 group"
                                     :class="processedPreviewMalam ?
-                                        'border-neutral-900 ring-2 ring-neutral-900/30 bg-base-100' :
+                                        'border-neutral-900 ring-2 ring-neutral-900/30 bg-neutral-900' :
                                         '{{ $existingFotoMalam ? 'border-neutral-900/40 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/70 bg-base-100/60 hover:bg-neutral-900/5' }}'">
 
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
                                     <template x-if="processedPreviewMalam">
-                                        <div class="w-full h-full relative">
-                                            <img :src="processedPreviewMalam" alt="Preview Foto Malam"
-                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                            <div class="absolute top-2 left-2 z-10">
+                                        <div
+                                            class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                            <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                :class="{
+                                                    'w-full': cropRatioMalam === 'original' ||
+                                                        cropRatioMalam === '16:9',
+                                                    'aspect-[4/3] w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam === '4:3'
+                                                }">
+                                                <img :src="processedPreviewMalam" alt="Preview Foto Malam"
+                                                    class="w-full h-full transition-all duration-300"
+                                                    :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'" />
+                                            </div>
+
+                                            <div
+                                                class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                 <span
                                                     class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
                                                     WebP • <span x-text="processedSizeMalam"></span>
                                                 </span>
+                                                <span
+                                                    class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                    <span
+                                                        x-text="cropRatioMalam === 'original' ? 'Asli' : (cropRatioMalam === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                </span>
                                             </div>
+
                                             {{-- Overlay saat hover --}}
                                             <div
                                                 class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
@@ -1725,8 +1785,8 @@
                                                     <button type="button" @click.stop="pickFile('malam', true)"
                                                         class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="2">
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -1739,8 +1799,8 @@
                                                     <div
                                                         class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="1.8">
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="1.8">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 d="M12 4v16m8-8H4" />
                                                         </svg>
@@ -1809,7 +1869,7 @@
                                             :class="cropRatioMalam === '16:9' ?
                                                 'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" x-model="cropRatioMalam" value="16:9"
+                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam" value="16:9"
                                                 @change="onCropRatioChange('fotoMalam')"
                                                 class="radio radio-xs radio-neutral" />
                                             <span class="text-[10px]">16:9</span>
@@ -1820,7 +1880,7 @@
                                             :class="cropRatioMalam === '4:3' ?
                                                 'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" x-model="cropRatioMalam" value="4:3"
+                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam" value="4:3"
                                                 @change="onCropRatioChange('fotoMalam')"
                                                 class="radio radio-xs radio-neutral" />
                                             <span class="text-[10px]">4:3</span>
@@ -1831,7 +1891,7 @@
                                             :class="cropRatioMalam === 'original' ?
                                                 'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                 'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                            <input type="radio" x-model="cropRatioMalam" value="original"
+                                            <input type="radio" name="ratio_malam" x-model="cropRatioMalam" value="original"
                                                 @change="onCropRatioChange('fotoMalam')"
                                                 class="radio radio-xs radio-neutral" />
                                             <span class="text-[10px]">Asli</span>
@@ -1864,12 +1924,35 @@
                                     <div class="relative overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewMalam2 ?
-                                            'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-base-100' :
+                                            'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-neutral-900' :
                                             '{{ $existingFotoMalam2 ? 'border-neutral-900/30 bg-base-100' : 'border-dashed border-base-300 hover:border-neutral-900/50 bg-base-100/60 hover:bg-neutral-900/5' }}'">
                                         <template x-if="processedPreviewMalam2">
-                                            <div class="w-full h-full relative">
-                                                <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <div
+                                                class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                    :class="{
+                                                        'w-full': cropRatioMalam2 === 'original' ||
+                                                            cropRatioMalam2 === '16:9',
+                                                        'aspect-[4/3] w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam2 === '4:3'
+                                                    }">
+                                                    <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
+                                                        class="w-full h-full transition-all duration-300"
+                                                        :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'" />
+                                                </div>
+
+                                                <div
+                                                    class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                                    <span
+                                                        class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
+                                                        WebP • <span x-text="processedSizeMalam2"></span>
+                                                    </span>
+                                                    <span
+                                                        class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                        <span
+                                                            x-text="cropRatioMalam2 === 'original' ? 'Asli' : (cropRatioMalam2 === '16:9' ? 'Review 16:9' : 'Review 4:3')"></span>
+                                                    </span>
+                                                </div>
+
                                                 <div
                                                     class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
                                                     <button type="button" @click.stop="pickFile('malam2', false)"
@@ -1952,7 +2035,7 @@
                                                 :class="cropRatioMalam2 === '16:9' ?
                                                     'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioMalam2" value="16:9"
+                                                <input type="radio" name="ratio_malam2" x-model="cropRatioMalam2" value="16:9"
                                                     @change="onCropRatioChange('fotoMalam2')"
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">16:9</span>
@@ -1963,7 +2046,7 @@
                                                 :class="cropRatioMalam2 === '4:3' ?
                                                     'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioMalam2" value="4:3"
+                                                <input type="radio" name="ratio_malam2" x-model="cropRatioMalam2" value="4:3"
                                                     @change="onCropRatioChange('fotoMalam2')"
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">4:3</span>
@@ -1974,7 +2057,7 @@
                                                 :class="cropRatioMalam2 === 'original' ?
                                                     'border-neutral-900 bg-neutral-900/15 ring-1 ring-neutral-900 shadow-2xs font-bold text-neutral-900 dark:text-white' :
                                                     'border-base-300 bg-base-100 hover:bg-base-200/50 text-base-content/70'">
-                                                <input type="radio" x-model="cropRatioMalam2" value="original"
+                                                <input type="radio" name="ratio_malam2" x-model="cropRatioMalam2" value="original"
                                                     @change="onCropRatioChange('fotoMalam2')"
                                                     class="radio radio-xs radio-neutral" />
                                                 <span class="text-[10px]">Asli</span>
@@ -2670,21 +2753,31 @@
 
         function dokumentasiUploadModal() {
             return {
-                cropRatioSiang: '16:9',
-                cropRatioSiang2: '16:9',
-                cropRatioMalam: '16:9',
-                cropRatioMalam2: '16:9',
-                cropRatio: '16:9',
+                cropRatioSiang: 'original',
+                cropRatioSiang2: 'original',
+                cropRatioMalam: 'original',
+                cropRatioMalam2: 'original',
+                cropRatio: 'original',
                 rawFileSiang: null,
                 rawFileSiang2: null,
                 rawFileMalam: null,
                 rawFileMalam2: null,
+                compressedOriginalSiang: null,
+                compressedOriginalSiang2: null,
+                compressedOriginalMalam: null,
+                compressedOriginalMalam2: null,
+                uploadedRatioSiang: null,
+                uploadedRatioSiang2: null,
+                uploadedRatioMalam: null,
+                uploadedRatioMalam2: null,
                 processedPreviewSiang: null,
                 processedPreviewSiang2: null,
                 processedPreviewMalam: null,
                 processedPreviewMalam2: null,
                 processedSizeSiang: null,
+                processedSizeSiang2: null,
                 processedSizeMalam: null,
+                processedSizeMalam2: null,
                 isProcessing: false,
                 currentProcessingTarget: null,
                 processingStatus: '',
@@ -2716,30 +2809,31 @@
                     this.errorMessage = '';
                     if (target === 'fotoSiang') {
                         this.rawFileSiang = file;
+                        this.cropRatioSiang = 'original';
+                        this.uploadedRatioSiang = null;
                     } else if (target === 'fotoSiang2') {
                         this.rawFileSiang2 = file;
+                        this.cropRatioSiang2 = 'original';
+                        this.uploadedRatioSiang2 = null;
                     } else if (target === 'fotoMalam') {
                         this.rawFileMalam = file;
+                        this.cropRatioMalam = 'original';
+                        this.uploadedRatioMalam = null;
                     } else {
                         this.rawFileMalam2 = file;
+                        this.cropRatioMalam2 = 'original';
+                        this.uploadedRatioMalam2 = null;
                     }
 
-                    await this.processAndUpload(target);
+                    await this.generateCompressedOriginalPreview(target);
                 },
 
-                async onCropRatioChange(target) {
-                    const rawMap = {
-                        fotoSiang: this.rawFileSiang,
-                        fotoSiang2: this.rawFileSiang2,
-                        fotoMalam: this.rawFileMalam,
-                        fotoMalam2: this.rawFileMalam2,
-                    };
-                    if (rawMap[target]) {
-                        await this.processAndUpload(target);
-                    }
+                onCropRatioChange(target) {
+                    // Preview updates reactively in CSS via Alpine :class.
+                    // No crop or upload occurs here.
                 },
 
-                async processAndUpload(target) {
+                async generateCompressedOriginalPreview(target) {
                     const rawMap = {
                         fotoSiang: this.rawFileSiang,
                         fotoSiang2: this.rawFileSiang2,
@@ -2752,18 +2846,10 @@
                     this.isProcessing = true;
                     this.currentProcessingTarget = target;
                     this.errorMessage = '';
-                    this.processingStatus = 'Mengubah format ke WebP & menyesuaikan ukuran (Maks. 100KB)...';
+                    this.processingStatus = 'Mengompresi gambar asli (Maks. 100KB)...';
 
                     try {
-                        const ratioMap = {
-                            fotoSiang: this.cropRatioSiang || '16:9',
-                            fotoSiang2: this.cropRatioSiang2 || '16:9',
-                            fotoMalam: this.cropRatioMalam || '16:9',
-                            fotoMalam2: this.cropRatioMalam2 || '16:9',
-                        };
-                        const ratio = ratioMap[target];
-                        const webpFile = await this.cropAndCompressToWebp(file, ratio);
-
+                        const webpFile = await this.cropAndCompressToWebp(file, 'original');
                         const previewUrl = URL.createObjectURL(webpFile);
                         const sizeKb = (webpFile.size / 1024).toFixed(1) + ' KB';
 
@@ -2771,60 +2857,152 @@
                             if (this.processedPreviewSiang) URL.revokeObjectURL(this.processedPreviewSiang);
                             this.processedPreviewSiang = previewUrl;
                             this.processedSizeSiang = sizeKb;
+                            this.compressedOriginalSiang = webpFile;
                         } else if (target === 'fotoSiang2') {
                             if (this.processedPreviewSiang2) URL.revokeObjectURL(this.processedPreviewSiang2);
                             this.processedPreviewSiang2 = previewUrl;
+                            this.processedSizeSiang2 = sizeKb;
+                            this.compressedOriginalSiang2 = webpFile;
                         } else if (target === 'fotoMalam') {
                             if (this.processedPreviewMalam) URL.revokeObjectURL(this.processedPreviewMalam);
                             this.processedPreviewMalam = previewUrl;
                             this.processedSizeMalam = sizeKb;
+                            this.compressedOriginalMalam = webpFile;
                         } else {
                             if (this.processedPreviewMalam2) URL.revokeObjectURL(this.processedPreviewMalam2);
                             this.processedPreviewMalam2 = previewUrl;
+                            this.processedSizeMalam2 = sizeKb;
+                            this.compressedOriginalMalam2 = webpFile;
                         }
 
-                        this.processingStatus = 'Mengunggah gambar terkompresi...';
-
+                        // Jika kedua foto sudah ada, otomatis aktifkan sesi 'keduanya'
                         const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                         if (wire) {
-                            wire.upload(target, webpFile,
-                                () => {
-                                    this.isProcessing = false;
-                                    this.currentProcessingTarget = null;
-                                    this.processingStatus = '';
+                            const hasSiangNow = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get(
+                                'fotoSiang') || wire.fotoSiang));
+                            const hasMalamNow = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get(
+                                'fotoMalam') || wire.fotoMalam));
+                            if (hasSiangNow && hasMalamNow) {
+                                wire.set('sesiKonsumsi', 'keduanya');
+                            }
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        this.errorMessage = 'Terjadi kesalahan saat memproses gambar: ' + (err.message || 'Error');
+                    } finally {
+                        this.isProcessing = false;
+                        this.currentProcessingTarget = null;
+                        this.processingStatus = '';
+                    }
+                },
 
-                                    // Jika kedua foto sudah ada, otomatis aktifkan sesi 'keduanya'
-                                    const hasSiangNow = !!(this.rawFileSiang || this.processedPreviewSiang);
-                                    const hasMalamNow = !!(this.rawFileMalam || this.processedPreviewMalam);
-                                    if (hasSiangNow && hasMalamNow) {
-                                        wire.set('sesiKonsumsi', 'keduanya');
-                                    }
-                                },
-                                (err) => {
-                                    this.isProcessing = false;
-                                    this.currentProcessingTarget = null;
-                                    this.processingStatus = '';
-                                    this.errorMessage = 'Gagal mengunggah foto ke server. Silakan coba lagi.';
-                                    console.error(err);
-                                },
-                                (e) => {
-                                    if (e.detail && e.detail.progress) {
-                                        this.processingStatus = `Mengunggah gambar... ${e.detail.progress}%`;
-                                    }
+                async submitWithCrop() {
+                    const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
+                    if (!wire) return;
+
+                    this.errorMessage = '';
+
+                    const targets = [{
+                            key: 'fotoSiang',
+                            label: 'Foto Siang',
+                            raw: this.rawFileSiang,
+                            ratio: this.cropRatioSiang || 'original',
+                            compressedOriginal: this.compressedOriginalSiang,
+                            uploadedRatio: this.uploadedRatioSiang,
+                        },
+                        {
+                            key: 'fotoSiang2',
+                            label: 'Foto Siang 2',
+                            raw: this.rawFileSiang2,
+                            ratio: this.cropRatioSiang2 || 'original',
+                            compressedOriginal: this.compressedOriginalSiang2,
+                            uploadedRatio: this.uploadedRatioSiang2,
+                        },
+                        {
+                            key: 'fotoMalam',
+                            label: 'Foto Malam',
+                            raw: this.rawFileMalam,
+                            ratio: this.cropRatioMalam || 'original',
+                            compressedOriginal: this.compressedOriginalMalam,
+                            uploadedRatio: this.uploadedRatioMalam,
+                        },
+                        {
+                            key: 'fotoMalam2',
+                            label: 'Foto Malam 2',
+                            raw: this.rawFileMalam2,
+                            ratio: this.cropRatioMalam2 || 'original',
+                            compressedOriginal: this.compressedOriginalMalam2,
+                            uploadedRatio: this.uploadedRatioMalam2,
+                        },
+                    ];
+
+                    const toProcess = targets.filter(t => t.raw && (t.uploadedRatio !== t.ratio || !wire.get(t.key)));
+
+                    if (toProcess.length > 0) {
+                        this.isProcessing = true;
+                        try {
+                            for (const item of toProcess) {
+                                this.currentProcessingTarget = item.key;
+                                let webpFile;
+
+                                if (item.ratio === 'original' && item.compressedOriginal) {
+                                    webpFile = item.compressedOriginal;
+                                } else {
+                                    const ratioLabel = item.ratio === 'original' ? 'asli' : item.ratio;
+                                    this.processingStatus =
+                                        `Meng-crop ${item.label} (${ratioLabel}) & kompresi (Maks. 100KB)...`;
+                                    webpFile = await this.cropAndCompressToWebp(item.raw, item.ratio);
                                 }
-                            );
-                        } else {
+
+                                this.processingStatus = `Mengunggah ${item.label}...`;
+
+                                await new Promise((resolve, reject) => {
+                                    wire.upload(item.key, webpFile,
+                                        () => {
+                                            if (item.key === 'fotoSiang') this.uploadedRatioSiang = item
+                                                .ratio;
+                                            else if (item.key === 'fotoSiang2') this.uploadedRatioSiang2 =
+                                                item.ratio;
+                                            else if (item.key === 'fotoMalam') this.uploadedRatioMalam =
+                                                item.ratio;
+                                            else if (item.key === 'fotoMalam2') this.uploadedRatioMalam2 =
+                                                item.ratio;
+                                            resolve();
+                                        },
+                                        (err) => reject(err),
+                                        (e) => {
+                                            if (e.detail && e.detail.progress) {
+                                                this.processingStatus =
+                                                    `Mengunggah ${item.label}... ${e.detail.progress}%`;
+                                            }
+                                        }
+                                    );
+                                });
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            this.isProcessing = false;
+                            this.currentProcessingTarget = null;
+                            this.processingStatus = '';
+                            this.errorMessage = 'Gagal memproses atau mengunggah gambar ke server. Silakan coba lagi.';
+                            return;
+                        } finally {
                             this.isProcessing = false;
                             this.currentProcessingTarget = null;
                             this.processingStatus = '';
                         }
-                    } catch (err) {
-                        console.error(err);
-                        this.isProcessing = false;
-                        this.currentProcessingTarget = null;
-                        this.processingStatus = '';
-                        this.errorMessage = 'Terjadi kesalahan saat memproses gambar: ' + (err.message || 'Error');
                     }
+
+                    // Pastikan sesiKonsumsi otomatis set ke 'keduanya' jika ada siang dan malam
+                    const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') ||
+                        wire.fotoSiang));
+                    const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
+                        wire.fotoMalam));
+                    if (hasSiang && hasMalam && (wire.get('sesiKonsumsi') || wire.sesiKonsumsi) !== 'keduanya') {
+                        wire.set('sesiKonsumsi', 'keduanya');
+                    }
+
+                    wire.saveKonsumsi();
                 },
 
                 cropAndCompressToWebp(file, ratio) {
@@ -3012,6 +3190,12 @@
                         fotoMalam: 'rawFileMalam',
                         fotoMalam2: 'rawFileMalam2',
                     };
+                    const compressedMap = {
+                        fotoSiang: 'compressedOriginalSiang',
+                        fotoSiang2: 'compressedOriginalSiang2',
+                        fotoMalam: 'compressedOriginalMalam',
+                        fotoMalam2: 'compressedOriginalMalam2',
+                    };
                     const refMap = {
                         fotoSiang: 'fileInputSiang',
                         fotoSiang2: 'fileInputSiang2',
@@ -3020,12 +3204,29 @@
                     };
 
                     this[rawMap[target]] = null;
+                    this[compressedMap[target]] = null;
                     if (this[previewMap[target]]) {
                         URL.revokeObjectURL(this[previewMap[target]]);
                         this[previewMap[target]] = null;
                     }
-                    if (target === 'fotoSiang') this.processedSizeSiang = null;
-                    if (target === 'fotoMalam') this.processedSizeMalam = null;
+                    if (target === 'fotoSiang') {
+                        this.processedSizeSiang = null;
+                        this.cropRatioSiang = 'original';
+                        this.uploadedRatioSiang = null;
+                    } else if (target === 'fotoSiang2') {
+                        this.processedSizeSiang2 = null;
+                        this.cropRatioSiang2 = 'original';
+                        this.uploadedRatioSiang2 = null;
+                    } else if (target === 'fotoMalam') {
+                        this.processedSizeMalam = null;
+                        this.cropRatioMalam = 'original';
+                        this.uploadedRatioMalam = null;
+                    } else if (target === 'fotoMalam2') {
+                        this.processedSizeMalam2 = null;
+                        this.cropRatioMalam2 = 'original';
+                        this.uploadedRatioMalam2 = null;
+                    }
+
                     if (this.$refs[refMap[target]]) this.$refs[refMap[target]].value = '';
 
                     const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
@@ -3050,6 +3251,15 @@
                     this.rawFileSiang2 = null;
                     this.rawFileMalam = null;
                     this.rawFileMalam2 = null;
+                    this.compressedOriginalSiang = null;
+                    this.compressedOriginalSiang2 = null;
+                    this.compressedOriginalMalam = null;
+                    this.compressedOriginalMalam2 = null;
+                    this.uploadedRatioSiang = null;
+                    this.uploadedRatioSiang2 = null;
+                    this.uploadedRatioMalam = null;
+                    this.uploadedRatioMalam2 = null;
+
                     if (this.processedPreviewSiang) {
                         URL.revokeObjectURL(this.processedPreviewSiang);
                         this.processedPreviewSiang = null;
@@ -3067,12 +3277,14 @@
                         this.processedPreviewMalam2 = null;
                     }
                     this.processedSizeSiang = null;
+                    this.processedSizeSiang2 = null;
                     this.processedSizeMalam = null;
-                    this.cropRatioSiang = '16:9';
-                    this.cropRatioSiang2 = '16:9';
-                    this.cropRatioMalam = '16:9';
-                    this.cropRatioMalam2 = '16:9';
-                    this.cropRatio = '16:9';
+                    this.processedSizeMalam2 = null;
+                    this.cropRatioSiang = 'original';
+                    this.cropRatioSiang2 = 'original';
+                    this.cropRatioMalam = 'original';
+                    this.cropRatioMalam2 = 'original';
+                    this.cropRatio = 'original';
                     this.isProcessing = false;
                     this.currentProcessingTarget = null;
                     this.processingStatus = '';

@@ -27,7 +27,9 @@ test('dokumentasi konsumsi component renders skeleton loading and instant modal 
         ->assertSeeHtml('openKonsumsiModalInstantly')
         ->assertSeeHtml('isKonsumsiModalLoading')
         ->assertSeeHtml('isKonsumsiModalOpen')
-        ->assertSeeHtml('closeKonsumsiModal');
+        ->assertSeeHtml('closeKonsumsiModal')
+        ->assertSeeHtml('submitWithCrop')
+        ->assertSeeHtml("cropRatioSiang: 'original'");
 });
 
 test('openAddKonsumsiModal opens modal and sets default create properties', function () {
