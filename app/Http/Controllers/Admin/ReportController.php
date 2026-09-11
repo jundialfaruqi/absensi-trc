@@ -164,6 +164,13 @@ class ReportController extends Controller
             $year = (int) $request->get('year', date('Y'));
             $search = $request->get('search');
             $paperSize = $request->get('paperSize', 'a4');
+            $includeRekap = $request->has('include_rekap') ? $request->boolean('include_rekap') : true;
+            $includeRincian = $request->has('include_rincian') ? $request->boolean('include_rincian') : false;
+
+            // Pastikan minimal salah satu aktif
+            if (!$includeRekap && !$includeRincian) {
+                $includeRekap = true;
+            }
 
             $opdId = Auth::user()->hasRole('super-admin') ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
 
@@ -267,6 +274,8 @@ class ReportController extends Controller
                 'opdName' => $opdName,
                 'startDate' => $startDate ?? $dates[0] ?? null,
                 'endDate' => $endDate ?? end($dates) ?? null,
+                'includeRekap' => $includeRekap,
+                'includeRincian' => $includeRincian,
             ];
 
             $paperFormat = $paperSize;
@@ -296,18 +305,27 @@ class ReportController extends Controller
     {
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
+        $includeRekap = $request->has('include_rekap') ? $request->boolean('include_rekap') : true;
+        $includeRincian = $request->has('include_rincian') ? $request->boolean('include_rincian') : false;
+
+        $prefix = 'rekap_konsumsi';
+        if (!$includeRekap && $includeRincian) {
+            $prefix = 'rincian_konsumsi_personel';
+        } elseif ($includeRekap && $includeRincian) {
+            $prefix = 'rekap_dan_rincian_konsumsi';
+        }
 
         if ($startDate && $endDate) {
             $startFormatted = Carbon::parse($startDate)->format('d-m-Y');
             $endFormatted = Carbon::parse($endDate)->format('d-m-Y');
 
-            return "rekap_konsumsi_{$startFormatted}_{$endFormatted}.{$extension}";
+            return "{$prefix}_{$startFormatted}_{$endFormatted}.{$extension}";
         }
 
         if ($startDate) {
             $startFormatted = Carbon::parse($startDate)->format('d-m-Y');
 
-            return "rekap_konsumsi_{$startFormatted}.{$extension}";
+            return "{$prefix}_{$startFormatted}.{$extension}";
         }
 
         $month = (int) $request->get('month', date('m'));
@@ -316,7 +334,7 @@ class ReportController extends Controller
         $startFormatted = Carbon::create($year, $month, 1)->format('d-m-Y');
         $endFormatted = Carbon::create($year, $month, $daysInMonth)->format('d-m-Y');
 
-        return "rekap_konsumsi_{$startFormatted}_{$endFormatted}.{$extension}";
+        return "{$prefix}_{$startFormatted}_{$endFormatted}.{$extension}";
     }
 
     private function generateExportFilename(Request $request, string $extension): string

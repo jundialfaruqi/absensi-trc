@@ -12,8 +12,10 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     // Seed basic permissions and roles
     $permission = Permission::create(['name' => 'manajemen-absensi', 'group' => 'Absensi']);
+    $permKonsumsi = Permission::create(['name' => 'lihat-dokumentasi-konsumsi', 'group' => 'Konsumsi']);
     $superAdminRole = Role::create(['name' => 'super-admin', 'color' => '#ef4444']);
     $superAdminRole->givePermissionTo($permission);
+    $superAdminRole->givePermissionTo($permKonsumsi);
 });
 
 test('unauthenticated users cannot export PDF', function () {
@@ -325,5 +327,110 @@ test('personnel with flexible attendance type has JML equal to Hadir in PDF repo
     // JML column should be 3 (equal to Hadir)
     expect($html)->toContain('<td class="summary-column">3</td>');
     expect($html)->toContain('<td class="summary-column ">3</td>');
+});
+
+test('authenticated user can export konsumsi PDF with default rekap only', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $response = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+    $response->assertHeader('x-filename', 'rekap_konsumsi_01-09-2026_05-09-2026.pdf');
+});
+
+test('export konsumsi PDF view renders sections conditionally based on includeRekap and includeRincian', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $dates = ['2026-09-01', '2026-09-02'];
+    $dailySummary = [
+        '2026-09-01' => ['siang' => 5, 'malam' => 5, 'total' => 10],
+        '2026-09-02' => ['siang' => 6, 'malam' => 4, 'total' => 10],
+    ];
+
+    // Case 1: Only Rekap
+    $htmlRekapOnly = view('reports.konsumsi-pdf', [
+        'personnels' => collect([]),
+        'dates' => $dates,
+        'dailySummary' => $dailySummary,
+        'totalSiangAll' => 11,
+        'totalMalamAll' => 9,
+        'grandTotalAll' => 20,
+        'month' => 9,
+        'year' => 2026,
+        'monthName' => 'September',
+        'opdName' => $opd->name,
+        'includeRekap' => true,
+        'includeRincian' => false,
+    ])->render();
+
+    expect($htmlRekapOnly)->toContain('Rekapitulasi Jumlah Porsi Konsumsi (September 2026)');
+    expect($htmlRekapOnly)->not->toContain('Rincian Konsumsi Per Personel');
+
+    // Case 2: Only Rincian
+    $htmlRincianOnly = view('reports.konsumsi-pdf', [
+        'personnels' => collect([]),
+        'dates' => $dates,
+        'dailySummary' => $dailySummary,
+        'totalSiangAll' => 11,
+        'totalMalamAll' => 9,
+        'grandTotalAll' => 20,
+        'month' => 9,
+        'year' => 2026,
+        'monthName' => 'September',
+        'opdName' => $opd->name,
+        'includeRekap' => false,
+        'includeRincian' => true,
+    ])->render();
+
+    expect($htmlRincianOnly)->not->toContain('Rekapitulasi Jumlah Porsi Konsumsi');
+    expect($htmlRincianOnly)->toContain('Rincian Konsumsi Per Personel');
+
+    // Case 3: Both
+    $htmlBoth = view('reports.konsumsi-pdf', [
+        'personnels' => collect([]),
+        'dates' => $dates,
+        'dailySummary' => $dailySummary,
+        'totalSiangAll' => 11,
+        'totalMalamAll' => 9,
+        'grandTotalAll' => 20,
+        'month' => 9,
+        'year' => 2026,
+        'monthName' => 'September',
+        'opdName' => $opd->name,
+        'includeRekap' => true,
+        'includeRincian' => true,
+    ])->render();
+
+    expect($htmlBoth)->toContain('I. Rekapitulasi Jumlah Porsi Konsumsi (September 2026)');
+    expect($htmlBoth)->toContain('II. Rincian Konsumsi Per Personel');
+});
+
+test('export konsumsi PDF filename dynamically changes based on selected sections', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    // Both selected
+    $resBoth = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+        'include_rekap' => 1,
+        'include_rincian' => 1,
+    ]));
+    $resBoth->assertHeader('x-filename', 'rekap_dan_rincian_konsumsi_01-09-2026_05-09-2026.pdf');
+
+    // Only rincian selected
+    $resRincian = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-05',
+        'include_rekap' => 0,
+        'include_rincian' => 1,
+    ]));
+    $resRincian->assertHeader('x-filename', 'rincian_konsumsi_personel_01-09-2026_05-09-2026.pdf');
 });
 

@@ -140,150 +140,159 @@
     </div>
 
     {{-- ─── TABEL 1: REKAP JUMLAH KONSUMSI PER BULAN ──────────────────────── --}}
-    <div class="section-title">I. Rekapitulasi Jumlah Porsi Konsumsi ({{ $monthName }} {{ $year }})</div>
-    <table>
-        <thead>
-            <tr>
-                <th rowspan="2" style="width: 85px; text-align: left; padding-left: 6px;">BULAN</th>
-                <th colspan="{{ count($dates) }}">TANGGAL / HARI</th>
-                <th rowspan="2" class="summary-column">TOTAL</th>
-            </tr>
-            <tr>
-                @foreach ($dates as $date)
-                    @php
-                        $carbonDate = \Carbon\Carbon::parse($date);
-                        $isWeekend = $carbonDate->isWeekend();
-                        $dayName = substr($carbonDate->translatedFormat('D'), 0, 3);
-                    @endphp
-                    <th class="date-column" style="{{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
-                        <div style="font-size: 5px; opacity: 0.8;">{{ $dayName }}</div>
-                        <div style="font-size: 7px; font-weight: bold;">{{ $carbonDate->format('d') }}</div>
-                    </th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="text-align: left; font-weight: bold; padding-left: 6px;" class="badge-siang">SIANG</td>
-                @foreach ($dates as $date)
-                    <td class="date-column {{ ($dailySummary[$date]['siang'] ?? 0) > 0 ? 'badge-siang' : '' }}">
-                        {{ $dailySummary[$date]['siang'] ?? 0 }}
-                    </td>
-                @endforeach
-                <td class="summary-column badge-siang">{{ $totalSiangAll }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: left; font-weight: bold; padding-left: 6px;" class="badge-malam">MALAM</td>
-                @foreach ($dates as $date)
-                    <td class="date-column {{ ($dailySummary[$date]['malam'] ?? 0) > 0 ? 'badge-malam' : '' }}">
-                        {{ $dailySummary[$date]['malam'] ?? 0 }}
-                    </td>
-                @endforeach
-                <td class="summary-column badge-malam">{{ $totalMalamAll }}</td>
-            </tr>
-            <tr class="total-row">
-                <td style="text-align: left; font-weight: bold; padding-left: 6px;">TOTAL</td>
-                @foreach ($dates as $date)
-                    <td class="date-column" style="font-weight: bold;">
-                        {{ $dailySummary[$date]['total'] ?? 0 }}
-                    </td>
-                @endforeach
-                <td class="summary-column" style="font-weight: bold; background-color: #e2e8f0;">{{ $grandTotalAll }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    {{-- ─── TABEL 2: RINCIAN KONSUMSI PER PERSONEL ────────────────────────── --}}
-    <div class="section-title">II. Rincian Konsumsi Per Personel</div>
-    <table>
-        <thead>
-            <tr>
-                <th rowspan="2" style="width: 20px;">NO</th>
-                <th rowspan="2" class="name-column">NAMA PERSONEL</th>
-                <th rowspan="2" style="width: 35px;">REGU</th>
-                <th colspan="{{ count($dates) }}">KONSUMSI HARIAN</th>
-                <th colspan="3" class="summary-column">TOTAL</th>
-            </tr>
-            <tr>
-                @foreach ($dates as $date)
-                    @php
-                        $carbonDate = \Carbon\Carbon::parse($date);
-                        $isWeekend = $carbonDate->isWeekend();
-                    @endphp
-                    <th class="date-column" style="font-size: 6px; {{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
-                        {{ $carbonDate->format('d') }}
-                    </th>
-                @endforeach
-                <th class="summary-column" style="font-size: 6px;">SIANG</th>
-                <th class="summary-column" style="font-size: 6px;">MALAM</th>
-                <th class="summary-column" style="font-size: 6px;">TOTAL</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($personnels as $index => $personnel)
+    @if ($includeRekap ?? true)
+        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi ({{ $monthName }} {{ $year }})</div>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td class="name-column">{{ $personnel->name }}</td>
-                    <td>{{ $personnel->regu ?? '-' }}</td>
+                    <th rowspan="2" style="width: 85px; text-align: left; padding-left: 6px;">BULAN</th>
+                    <th colspan="{{ count($dates) }}">TANGGAL / HARI</th>
+                    <th rowspan="2" class="summary-column">TOTAL</th>
+                </tr>
+                <tr>
                     @foreach ($dates as $date)
                         @php
-                            $abs = $personnel->absensi_map->get($date);
-                            $jadwal = $personnel->jadwal_map->get($date);
-
-                            $isHadir = $abs && (
-                                $abs->status === 'HADIR' ||
-                                $abs->status === 'TELAT' ||
-                                !empty($abs->jam_masuk)
-                            );
-
-                            $cellText = '-';
-                            $cellClass = '';
-
-                            if ($isHadir && $jadwal && $jadwal->shift) {
-                                $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
-                                $hasSiang = in_array('siang', $konsumsis);
-                                $hasMalam = in_array('malam', $konsumsis);
-
-                                if ($hasSiang && $hasMalam) {
-                                    $cellText = 'S+M';
-                                    $cellClass = 'badge-both';
-                                } elseif ($hasSiang) {
-                                    $cellText = 'S';
-                                    $cellClass = 'badge-siang';
-                                } elseif ($hasMalam) {
-                                    $cellText = 'M';
-                                    $cellClass = 'badge-malam';
-                                } else {
-                                    $cellText = 'H';
-                                }
-                            } elseif ($abs && in_array($abs->status, ['ALPA', 'IZIN', 'SAKIT', 'CUTI'])) {
-                                $cellText = substr($abs->status, 0, 1);
-                            }
+                            $carbonDate = \Carbon\Carbon::parse($date);
+                            $isWeekend = $carbonDate->isWeekend();
+                            $dayName = substr($carbonDate->translatedFormat('D'), 0, 3);
                         @endphp
-                        <td class="date-column {{ $cellClass }}">{{ $cellText }}</td>
+                        <th class="date-column" style="{{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
+                            <div style="font-size: 5px; opacity: 0.8;">{{ $dayName }}</div>
+                            <div style="font-size: 7px; font-weight: bold;">{{ $carbonDate->format('d') }}</div>
+                        </th>
                     @endforeach
-                    <td class="summary-column">{{ $personnel->total_siang }}</td>
-                    <td class="summary-column">{{ $personnel->total_malam }}</td>
-                    <td class="summary-column" style="font-weight: bold;">{{ $personnel->total_siang + $personnel->total_malam }}</td>
                 </tr>
-            @empty
+            </thead>
+            <tbody>
                 <tr>
-                    <td colspan="{{ count($dates) + 6 }}" style="padding: 10px; text-align: center; color: #888;">
-                        Tidak ada data personel pada periode ini.
-                    </td>
+                    <td style="text-align: left; font-weight: bold; padding-left: 6px;" class="badge-siang">SIANG</td>
+                    @foreach ($dates as $date)
+                        <td class="date-column {{ ($dailySummary[$date]['siang'] ?? 0) > 0 ? 'badge-siang' : '' }}">
+                            {{ $dailySummary[$date]['siang'] ?? 0 }}
+                        </td>
+                    @endforeach
+                    <td class="summary-column badge-siang">{{ $totalSiangAll }}</td>
                 </tr>
-            @endforelse
-        </tbody>
-    </table>
+                <tr>
+                    <td style="text-align: left; font-weight: bold; padding-left: 6px;" class="badge-malam">MALAM</td>
+                    @foreach ($dates as $date)
+                        <td class="date-column {{ ($dailySummary[$date]['malam'] ?? 0) > 0 ? 'badge-malam' : '' }}">
+                            {{ $dailySummary[$date]['malam'] ?? 0 }}
+                        </td>
+                    @endforeach
+                    <td class="summary-column badge-malam">{{ $totalMalamAll }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td style="text-align: left; font-weight: bold; padding-left: 6px;">TOTAL</td>
+                    @foreach ($dates as $date)
+                        <td class="date-column" style="font-weight: bold;">
+                            {{ $dailySummary[$date]['total'] ?? 0 }}
+                        </td>
+                    @endforeach
+                    <td class="summary-column" style="font-weight: bold; background-color: #e2e8f0;">{{ $grandTotalAll }}</td>
+                </tr>
+            </tbody>
+        </table>
+    @endif
+
+    {{-- ─── TABEL 2: RINCIAN KONSUMSI PER PERSONEL ────────────────────────── --}}
+    @if ($includeRincian ?? false)
+        @if (!empty($includeRekap))
+            <div style="margin-top: 15px;"></div>
+        @endif
+        <div class="section-title">{{ !empty($includeRekap) ? 'II. ' : '' }}Rincian Konsumsi Per Personel</div>
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 20px;">NO</th>
+                    <th rowspan="2" class="name-column">NAMA PERSONEL</th>
+                    <th rowspan="2" style="width: 35px;">REGU</th>
+                    <th colspan="{{ count($dates) }}">KONSUMSI HARIAN</th>
+                    <th colspan="3" class="summary-column">TOTAL</th>
+                </tr>
+                <tr>
+                    @foreach ($dates as $date)
+                        @php
+                            $carbonDate = \Carbon\Carbon::parse($date);
+                            $isWeekend = $carbonDate->isWeekend();
+                        @endphp
+                        <th class="date-column" style="font-size: 6px; {{ $isWeekend ? 'background-color: #fee2e2; color: #991b1b;' : '' }}">
+                            {{ $carbonDate->format('d') }}
+                        </th>
+                    @endforeach
+                    <th class="summary-column" style="font-size: 6px;">SIANG</th>
+                    <th class="summary-column" style="font-size: 6px;">MALAM</th>
+                    <th class="summary-column" style="font-size: 6px;">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($personnels as $index => $personnel)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td class="name-column">{{ $personnel->name }}</td>
+                        <td>{{ $personnel->regu ?? '-' }}</td>
+                        @foreach ($dates as $date)
+                            @php
+                                $abs = $personnel->absensi_map->get($date);
+                                $jadwal = $personnel->jadwal_map->get($date);
+
+                                $isHadir = $abs && (
+                                    $abs->status === 'HADIR' ||
+                                    $abs->status === 'TELAT' ||
+                                    !empty($abs->jam_masuk)
+                                );
+
+                                $cellText = '-';
+                                $cellClass = '';
+
+                                if ($isHadir && $jadwal && $jadwal->shift) {
+                                    $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
+                                    $hasSiang = in_array('siang', $konsumsis);
+                                    $hasMalam = in_array('malam', $konsumsis);
+
+                                    if ($hasSiang && $hasMalam) {
+                                        $cellText = 'S+M';
+                                        $cellClass = 'badge-both';
+                                    } elseif ($hasSiang) {
+                                        $cellText = 'S';
+                                        $cellClass = 'badge-siang';
+                                    } elseif ($hasMalam) {
+                                        $cellText = 'M';
+                                        $cellClass = 'badge-malam';
+                                    } else {
+                                        $cellText = 'H';
+                                    }
+                                } elseif ($abs && in_array($abs->status, ['ALPA', 'IZIN', 'SAKIT', 'CUTI'])) {
+                                    $cellText = substr($abs->status, 0, 1);
+                                }
+                            @endphp
+                            <td class="date-column {{ $cellClass }}">{{ $cellText }}</td>
+                        @endforeach
+                        <td class="summary-column">{{ $personnel->total_siang }}</td>
+                        <td class="summary-column">{{ $personnel->total_malam }}</td>
+                        <td class="summary-column" style="font-weight: bold;">{{ $personnel->total_siang + $personnel->total_malam }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ count($dates) + 6 }}" style="padding: 10px; text-align: center; color: #888;">
+                            Tidak ada data personel pada periode ini.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    @endif
 
     <div class="summary-info">
-        <strong>Keterangan Simbol:</strong> 
-        <strong>S</strong>: Konsumsi Siang | 
-        <strong>M</strong>: Konsumsi Malam | 
-        <strong>S+M</strong>: Konsumsi Siang & Malam (Shift 24 Jam) | 
-        <strong>-</strong>: Libur / Tidak Ada Jadwal | 
-        <strong>A/I/S/C</strong>: Alpa / Izin / Sakit / Cuti (Tidak berhak konsumsi)
-        <br>
+        @if ($includeRincian ?? false)
+            <strong>Keterangan Simbol:</strong> 
+            <strong>S</strong>: Konsumsi Siang | 
+            <strong>M</strong>: Konsumsi Malam | 
+            <strong>S+M</strong>: Konsumsi Siang & Malam (Shift 24 Jam) | 
+            <strong>-</strong>: Libur / Tidak Ada Jadwal | 
+            <strong>A/I/S/C</strong>: Alpa / Izin / Sakit / Cuti (Tidak berhak konsumsi)
+            <br>
+        @endif
         Dokumen ini dibuat otomatis melalui sistem absensitrc.pekanbaru.go.id
     </div>
 

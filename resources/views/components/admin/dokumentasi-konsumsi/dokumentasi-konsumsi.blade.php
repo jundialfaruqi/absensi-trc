@@ -826,6 +826,49 @@
                             Rentang tanggal maksimal 31 hari.
                         </p>
                     </div>
+
+                    {{-- Checklist Pilihan Bagian Laporan --}}
+                    <div class="space-y-2 pt-2 border-t border-base-200">
+                        <label class="block text-xs font-bold text-base-content/80">
+                            Pilihan Bagian Laporan:
+                        </label>
+                        <div class="space-y-2">
+                            {{-- Checklist: Rekapitulasi Jumlah Porsi Konsumsi --}}
+                            <label class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
+                                :class="exportIncludeRekap ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                                <input type="checkbox" x-model="exportIncludeRekap"
+                                    class="checkbox checkbox-sm checkbox-primary mt-0.5" />
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold text-base-content"
+                                        x-text="'REKAPITULASI JUMLAH PORSI KONSUMSI (' + exportMonthYearLabel + ')'">
+                                    </div>
+                                    <p class="text-[11px] text-base-content/60 mt-0.5 leading-relaxed">
+                                        Matriks ringkasan jumlah porsi makan siang, malam, dan total per tanggal.
+                                    </p>
+                                </div>
+                            </label>
+
+                            {{-- Checklist: Rincian Konsumsi Per Personel --}}
+                            <label class="cursor-pointer border rounded-2xl p-3 flex items-start gap-3 transition-all select-none"
+                                :class="exportIncludeRincian ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50'">
+                                <input type="checkbox" x-model="exportIncludeRincian"
+                                    class="checkbox checkbox-sm checkbox-primary mt-0.5" />
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold text-base-content">
+                                        RINCIAN KONSUMSI PER PERSONEL
+                                    </div>
+                                    <p class="text-[11px] text-base-content/60 mt-0.5 leading-relaxed">
+                                        Matriks kehadiran dan rincian hak konsumsi per nama personel & regu.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                        <template x-if="!exportIncludeRekap && !exportIncludeRincian">
+                            <span class="text-error text-xs block font-medium mt-1">
+                                *Pilih minimal salah satu bagian laporan di atas untuk diunduh.
+                            </span>
+                        </template>
+                    </div>
                 </div>
 
                 {{-- State: Processing --}}
@@ -874,7 +917,8 @@
                         <button type="button" @click="closeExportModal()"
                             class="btn btn-sm btn-ghost">Batal</button>
                         <button type="button" @click="startExport()"
-                            class="btn btn-sm btn-primary text-white gap-2">
+                            :disabled="!exportIncludeRekap && !exportIncludeRincian"
+                            class="btn btn-sm btn-primary text-white gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1845,12 +1889,34 @@
                 exportEndDate: @entangle('endDate').live,
                 exportOpdId: @entangle('selectedOpd').live,
                 exportPaperSize: @entangle('paperSize').live,
+                exportIncludeRekap: true,
+                exportIncludeRincian: false,
                 exportStatus: 'idle',
                 exportProgress: 0,
                 exportStatusText: '',
                 exportErrorMessage: '',
                 downloadBlobUrl: null,
                 exportedFilename: '',
+
+                get exportMonthYearLabel() {
+                    let dStr = this.exportStartDate || this.exportEndDate;
+                    if (!dStr) return '{{ strtoupper(\Carbon\Carbon::now()->translatedFormat('F Y')) }}';
+                    try {
+                        const parts = dStr.split('-');
+                        if (parts.length === 3) {
+                            const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+                            const mIndex = parseInt(parts[1], 10) - 1;
+                            if (mIndex >= 0 && mIndex < 12) {
+                                return months[mIndex] + ' ' + parts[0];
+                            }
+                        }
+                        const d = new Date(dStr);
+                        const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+                        return months[d.getMonth()] + ' ' + d.getFullYear();
+                    } catch (e) {
+                        return '{{ strtoupper(\Carbon\Carbon::now()->translatedFormat('F Y')) }}';
+                    }
+                },
 
                 openExportModal(type) {
                     this.exportStatus = 'idle';
@@ -1859,6 +1925,8 @@
                     this.exportErrorMessage = '';
                     this.downloadBlobUrl = null;
                     this.exportedFilename = '';
+                    this.exportIncludeRekap = true;
+                    this.exportIncludeRincian = false;
 
                     const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                     if (wire) {
@@ -1877,6 +1945,10 @@
                 },
 
                 async startExport() {
+                    if (!this.exportIncludeRekap && !this.exportIncludeRincian) {
+                        return;
+                    }
+
                     this.exportStatus = 'processing';
                     this.exportProgress = 10;
                     this.exportStatusText = 'Mempersiapkan data dokumentasi konsumsi...';
@@ -1900,6 +1972,8 @@
                         if (this.exportEndDate) params.append('endDate', this.exportEndDate);
                         if (this.exportOpdId) params.append('opd_id', this.exportOpdId);
                         if (this.exportPaperSize) params.append('paperSize', this.exportPaperSize);
+                        params.append('include_rekap', this.exportIncludeRekap ? '1' : '0');
+                        params.append('include_rincian', this.exportIncludeRincian ? '1' : '0');
 
                         const fullUrl = base + (params.toString() ? '?' + params.toString() : '');
 
@@ -1942,7 +2016,13 @@
                             };
                             const sDate = formatIndo(this.exportStartDate);
                             const eDate = formatIndo(this.exportEndDate);
-                            filename = 'rekap_konsumsi_' + (sDate && eDate ? `${sDate}_${eDate}` : (sDate || '')) +
+                            let prefix = 'rekap_dan_rincian_konsumsi_';
+                            if (this.exportIncludeRekap && !this.exportIncludeRincian) {
+                                prefix = 'rekap_konsumsi_';
+                            } else if (!this.exportIncludeRekap && this.exportIncludeRincian) {
+                                prefix = 'rincian_konsumsi_personel_';
+                            }
+                            filename = prefix + (sDate && eDate ? `${sDate}_${eDate}` : (sDate || '')) +
                                 '.pdf';
                         }
 
