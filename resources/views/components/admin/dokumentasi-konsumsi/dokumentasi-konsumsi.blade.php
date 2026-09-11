@@ -1099,33 +1099,6 @@
                     </div>
                 </div>
 
-                {{-- Status Card Skeleton --}}
-                <div class="bg-base-200/60 border border-base-300/60 rounded-2xl p-3.5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="size-4 bg-base-300 rounded"></div>
-                            <div class="h-3.5 bg-base-300 rounded w-40"></div>
-                        </div>
-                        <div class="h-5 bg-base-300 rounded w-20"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-base-300/60">
-                        <div class="space-y-1.5">
-                            <div class="flex items-center justify-between">
-                                <div class="h-3 bg-base-300 rounded w-14"></div>
-                                <div class="h-3 bg-base-300 rounded w-10"></div>
-                            </div>
-                            <div class="h-24 bg-base-300/60 rounded-xl"></div>
-                        </div>
-                        <div class="space-y-1.5">
-                            <div class="flex items-center justify-between">
-                                <div class="h-3 bg-base-300 rounded w-14"></div>
-                                <div class="h-3 bg-base-300 rounded w-10"></div>
-                            </div>
-                            <div class="h-24 bg-base-300/60 rounded-xl"></div>
-                        </div>
-                    </div>
-                </div>
-
                 {{-- 2. Sesi Konsumsi Radio Cards Skeleton --}}
                 <div class="space-y-2">
                     <div class="h-3 bg-base-300 rounded w-32"></div>
@@ -1157,7 +1130,51 @@
                     </div>
                 </div>
 
-                {{-- 3. Form Upload Foto Skeleton --}}
+                {{-- 3. Jumlah Porsi Konsumsi Skeleton --}}
+                <div class="space-y-2">
+                    <div class="h-3 bg-base-300 rounded w-40"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div
+                            class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
+                            <div class="h-3.5 bg-base-300 rounded w-20"></div>
+                            <div class="h-4 bg-base-300 rounded w-14"></div>
+                        </div>
+                        <div
+                            class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
+                            <div class="h-3.5 bg-base-300 rounded w-20"></div>
+                            <div class="h-4 bg-base-300 rounded w-14"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Status Card Skeleton --}}
+                <div class="bg-base-200/60 border border-base-300/60 rounded-2xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="size-4 bg-base-300 rounded"></div>
+                            <div class="h-3.5 bg-base-300 rounded w-40"></div>
+                        </div>
+                        <div class="h-5 bg-base-300 rounded w-20"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-base-300/60">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="h-3 bg-base-300 rounded w-14"></div>
+                                <div class="h-3 bg-base-300 rounded w-10"></div>
+                            </div>
+                            <div class="h-24 bg-base-300/60 rounded-xl"></div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="h-3 bg-base-300 rounded w-14"></div>
+                                <div class="h-3 bg-base-300 rounded w-10"></div>
+                            </div>
+                            <div class="h-24 bg-base-300/60 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Form Upload Foto Skeleton --}}
                 <div class="space-y-2">
                     <div class="h-3 bg-base-300 rounded w-44"></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1178,23 +1195,6 @@
                             <div class="aspect-video bg-base-300/60 rounded flex items-center justify-center">
                                 <div class="size-8 rounded-full bg-base-200/80"></div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 4. Jumlah Porsi Konsumsi Skeleton --}}
-                <div class="space-y-2">
-                    <div class="h-3 bg-base-300 rounded w-40"></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div
-                            class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
-                            <div class="h-3.5 bg-base-300 rounded w-20"></div>
-                            <div class="h-4 bg-base-300 rounded w-14"></div>
-                        </div>
-                        <div
-                            class="h-10 bg-base-200/80 rounded-lg border border-base-300/60 flex items-center justify-between px-3">
-                            <div class="h-3.5 bg-base-300 rounded w-20"></div>
-                            <div class="h-4 bg-base-300 rounded w-14"></div>
                         </div>
                     </div>
                 </div>
@@ -1233,6 +1233,343 @@
                         class="input input-bordered w-full text-xs scheme-light dark:scheme-dark {{ $modalMode === 'edit' ? 'bg-base-200/60 cursor-not-allowed' : '' }}"
                         required />
                 </div>
+
+                {{-- 2. Radio Button Pilihan Sesi Konsumsi --}}
+                <div>
+                    <label class="label text-xs py-1 text-base-content/80 font-bold">2. Pilih Sesi Konsumsi</label>
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                        {{-- Radio Siang --}}
+                        <label
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang ? 'opacity-95' : '' }}">
+                            <input type="radio" wire:model.live="sesiKonsumsi" value="siang"
+                                class="radio radio-xs sm:radio-sm radio-warning shrink-0" />
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="text-xs font-bold text-base-content">Siang</span>
+                                    @if ($existingFotoSiang)
+                                        <span
+                                            class="badge badge-warning badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
+                                            Saved
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-[10px] sm:text-[11px] text-base-content/60 mt-0.5 truncate">
+                                    Maks: <span
+                                        class="font-bold text-warning-content">{{ $this->calculatedSiang }}</span>
+                                </div>
+                            </div>
+                        </label>
+
+                        {{-- Radio Malam --}}
+                        <label
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
+                            <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
+                                class="radio radio-xs sm:radio-sm radio-neutral shrink-0" />
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="text-xs font-bold text-base-content">Malam</span>
+                                    @if ($existingFotoMalam)
+                                        <span
+                                            class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
+                                            Saved
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-[10px] sm:text-[11px] text-base-content/60 mt-0.5 truncate">
+                                    Maks: <span
+                                        class="font-bold text-neutral-900 dark:text-neutral-100">{{ $this->calculatedMalam }}</span>
+                                </div>
+                            </div>
+                        </label>
+
+                        {{-- Radio Keduanya (Siang & Malam) --}}
+                        <label
+                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'keduanya' ? 'border-primary bg-primary/10 ring-2 ring-primary/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang && $existingFotoMalam ? 'opacity-95' : '' }}">
+                            <input type="radio" wire:model.live="sesiKonsumsi" value="keduanya"
+                                class="radio radio-xs sm:radio-sm radio-primary shrink-0" />
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="text-xs font-bold text-base-content">Keduanya</span>
+                                    @if ($existingFotoSiang && $existingFotoMalam)
+                                        <span
+                                            class="badge badge-success badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
+                                            Lengkap
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-[10px] sm:text-[11px] text-base-content/60 mt-0.5 truncate">
+                                    Siang & Malam
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    @error('sesiKonsumsi')
+                        <span class="text-error text-xs block mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                @php
+                    $maxSiang = $this->calculatedSiang;
+                    $maxMalam = $this->calculatedMalam;
+                    $isCurrentSesiLocked =
+                        $modalMode === 'create' &&
+                        (($sesiKonsumsi === 'siang' && $existingFotoSiang) ||
+                            ($sesiKonsumsi === 'malam' && $existingFotoMalam) ||
+                            ($sesiKonsumsi === 'keduanya' && $existingFotoSiang && $existingFotoMalam));
+                    $hasExistingCurrentPhoto = match ($sesiKonsumsi) {
+                        'siang' => (bool) $existingFotoSiang,
+                        'malam' => (bool) $existingFotoMalam,
+                        default => (bool) ($existingFotoSiang || $existingFotoMalam),
+                    };
+                @endphp
+
+                {{-- 3. Form Input Porsi Berdasarkan Sesi Terpilih --}}
+
+                {{-- A. Jika Memilih Keduanya: Tampilkan Form Siang dan Malam Berdampingan --}}
+                @if ($sesiKonsumsi === 'keduanya')
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {{-- Card Input Porsi Siang --}}
+                        <div>
+                            @if ($modalMode === 'create' && $existingFotoSiang)
+                                <div
+                                    class="p-3.5 bg-warning/10 border border-warning/30 rounded-2xl space-y-2 h-full flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center gap-1.5 text-warning-content font-bold text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            <span class="text-xs">Siang Sudah Tersimpan</span>
+                                        </div>
+                                        <p class="text-[11px] text-base-content/70 mt-1">
+                                            Dokumentasi siang sudah tersimpan ({{ $jumlahSiang }} porsi).
+                                        </p>
+                                    </div>
+                                    <button type="button"
+                                        @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
+                                        class="btn btn-xs btn-warning text-warning-content w-full gap-1">
+                                        Edit Siang
+                                    </button>
+                                </div>
+                            @else
+                                <div class="p-3.5 bg-warning/5 border border-warning/20 rounded-2xl space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                            <span class="size-2 rounded-full bg-warning"></span>
+                                            Porsi Makan Siang
+                                        </label>
+                                        <span class="badge badge-warning badge-xs font-bold text-[10px] rounded-none">
+                                            Maks. {{ $maxSiang }}
+                                        </span>
+                                    </div>
+                                    <input type="number" wire:model.live="jumlahSiang" min="0"
+                                        max="{{ $maxSiang }}"
+                                        x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                        class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
+                                        placeholder="Maks. {{ $maxSiang }}" required />
+                                    @error('jumlahSiang')
+                                        <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                    <p class="text-[10px] text-base-content/50">
+                                        *Total konsumsi: {{ $maxSiang }} porsi
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Card Input Porsi Malam --}}
+                        <div>
+                            @if ($modalMode === 'create' && $existingFotoMalam)
+                                <div
+                                    class="p-3.5 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2 h-full flex flex-col justify-between">
+                                    <div>
+                                        <div
+                                            class="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            <span class="text-xs">Malam Sudah Tersimpan</span>
+                                        </div>
+                                        <p class="text-[11px] text-base-content/70 mt-1">
+                                            Dokumentasi malam sudah tersimpan ({{ $jumlahMalam }} porsi).
+                                        </p>
+                                    </div>
+                                    <button type="button"
+                                        @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
+                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white w-full gap-1">
+                                        Edit Malam
+                                    </button>
+                                </div>
+                            @else
+                                <div
+                                    class="p-3.5 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                            <span class="size-2 rounded-full bg-neutral-900"></span>
+                                            Porsi Makan Malam
+                                        </label>
+                                        <span
+                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] rounded-none">
+                                            Maks. {{ $maxMalam }}
+                                        </span>
+                                    </div>
+                                    <input type="number" wire:model.live="jumlahMalam" min="0"
+                                        max="{{ $maxMalam }}"
+                                        x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                        class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
+                                        placeholder="Maks. {{ $maxMalam }}" required />
+                                    @error('jumlahMalam')
+                                        <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                    <p class="text-[10px] text-base-content/50">
+                                        *Total konsumsi: {{ $maxMalam }} porsi
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- B. Form Input Sesi Makan Siang (Tampil Jika Sesi Siang Dipilih) --}}
+                @if ($sesiKonsumsi === 'siang')
+                    @if ($modalMode === 'create' && $existingFotoSiang)
+                        {{-- Notifikasi Bahwa Dokumentasi Siang Sudah Tersimpan Pada Mode Tambah --}}
+                        <div class="p-4 bg-warning/10 border border-warning/30 rounded-2xl space-y-2.5">
+                            <div class="flex items-center gap-2.5 text-warning-content font-bold text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="text-sm">Dokumentasi Makan Siang Sudah Tersimpan</span>
+                            </div>
+                            <p class="text-xs text-base-content/70 leading-relaxed">
+                                Dokumentasi makan siang untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika
+                                Anda ingin mengubah atau menghapusnya.
+                            </p>
+                            <div class="pt-1 flex flex-wrap items-center gap-2">
+                                <button type="button"
+                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
+                                    class="btn btn-xs btn-warning text-warning-content gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Edit Data Siang
+                                </button>
+                                @if (!$existingFotoMalam)
+                                    <button type="button" wire:click="$set('sesiKonsumsi', 'malam')"
+                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
+                                        Pindah ke Input Makan Malam &rarr;
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-4 bg-warning/5 border border-warning/20 rounded-2xl space-y-4">
+                            {{-- Input Jumlah Siang --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <span class="size-2 rounded-full bg-warning"></span>
+                                        Jumlah Porsi Makan Siang
+                                    </label>
+                                    <span class="badge badge-warning badge-sm font-bold text-[11px] rounded-none">
+                                        Maks. {{ $maxSiang }} Porsi
+                                    </span>
+                                </div>
+                                <input type="number" wire:model.live="jumlahSiang" min="0"
+                                    max="{{ $maxSiang }}"
+                                    x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
+                                    placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})"
+                                    required />
+                                @error('jumlahSiang')
+                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                                <p class="text-[11px] text-base-content/60 mt-1">
+                                    *Jumlah porsi tidak boleh lebih dari {{ $maxSiang }} (total konsumsi makan
+                                    siang terdata pada tanggal ini).
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
+                {{-- C. Form Input Sesi Makan Malam (Tampil Jika Sesi Malam Dipilih) --}}
+                @if ($sesiKonsumsi === 'malam')
+                    @if ($modalMode === 'create' && $existingFotoMalam)
+                        {{-- Notifikasi Bahwa Dokumentasi Malam Sudah Tersimpan Pada Mode Tambah --}}
+                        <div class="p-4 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2.5">
+                            <div
+                                class="flex items-center gap-2.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="text-sm">Dokumentasi Makan Malam Sudah Tersimpan</span>
+                            </div>
+                            <p class="text-xs text-base-content/70 leading-relaxed">
+                                Dokumentasi makan malam untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika
+                                Anda ingin mengubah atau menghapusnya.
+                            </p>
+                            <div class="pt-1 flex flex-wrap items-center gap-2">
+                                <button type="button"
+                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
+                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Edit Data Malam
+                                </button>
+                                @if (!$existingFotoSiang)
+                                    <button type="button" wire:click="$set('sesiKonsumsi', 'siang')"
+                                        class="btn btn-xs btn-warning text-warning-content gap-1">
+                                        Pindah ke Input Makan Siang &rarr;
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-4 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-4">
+                            {{-- Input Jumlah Malam --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
+                                        <span class="size-2 rounded-full bg-neutral-900"></span>
+                                        Jumlah Porsi Makan Malam
+                                    </label>
+                                    <span
+                                        class="badge bg-neutral-900 text-white rounded-none border-0 badge-sm font-bold text-[11px]">
+                                        Maks. {{ $maxMalam }} Porsi
+                                    </span>
+                                </div>
+                                <input type="number" wire:model.live="jumlahMalam" min="0"
+                                    max="{{ $maxMalam }}"
+                                    x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
+                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
+                                    placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})"
+                                    required />
+                                @error('jumlahMalam')
+                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                                <p class="text-[11px] text-base-content/60 mt-1">
+                                    *Jumlah porsi tidak boleh lebih dari {{ $maxMalam }} (total konsumsi makan
+                                    malam terdata pada tanggal ini).
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                @endif
 
                 {{-- Card Grey: Status Dokumentasi Tanggal Terpilih --}}
                 @if ($uploadTanggal)
@@ -2412,343 +2749,6 @@
                             </div>
                         </div>
                     </div>
-                @endif
-
-                {{-- 2. Radio Button Pilihan Sesi Konsumsi --}}
-                <div>
-                    <label class="label text-xs py-1 text-base-content/80 font-bold">2. Pilih Sesi Konsumsi</label>
-                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                        {{-- Radio Siang --}}
-                        <label
-                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'siang' ? 'border-warning bg-warning/10 ring-2 ring-warning/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang ? 'opacity-95' : '' }}">
-                            <input type="radio" wire:model.live="sesiKonsumsi" value="siang"
-                                class="radio radio-xs sm:radio-sm radio-warning shrink-0" />
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span class="text-xs font-bold text-base-content">Siang</span>
-                                    @if ($existingFotoSiang)
-                                        <span
-                                            class="badge badge-warning badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
-                                            Saved
-                                        </span>
-                                    @endif
-                                </div>
-                                <div class="text-[10px] sm:text-[11px] text-base-content/60 mt-0.5 truncate">
-                                    Maks: <span
-                                        class="font-bold text-warning-content">{{ $this->calculatedSiang }}</span>
-                                </div>
-                            </div>
-                        </label>
-
-                        {{-- Radio Malam --}}
-                        <label
-                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'malam' ? 'border-neutral-900 bg-neutral-900/10 ring-2 ring-neutral-900/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoMalam ? 'opacity-95' : '' }}">
-                            <input type="radio" wire:model.live="sesiKonsumsi" value="malam"
-                                class="radio radio-xs sm:radio-sm radio-neutral shrink-0" />
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span class="text-xs font-bold text-base-content">Malam</span>
-                                    @if ($existingFotoMalam)
-                                        <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
-                                            Saved
-                                        </span>
-                                    @endif
-                                </div>
-                                <div class="text-[10px] sm:text-[11px] text-base-content/60 mt-0.5 truncate">
-                                    Maks: <span
-                                        class="font-bold text-neutral-900 dark:text-neutral-100">{{ $this->calculatedMalam }}</span>
-                                </div>
-                            </div>
-                        </label>
-
-                        {{-- Radio Keduanya (Siang & Malam) --}}
-                        <label
-                            class="cursor-pointer border rounded p-2.5 sm:p-3 flex items-center gap-2.5 transition-all {{ $sesiKonsumsi === 'keduanya' ? 'border-primary bg-primary/10 ring-2 ring-primary/30 shadow-xs' : 'border-base-200 bg-base-100 hover:bg-base-200/50' }} {{ $existingFotoSiang && $existingFotoMalam ? 'opacity-95' : '' }}">
-                            <input type="radio" wire:model.live="sesiKonsumsi" value="keduanya"
-                                class="radio radio-xs sm:radio-sm radio-primary shrink-0" />
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span class="text-xs font-bold text-base-content">Keduanya</span>
-                                    @if ($existingFotoSiang && $existingFotoMalam)
-                                        <span
-                                            class="badge badge-success badge-xs rounded-none font-bold text-[8px] px-1 py-0.5">
-                                            Lengkap
-                                        </span>
-                                    @endif
-                                </div>
-                                <div class="text-[10px] sm:text-[11px] text-base-content/60 mt-0.5 truncate">
-                                    Siang & Malam
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    @error('sesiKonsumsi')
-                        <span class="text-error text-xs block mt-1">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                @php
-                    $maxSiang = $this->calculatedSiang;
-                    $maxMalam = $this->calculatedMalam;
-                    $isCurrentSesiLocked =
-                        $modalMode === 'create' &&
-                        (($sesiKonsumsi === 'siang' && $existingFotoSiang) ||
-                            ($sesiKonsumsi === 'malam' && $existingFotoMalam) ||
-                            ($sesiKonsumsi === 'keduanya' && $existingFotoSiang && $existingFotoMalam));
-                    $hasExistingCurrentPhoto = match ($sesiKonsumsi) {
-                        'siang' => (bool) $existingFotoSiang,
-                        'malam' => (bool) $existingFotoMalam,
-                        default => (bool) ($existingFotoSiang || $existingFotoMalam),
-                    };
-                @endphp
-
-                {{-- 3. Form Input Porsi Berdasarkan Sesi Terpilih --}}
-
-                {{-- A. Jika Memilih Keduanya: Tampilkan Form Siang dan Malam Berdampingan --}}
-                @if ($sesiKonsumsi === 'keduanya')
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {{-- Card Input Porsi Siang --}}
-                        <div>
-                            @if ($modalMode === 'create' && $existingFotoSiang)
-                                <div
-                                    class="p-3.5 bg-warning/10 border border-warning/30 rounded-2xl space-y-2 h-full flex flex-col justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-1.5 text-warning-content font-bold text-xs">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            <span class="text-xs">Siang Sudah Tersimpan</span>
-                                        </div>
-                                        <p class="text-[11px] text-base-content/70 mt-1">
-                                            Dokumentasi siang sudah tersimpan ({{ $jumlahSiang }} porsi).
-                                        </p>
-                                    </div>
-                                    <button type="button"
-                                        @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
-                                        class="btn btn-xs btn-warning text-warning-content w-full gap-1">
-                                        Edit Siang
-                                    </button>
-                                </div>
-                            @else
-                                <div class="p-3.5 bg-warning/5 border border-warning/20 rounded-2xl space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                            <span class="size-2 rounded-full bg-warning"></span>
-                                            Porsi Makan Siang
-                                        </label>
-                                        <span class="badge badge-warning badge-xs font-bold text-[10px] rounded-none">
-                                            Maks. {{ $maxSiang }}
-                                        </span>
-                                    </div>
-                                    <input type="number" wire:model.live="jumlahSiang" min="0"
-                                        max="{{ $maxSiang }}"
-                                        x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                        class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
-                                        placeholder="Maks. {{ $maxSiang }}" required />
-                                    @error('jumlahSiang')
-                                        <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
-                                    @enderror
-                                    <p class="text-[10px] text-base-content/50">
-                                        *Total konsumsi: {{ $maxSiang }} porsi
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- Card Input Porsi Malam --}}
-                        <div>
-                            @if ($modalMode === 'create' && $existingFotoMalam)
-                                <div
-                                    class="p-3.5 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2 h-full flex flex-col justify-between">
-                                    <div>
-                                        <div
-                                            class="flex items-center gap-1.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            <span class="text-xs">Malam Sudah Tersimpan</span>
-                                        </div>
-                                        <p class="text-[11px] text-base-content/70 mt-1">
-                                            Dokumentasi malam sudah tersimpan ({{ $jumlahMalam }} porsi).
-                                        </p>
-                                    </div>
-                                    <button type="button"
-                                        @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
-                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white w-full gap-1">
-                                        Edit Malam
-                                    </button>
-                                </div>
-                            @else
-                                <div
-                                    class="p-3.5 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                            <span class="size-2 rounded-full bg-neutral-900"></span>
-                                            Porsi Makan Malam
-                                        </label>
-                                        <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs font-bold text-[10px] rounded-none">
-                                            Maks. {{ $maxMalam }}
-                                        </span>
-                                    </div>
-                                    <input type="number" wire:model.live="jumlahMalam" min="0"
-                                        max="{{ $maxMalam }}"
-                                        x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                        class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
-                                        placeholder="Maks. {{ $maxMalam }}" required />
-                                    @error('jumlahMalam')
-                                        <span class="text-error text-[10px] mt-1 block">{{ $message }}</span>
-                                    @enderror
-                                    <p class="text-[10px] text-base-content/50">
-                                        *Total konsumsi: {{ $maxMalam }} porsi
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                {{-- B. Form Input Sesi Makan Siang (Tampil Jika Sesi Siang Dipilih) --}}
-                @if ($sesiKonsumsi === 'siang')
-                    @if ($modalMode === 'create' && $existingFotoSiang)
-                        {{-- Notifikasi Bahwa Dokumentasi Siang Sudah Tersimpan Pada Mode Tambah --}}
-                        <div class="p-4 bg-warning/10 border border-warning/30 rounded-2xl space-y-2.5">
-                            <div class="flex items-center gap-2.5 text-warning-content font-bold text-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span class="text-sm">Dokumentasi Makan Siang Sudah Tersimpan</span>
-                            </div>
-                            <p class="text-xs text-base-content/70 leading-relaxed">
-                                Dokumentasi makan siang untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika
-                                Anda ingin mengubah atau menghapusnya.
-                            </p>
-                            <div class="pt-1 flex flex-wrap items-center gap-2">
-                                <button type="button"
-                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'siang', 'edit')"
-                                    class="btn btn-xs btn-warning text-warning-content gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Edit Data Siang
-                                </button>
-                                @if (!$existingFotoMalam)
-                                    <button type="button" wire:click="$set('sesiKonsumsi', 'malam')"
-                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
-                                        Pindah ke Input Makan Malam &rarr;
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @else
-                        <div class="p-4 bg-warning/5 border border-warning/20 rounded-2xl space-y-4">
-                            {{-- Input Jumlah Siang --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                        <span class="size-2 rounded-full bg-warning"></span>
-                                        Jumlah Porsi Makan Siang
-                                    </label>
-                                    <span class="badge badge-warning badge-sm font-bold text-[11px] rounded-none">
-                                        Maks. {{ $maxSiang }} Porsi
-                                    </span>
-                                </div>
-                                <input type="number" wire:model.live="jumlahSiang" min="0"
-                                    max="{{ $maxSiang }}"
-                                    x-on:input="if (parseInt($el.value) > {{ $maxSiang }}) $el.value = {{ $maxSiang }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-warning focus:outline-warning"
-                                    placeholder="Masukkan jumlah makan siang (maks. {{ $maxSiang }})"
-                                    required />
-                                @error('jumlahSiang')
-                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
-                                @enderror
-                                <p class="text-[11px] text-base-content/60 mt-1">
-                                    *Jumlah porsi tidak boleh lebih dari {{ $maxSiang }} (total konsumsi makan
-                                    siang terdata pada tanggal ini).
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-                @endif
-
-                {{-- C. Form Input Sesi Makan Malam (Tampil Jika Sesi Malam Dipilih) --}}
-                @if ($sesiKonsumsi === 'malam')
-                    @if ($modalMode === 'create' && $existingFotoMalam)
-                        {{-- Notifikasi Bahwa Dokumentasi Malam Sudah Tersimpan Pada Mode Tambah --}}
-                        <div class="p-4 bg-neutral-900/10 border border-neutral-900/30 rounded-2xl space-y-2.5">
-                            <div
-                                class="flex items-center gap-2.5 text-neutral-900 dark:text-neutral-100 font-bold text-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span class="text-sm">Dokumentasi Makan Malam Sudah Tersimpan</span>
-                            </div>
-                            <p class="text-xs text-base-content/70 leading-relaxed">
-                                Dokumentasi makan malam untuk tanggal ini sudah tersimpan. Klik tombol di bawah jika
-                                Anda ingin mengubah atau menghapusnya.
-                            </p>
-                            <div class="pt-1 flex flex-wrap items-center gap-2">
-                                <button type="button"
-                                    @click="openKonsumsiModalInstantly('{{ $uploadTanggal }}', 'malam', 'edit')"
-                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Edit Data Malam
-                                </button>
-                                @if (!$existingFotoSiang)
-                                    <button type="button" wire:click="$set('sesiKonsumsi', 'siang')"
-                                        class="btn btn-xs btn-warning text-warning-content gap-1">
-                                        Pindah ke Input Makan Siang &rarr;
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @else
-                        <div class="p-4 bg-neutral-900/5 border border-neutral-900/20 rounded-2xl space-y-4">
-                            {{-- Input Jumlah Malam --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="text-xs font-bold text-base-content flex items-center gap-1.5">
-                                        <span class="size-2 rounded-full bg-neutral-900"></span>
-                                        Jumlah Porsi Makan Malam
-                                    </label>
-                                    <span
-                                        class="badge bg-neutral-900 text-white rounded-none border-0 badge-sm font-bold text-[11px]">
-                                        Maks. {{ $maxMalam }} Porsi
-                                    </span>
-                                </div>
-                                <input type="number" wire:model.live="jumlahMalam" min="0"
-                                    max="{{ $maxMalam }}"
-                                    x-on:input="if (parseInt($el.value) > {{ $maxMalam }}) $el.value = {{ $maxMalam }}; if (parseInt($el.value) < 0) $el.value = 0;"
-                                    class="input input-bordered input-sm w-full text-xs font-bold focus:border-neutral-900 focus:outline-neutral-900"
-                                    placeholder="Masukkan jumlah makan malam (maks. {{ $maxMalam }})"
-                                    required />
-                                @error('jumlahMalam')
-                                    <span class="text-error text-xs mt-1 block">{{ $message }}</span>
-                                @enderror
-                                <p class="text-[11px] text-base-content/60 mt-1">
-                                    *Jumlah porsi tidak boleh lebih dari {{ $maxMalam }} (total konsumsi makan
-                                    malam terdata pada tanggal ini).
-                                </p>
-                            </div>
-                        </div>
-                    @endif
                 @endif
 
                 {{-- Footer Modal --}}

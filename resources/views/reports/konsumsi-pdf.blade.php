@@ -261,8 +261,7 @@
 
     {{-- ─── TABEL 1: REKAP JUMLAH KONSUMSI PER BULAN ──────────────────────── --}}
     @if ($includeRekap ?? true)
-        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi
-            ({{ $monthName }} {{ $year }})</div>
+        <div class="section-title">{{ !empty($includeRincian) ? 'I. ' : '' }}Rekapitulasi Jumlah Porsi Konsumsi ({{ $monthName }} {{ $year }})</div>
         <table>
             <thead>
                 <tr>
