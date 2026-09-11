@@ -43,7 +43,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     public bool $showAddModal = false;
     public string $modalMode = 'create'; // 'create' atau 'edit'
     public string $uploadTanggal = '';
-    public string $sesiKonsumsi = 'siang'; // 'siang' atau 'malam'
+    public string $sesiKonsumsi = 'siang'; // 'siang', 'malam', atau 'keduanya'
     public ?int $jumlahSiang = 0;
     public ?int $jumlahMalam = 0;
     public $fotoSiang = null;
@@ -340,7 +340,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     {
         $this->modalMode = 'create';
         $this->uploadTanggal = $date ?: Carbon::now()->format('Y-m-d');
-        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam']) ? $sesi : 'siang';
+        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam', 'keduanya']) ? $sesi : 'siang';
         $this->fotoSiang = null;
         $this->fotoMalam = null;
         $this->uploadIteration++;
@@ -353,14 +353,14 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
     {
         $this->modalMode = 'edit';
         $this->uploadTanggal = $date;
-        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam']) ? $sesi : 'siang';
+        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam', 'keduanya']) ? $sesi : 'siang';
         $this->fotoSiang = null;
         $this->fotoMalam = null;
         $this->uploadIteration++;
         $this->resetValidation();
         $this->loadExistingDokumentasi();
         // Tetapkan sesi sesuai tombol yang di klik
-        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam']) ? $sesi : 'siang';
+        $this->sesiKonsumsi = in_array($sesi, ['siang', 'malam', 'keduanya']) ? $sesi : 'siang';
         $this->showAddModal = true;
     }
 
@@ -450,6 +450,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 $this->sesiKonsumsi = 'malam';
             } elseif (!$this->existingFotoSiang && $this->existingFotoMalam) {
                 $this->sesiKonsumsi = 'siang';
+            } elseif ($this->existingFotoSiang && $this->existingFotoMalam) {
+                $this->sesiKonsumsi = 'keduanya';
             }
         }
     }
@@ -521,7 +523,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         return $this->getCalculatedKonsumsi($this->uploadTanggal)['malam'] ?? 0;
     }
 
-    public function deleteDokumentasi(): void
+    public function deleteDokumentasi(?string $sesi = null): void
     {
         if (!$this->uploadTanggal) {
             return;
@@ -540,28 +542,41 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             return;
         }
 
-        $sesi = $this->sesiKonsumsi;
-        $sesiLabel = $sesi === 'siang' ? 'Makan Siang' : 'Makan Malam';
+        $sesi = $sesi ?: $this->sesiKonsumsi;
 
-        if ($sesi === 'siang') {
+        if ($sesi === 'keduanya') {
+            if ($record->foto_siang && Storage::disk('public')->exists($record->foto_siang)) {
+                Storage::disk('public')->delete($record->foto_siang);
+            }
+            if ($record->foto_malam && Storage::disk('public')->exists($record->foto_malam)) {
+                Storage::disk('public')->delete($record->foto_malam);
+            }
+            $record->delete();
+            $sesiLabel = 'Makan Siang & Makan Malam';
+        } elseif ($sesi === 'siang') {
             if ($record->foto_siang && Storage::disk('public')->exists($record->foto_siang)) {
                 Storage::disk('public')->delete($record->foto_siang);
             }
             $record->foto_siang = null;
             $record->jumlah_siang = 0;
+            if (empty($record->foto_malam) && (int)$record->jumlah_malam === 0) {
+                $record->delete();
+            } else {
+                $record->save();
+            }
+            $sesiLabel = 'Makan Siang';
         } else {
             if ($record->foto_malam && Storage::disk('public')->exists($record->foto_malam)) {
                 Storage::disk('public')->delete($record->foto_malam);
             }
             $record->foto_malam = null;
             $record->jumlah_malam = 0;
-        }
-
-        // Jika kedua sesi sudah tidak memiliki foto dan jumlah 0, hapus record
-        if (empty($record->foto_siang) && empty($record->foto_malam) && (int)$record->jumlah_siang === 0 && (int)$record->jumlah_malam === 0) {
-            $record->delete();
-        } else {
-            $record->save();
+            if (empty($record->foto_siang) && (int)$record->jumlah_siang === 0) {
+                $record->delete();
+            } else {
+                $record->save();
+            }
+            $sesiLabel = 'Makan Malam';
         }
 
         $this->showAddModal = false;
@@ -588,62 +603,99 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
             ->first();
 
-        if ($this->sesiKonsumsi === 'siang') {
-            $max = $this->calculatedSiang;
-            $hasExistingPhoto = !empty($record?->foto_siang);
-            $fotoRule = ($this->modalMode === 'create' || !$hasExistingPhoto)
-                ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
-                : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
+        $maxSiang = $this->calculatedSiang;
+        $maxMalam = $this->calculatedMalam;
 
-            $this->validate([
-                'uploadTanggal' => 'required|date',
-                'sesiKonsumsi' => 'required|in:siang,malam',
-                'jumlahSiang' => "required|integer|min:0|max:{$max}",
-                'fotoSiang' => $fotoRule,
-            ], [
-                'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
-                'jumlahSiang.required' => 'Jumlah porsi makan siang wajib diisi.',
-                'jumlahSiang.integer' => 'Jumlah porsi harus berupa angka.',
-                'jumlahSiang.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
-                'jumlahSiang.max' => "Jumlah porsi makan siang tidak boleh melebihi {$max} porsi (maksimal terdata pada tanggal ini).",
-                'fotoSiang.required' => 'Foto bukti makan siang wajib diunggah.',
-                'fotoSiang.image' => 'File foto makan siang harus berupa gambar.',
-                'fotoSiang.mimes' => 'Format foto makan siang harus berupa JPG, JPEG, PNG, atau WEBP.',
-                'fotoSiang.max' => 'Ukuran foto makan siang maksimal 2MB (2048 KB).',
-            ]);
+        $hasNewSiang = !empty($this->fotoSiang);
+        $hasNewMalam = !empty($this->fotoMalam);
+
+        // Tentukan sesi mana saja yang akan divalidasi dan disimpan:
+        // Prioritas: Jika kedua foto diunggah, simpan keduanya secara simultan!
+        if ($hasNewSiang && $hasNewMalam) {
+            $saveSiang = true;
+            $saveMalam = true;
+        } elseif ($this->sesiKonsumsi === 'keduanya') {
+            $saveSiang = true;
+            $saveMalam = true;
+        } elseif ($this->modalMode === 'create') {
+            if ($hasNewSiang) {
+                $saveSiang = true;
+                $saveMalam = false;
+            } elseif ($hasNewMalam) {
+                $saveSiang = false;
+                $saveMalam = true;
+            } else {
+                $saveSiang = ($this->sesiKonsumsi === 'siang');
+                $saveMalam = ($this->sesiKonsumsi === 'malam');
+            }
         } else {
-            $max = $this->calculatedMalam;
-            $hasExistingPhoto = !empty($record?->foto_malam);
-            $fotoRule = ($this->modalMode === 'create' || !$hasExistingPhoto)
+            // Mode 'edit'
+            if ($this->sesiKonsumsi === 'siang') {
+                $saveSiang = true;
+                $saveMalam = false;
+            } elseif ($this->sesiKonsumsi === 'malam') {
+                $saveSiang = false;
+                $saveMalam = true;
+            } else {
+                $saveSiang = true;
+                $saveMalam = true;
+            }
+        }
+
+        $rules = [
+            'uploadTanggal' => 'required|date',
+            'sesiKonsumsi' => 'required|in:siang,malam,keduanya',
+        ];
+
+        $messages = [
+            'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
+            'sesiKonsumsi.required' => 'Sesi konsumsi wajib dipilih.',
+        ];
+
+        if ($saveSiang) {
+            $rules['jumlahSiang'] = "required|integer|min:0|max:{$maxSiang}";
+            $fotoSiangRule = ($this->modalMode === 'create' || empty($record?->foto_siang))
                 ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
                 : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
+            $rules['fotoSiang'] = $fotoSiangRule;
 
-            $this->validate([
-                'uploadTanggal' => 'required|date',
-                'sesiKonsumsi' => 'required|in:siang,malam',
-                'jumlahMalam' => "required|integer|min:0|max:{$max}",
-                'fotoMalam' => $fotoRule,
-            ], [
-                'uploadTanggal.required' => 'Tanggal dokumentasi wajib dipilih.',
-                'jumlahMalam.required' => 'Jumlah porsi makan malam wajib diisi.',
-                'jumlahMalam.integer' => 'Jumlah porsi harus berupa angka.',
-                'jumlahMalam.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
-                'jumlahMalam.max' => "Jumlah porsi makan malam tidak boleh melebihi {$max} porsi (maksimal terdata pada tanggal ini).",
-                'fotoMalam.required' => 'Foto bukti makan malam wajib diunggah.',
-                'fotoMalam.image' => 'File foto makan malam harus berupa gambar.',
-                'fotoMalam.mimes' => 'Format foto makan malam harus berupa JPG, JPEG, PNG, atau WEBP.',
-                'fotoMalam.max' => 'Ukuran foto makan malam maksimal 2MB (2048 KB).',
-            ]);
+            $messages['jumlahSiang.required'] = 'Jumlah porsi makan siang wajib diisi.';
+            $messages['jumlahSiang.integer'] = 'Jumlah porsi makan siang harus berupa angka.';
+            $messages['jumlahSiang.min'] = 'Jumlah porsi makan siang tidak boleh kurang dari 0.';
+            $messages['jumlahSiang.max'] = "Jumlah porsi makan siang tidak boleh melebihi {$maxSiang} porsi (maksimal terdata pada tanggal ini).";
+            $messages['fotoSiang.required'] = 'Foto bukti makan siang wajib diunggah.';
+            $messages['fotoSiang.image'] = 'File foto makan siang harus berupa gambar.';
+            $messages['fotoSiang.mimes'] = 'Format foto makan siang harus berupa JPG, JPEG, PNG, atau WEBP.';
+            $messages['fotoSiang.max'] = 'Ukuran foto makan siang maksimal 2MB (2048 KB).';
         }
+
+        if ($saveMalam) {
+            $rules['jumlahMalam'] = "required|integer|min:0|max:{$maxMalam}";
+            $fotoMalamRule = ($this->modalMode === 'create' || empty($record?->foto_malam))
+                ? 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
+                : 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048';
+            $rules['fotoMalam'] = $fotoMalamRule;
+
+            $messages['jumlahMalam.required'] = 'Jumlah porsi makan malam wajib diisi.';
+            $messages['jumlahMalam.integer'] = 'Jumlah porsi makan malam harus berupa angka.';
+            $messages['jumlahMalam.min'] = 'Jumlah porsi makan malam tidak boleh kurang dari 0.';
+            $messages['jumlahMalam.max'] = "Jumlah porsi makan malam tidak boleh melebihi {$maxMalam} porsi (maksimal terdata pada tanggal ini).";
+            $messages['fotoMalam.required'] = 'Foto bukti makan malam wajib diunggah.';
+            $messages['fotoMalam.image'] = 'File foto makan malam harus berupa gambar.';
+            $messages['fotoMalam.mimes'] = 'Format foto makan malam harus berupa JPG, JPEG, PNG, atau WEBP.';
+            $messages['fotoMalam.max'] = 'Ukuran foto makan malam maksimal 2MB (2048 KB).';
+        }
+
+        $this->validate($rules, $messages);
 
         // Jika modal dalam mode 'create' dan sesi sudah ada data tersimpan, larang overwrite
         if ($this->modalMode === 'create') {
-            if ($this->sesiKonsumsi === 'siang' && $record?->foto_siang) {
+            if ($saveSiang && $record?->foto_siang) {
                 $this->addError('sesiKonsumsi', 'Dokumentasi makan siang untuk tanggal ini sudah tersimpan. Silakan buka form edit untuk memperbaruinya.');
                 return;
             }
 
-            if ($this->sesiKonsumsi === 'malam' && $record?->foto_malam) {
+            if ($saveMalam && $record?->foto_malam) {
                 $this->addError('sesiKonsumsi', 'Dokumentasi makan malam untuk tanggal ini sudah tersimpan. Silakan buka form edit untuk memperbaruinya.');
                 return;
             }
@@ -658,7 +710,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $folderTanggal = Carbon::parse($this->uploadTanggal)->format('d-m-Y');
         $targetDirectory = 'dokumentasi-konsumsi/' . $folderTanggal;
 
-        if ($this->sesiKonsumsi === 'siang') {
+        if ($saveSiang) {
             $pathSiang = $record?->foto_siang;
             if ($this->fotoSiang) {
                 if ($pathSiang && Storage::disk('public')->exists($pathSiang)) {
@@ -668,10 +720,12 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             }
             $dataToUpdate['jumlah_siang'] = $this->jumlahSiang;
             $dataToUpdate['foto_siang'] = $pathSiang;
-            if (!$record) {
-                $dataToUpdate['jumlah_malam'] = 0;
-            }
         } else {
+            $dataToUpdate['jumlah_siang'] = $record?->jumlah_siang ?? 0;
+            $dataToUpdate['foto_siang'] = $record?->foto_siang ?? null;
+        }
+
+        if ($saveMalam) {
             $pathMalam = $record?->foto_malam;
             if ($this->fotoMalam) {
                 if ($pathMalam && Storage::disk('public')->exists($pathMalam)) {
@@ -681,9 +735,9 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             }
             $dataToUpdate['jumlah_malam'] = $this->jumlahMalam;
             $dataToUpdate['foto_malam'] = $pathMalam;
-            if (!$record) {
-                $dataToUpdate['jumlah_siang'] = 0;
-            }
+        } else {
+            $dataToUpdate['jumlah_malam'] = $record?->jumlah_malam ?? 0;
+            $dataToUpdate['foto_malam'] = $record?->foto_malam ?? null;
         }
 
         DokumentasiKonsumsi::updateOrCreate(
@@ -694,7 +748,14 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             $dataToUpdate
         );
 
-        $sesiLabel = $this->sesiKonsumsi === 'siang' ? 'Makan Siang' : 'Makan Malam';
+        if ($saveSiang && $saveMalam) {
+            $sesiLabel = 'Makan Siang & Makan Malam';
+        } elseif ($saveSiang) {
+            $sesiLabel = 'Makan Siang';
+        } else {
+            $sesiLabel = 'Makan Malam';
+        }
+
         $verb = $this->modalMode === 'edit' ? 'diperbarui' : 'disimpan';
         $this->showAddModal = false;
         $this->fotoSiang = null;
