@@ -179,6 +179,32 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
         $this->resetValidation();
     }
 
+    public function updatedFoto1(): void
+    {
+        if ($this->foto1) {
+            $this->validateOnly('foto1', [
+                'foto1' => ['image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            ], [
+                'foto1.image' => 'File harus berupa gambar.',
+                'foto1.mimes' => 'Format gambar harus JPEG, JPG, PNG, atau WebP.',
+                'foto1.max' => 'Ukuran foto utama maksimal 2MB (2048KB).',
+            ]);
+        }
+    }
+
+    public function updatedFoto2(): void
+    {
+        if ($this->foto2) {
+            $this->validateOnly('foto2', [
+                'foto2' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            ], [
+                'foto2.image' => 'File harus berupa gambar.',
+                'foto2.mimes' => 'Format gambar harus JPEG, JPG, PNG, atau WebP.',
+                'foto2.max' => 'Ukuran foto kedua maksimal 2MB (2048KB).',
+            ]);
+        }
+    }
+
     public function save()
     {
         if (!Auth::user()?->can('upload-dokumentasi')) {
@@ -192,8 +218,8 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
             'shift' => ['required', 'in:siang,malam'],
             'jumlah_porsi' => ['required', 'integer', 'min:0', 'max:' . $max],
             'keterangan' => ['nullable', 'string', 'max:1000'],
-            'foto1' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
-            'foto2' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'foto1' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'foto2' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ], [
             'tanggal.required' => 'Tanggal dokumentasi wajib diisi.',
             'shift.required' => 'Silakan pilih shift terlebih dahulu.',
@@ -202,9 +228,9 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
             'jumlah_porsi.max' => "Jumlah porsi tidak boleh melebihi perhitungan otomatis ({$max} Porsi).",
             'foto1.required' => 'Foto dokumentasi utama wajib diunggah.',
             'foto1.image' => 'File harus berupa gambar.',
-            'foto1.max' => 'Ukuran foto utama maksimal 5MB.',
+            'foto1.max' => 'Ukuran foto utama maksimal 2MB (2048KB).',
             'foto2.image' => 'File harus berupa gambar.',
-            'foto2.max' => 'Ukuran foto kedua maksimal 5MB.',
+            'foto2.max' => 'Ukuran foto kedua maksimal 2MB (2048KB).',
         ]);
 
         $opdId = Auth::user()?->opd()?->id;

@@ -220,3 +220,37 @@ test('resetForm clears all input fields and resets validation', function () {
         ->assertSet('foto1', null)
         ->assertSet('foto2', null);
 });
+
+test('validation fails when photo size exceeds 2048KB', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    // Create file over 2048KB (e.g. 2500KB)
+    $largeImage = UploadedFile::fake()->create('large.jpg', 2500, 'image/jpeg');
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $largeImage)
+        ->call('save')
+        ->assertHasErrors(['foto1' => 'max']);
+});
+
+test('validation passes with compressed webp image within 2048KB', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    $webpImage = UploadedFile::fake()->create('compressed.webp', 95, 'image/webp');
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $webpImage)
+        ->call('save')
+        ->assertHasNoErrors(['foto1']);
+});
+
