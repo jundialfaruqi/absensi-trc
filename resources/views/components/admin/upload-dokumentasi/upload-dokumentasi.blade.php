@@ -77,7 +77,7 @@
                             <div class="form-control w-full md:col-span-2">
                                 <label class="label mb-1 px-1 flex justify-between items-center">
                                     <span class="label-text text-sm font-medium text-base-content">
-                                        Jumlah Porsi Makan <span class="text-error">*</span>
+                                        Jumlah Porsi Nasi <span class="text-error">*</span>
                                     </span>
                                 </label>
 
