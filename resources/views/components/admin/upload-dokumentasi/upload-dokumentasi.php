@@ -51,6 +51,7 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
     public function updatedTanggal(): void
     {
         $this->syncJumlahPorsi();
+        $this->checkExistingDocumentation();
     }
 
     public function updatedShift(): void
@@ -58,6 +59,7 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
         $this->reset(['foto1', 'foto2']);
         $this->uploadIteration++;
         $this->syncJumlahPorsi();
+        $this->checkExistingDocumentation();
     }
 
     private function syncJumlahPorsi(): void
@@ -157,6 +159,40 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
             ->first();
     }
 
+    #[Computed]
+    public function isShiftAlreadyDocumented(): bool
+    {
+        if (!$this->tanggal || !$this->shift) {
+            return false;
+        }
+
+        $record = $this->existingRecord;
+        if (!$record) {
+            return false;
+        }
+
+        if ($this->shift === 'siang') {
+            return !empty($record->foto_siang);
+        }
+
+        if ($this->shift === 'malam') {
+            return !empty($record->foto_malam);
+        }
+
+        return false;
+    }
+
+    public function checkExistingDocumentation(): void
+    {
+        $this->resetErrorBag('shift');
+
+        if ($this->isShiftAlreadyDocumented) {
+            $shiftLabel = $this->shift === 'siang' ? 'Siang' : 'Malam';
+            $dateLabel = Carbon::parse($this->tanggal)->translatedFormat('d F Y');
+            $this->addError('shift', "Data dokumentasi untuk Shift {$shiftLabel} pada tanggal {$dateLabel} sudah ada di sistem. Silahkan pilih shift atau tanggal lain.");
+        }
+    }
+
     public function removeFoto(int $index): void
     {
         if ($index === 1) {
@@ -232,6 +268,11 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
             'foto2.image' => 'File harus berupa gambar.',
             'foto2.max' => 'Ukuran foto kedua maksimal 2MB (2048KB).',
         ]);
+
+        $this->checkExistingDocumentation();
+        if ($this->isShiftAlreadyDocumented) {
+            return null;
+        }
 
         $opdId = Auth::user()?->opd()?->id;
 

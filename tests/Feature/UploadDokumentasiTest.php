@@ -254,3 +254,58 @@ test('validation passes with compressed webp image within 2048KB', function () {
         ->assertHasNoErrors(['foto1']);
 });
 
+test('shows inline error when selected shift already has documentation on date', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    $targetDate = Carbon::today()->format('Y-m-d');
+
+    // Create existing documentation for shift siang
+    DokumentasiKonsumsi::create([
+        'tanggal' => $targetDate,
+        'opd_id' => null,
+        'jumlah_siang' => 10,
+        'foto_siang' => 'dokumentasi-konsumsi/test/siang.jpg',
+        'created_by' => $user->id,
+    ]);
+
+    // Selecting shift siang should immediately show error on shift
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->assertHasErrors(['shift'])
+        // Switching to shift malam (which has no documentation yet) should clear error
+        ->set('shift', 'malam')
+        ->assertHasNoErrors(['shift']);
+});
+
+test('save is blocked with error if documentation for shift already exists', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    $targetDate = Carbon::today()->format('Y-m-d');
+
+    DokumentasiKonsumsi::create([
+        'tanggal' => $targetDate,
+        'opd_id' => null,
+        'jumlah_siang' => 10,
+        'foto_siang' => 'dokumentasi-konsumsi/test/siang.jpg',
+        'created_by' => $user->id,
+    ]);
+
+    $foto = UploadedFile::fake()->create('test.webp', 80, 'image/webp');
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $foto)
+        ->call('save')
+        ->assertHasErrors(['shift']);
+});
+
+
