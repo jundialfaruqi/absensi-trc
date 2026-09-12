@@ -444,10 +444,10 @@
                                                     {{-- Preview Foto 1 Baru (Terkompresi WebP) --}}
                                                     <div wire:key="foto1-preview-container-{{ $uploadIteration }}">
                                                         <div
-                                                            class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
+                                                            class="w-full aspect-4/3 bg-base-200/80 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group flex items-center justify-center">
                                                             <img src="{{ $foto1->temporaryUrl() }}"
                                                                 alt="Preview Foto 1"
-                                                                class="w-full h-full object-cover">
+                                                                class="w-full h-full object-contain">
                                                             <div class="absolute top-2 right-2">
                                                                 <span
                                                                     class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
@@ -622,10 +622,10 @@
                                                     {{-- Preview Foto 2 Baru (Terkompresi WebP) --}}
                                                     <div wire:key="foto2-preview-container-{{ $uploadIteration }}">
                                                         <div
-                                                            class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
+                                                            class="w-full aspect-4/3 bg-base-200/80 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group flex items-center justify-center">
                                                             <img src="{{ $foto2->temporaryUrl() }}"
                                                                 alt="Preview Foto 2"
-                                                                class="w-full h-full object-cover">
+                                                                class="w-full h-full object-contain">
                                                             <div class="absolute top-2 right-2">
                                                                 <span
                                                                     class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
@@ -866,8 +866,44 @@
                         </button>
                     </div>
 
+                    {{-- Bar Pemilihan Orientasi Hasil Foto (Landscape vs Portrait) --}}
+                    <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-base-200 bg-base-100 text-xs">
+                        <div class="flex items-center gap-1.5 text-base-content/70">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                                stroke="currentColor" class="size-4 text-primary">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                            </svg>
+                            <span class="font-semibold">Orientasi Foto:</span>
+                        </div>
+                        <div class="join shadow-2xs">
+                            <button type="button" @click="cameraOrientation = 'auto'"
+                                :class="cameraOrientation === 'auto' ? 'btn-primary text-white font-bold shadow-xs' : 'btn-ghost text-base-content/70 hover:bg-base-200'"
+                                class="btn btn-xs join-item transition-all" title="Otomatis mendeteksi orientasi sensor kamera">
+                                Otomatis
+                            </button>
+                            <button type="button" @click="cameraOrientation = 'landscape'"
+                                :class="cameraOrientation === 'landscape' ? 'btn-primary text-white font-bold shadow-xs' : 'btn-ghost text-base-content/70 hover:bg-base-200'"
+                                class="btn btn-xs join-item transition-all gap-1" title="Foto mendatar (Landscape 4:3)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                                </svg>
+                                Landscape
+                            </button>
+                            <button type="button" @click="cameraOrientation = 'portrait'"
+                                :class="cameraOrientation === 'portrait' ? 'btn-primary text-white font-bold shadow-xs' : 'btn-ghost text-base-content/70 hover:bg-base-200'"
+                                class="btn btn-xs join-item transition-all gap-1" title="Foto tegak (Portrait 3:4)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" />
+                                </svg>
+                                Portrait
+                            </button>
+                        </div>
+                    </div>
+
                     {{-- Video Viewport --}}
-                    <div class="relative w-full aspect-4/3 bg-black flex items-center justify-center overflow-hidden">
+                    <div class="relative w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-300 mx-auto"
+                        :class="effectiveOrientation() === 'portrait' ? 'aspect-3/4 max-h-[58vh]' : 'aspect-4/3 max-h-[50vh]'">
                         {{-- Loading State --}}
                         <div x-show="isStartingCamera"
                             class="absolute inset-0 flex flex-col items-center justify-center text-white gap-2 bg-black/60 z-20">
@@ -899,6 +935,13 @@
                                     Coba Lagi
                                 </button>
                             </div>
+                        </div>
+
+                        {{-- Badge Status Orientasi Aktif --}}
+                        <div class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-[11px] font-medium text-white border border-white/10 z-10 pointer-events-none">
+                            <span x-text="effectiveOrientation() === 'portrait' ? '📱 Portrait' : '🖥️ Landscape'"></span>
+                            <span class="opacity-60" x-text="effectiveOrientation() === 'portrait' ? '(3:4)' : '(4:3)'"></span>
+                            <span x-show="cameraOrientation === 'auto'" class="badge badge-2xs badge-primary ml-0.5 text-[9px] text-white">Auto</span>
                         </div>
 
                         {{-- Video Element --}}
@@ -1015,6 +1058,14 @@
                         cameraFacingMode: 'environment',
                         hasMultipleCameras: false,
                         cameraError: '',
+                        cameraOrientation: 'auto', // 'auto', 'landscape', 'portrait'
+                        detectedOrientation: 'landscape', // 'landscape' atau 'portrait'
+
+                        effectiveOrientation() {
+                            if (this.cameraOrientation === 'landscape') return 'landscape';
+                            if (this.cameraOrientation === 'portrait') return 'portrait';
+                            return this.detectedOrientation;
+                        },
 
                         async openCamera(slot) {
                             this.activeCameraSlot = slot;
@@ -1082,6 +1133,11 @@
                                 this.$nextTick(() => {
                                     if (this.$refs.cameraVideo) {
                                         this.$refs.cameraVideo.srcObject = this.cameraStream;
+                                        this.$refs.cameraVideo.onloadedmetadata = () => {
+                                            const vw = this.$refs.cameraVideo.videoWidth || 1280;
+                                            const vh = this.$refs.cameraVideo.videoHeight || 720;
+                                            this.detectedOrientation = vh > vw ? 'portrait' : 'landscape';
+                                        };
                                         this.$refs.cameraVideo.play().catch(() => {});
                                     }
                                 });
@@ -1130,18 +1186,74 @@
                             const vw = video.videoWidth || 1280;
                             const vh = video.videoHeight || 720;
 
+                            const isStreamPortrait = vh > vw;
+                            const orientation = this.effectiveOrientation();
+
+                            let sourceX = 0;
+                            let sourceY = 0;
+                            let sourceW = vw;
+                            let sourceH = vh;
+                            let targetW = vw;
+                            let targetH = vh;
+
+                            if (orientation === 'portrait') {
+                                if (!isStreamPortrait) {
+                                    // Sensor adalah landscape (misal webcam PC), potong tengah ke 3:4 portrait
+                                    targetH = vh;
+                                    targetW = Math.round(vh * (3 / 4));
+                                    if (targetW > vw) {
+                                        targetW = vw;
+                                        targetH = Math.round(vw * (4 / 3));
+                                    }
+                                } else {
+                                    // Sensor sudah portrait (misal HP), sesuaikan ke 3:4 portrait
+                                    targetW = vw;
+                                    targetH = Math.round(vw * (4 / 3));
+                                    if (targetH > vh) {
+                                        targetH = vh;
+                                        targetW = Math.round(vh * (3 / 4));
+                                    }
+                                }
+                                sourceW = targetW;
+                                sourceH = targetH;
+                                sourceX = Math.round((vw - targetW) / 2);
+                                sourceY = Math.round((vh - targetH) / 2);
+                            } else if (orientation === 'landscape') {
+                                if (isStreamPortrait) {
+                                    // Sensor adalah portrait (misal HP tegak), potong tengah ke 4:3 landscape
+                                    targetW = vw;
+                                    targetH = Math.round(vw * (3 / 4));
+                                    if (targetH > vh) {
+                                        targetH = vh;
+                                        targetW = Math.round(vh * (4 / 3));
+                                    }
+                                } else {
+                                    // Sensor sudah landscape, sesuaikan ke 4:3 landscape
+                                    targetH = vh;
+                                    targetW = Math.round(vh * (4 / 3));
+                                    if (targetW > vw) {
+                                        targetW = vw;
+                                        targetH = Math.round(vw * (3 / 4));
+                                    }
+                                }
+                                sourceW = targetW;
+                                sourceH = targetH;
+                                sourceX = Math.round((vw - targetW) / 2);
+                                sourceY = Math.round((vh - targetH) / 2);
+                            }
+
                             const canvas = document.createElement('canvas');
-                            canvas.width = vw;
-                            canvas.height = vh;
+                            canvas.width = targetW;
+                            canvas.height = targetH;
                             const ctx = canvas.getContext('2d');
 
                             // Jika kamera depan, balik secara horizontal agar preview cermin alami
                             if (this.cameraFacingMode === 'user') {
-                                ctx.translate(vw, 0);
+                                ctx.translate(targetW, 0);
                                 ctx.scale(-1, 1);
                             }
 
-                            ctx.drawImage(video, 0, 0, vw, vh);
+                            ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
 
                             const slot = this.activeCameraSlot;
                             this.stopCamera();
