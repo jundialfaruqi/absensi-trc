@@ -60,6 +60,8 @@ Route::group([
         ->middleware('permission:manajemen-user')
         ->name('user');
 
+    // Manajemen Personel
+
     Route::livewire('/personnel', 'admin::personnel')
         ->middleware('permission:manajemen-personel')
         ->name('personnel');
@@ -72,26 +74,30 @@ Route::group([
         ->middleware('role_or_permission:super-admin|edit-personel-all-opd|edit-personel-opd')
         ->name('personnel.edit');
 
+    // Manajemen Kantor
+
     Route::livewire('/kantor', 'admin::kantors')
         ->middleware('permission:manajemen-kantor')
         ->name('kantor');
+
+    // Manajemen Shift
 
     Route::livewire('/shift', 'admin::shift')
         ->middleware('permission:manajemen-shift')
         ->name('shift');
 
+    // Manajemen Konsumsi
+
     Route::livewire('/konsumsi', 'admin::konsumsi')
         ->middleware('permission:manajemen-konsumsi')
         ->name('konsumsi');
+    
+    // Manajemen Jadwal
 
     Route::livewire('/jadwal', 'admin::jadwal')
         ->middleware('permission:manajemen-jadwal')
         ->name('jadwal');
-
-    Route::livewire('/cuti', 'admin::cutis')
-        ->middleware('permission:manajemen-master-cuti')
-        ->name('cuti');
-
+    
     Route::livewire('/jadwal/import', 'admin::jadwal-import')
         ->middleware('permission:manajemen-jadwal-import')
         ->name('jadwal.import');
@@ -99,6 +105,12 @@ Route::group([
     Route::livewire('/jadwal/generate', 'admin::jadwal-generate')
         ->middleware('permission:manajemen-jadwal')
         ->name('jadwal.generate');
+
+    // Manajemen Cuti
+
+    Route::livewire('/cuti', 'admin::cutis')
+        ->middleware('permission:manajemen-master-cuti')
+        ->name('cuti');
 
     Route::livewire('/absensi', 'admin::absensi')
         ->middleware('permission:manajemen-absensi')
