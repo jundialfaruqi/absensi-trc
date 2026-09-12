@@ -87,7 +87,7 @@
                                         <span wire:loading.remove wire:target="shift"
                                             class="text-xs text-base-content/70">
                                             Maks:
-                                            <span class="border-b-2 border-primary font-bold text-primary pb-0.5">
+                                            <span class="font-bold text-primary pb-0.5">
                                                 {{ $this->maxPorsi }} Porsi
                                             </span>
                                         </span>
@@ -295,35 +295,38 @@
 
                                                 @if ($foto1)
                                                     {{-- Preview Foto 1 Baru (Terkompresi WebP) --}}
-                                                    <div
-                                                        class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
-                                                        <img src="{{ $foto1->temporaryUrl() }}" alt="Preview Foto 1"
-                                                            class="w-full h-full object-cover">
-                                                        <div class="absolute top-2 right-2">
-                                                            <span
-                                                                class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
-                                                                WebP &le; 100KB
-                                                            </span>
+                                                    <div wire:key="foto1-preview-container-{{ $uploadIteration }}">
+                                                        <div
+                                                            class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
+                                                            <img src="{{ $foto1->temporaryUrl() }}" alt="Preview Foto 1"
+                                                                class="w-full h-full object-cover">
+                                                            <div class="absolute top-2 right-2">
+                                                                <span
+                                                                    class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
+                                                                    WebP &le; 100KB
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="mt-2 flex items-center justify-between text-xs">
-                                                        <span class="text-success font-medium text-[11px]"
-                                                            x-show="compressInfo1" x-text="compressInfo1"></span>
-                                                        <button type="button" wire:click="removeFoto(1)"
-                                                            @click="resetSlot(1)"
-                                                            class="text-error hover:text-error/80 text-xs font-semibold flex items-center gap-1 transition-colors ml-auto">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                viewBox="0 0 24 24" stroke-width="2"
-                                                                stroke="currentColor" class="size-4">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                            </svg>
-                                                            <span>Hapus Foto Utama</span>
-                                                        </button>
+                                                        <div class="mt-2 flex items-center justify-between text-xs">
+                                                            <span class="text-success font-medium text-[11px]"
+                                                                x-show="compressInfo1" x-text="compressInfo1"></span>
+                                                            <button type="button" wire:click="removeFoto(1)"
+                                                                @click="resetSlot(1)"
+                                                                class="text-error hover:text-error/80 text-xs font-semibold flex items-center gap-1 transition-colors ml-auto">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                    viewBox="0 0 24 24" stroke-width="2"
+                                                                    stroke="currentColor" class="size-4">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                                </svg>
+                                                                <span>Hapus Foto Utama</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 @else
                                                     {{-- Area Pemilihan Foto 1 (Dengan 2 Tombol: Dokumen & Kamera HP) --}}
-                                                    <div class="relative flex flex-col items-center justify-center w-full min-h-[220px] aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
+                                                    <div wire:key="foto1-dropzone-container-{{ $uploadIteration }}"
+                                                        class="relative flex flex-col items-center justify-center w-full min-h-[220px] aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
                                                         :class="{
                                                             'border-primary/60 bg-primary/5': isProcessing1,
                                                             'border-base-300 hover:border-primary/50 hover:bg-base-200/60':
@@ -334,7 +337,7 @@
 
                                                         {{-- State Loading: Kompresi & Upload --}}
                                                         <div x-show="isProcessing1" x-cloak
-                                                            class="flex flex-col items-center justify-center w-full py-3 px-2">
+                                                            class="flex flex-col items-center justify-center w-full py-3 px-2 my-auto">
                                                             <span
                                                                 class="loading loading-spinner loading-lg text-primary mb-2.5"></span>
                                                             <span class="text-xs font-bold text-base-content"
@@ -358,7 +361,7 @@
 
                                                         {{-- State Normal: Pilihan Dokumen atau Kamera HP --}}
                                                         <div x-show="!isProcessing1"
-                                                            class="flex flex-col items-center justify-center w-full">
+                                                            class="flex flex-col items-center justify-center w-full my-auto">
                                                             <div
                                                                 class="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -373,7 +376,7 @@
                                                                 atau
                                                                 Ambil Foto Utama</span>
                                                             <span
-                                                                class="text-[10px] text-base-content/60 text-center max-w-220px mt-0.5">
+                                                                class="text-[10px] text-base-content/60 text-center max-w-[220px] mt-0.5">
                                                                 Maks. 10MB dari HP/PC, otomatis dikompres ke WebP
                                                                 (&le;100KB)
                                                             </span>
@@ -468,35 +471,38 @@
 
                                                 @if ($foto2)
                                                     {{-- Preview Foto 2 Baru (Terkompresi WebP) --}}
-                                                    <div
-                                                        class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
-                                                        <img src="{{ $foto2->temporaryUrl() }}" alt="Preview Foto 2"
-                                                            class="w-full h-full object-cover">
-                                                        <div class="absolute top-2 right-2">
-                                                            <span
-                                                                class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
-                                                                WebP &le; 100KB
-                                                            </span>
+                                                    <div wire:key="foto2-preview-container-{{ $uploadIteration }}">
+                                                        <div
+                                                            class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
+                                                            <img src="{{ $foto2->temporaryUrl() }}" alt="Preview Foto 2"
+                                                                class="w-full h-full object-cover">
+                                                            <div class="absolute top-2 right-2">
+                                                                <span
+                                                                    class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
+                                                                    WebP &le; 100KB
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="mt-2 flex items-center justify-between text-xs">
-                                                        <span class="text-success font-medium text-[11px]"
-                                                            x-show="compressInfo2" x-text="compressInfo2"></span>
-                                                        <button type="button" wire:click="removeFoto(2)"
-                                                            @click="resetSlot(2)"
-                                                            class="text-error hover:text-error/80 text-xs font-semibold flex items-center gap-1 transition-colors ml-auto">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                viewBox="0 0 24 24" stroke-width="2"
-                                                                stroke="currentColor" class="size-4">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                            </svg>
-                                                            <span>Hapus Foto Tambahan</span>
-                                                        </button>
+                                                        <div class="mt-2 flex items-center justify-between text-xs">
+                                                            <span class="text-success font-medium text-[11px]"
+                                                                x-show="compressInfo2" x-text="compressInfo2"></span>
+                                                            <button type="button" wire:click="removeFoto(2)"
+                                                                @click="resetSlot(2)"
+                                                                class="text-error hover:text-error/80 text-xs font-semibold flex items-center gap-1 transition-colors ml-auto">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                    viewBox="0 0 24 24" stroke-width="2"
+                                                                    stroke="currentColor" class="size-4">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                                </svg>
+                                                                <span>Hapus Foto Tambahan</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 @else
                                                     {{-- Area Pemilihan Foto 2 (Dengan 2 Tombol: Dokumen & Kamera HP) --}}
-                                                    <div class="relative flex flex-col items-center justify-center w-full min-h-220px aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
+                                                    <div wire:key="foto2-dropzone-container-{{ $uploadIteration }}"
+                                                        class="relative flex flex-col items-center justify-center w-full min-h-[220px] aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
                                                         :class="{
                                                             'border-primary/60 bg-primary/5': isProcessing2,
                                                             'border-base-300 hover:border-primary/50 hover:bg-base-200/60':
@@ -507,7 +513,7 @@
 
                                                         {{-- State Loading: Kompresi & Upload --}}
                                                         <div x-show="isProcessing2" x-cloak
-                                                            class="flex flex-col items-center justify-center w-full py-3 px-2">
+                                                            class="flex flex-col items-center justify-center w-full py-3 px-2 my-auto">
                                                             <span
                                                                 class="loading loading-spinner loading-lg text-primary mb-2.5"></span>
                                                             <span class="text-xs font-bold text-base-content"
@@ -531,7 +537,7 @@
 
                                                         {{-- State Normal: Pilihan Dokumen atau Kamera HP --}}
                                                         <div x-show="!isProcessing2"
-                                                            class="flex flex-col items-center justify-center w-full">
+                                                            class="flex flex-col items-center justify-center w-full my-auto">
                                                             <div
                                                                 class="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -546,7 +552,7 @@
                                                                 atau
                                                                 Ambil Foto Tambahan</span>
                                                             <span
-                                                                class="text-[10px] text-base-content/60 text-center max-w-220px mt-0.5">
+                                                                class="text-[10px] text-base-content/60 text-center max-w-[220px] mt-0.5">
                                                                 Maks. 10MB dari HP/PC, otomatis dikompres ke WebP
                                                                 (&le;100KB)
                                                             </span>
@@ -1009,12 +1015,16 @@
 
                         resetSlot(slot) {
                             if (slot === 1) {
+                                if (this.$refs.docInput1) this.$refs.docInput1.value = '';
+                                if (this.$refs.camInput1) this.$refs.camInput1.value = '';
                                 this.isProcessing1 = false;
                                 this.progress1 = 0;
                                 this.statusText1 = '';
                                 this.compressInfo1 = '';
                                 this.errorMsg1 = '';
                             } else {
+                                if (this.$refs.docInput2) this.$refs.docInput2.value = '';
+                                if (this.$refs.camInput2) this.$refs.camInput2.value = '';
                                 this.isProcessing2 = false;
                                 this.progress2 = 0;
                                 this.statusText2 = '';
