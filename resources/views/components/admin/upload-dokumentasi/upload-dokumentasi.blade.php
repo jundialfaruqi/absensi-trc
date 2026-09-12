@@ -440,7 +440,7 @@
                                                     </span>
                                                 </div>
 
-                                                @if ($foto1)
+                                                @if ($foto1 && (!method_exists($foto1, 'isPreviewable') || $foto1->isPreviewable()))
                                                     {{-- Preview Foto 1 Baru (Terkompresi WebP) --}}
                                                     <div wire:key="foto1-preview-container-{{ $uploadIteration }}">
                                                         <div
@@ -618,7 +618,7 @@
                                                     </span>
                                                 </div>
 
-                                                @if ($foto2)
+                                                @if ($foto2 && (!method_exists($foto2, 'isPreviewable') || $foto2->isPreviewable()))
                                                     {{-- Preview Foto 2 Baru (Terkompresi WebP) --}}
                                                     <div wire:key="foto2-preview-container-{{ $uploadIteration }}">
                                                         <div

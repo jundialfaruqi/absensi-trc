@@ -336,5 +336,55 @@ test('validation fails when jumlah_porsi is negative or non-integer', function (
         ->assertHasErrors(['jumlah_porsi' => 'integer']);
 });
 
+test('validation fails when photo mime type is not jpeg, jpg, png, or webp', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
 
+    $targetDate = Carbon::today()->format('Y-m-d');
+    $invalidPdf = UploadedFile::fake()->create('malicious.pdf', 100, 'application/pdf');
+    $invalidPhp = UploadedFile::fake()->create('shell.php', 10, 'text/x-php');
 
+    // Test PDF rejection
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $invalidPdf)
+        ->call('save')
+        ->assertHasErrors(['foto1' => 'image']);
+
+    // Test PHP script rejection
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $invalidPhp)
+        ->call('save')
+        ->assertHasErrors(['foto1' => 'image']);
+});
+
+test('validation passes when uploading valid jpeg, jpg, png, or webp files directly within 2048KB', function (string $extension, string $mime) {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    $targetDate = Carbon::today()->format('Y-m-d');
+    $file = UploadedFile::fake()->image("sample.{$extension}")->size(500);
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $file)
+        ->assertHasNoErrors(['foto1']);
+})->with([
+    ['jpg', 'image/jpeg'],
+    ['jpeg', 'image/jpeg'],
+    ['png', 'image/png'],
+    ['webp', 'image/webp'],
+]);
