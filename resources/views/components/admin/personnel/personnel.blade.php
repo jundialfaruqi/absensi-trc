@@ -56,7 +56,7 @@
                     @endif
                 </div>
 
-                @if (auth()->user()->hasRole('super-admin'))
+                @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('lihat-personel-all-opd'))
                     <div class="w-full sm:w-auto">
                         <select wire:model.live="selectedOpd" class="select select-bordered w-full sm:w-64 bg-base-100">
                             <option value="">Semua OPD (Filter)</option>
@@ -68,16 +68,18 @@
                 @endif
             </div>
         </div>
-        <div class="flex gap-2">
-            <button wire:click="goToAdd" class="btn btn-neutral gap-2" wire:loading.attr="disabled">
-                <span wire:loading wire:target="goToAdd" class="loading loading-spinner loading-xs"></span>
-                <svg wire:loading.remove wire:target="goToAdd" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Tambah Personnel
-            </button>
-        </div>
+        @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('create-personel-all-opd') || auth()->user()->can('create-personel-opd'))
+            <div class="flex gap-2">
+                <button wire:click="goToAdd" class="btn btn-neutral gap-2" wire:loading.attr="disabled">
+                    <span wire:loading wire:target="goToAdd" class="loading loading-spinner loading-xs"></span>
+                    <svg wire:loading.remove wire:target="goToAdd" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Tambah Personnel
+                </button>
+            </div>
+        @endif
     </div>
 
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
@@ -275,10 +277,12 @@
                                             </button>
                                             <ul tabindex="0"
                                                 class="dropdown-content menu p-2 shadow-md bg-base-100 rounded-box w-36 z-50">
-                                                <li>
-                                                    <a wire:navigate
-                                                        href="{{ route('personnel.edit', $r->id) }}">Edit</a>
-                                                </li>
+                                                @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('edit-personel-all-opd') || (auth()->user()->can('edit-personel-opd') && auth()->user()->opd()?->id === $r->opd_id))
+                                                    <li>
+                                                        <a wire:navigate
+                                                            href="{{ route('personnel.edit', $r->id) }}">Edit</a>
+                                                    </li>
+                                                @endif
                                                 <li>
                                                     @php
                                                         $waPhone = preg_replace('/^0/', '62', $r->nomor_hp);
@@ -302,10 +306,12 @@
                                                         Kirim WA
                                                     </a>
                                                 </li>
-                                                <li>
-                                                    <button type="button" class="text-error"
-                                                        wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">Delete</button>
-                                                </li>
+                                                @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('delete-personel-all-opd') || (auth()->user()->can('delete-personel-opd') && auth()->user()->opd()?->id === $r->opd_id))
+                                                    <li>
+                                                        <button type="button" class="text-error"
+                                                            wire:click="confirmDelete({{ $r->id }}, '{{ addslashes($r->name) }}')">Delete</button>
+                                                    </li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </td>

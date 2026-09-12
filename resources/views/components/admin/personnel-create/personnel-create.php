@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use App\Models\Opd;
 use App\Models\Penugasan;
 use App\Models\Kantor;
+use App\Models\User;
 
 new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -37,6 +38,15 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     public bool $auto_create_device = false;
     public bool $readyToLoad = false;
 
+    /**
+     * @return User|null
+     */
+    private function user(): ?User
+    {
+        /** @var User|null */
+        return Auth::user();
+    }
+
     public function load()
     {
         $this->readyToLoad = true;
@@ -44,8 +54,17 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
 
     public function mount()
     {
-        if (!Auth::user()->hasRole('super-admin')) {
-            $this->opd_id = (string) Auth::user()->opd()?->id;
+        /** @var User|null $user */
+        $user = $this->user();
+        $canCreateAll = $user && ($user->hasRole('super-admin') || $user->can('create-personel-all-opd'));
+        $canCreateOpd = $user && $user->can('create-personel-opd');
+
+        if (! $canCreateAll && ! $canCreateOpd) {
+            abort(403, 'Anda tidak memiliki izin untuk menambah personel.');
+        }
+
+        if (! $canCreateAll) {
+            $this->opd_id = (string) $user->opd()?->id;
         }
 
         $this->pin = $this->generateUniquePin();
@@ -64,10 +83,13 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function opds()
     {
-        if (Auth::user()->hasRole('super-admin')) {
+        /** @var User|null $user */
+        $user = $this->user();
+        if ($user && ($user->hasRole('super-admin') || $user->can('create-personel-all-opd'))) {
             return Opd::query()->orderBy('name', 'asc')->get(['*']);
         } else {
-            $userOpdId = Auth::user()->opd()?->id;
+            $userOpdId = $user?->opd()?->id;
+
             return Opd::query()->where('id', '=', $userOpdId)->get(['*']);
         }
     }
@@ -81,10 +103,13 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     #[Computed]
     public function kantors()
     {
+        /** @var User|null $user */
+        $user = $this->user();
         $query = Kantor::query()->orderBy('name', 'asc');
-        if (!Auth::user()->hasRole('super-admin')) {
-            $query->where('opd_id', '=', Auth::user()->opd()?->id);
+        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('create-personel-all-opd'))) {
+            $query->where('opd_id', '=', $user?->opd()?->id);
         }
+
         return $query->get(['*']);
     }
 
@@ -179,9 +204,19 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
 
     public function save()
     {
-        if (!Auth::user()->hasRole('super-admin')) {
-            if ($this->opd_id != Auth::user()->opd()?->id) {
-                abort(403, 'Unauthorized action.');
+        /** @var User|null $user */
+        $user = $this->user();
+        $canCreateAll = $user && ($user->hasRole('super-admin') || $user->can('create-personel-all-opd'));
+        $canCreateOpd = $user && $user->can('create-personel-opd');
+
+        if (! $canCreateAll && ! $canCreateOpd) {
+            abort(403, 'Anda tidak memiliki izin untuk menambah personel.');
+        }
+
+        if (! $canCreateAll) {
+            $userOpdId = $user->opd()?->id;
+            if (empty($userOpdId) || (int) $this->opd_id !== (int) $userOpdId) {
+                abort(403, 'Anda tidak bisa membuat personel untuk OPD lain selain OPD Anda sendiri.');
             }
         }
 

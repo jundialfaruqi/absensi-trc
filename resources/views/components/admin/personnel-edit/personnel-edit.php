@@ -7,6 +7,7 @@ use App\Models\Kantor;
 use App\Models\Opd;
 use App\Models\Penugasan;
 use App\Models\Personnel;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -67,6 +68,15 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
     public bool $readyToLoad = false;
 
+    /**
+     * @return User|null
+     */
+    private function user(): ?User
+    {
+        /** @var User|null */
+        return Auth::user();
+    }
+
     public function load()
     {
         $this->readyToLoad = true;
@@ -89,10 +99,12 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     #[Computed]
     public function opds()
     {
-        if (Auth::user()->hasRole('super-admin')) {
+        /** @var User|null $user */
+        $user = $this->user();
+        if ($user && ($user->hasRole('super-admin') || $user->can('edit-personel-all-opd'))) {
             return Opd::query()->orderBy('name', 'asc')->get(['*']);
         } else {
-            $userOpdId = Auth::user()->opd()?->id;
+            $userOpdId = $user?->opd()?->id;
 
             return Opd::query()->where('id', '=', $userOpdId)->get(['*']);
         }
@@ -107,20 +119,49 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     #[Computed]
     public function kantors()
     {
+        /** @var User|null $user */
+        $user = $this->user();
         $query = Kantor::query()->orderBy('name', 'asc');
-        if (! Auth::user()->hasRole('super-admin')) {
-            $query->where('opd_id', '=', Auth::user()->opd()?->id);
+        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('edit-personel-all-opd'))) {
+            $query->where('opd_id', '=', $user?->opd()?->id);
         }
 
         return $query->get(['*']);
+    }
+
+    private function canEditPersonnel(?Personnel $personnel): bool
+    {
+        if (! $personnel) {
+            return false;
+        }
+
+        /** @var User|null $user */
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        // 1. edit-personel-all-opd atau role super-admin
+        if ($user->hasRole('super-admin') || $user->can('edit-personel-all-opd')) {
+            return true;
+        }
+
+        // 2. edit-personel-opd: hanya bisa jika se-OPD
+        if ($user->can('edit-personel-opd')) {
+            $userOpdId = $user->opd()?->id;
+
+            return ! empty($userOpdId) && ! empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
+        }
+
+        return false;
     }
 
     private function loadPersonnelData(int $id): void
     {
         $item = Personnel::findOrFail($id);
 
-        if (! Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
-            abort(403, 'Unauthorized action.');
+        if (! $this->canEditPersonnel($item)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data personel ini.');
         }
 
         $this->personnelId = $item->id;
@@ -248,10 +289,10 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
     public function saveFotoDirectly(?string $descriptor = null): void
     {
-        if (! Auth::user()->hasRole('super-admin')) {
-            if ($this->opd_id != Auth::user()->opd()?->id) {
-                abort(403, 'Unauthorized action.');
-            }
+        $personnel = Personnel::findOrFail($this->personnelId);
+
+        if (! $this->canEditPersonnel($personnel)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data personel ini.');
         }
 
         if ($this->foto) {
@@ -261,7 +302,6 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
                 Storage::disk('public')->delete($this->oldFoto);
             }
 
-            $personnel = Personnel::findOrFail($this->personnelId);
             $updateData = [
                 'foto' => $path,
                 'face_descriptor_mobile' => null,
@@ -295,9 +335,20 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
     public function save()
     {
-        if (! Auth::user()->hasRole('super-admin')) {
-            if ($this->opd_id != Auth::user()->opd()?->id) {
-                abort(403, 'Unauthorized action.');
+        $personnel = Personnel::findOrFail($this->personnelId);
+
+        if (! $this->canEditPersonnel($personnel)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data personel ini.');
+        }
+
+        /** @var User|null $user */
+        $user = $this->user();
+        $canEditAll = $user && ($user->hasRole('super-admin') || $user->can('edit-personel-all-opd'));
+
+        if (! $canEditAll) {
+            $userOpdId = $user?->opd()?->id;
+            if (empty($userOpdId) || (int) $this->opd_id !== (int) $userOpdId) {
+                abort(403, 'Anda tidak dapat memindahkan personel ke OPD lain.');
             }
         }
 

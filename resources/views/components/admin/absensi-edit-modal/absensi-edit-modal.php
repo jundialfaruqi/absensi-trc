@@ -6,6 +6,7 @@ use App\Models\Device;
 use App\Models\Jadwal;
 use App\Models\Personnel;
 use App\Models\Shift;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -417,6 +418,7 @@ new class extends Component
             return false;
         }
 
+        /** @var User|null $user */
         $user = Auth::user();
         if (! $user) {
             return false;

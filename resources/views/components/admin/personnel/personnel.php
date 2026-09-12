@@ -11,6 +11,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Personnel;
 use App\Models\Opd;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extends Component
@@ -42,10 +43,28 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         return $this->getPersonnelsQuery()->paginate($this->perPage);
     }
 
+    /**
+     * @return User|null
+     */
+    private function user(): ?User
+    {
+        /** @var User|null */
+        return Auth::user();
+    }
+
     private function getPersonnelsQuery()
     {
-        if (!$this->readyToLoad) {
+        if (! $this->readyToLoad) {
             // Return a query that returns nothing but has the right structure
+            return Personnel::query()->whereRaw('1 = 0');
+        }
+
+        /** @var User|null $user */
+        $user = $this->user();
+        $canSeeAll = $user && ($user->hasRole('super-admin') || $user->can('lihat-personel-all-opd'));
+        $canSeeOpd = $user && $user->can('lihat-personel-opd');
+
+        if (! $canSeeAll && ! $canSeeOpd) {
             return Personnel::query()->whereRaw('1 = 0');
         }
 
@@ -59,9 +78,10 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
                     ->orWhere('personnels.email', 'like', '%' . $this->search . '%')
                     ->orWhere('personnels.pin', 'like', '%' . $this->search . '%');
             }))
-            ->when($this->selectedOpd, fn($q) => $q->where('personnels.opd_id', '=', $this->selectedOpd))
-            ->when(!Auth::user()->hasRole('super-admin'), function ($q) {
-                $q->where('personnels.opd_id', '=', Auth::user()->opd()?->id);
+            ->when($canSeeAll, function ($q) {
+                $q->when($this->selectedOpd, fn($sub) => $sub->where('personnels.opd_id', '=', $this->selectedOpd));
+            }, function ($q) use ($user) {
+                $q->where('personnels.opd_id', '=', $user->opd()?->id);
             })
             ->orderBy('opds.name', 'asc')
             ->orderBy('personnels.name', 'asc')
@@ -87,19 +107,76 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     #[Computed]
     public function opds()
     {
-        if (Auth::user()->hasRole('super-admin')) {
+        /** @var User|null $user */
+        $user = $this->user();
+        if ($user && ($user->hasRole('super-admin') || $user->can('lihat-personel-all-opd'))) {
             return Opd::query()->orderBy('name', 'asc')->get(['*']);
         } else {
-            $userOpdId = Auth::user()->opd()?->id;
+            $userOpdId = $user?->opd()?->id;
+
             return Opd::query()->where('id', '=', $userOpdId)->get(['*']);
         }
+    }
+
+    private function canEditPersonnel(?Personnel $personnel): bool
+    {
+        if (! $personnel) {
+            return false;
+        }
+
+        /** @var User|null $user */
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        // 1. edit-personel-all-opd atau role super-admin
+        if ($user->hasRole('super-admin') || $user->can('edit-personel-all-opd')) {
+            return true;
+        }
+
+        // 2. edit-personel-opd: hanya bisa jika se-OPD
+        if ($user->can('edit-personel-opd')) {
+            $userOpdId = $user->opd()?->id;
+
+            return ! empty($userOpdId) && ! empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
+        }
+
+        return false;
+    }
+
+    private function canDeletePersonnel(?Personnel $personnel): bool
+    {
+        if (! $personnel) {
+            return false;
+        }
+
+        /** @var User|null $user */
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        // 1. delete-personel-all-opd atau role super-admin
+        if ($user->hasRole('super-admin') || $user->can('delete-personel-all-opd')) {
+            return true;
+        }
+
+        // 2. delete-personel-opd: hanya bisa jika se-OPD
+        if ($user->can('delete-personel-opd')) {
+            $userOpdId = $user->opd()?->id;
+
+            return ! empty($userOpdId) && ! empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
+        }
+
+        return false;
     }
 
     public function resetPin(int $id): void
     {
         $item = Personnel::findOrFail($id);
-        if (!Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
-            abort(403, 'Unauthorized action.');
+        if (! $this->canEditPersonnel($item)) {
+            abort(403, 'Anda tidak memiliki izin untuk mereset PIN personel ini.');
         }
 
         $newPin = $this->generateUniquePin();
@@ -108,7 +185,7 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->dispatch('toast', [
             'type' => 'success',
             'title' => 'PIN Direset',
-            'message' => "PIN baru untuk {$item->name} adalah: {$newPin}"
+            'message' => "PIN baru untuk {$item->name} adalah: {$newPin}",
         ]);
     }
 
@@ -124,8 +201,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public function confirmDelete(int $id, string $name): void
     {
         $item = Personnel::findOrFail($id);
-        if (!Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
-            abort(403, 'Unauthorized action.');
+        if (! $this->canDeletePersonnel($item)) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus personel ini.');
         }
 
         $this->deleteId = $id;
@@ -137,8 +214,8 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     {
         $item = Personnel::findOrFail($this->deleteId);
 
-        if (!Auth::user()->hasRole('super-admin') && $item->opd_id !== Auth::user()->opd()?->id) {
-            abort(403, 'Unauthorized action.');
+        if (! $this->canDeletePersonnel($item)) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus personel ini.');
         }
 
         if ($item->foto) {
@@ -152,12 +229,18 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
         $this->dispatch('toast', [
             'type' => 'success',
             'title' => 'Berhasil',
-            'message' => 'Data Personnel berhasil dihapus.'
+            'message' => 'Data Personnel berhasil dihapus.',
         ]);
     }
 
     public function goToAdd()
     {
+        /** @var User|null $user */
+        $user = $this->user();
+        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('create-personel-all-opd') && ! $user->can('create-personel-opd'))) {
+            abort(403, 'Anda tidak memiliki izin untuk menambah personel.');
+        }
+
         return $this->redirectRoute('personnel.tambah', [], true, true);
     }
 

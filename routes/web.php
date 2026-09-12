@@ -65,11 +65,11 @@ Route::group([
         ->name('personnel');
 
     Route::livewire('/personnel/tambah', 'admin::personnel-create')
-        ->middleware('permission:manajemen-personel')
+        ->middleware('role_or_permission:super-admin|create-personel-all-opd|create-personel-opd')
         ->name('personnel.tambah');
 
     Route::livewire('/personnel/{id}/edit', 'admin::personnel-edit')
-        ->middleware('permission:manajemen-personel')
+        ->middleware('role_or_permission:super-admin|edit-personel-all-opd|edit-personel-opd')
         ->name('personnel.edit');
 
     Route::livewire('/kantor', 'admin::kantors')

@@ -157,7 +157,7 @@
                                     </label>
                                     <select wire:model="opd_id"
                                         class="select select-bordered focus:select-primary w-full transition-all @error('opd_id') select-error @enderror"
-                                        @if (!auth()->user()->hasRole('super-admin')) disabled @endif>
+                                        @if (!auth()->user()->hasRole('super-admin') && !auth()->user()->can('edit-personel-all-opd')) disabled @endif>
                                         <option value="">-- Pilih OPD --</option>
                                         @foreach ($this->opds as $opd)
                                             <option value="{{ $opd->id }}">{{ $opd->name }}</option>

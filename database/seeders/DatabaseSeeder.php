@@ -80,6 +80,14 @@ class DatabaseSeeder extends Seeder
 
             // Personel
             ['name' => 'manajemen-personel', 'group' => 'Personel'],
+            ['name' => 'create-personel-all-opd', 'group' => 'Personel'],
+            ['name' => 'create-personel-opd', 'group' => 'Personel'],
+            ['name' => 'edit-personel-all-opd', 'group' => 'Personel'],
+            ['name' => 'edit-personel-opd', 'group' => 'Personel'],
+            ['name' => 'lihat-personel-all-opd', 'group' => 'Personel'],
+            ['name' => 'lihat-personel-opd', 'group' => 'Personel'],
+            ['name' => 'delete-personel-all-opd', 'group' => 'Personel'],
+            ['name' => 'delete-personel-opd', 'group' => 'Personel'],
 
             // Role & Permission
             ['name' => 'manajemen-role-permission', 'group' => 'Role & Permission'],
@@ -132,6 +140,10 @@ class DatabaseSeeder extends Seeder
             'manajemen-role-permission',
             'manajemen-user',
             'edit-absensi-all-opd',
+            'create-personel-all-opd',
+            'edit-personel-all-opd',
+            'lihat-personel-all-opd',
+            'delete-personel-all-opd',
         ]);
 
         // 5. Assign specific permissions to admin-opd
@@ -143,6 +155,10 @@ class DatabaseSeeder extends Seeder
             'manajemen-jadwal-import',
             'manajemen-personel',
             'edit-absensi-opd',
+            'create-personel-opd',
+            'edit-personel-opd',
+            'lihat-personel-opd',
+            'delete-personel-opd',
         ]);
 
         // 6. Assign specific permissions to admin-absen
