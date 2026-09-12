@@ -120,6 +120,10 @@ Route::group([
         ->middleware('permission:lihat-dokumentasi-konsumsi')
         ->name('dokumentasi-konsumsi');
 
+    Route::livewire('/upload-dokumentasi', 'admin::upload-dokumentasi')
+        ->middleware('permission:upload-dokumentasi')
+        ->name('upload-dokumentasi');
+
     Route::livewire('/absensi/log', 'admin::absensi-log')
         ->middleware('permission:manajemen-absensi')
         ->name('absensi.log');

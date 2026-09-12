@@ -56,6 +56,8 @@ class DatabaseSeeder extends Seeder
 
             // Konsumsi
             ['name' => 'manajemen-konsumsi', 'group' => 'Konsumsi'],
+            ['name' => 'lihat-dokumentasi-konsumsi', 'group' => 'Dokumentasi'],
+            ['name' => 'upload-dokumentasi', 'group' => 'Dokumentasi'],
 
             // Kotak Sampah
             ['name' => 'manajemen-kotak-sampah-absensi', 'group' => 'Kotak Sampah'],
@@ -165,6 +167,18 @@ class DatabaseSeeder extends Seeder
         $adminAbsenRole->givePermissionTo([
             'halaman-absensi',
             'lihat-dashboard',
+        ]);
+
+        // 7. Seed Kordinator Role
+        $kordinatorRole = Role::firstOrCreate(['name' => 'kordinator'], ['color' => '#10b981']);
+        $kordinatorRole->givePermissionTo([
+            'manajemen-personel',
+            'lihat-dashboard',
+            'edit-absensi-all-opd',
+            'lihat-personel-all-opd',
+            'edit-personel-all-opd',
+            'create-personel-all-opd',
+            'upload-dokumentasi',
         ]);
 
         // 7. Create Super Admin User
