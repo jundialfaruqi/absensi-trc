@@ -83,7 +83,10 @@ new class extends Component
         $personnel = Personnel::findOrFail($personnelId);
 
         // Authorization check
-        if (! Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! $this->canEditPersonnel($personnel)) {
+            $this->dispatch('close-modal', id: 'edit-absensi-modal');
+            $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
+
             return;
         }
 
@@ -239,7 +242,10 @@ new class extends Component
         $personnel = Personnel::findOrFail($this->editingPersonnelId);
 
         // Authorization check
-        if (! Auth::user()->hasRole('super-admin') && $personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! $this->canEditPersonnel($personnel)) {
+            $this->dispatch('close-modal', id: 'edit-absensi-modal');
+            $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
+
             return;
         }
 
@@ -290,7 +296,10 @@ new class extends Component
         $absensi = Absensi::findOrFail($this->editingAbsensiId);
 
         // Authorization check
-        if (! Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! $this->canEditPersonnel($absensi->personnel)) {
+            $this->dispatch('close-modal', id: 'edit-absensi-modal');
+            $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
+
             return;
         }
 
@@ -344,13 +353,18 @@ new class extends Component
 
         // Permission check
         if (! Auth::user()->can('reset-absen')) {
+            $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mereset absensi.', type: 'error');
+
             return;
         }
 
         $absensi = Absensi::findOrFail($this->editingAbsensiId);
 
         // Authorization check
-        if (! Auth::user()->hasRole('super-admin') && $absensi->personnel->opd_id !== Auth::user()->opd()?->id) {
+        if (! $this->canEditPersonnel($absensi->personnel)) {
+            $this->dispatch('close-modal', id: 'edit-absensi-modal');
+            $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
+
             return;
         }
 
@@ -390,6 +404,37 @@ new class extends Component
     public function cutis()
     {
         return Cuti::orderBy('name')->get();
+    }
+
+    /**
+     * Cek hak akses untuk mengedit absensi personel:
+     * 1. Jika permission = edit-absensi-all-opd (atau role super-admin), bisa mengedit absensi seluruh personel OPD.
+     * 2. Jika permission = edit-absensi-opd, hanya bisa mengedit absensi personel OPD-nya sendiri.
+     */
+    private function canEditPersonnel(?Personnel $personnel): bool
+    {
+        if (! $personnel) {
+            return false;
+        }
+
+        $user = Auth::user();
+        if (! $user) {
+            return false;
+        }
+
+        // 1. Permission edit-absensi-all-opd atau role super-admin: bisa edit semua OPD
+        if ($user->can('edit-absensi-all-opd') || $user->hasRole('super-admin')) {
+            return true;
+        }
+
+        // 2. Permission edit-absensi-opd: hanya bisa edit OPD-nya sendiri
+        if ($user->can('edit-absensi-opd')) {
+            $userOpdId = $user->opd()?->id;
+
+            return ! empty($userOpdId) && ! empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
+        }
+
+        return false;
     }
 
     private function resetEditForm()

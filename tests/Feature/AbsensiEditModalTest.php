@@ -237,3 +237,135 @@ test('validation messages are in Indonesian and validation errors are reset on c
     $component->call('open', $personnel->id, $date)
         ->assertHasNoErrors();
 });
+
+test('user with edit-absensi-all-opd permission can open and edit attendance of any OPD personnel', function () {
+    $permAll = Permission::firstOrCreate(['name' => 'edit-absensi-all-opd', 'group' => 'Absensi']);
+    $user = User::factory()->create();
+    $user->givePermissionTo($permAll);
+
+    $opd1 = Opd::create(['name' => 'OPD Satu', 'code' => 'OPD1']);
+    $opd2 = Opd::create(['name' => 'OPD Dua', 'code' => 'OPD2']);
+    $user->opds()->attach($opd1->id);
+
+    $personnel = Personnel::create([
+        'name' => 'Pegawai OPD 2',
+        'nik' => '1234567890123499',
+        'opd_id' => $opd2->id,
+        'penugasan_id' => 1,
+        'foto' => 'opd2.jpg',
+        'email' => 'opd2@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-20';
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertSet('editingPersonnelId', $personnel->id)
+        ->set('statusMasuk', 'HADIR')
+        ->set('alasanEdit', 'Perubahan absensi oleh admin all opd')
+        ->call('saveEdit')
+        ->assertDispatched('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
+
+    $saved = Absensi::where('personnel_id', $personnel->id)->whereDate('tanggal', $date)->first();
+    expect($saved)->not->toBeNull()
+        ->and($saved->status_masuk)->toBe('HADIR');
+});
+
+test('user with edit-absensi-opd permission can open and edit attendance of own OPD personnel', function () {
+    $permOpd = Permission::firstOrCreate(['name' => 'edit-absensi-opd', 'group' => 'Absensi']);
+    $user = User::factory()->create();
+    $user->givePermissionTo($permOpd);
+
+    $opd1 = Opd::create(['name' => 'OPD Satu', 'code' => 'OPD1']);
+    $user->opds()->attach($opd1->id);
+
+    $personnel = Personnel::create([
+        'name' => 'Pegawai OPD 1',
+        'nik' => '1234567890123498',
+        'opd_id' => $opd1->id,
+        'penugasan_id' => 1,
+        'foto' => 'opd1.jpg',
+        'email' => 'opd1@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-20';
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertSet('editingPersonnelId', $personnel->id)
+        ->set('statusMasuk', 'HADIR')
+        ->set('alasanEdit', 'Perubahan absensi oleh admin opd sendiri')
+        ->call('saveEdit')
+        ->assertDispatched('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
+
+    $saved = Absensi::where('personnel_id', $personnel->id)->whereDate('tanggal', $date)->first();
+    expect($saved)->not->toBeNull()
+        ->and($saved->status_masuk)->toBe('HADIR');
+});
+
+test('user with edit-absensi-opd permission cannot open or edit attendance of other OPD personnel', function () {
+    $permOpd = Permission::firstOrCreate(['name' => 'edit-absensi-opd', 'group' => 'Absensi']);
+    $user = User::factory()->create();
+    $user->givePermissionTo($permOpd);
+
+    $opd1 = Opd::create(['name' => 'OPD Satu', 'code' => 'OPD1']);
+    $opd2 = Opd::create(['name' => 'OPD Dua', 'code' => 'OPD2']);
+    $user->opds()->attach($opd1->id);
+
+    $personnel = Personnel::create([
+        'name' => 'Pegawai OPD 2',
+        'nik' => '1234567890123497',
+        'opd_id' => $opd2->id,
+        'penugasan_id' => 1,
+        'foto' => 'opd2b.jpg',
+        'email' => 'opd2b@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-20';
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertSet('editingPersonnelId', null)
+        ->assertDispatched('close-modal', id: 'edit-absensi-modal')
+        ->assertDispatched('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
+});
+
+test('user without edit-absensi-all-opd or edit-absensi-opd cannot open or edit attendance', function () {
+    $user = User::factory()->create();
+
+    $opd1 = Opd::create(['name' => 'OPD Satu', 'code' => 'OPD1']);
+    $user->opds()->attach($opd1->id);
+
+    $personnel = Personnel::create([
+        'name' => 'Pegawai OPD 1',
+        'nik' => '1234567890123496',
+        'opd_id' => $opd1->id,
+        'penugasan_id' => 1,
+        'foto' => 'opd1c.jpg',
+        'email' => 'opd1c@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-20';
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertSet('editingPersonnelId', null)
+        ->assertDispatched('close-modal', id: 'edit-absensi-modal')
+        ->assertDispatched('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
+});

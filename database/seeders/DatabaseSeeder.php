@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
             ['name' => 'manajemen-absensi', 'group' => 'Absensi'],
             ['name' => 'manajemen-absensi-anomaly', 'group' => 'Absensi'],
             ['name' => 'reset-absen', 'group' => 'Absensi'],
+            ['name' => 'edit-absensi-all-opd', 'group' => 'Absensi'],
+            ['name' => 'edit-absensi-opd', 'group' => 'Absensi'],
 
             // APK
             ['name' => 'download-apk', 'group' => 'APK'],
@@ -129,6 +131,7 @@ class DatabaseSeeder extends Seeder
             'manajemen-shift',
             'manajemen-role-permission',
             'manajemen-user',
+            'edit-absensi-all-opd',
         ]);
 
         // 5. Assign specific permissions to admin-opd
@@ -139,6 +142,7 @@ class DatabaseSeeder extends Seeder
             'manajemen-jadwal',
             'manajemen-jadwal-import',
             'manajemen-personel',
+            'edit-absensi-opd',
         ]);
 
         // 6. Assign specific permissions to admin-absen
