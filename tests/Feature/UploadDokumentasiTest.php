@@ -308,4 +308,33 @@ test('save is blocked with error if documentation for shift already exists', fun
         ->assertHasErrors(['shift']);
 });
 
+test('validation fails when jumlah_porsi is negative or non-integer', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    $targetDate = Carbon::today()->format('Y-m-d');
+    $foto = UploadedFile::fake()->create('test.webp', 80, 'image/webp');
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', -5)
+        ->set('foto1', $foto)
+        ->call('save')
+        ->assertHasErrors(['jumlah_porsi' => 'min']);
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 'abc')
+        ->set('foto1', $foto)
+        ->call('save')
+        ->assertHasErrors(['jumlah_porsi' => 'integer']);
+});
+
+
 

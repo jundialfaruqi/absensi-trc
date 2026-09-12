@@ -26,7 +26,7 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
     public bool $readyToLoad = false;
     public string $tanggal = '';
     public string $shift = ''; // '' | 'siang' | 'malam'
-    public ?int $jumlah_porsi = 0;
+    public int|string|null $jumlah_porsi = 0;
     public ?string $keterangan = '';
     public $foto1 = null;
     public $foto2 = null;
@@ -261,6 +261,8 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
             'shift.required' => 'Silakan pilih shift terlebih dahulu.',
             'shift.in' => 'Shift yang dipilih tidak valid.',
             'jumlah_porsi.required' => 'Jumlah porsi wajib diisi.',
+            'jumlah_porsi.integer' => 'Jumlah porsi harus berupa angka bulat.',
+            'jumlah_porsi.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
             'jumlah_porsi.max' => "Jumlah porsi tidak boleh melebihi perhitungan otomatis ({$max} Porsi).",
             'foto1.required' => 'Foto dokumentasi utama wajib diunggah.',
             'foto1.image' => 'File harus berupa gambar.',

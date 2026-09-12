@@ -79,19 +79,6 @@
                                     <span class="label-text text-sm font-medium text-base-content">
                                         Jumlah Porsi Makan <span class="text-error">*</span>
                                     </span>
-                                    @if ($shift)
-                                        {{-- Skeleton Maks Porsi saat shift sedang di-load --}}
-                                        <div wire:loading wire:target="shift">
-                                            <div class="h-4 w-20 bg-base-300 rounded animate-pulse"></div>
-                                        </div>
-                                        <span wire:loading.remove wire:target="shift"
-                                            class="text-xs text-base-content/70">
-                                            Maks:
-                                            <span class="font-bold text-primary pb-0.5">
-                                                {{ $this->maxPorsi }} Porsi
-                                            </span>
-                                        </span>
-                                    @endif
                                 </label>
 
                                 {{-- Skeleton input porsi saat shift sedang di-load --}}
@@ -99,13 +86,172 @@
                                     <div class="h-12 w-full bg-base-300/80 rounded-lg animate-pulse"></div>
                                 </div>
 
-                                {{-- Input porsi saat shift sudah selesai dimuat --}}
-                                <div wire:loading.remove wire:target="shift" class="relative">
-                                    <input type="number" wire:model="jumlah_porsi" min="0"
-                                        max="{{ $this->maxPorsi }}" @disabled(!$shift || $this->isShiftAlreadyDocumented)
-                                        class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('jumlah_porsi') input-error @enderror"
-                                        placeholder="0">
+                                {{-- Input porsi & stepper saat shift sudah selesai dimuat --}}
+                                <div wire:loading.remove wire:target="shift" class="w-full"
+                                    wire:key="porsi-stepper-container-{{ $shift }}-{{ (int) $this->maxPorsi }}"
+                                    x-data="{
+                                        porsi: @entangle('jumlah_porsi'),
+                                        max: {{ (int) $this->maxPorsi }},
+                                        isBlocked: {{ $this->isShiftAlreadyDocumented || !$shift ? 'true' : 'false' }},
+                                        get shortcuts() {
+                                            const m = parseInt(this.max, 10) || 0;
+                                            if (m <= 0) return [];
+                                            if (m <= 5) {
+                                                let res = [];
+                                                for (let i = 1; i <= m; i++) res.push(i);
+                                                return res;
+                                            }
+                                            let base = m <= 25 ? [5, 10, 15, 20] : (m <= 50 ? [10, 20, 30, 40] : [10, 25, 50, 75, 100]);
+                                            let res = base.filter(n => n < m);
+                                            if (res.length === 0 && m > 2) {
+                                                res.push(Math.floor(m / 2));
+                                            }
+                                            if (!res.includes(m)) {
+                                                res.push(m);
+                                            }
+                                            return res;
+                                        },
+                                        syncToLivewire() {
+                                            const val = this.porsi === '' ? 0 : (parseInt(this.porsi, 10) || 0);
+                                            if (typeof this.$wire !== 'undefined') {
+                                                this.$wire.set('jumlah_porsi', val, false);
+                                            }
+                                        },
+                                        increment() {
+                                            if (this.isBlocked) return;
+                                            let val = parseInt(this.porsi, 10) || 0;
+                                            if (this.max > 0 && val >= this.max) return;
+                                            this.porsi = val + 1;
+                                            this.syncToLivewire();
+                                        },
+                                        decrement() {
+                                            if (this.isBlocked) return;
+                                            let val = parseInt(this.porsi, 10) || 0;
+                                            if (val <= 0) return;
+                                            this.porsi = val - 1;
+                                            this.syncToLivewire();
+                                        },
+                                        setShortcut(val) {
+                                            if (this.isBlocked) return;
+                                            let target = parseInt(val, 10) || 0;
+                                            if (this.max > 0 && target > this.max) target = this.max;
+                                            this.porsi = target;
+                                            this.syncToLivewire();
+                                        },
+                                        handleInput(e) {
+                                            let raw = e.target.value;
+                                            let clean = raw.replace(/[^0-9]/g, '');
+                                            if (clean !== raw) {
+                                                e.target.value = clean;
+                                            }
+                                            if (clean === '') {
+                                                this.porsi = '';
+                                                this.syncToLivewire();
+                                                return;
+                                            }
+                                            let num = parseInt(clean, 10);
+                                            if (isNaN(num)) num = 0;
+                                            if (this.max > 0 && num > this.max) {
+                                                num = this.max;
+                                                e.target.value = num;
+                                            }
+                                            this.porsi = num;
+                                            this.syncToLivewire();
+                                        },
+                                        handleKeydown(e) {
+                                            if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                                                return;
+                                            }
+                                            if (e.key === 'ArrowUp') {
+                                                e.preventDefault();
+                                                this.increment();
+                                                return;
+                                            }
+                                            if (e.key === 'ArrowDown') {
+                                                e.preventDefault();
+                                                this.decrement();
+                                                return;
+                                            }
+                                            if (e.ctrlKey || e.metaKey) {
+                                                return;
+                                            }
+                                            if (!/^[0-9]$/.test(e.key)) {
+                                                e.preventDefault();
+                                            }
+                                        },
+                                        handlePaste(e) {
+                                            e.preventDefault();
+                                            let text = (e.clipboardData || window.clipboardData).getData('text') || '';
+                                            let clean = text.replace(/[^0-9]/g, '');
+                                            if (clean) {
+                                                let num = parseInt(clean, 10);
+                                                if (this.max > 0 && num > this.max) num = this.max;
+                                                this.porsi = num;
+                                                this.syncToLivewire();
+                                            }
+                                        },
+                                        handleBlur() {
+                                            if (this.porsi === '' || isNaN(this.porsi) || this.porsi === null) {
+                                                this.porsi = 0;
+                                                this.syncToLivewire();
+                                            }
+                                        }
+                                    }">
+
+                                    {{-- Stepper Input Group: Form Input + Tombol Kurang & Tambah di samping kanan --}}
+                                    <div class="join w-full shadow-xs">
+                                        <input type="text" inputmode="numeric" pattern="[0-9]*" x-model="porsi"
+                                            @input="handleInput($event)" @keydown="handleKeydown($event)"
+                                            @paste="handlePaste($event)" @blur="handleBlur()" @drop.prevent
+                                            @disabled(!$shift || $this->isShiftAlreadyDocumented)
+                                            class="input input-bordered focus:input-primary join-item flex-1 font-medium transition-all @error('jumlah_porsi') input-error @enderror"
+                                            placeholder="0">
+
+                                        {{-- Tombol Kurang (-) --}}
+                                        <button type="button" @click="decrement()" :disabled="isBlocked || porsi <= 0"
+                                            title="Kurangi 1 Porsi"
+                                            class="btn join-item btn-outline border-base-300 hover:border-base-content/20 hover:bg-base-200 px-3.5 transition-transform active:scale-95 disabled:opacity-40">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                                            </svg>
+                                        </button>
+
+                                        {{-- Tombol Tambah (+) --}}
+                                        <button type="button" @click="increment()"
+                                            :disabled="isBlocked || (max > 0 && porsi >= max)" title="Tambah 1 Porsi"
+                                            class="btn join-item btn-outline border-base-300 hover:border-primary hover:bg-primary hover:text-white px-3.5 transition-transform active:scale-95 disabled:opacity-40">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {{-- Shortcut Pilihan Cepat Jumlah Porsi --}}
+                                    <div x-show="max > 0 && !isBlocked && shortcuts.length > 0" x-cloak
+                                        class="flex flex-wrap items-center gap-1.5 mt-2">
+                                        <span
+                                            class="text-xs text-base-content/60 mr-1 flex items-center gap-1 font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.8" stroke="currentColor" class="size-3.5 text-primary">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                                            </svg>
+                                            Pilihan Cepat:
+                                        </span>
+                                        <template x-for="item in shortcuts" :key="item">
+                                            <button type="button" @click="setShortcut(item)"
+                                                :class="porsi == item ? 'btn-primary text-white font-bold shadow-xs' :
+                                                    'btn-ghost bg-base-200 hover:bg-base-300 text-base-content/80 font-medium'"
+                                                class="btn btn-xs rounded-md transition-all active:scale-95"
+                                                x-text="item + ' Porsi'">
+                                            </button>
+                                        </template>
+                                    </div>
                                 </div>
+
                                 <div class="flex items-center justify-between mt-1 px-1">
                                     <div wire:loading wire:target="shift" class="w-full">
                                         <div class="h-3 w-64 bg-base-300 rounded animate-pulse mt-0.5"></div>
@@ -119,11 +265,11 @@
                                             </span>
                                         @else
                                             <span class="text-[11px] text-base-content/50">
-                                                Pilih shift terlebih dahulu untuk melihat kuota porsi.
+                                                Pilih shift terlebih dahulu untuk menentukan kuota porsi.
                                             </span>
                                         @endif
                                         @error('jumlah_porsi')
-                                            <span class="text-error text-xs">{{ $message }}</span>
+                                            <span class="text-error text-xs font-semibold">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
@@ -193,8 +339,9 @@
                                         {{-- Placeholder jika shift belum dipilih --}}
                                         <div
                                             class="flex flex-col items-center justify-center p-8 text-center text-base-content/40 border-2 border-dashed border-base-300 rounded-xl my-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                class="w-12 h-12 mb-3">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                             </svg>
@@ -298,7 +445,8 @@
                                                     <div wire:key="foto1-preview-container-{{ $uploadIteration }}">
                                                         <div
                                                             class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
-                                                            <img src="{{ $foto1->temporaryUrl() }}" alt="Preview Foto 1"
+                                                            <img src="{{ $foto1->temporaryUrl() }}"
+                                                                alt="Preview Foto 1"
                                                                 class="w-full h-full object-cover">
                                                             <div class="absolute top-2 right-2">
                                                                 <span
@@ -316,7 +464,8 @@
                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                                     viewBox="0 0 24 24" stroke-width="2"
                                                                     stroke="currentColor" class="size-4">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round"
                                                                         d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                                 </svg>
                                                                 <span>Hapus Foto Utama</span>
@@ -326,7 +475,7 @@
                                                 @else
                                                     {{-- Area Pemilihan Foto 1 (Dengan 2 Tombol: Dokumen & Kamera HP) --}}
                                                     <div wire:key="foto1-dropzone-container-{{ $uploadIteration }}"
-                                                        class="relative flex flex-col items-center justify-center w-full min-h-[220px] aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
+                                                        class="relative flex flex-col items-center justify-center w-full min-h-55 aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
                                                         :class="{
                                                             'border-primary/60 bg-primary/5': isProcessing1,
                                                             'border-base-300 hover:border-primary/50 hover:bg-base-200/60':
@@ -345,7 +494,7 @@
                                                             <span class="text-[11px] text-base-content/60 mt-1"
                                                                 x-show="compressInfo1" x-text="compressInfo1"></span>
 
-                                                            <div class="w-full max-w-[200px] mt-3">
+                                                            <div class="w-full max-w-50 mt-3">
                                                                 <div
                                                                     class="w-full bg-base-300 rounded-full h-2 overflow-hidden shadow-inner">
                                                                     <div class="bg-primary h-2 rounded-full transition-all duration-200"
@@ -376,7 +525,7 @@
                                                                 atau
                                                                 Ambil Foto Utama</span>
                                                             <span
-                                                                class="text-[10px] text-base-content/60 text-center max-w-[220px] mt-0.5">
+                                                                class="text-[10px] text-base-content/60 text-center max-w-55 mt-0.5">
                                                                 Maks. 10MB dari HP/PC, otomatis dikompres ke WebP
                                                                 (&le;100KB)
                                                             </span>
@@ -474,7 +623,8 @@
                                                     <div wire:key="foto2-preview-container-{{ $uploadIteration }}">
                                                         <div
                                                             class="w-full aspect-4/3 bg-base-200 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group">
-                                                            <img src="{{ $foto2->temporaryUrl() }}" alt="Preview Foto 2"
+                                                            <img src="{{ $foto2->temporaryUrl() }}"
+                                                                alt="Preview Foto 2"
                                                                 class="w-full h-full object-cover">
                                                             <div class="absolute top-2 right-2">
                                                                 <span
@@ -492,7 +642,8 @@
                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                                     viewBox="0 0 24 24" stroke-width="2"
                                                                     stroke="currentColor" class="size-4">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round"
                                                                         d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                                 </svg>
                                                                 <span>Hapus Foto Tambahan</span>
@@ -502,7 +653,7 @@
                                                 @else
                                                     {{-- Area Pemilihan Foto 2 (Dengan 2 Tombol: Dokumen & Kamera HP) --}}
                                                     <div wire:key="foto2-dropzone-container-{{ $uploadIteration }}"
-                                                        class="relative flex flex-col items-center justify-center w-full min-h-[220px] aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
+                                                        class="relative flex flex-col items-center justify-center w-full min-h-55 aspect-4/3 border-2 border-dashed rounded-xl transition-all p-4 text-center bg-base-200/40"
                                                         :class="{
                                                             'border-primary/60 bg-primary/5': isProcessing2,
                                                             'border-base-300 hover:border-primary/50 hover:bg-base-200/60':
@@ -521,7 +672,7 @@
                                                             <span class="text-[11px] text-base-content/60 mt-1"
                                                                 x-show="compressInfo2" x-text="compressInfo2"></span>
 
-                                                            <div class="w-full max-w-[200px] mt-3">
+                                                            <div class="w-full max-w-50 mt-3">
                                                                 <div
                                                                     class="w-full bg-base-300 rounded-full h-2 overflow-hidden shadow-inner">
                                                                     <div class="bg-primary h-2 rounded-full transition-all duration-200"
@@ -552,7 +703,7 @@
                                                                 atau
                                                                 Ambil Foto Tambahan</span>
                                                             <span
-                                                                class="text-[10px] text-base-content/60 text-center max-w-[220px] mt-0.5">
+                                                                class="text-[10px] text-base-content/60 text-center max-w-55 mt-0.5">
                                                                 Maks. 10MB dari HP/PC, otomatis dikompres ke WebP
                                                                 (&le;100KB)
                                                             </span>
