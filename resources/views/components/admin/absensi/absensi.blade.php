@@ -32,6 +32,7 @@
                 <span>Rekap Absensi</span>
             </a>
 
+            @can('lihat-dokumentasi-konsumsi')
             <a href="{{ route('dokumentasi-konsumsi') }}" wire:navigate
                 :class="activeTab === 'konsumsi' ? 'border-primary text-primary font-bold' : 'border-transparent text-base-content/60 hover:text-base-content hover:border-base-300 font-medium'"
                 class="inline-flex items-center gap-2 py-3 px-1 border-b-4 text-sm transition-all border-transparent text-base-content/60 hover:text-base-content hover:border-base-300 font-medium cursor-pointer">
@@ -42,6 +43,7 @@
                 </svg>
                 <span>Rekap Dokumentasi Konsumsi</span>
             </a>
+            @endcan
         </nav>
     </div>
 
@@ -624,6 +626,7 @@
     </div>
 
     {{-- ─── Rekap Dokumentasi Konsumsi Placeholder ─────────────────────────── --}}
+    @can('lihat-dokumentasi-konsumsi')
     <div x-show="activeTab === 'konsumsi'" x-cloak class="bg-base-100 rounded-2xl border border-base-200 p-12 text-center my-6">
         <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-8" fill="none" viewBox="0 0 24 24"
@@ -637,6 +640,7 @@
             Menu dokumentasi konsumsi sedang disiapkan.
         </p>
     </div>
+    @endcan
 
     <livewire:admin::absensi-edit-modal />
 

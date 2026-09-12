@@ -30,6 +30,7 @@
                 <span>Rekap Absensi</span>
             </a>
 
+            @can('lihat-dokumentasi-konsumsi')
             <a href="{{ route('dokumentasi-konsumsi') }}"
                 class="inline-flex items-center gap-2 py-3 px-1 border-b-4 text-sm transition-all border-primary text-primary font-bold cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24"
@@ -39,6 +40,7 @@
                 </svg>
                 <span>Rekap Dokumentasi Konsumsi</span>
             </a>
+            @endcan
         </nav>
     </div>
 

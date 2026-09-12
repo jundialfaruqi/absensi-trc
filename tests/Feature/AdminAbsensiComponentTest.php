@@ -126,6 +126,9 @@ test('export modal initiates download via startExport with progress and file pat
 
 test('admin absensi component renders navigation tabs for Rekap Absensi and Rekap Dokumentasi Konsumsi with active border and primary text', function () {
     $user = User::factory()->create();
+    $role = Role::firstOrCreate(['name' => 'super-admin', 'color' => '#ef4444']);
+    $perm = Permission::firstOrCreate(['name' => 'lihat-dokumentasi-konsumsi', 'group' => 'Dokumentasi']);
+    $role->givePermissionTo($perm);
     $user->assignRole('super-admin');
 
     Livewire::actingAs($user)
@@ -139,5 +142,16 @@ test('admin absensi component renders navigation tabs for Rekap Absensi and Reka
         ->call('load')
         ->assertSee('border-primary text-primary', false)
         ->assertSee('border-b-4', false);
+});
+
+test('admin absensi component hides Rekap Dokumentasi Konsumsi tab for user without lihat-dokumentasi-konsumsi permission', function () {
+    $user = User::factory()->create();
+    $role = Role::firstOrCreate(['name' => 'pegawai-biasa', 'color' => '#64748b']);
+    $user->assignRole($role);
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi')
+        ->assertSee('Rekap Absensi')
+        ->assertDontSee('Rekap Dokumentasi Konsumsi');
 });
 
