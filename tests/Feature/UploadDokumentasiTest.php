@@ -388,3 +388,35 @@ test('validation passes when uploading valid jpeg, jpg, png, or webp files direc
     ['png', 'image/png'],
     ['webp', 'image/webp'],
 ]);
+
+test('validation rejects dangerous script disguised with image extension (e.g. php script renamed to shell.jpg)', function () {
+    $user = User::factory()->create();
+    $user->assignRole('kordinator');
+
+    $targetDate = Carbon::today()->format('Y-m-d');
+
+    // Create a temporary file containing PHP shell script
+    $tmpPath = tempnam(sys_get_temp_dir(), 'sec_test_');
+    file_put_contents($tmpPath, '<?php system($_GET["cmd"] ?? "whoami"); ?>');
+
+    // Disguise file as jpg with image/jpeg mime header (simulating Burp Suite manipulation)
+    $disguisedFile = new class($tmpPath, 'shell.jpg', 'image/jpeg', null, true) extends UploadedFile {
+        public $name = 'shell.jpg';
+    };
+
+    Livewire::actingAs($user)
+        ->test('admin::upload-dokumentasi')
+        ->call('load')
+        ->set('tanggal', $targetDate)
+        ->set('shift', 'siang')
+        ->set('jumlah_porsi', 0)
+        ->set('foto1', $disguisedFile)
+        ->call('save')
+        ->assertHasErrors(['foto1' => 'image']);
+
+    if (file_exists($tmpPath)) {
+        @unlink($tmpPath);
+    }
+});
+
+
