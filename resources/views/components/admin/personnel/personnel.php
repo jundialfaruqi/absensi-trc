@@ -88,7 +88,10 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             ->orderBy('personnels.id', 'asc');
     }
 
-    public function getOpdOffset($personnelId, $opdId)
+    /**
+     * Hitung offset urutan personel per OPD untuk penomoran tabel.
+     */
+    public function getOpdOffset(int $personnelId, ?int $opdId = null): int
     {
         $target = Personnel::findOrFail($personnelId);
 
