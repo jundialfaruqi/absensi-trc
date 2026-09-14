@@ -166,7 +166,7 @@
             vertical-align: top;
             border: none;
             border-radius: 0px;
-            padding: 4px 10px;
+            padding: 0 10px;
             text-align: center;
             background-color: transparent;
         }
@@ -185,12 +185,12 @@
         }
 
         .dok-col-title {
+            width: 50%;
             font-weight: bold;
             font-size: 11px;
-            padding: 4px 0;
+            padding: 4px 10px 8px 10px;
             border-radius: 0px;
             text-align: center;
-            margin-bottom: 8px;
             background-color: transparent !important;
             border: none !important;
             color: #1e293b;
@@ -459,11 +459,16 @@
 
                 <table class="dok-table">
                     <tr>
+                        <td class="dok-col-title title-siang">
+                            Siang : {{ $item['jumlah_siang'] }} bungkus
+                        </td>
+                        <td class="dok-col-title title-malam">
+                            Malam : {{ $item['jumlah_malam'] }} Bungkus
+                        </td>
+                    </tr>
+                    <tr>
                         {{-- Kolom Siang --}}
                         <td class="dok-col dok-col-siang">
-                            <div class="dok-col-title title-siang">
-                                Siang : {{ $item['jumlah_siang'] }} bungkus
-                            </div>
                             <div class="dok-photos">
                                 @if ($item['foto_siang'])
                                     <div class="dok-card {{ empty($item['foto_siang_2']) ? 'dok-card-last' : '' }}">
@@ -483,9 +488,6 @@
 
                         {{-- Kolom Malam --}}
                         <td class="dok-col dok-col-malam">
-                            <div class="dok-col-title title-malam">
-                                Malam : {{ $item['jumlah_malam'] }} Bungkus
-                            </div>
                             <div class="dok-photos">
                                 @if ($item['foto_malam'])
                                     <div class="dok-card {{ empty($item['foto_malam_2']) ? 'dok-card-last' : '' }}">
