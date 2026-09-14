@@ -685,6 +685,8 @@
 
                                             $isHadir =
                                                 $abs &&
+                                                !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                                                !in_array($abs->status_masuk, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
                                                 ($abs->status === 'HADIR' ||
                                                     $abs->status === 'TELAT' ||
                                                     $abs->status_masuk === 'HADIR' ||

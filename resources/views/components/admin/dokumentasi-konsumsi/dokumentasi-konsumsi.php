@@ -175,13 +175,16 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 $abs = $absensiMap->get($date);
                 $jadwal = $jadwalMap->get($date);
 
-                $isHadir = $abs && (
-                    $abs->status === 'HADIR' ||
-                    $abs->status === 'TELAT' ||
-                    $abs->status_masuk === 'HADIR' ||
-                    $abs->status_masuk === 'TELAT' ||
-                    !empty($abs->jam_masuk)
-                );
+                $isHadir = $abs &&
+                    !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                    !in_array($abs->status_masuk, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                    (
+                        $abs->status === 'HADIR' ||
+                        $abs->status === 'TELAT' ||
+                        $abs->status_masuk === 'HADIR' ||
+                        $abs->status_masuk === 'TELAT' ||
+                        !empty($abs->jam_masuk)
+                    );
 
                 if ($isHadir && $jadwal && $jadwal->shift) {
                     $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
@@ -340,13 +343,16 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 $abs = $personnel->absensi_map->get($d);
                 $jadwal = $personnel->jadwal_map->get($d);
 
-                $isHadir = $abs && (
-                    $abs->status === 'HADIR' ||
-                    $abs->status === 'TELAT' ||
-                    $abs->status_masuk === 'HADIR' ||
-                    $abs->status_masuk === 'TELAT' ||
-                    !empty($abs->jam_masuk)
-                );
+                $isHadir = $abs &&
+                    !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                    !in_array($abs->status_masuk, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                    (
+                        $abs->status === 'HADIR' ||
+                        $abs->status === 'TELAT' ||
+                        $abs->status_masuk === 'HADIR' ||
+                        $abs->status_masuk === 'TELAT' ||
+                        !empty($abs->jam_masuk)
+                    );
 
                 if ($isHadir && $jadwal && $jadwal->shift) {
                     $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
@@ -565,13 +571,16 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             $abs = $personnel->absensis->first();
             $jadwal = $personnel->jadwals->first();
 
-            $isHadir = $abs && (
-                $abs->status === 'HADIR' ||
-                $abs->status === 'TELAT' ||
-                $abs->status_masuk === 'HADIR' ||
-                $abs->status_masuk === 'TELAT' ||
-                !empty($abs->jam_masuk)
-            );
+            $isHadir = $abs &&
+                !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                !in_array($abs->status_masuk, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
+                (
+                    $abs->status === 'HADIR' ||
+                    $abs->status === 'TELAT' ||
+                    $abs->status_masuk === 'HADIR' ||
+                    $abs->status_masuk === 'TELAT' ||
+                    !empty($abs->jam_masuk)
+                );
 
             if ($isHadir && $jadwal && $jadwal->shift) {
                 $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
