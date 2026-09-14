@@ -258,8 +258,21 @@ new class extends Component
         $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
         $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
 
+        // Tentukan status kehadiran utama (status):
+        // Jika status masuk TELAT/HADIR atau status pulang PC/HADIR, maka status kehadiran utama adalah HADIR.
+        $overallStatus = $this->statusMasuk;
+        if (in_array($this->statusMasuk, ['HADIR', 'TELAT']) || in_array($this->statusPulang, ['HADIR', 'PC'])) {
+            $overallStatus = 'HADIR';
+        } elseif (! empty($this->statusMasuk)) {
+            $overallStatus = $this->statusMasuk;
+        } elseif (! empty($this->statusPulang)) {
+            $overallStatus = $this->statusPulang;
+        } else {
+            $overallStatus = 'ALPA';
+        }
+
         $attributes = [
-            'status' => $this->statusMasuk,
+            'status' => $overallStatus,
             'status_masuk' => $this->statusMasuk,
             'status_pulang' => $this->statusPulang,
             'jam_masuk' => ! empty($this->jamMasuk) ? $this->jamMasuk : null,
@@ -326,8 +339,17 @@ new class extends Component
             ]);
         } else {
             // Restore original status and clear audit fields
+            $origStatus = $absensi->original_status_masuk;
+            if (in_array($absensi->original_status_masuk, ['HADIR', 'TELAT']) || in_array($absensi->original_status_pulang, ['HADIR', 'PC'])) {
+                $origStatus = 'HADIR';
+            } elseif (! empty($absensi->original_status_masuk)) {
+                $origStatus = $absensi->original_status_masuk;
+            } elseif (! empty($absensi->original_status_pulang)) {
+                $origStatus = $absensi->original_status_pulang;
+            }
+
             $absensi->update([
-                'status' => $absensi->original_status_masuk,
+                'status' => $origStatus,
                 'status_masuk' => $absensi->original_status_masuk,
                 'status_pulang' => $absensi->original_status_pulang,
                 'edited_by_user_id' => null,

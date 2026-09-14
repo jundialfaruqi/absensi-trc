@@ -369,3 +369,41 @@ test('user without edit-absensi-all-opd or edit-absensi-opd cannot open or edit 
         ->assertDispatched('close-modal', id: 'edit-absensi-modal')
         ->assertDispatched('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
 });
+
+test('saving edit with statusMasuk TELAT sets overall status to HADIR', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $opd = Opd::create(['name' => 'BPBD', 'code' => 'BPBD']);
+    $personnel = Personnel::create([
+        'name' => 'Rudi Hartono',
+        'nik' => '1234567890123477',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'rudi.jpg',
+        'email' => 'rudi@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-25';
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->set('statusMasuk', 'TELAT')
+        ->set('jamMasuk', '08:45')
+        ->set('statusPulang', 'HADIR')
+        ->set('jamPulang', '16:00')
+        ->set('alasanEdit', 'Perubahan absensi menjadi telat')
+        ->call('saveEdit')
+        ->assertDispatched('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
+
+    $saved = Absensi::where('personnel_id', $personnel->id)->whereDate('tanggal', $date)->first();
+    expect($saved)->not->toBeNull()
+        ->and($saved->status_masuk)->toBe('TELAT')
+        ->and($saved->status_pulang)->toBe('HADIR')
+        ->and($saved->status)->toBe('HADIR');
+});
+
