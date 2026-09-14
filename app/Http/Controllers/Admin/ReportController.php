@@ -255,12 +255,12 @@ class ReportController extends Controller
 
                     $isHadir = $abs &&
                         !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
-                        !in_array($abs->status_masuk, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
                         ($abs->status === 'HADIR' ||
                             $abs->status === 'TELAT' ||
                             $abs->status_masuk === 'HADIR' ||
                             $abs->status_masuk === 'TELAT' ||
-                            !empty($abs->jam_masuk));
+                            !empty($abs->jam_masuk) ||
+                            !empty($abs->jam_pulang));
 
                     if ($isHadir && $jadwal && $jadwal->shift) {
                         $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();

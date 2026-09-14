@@ -109,13 +109,13 @@ new #[Title('Upload Dokumentasi')] #[Layout('layouts::admin.app')] class extends
 
             $isHadir = $abs &&
                 !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
-                !in_array($abs->status_masuk, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
                 (
                     $abs->status === 'HADIR' ||
                     $abs->status === 'TELAT' ||
                     $abs->status_masuk === 'HADIR' ||
                     $abs->status_masuk === 'TELAT' ||
-                    !empty($abs->jam_masuk)
+                    !empty($abs->jam_masuk) ||
+                    !empty($abs->jam_pulang)
                 );
 
             if ($isHadir && $jadwal && $jadwal->shift) {

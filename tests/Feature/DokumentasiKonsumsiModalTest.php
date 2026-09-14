@@ -468,7 +468,69 @@ test('personnel with status IZIN (even with jam_masuk) is NOT counted in konsums
     expect($calculated['siang'])->toBe(0);
 });
 
+test('personnel with direct checkout (status HADIR, status_masuk ALPA, jam_pulang filled) is counted in konsumsi calculations', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
 
+    $personnel = \App\Models\Personnel::create([
+        'name' => 'Benny Direct',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'SCHEDULED',
+        'foto' => 'benny.jpg',
+        'email' => 'benny@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+    ]);
 
+    $konsumsiSiang = \App\Models\Konsumsi::create(['nama' => 'Siang', 'opd_id' => $opd->id]);
+    $shift = \App\Models\Shift::create([
+        'name' => 'Shift Pagi',
+        'opd_id' => $opd->id,
+        'jam_masuk' => '08:00:00',
+        'jam_pulang' => '16:00:00',
+        'type' => 'shift',
+        'color' => '#3b82f6',
+    ]);
+    $shift->konsumsis()->attach([$konsumsiSiang->id]);
 
+    $date = '2026-06-04';
 
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $date,
+        'shift_id' => $shift->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Data direct checkout: absen pulang saja
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'ALPA',
+        'status_pulang' => 'HADIR',
+        'jam_masuk' => null,
+        'jam_pulang' => '16:05:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $test = Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi', [
+            'startDate' => '2026-06-04',
+            'endDate' => '2026-06-04',
+            'selectedOpd' => (string) $opd->id,
+            'readyToLoad' => true,
+        ]);
+
+    $summary = $test->get('monthlySummary');
+    expect($summary['daily']['2026-06-04']['auto_siang'])->toBe(1);
+    expect($summary['totalAutoSiang'])->toBe(1);
+
+    $calculated = $test->instance()->getCalculatedKonsumsi($date);
+    expect($calculated['siang'])->toBe(1);
+});
