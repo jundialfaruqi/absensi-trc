@@ -152,56 +152,64 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 12px 0;
-            border: none;
+            border: none !important;
             table-layout: fixed;
             margin: 0;
+        }
+
+        .dok-table td {
+            border: none !important;
         }
 
         .dok-col {
             width: 50%;
             vertical-align: top;
-            border: 1px solid #cbd5e1;
+            border: none !important;
             border-radius: 0px;
-            padding: 8px;
+            padding: 4px;
             text-align: center;
+            background-color: transparent !important;
         }
 
         .dok-col-siang {
-            background-color: #ffffff;
-            border-color: #fde68a;
+            background-color: transparent !important;
+            border: none !important;
         }
 
         .dok-col-malam {
-            background-color: #ffffff;
-            border-color: #cbd5e1;
+            background-color: transparent !important;
+            border: none !important;
         }
 
         .dok-col-title {
             font-weight: bold;
             font-size: 11px;
-            padding: 5px 8px;
+            padding: 4px 0;
             border-radius: 0px;
             text-align: center;
             margin-bottom: 8px;
+            background-color: transparent !important;
+            border: none !important;
+            color: #1e293b;
         }
 
         .title-siang {
-            background-color: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
+            background-color: transparent !important;
+            color: #1e293b;
+            border: none !important;
         }
 
         .title-malam {
-            background-color: #e2e8f0;
-            color: #0f172a;
-            border: 1px solid #cbd5e1;
+            background-color: transparent !important;
+            color: #1e293b;
+            border: none !important;
         }
 
         .dok-card {
             width: 100%;
             height: 210pt;
-            background-color: #ffffff;
-            border: none;
+            background-color: transparent !important;
+            border: none !important;
             text-align: center;
             overflow: hidden;
             margin-bottom: 6px;
@@ -226,8 +234,8 @@
             color: #94a3b8;
             font-size: 9px;
             font-style: italic;
-            background-color: #f1f5f9;
-            border: 1px dashed #cbd5e1;
+            background-color: transparent !important;
+            border: none !important;
             border-radius: 0px;
             text-align: center;
             box-sizing: border-box;
