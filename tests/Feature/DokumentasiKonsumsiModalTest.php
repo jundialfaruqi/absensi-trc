@@ -337,5 +337,72 @@ test('grid cells display 0 in the center and auto calculation in bottom-left cor
         ->assertSeeHtml('(Auto: 1)');
 });
 
+test('personnel with TELAT status (status or status_masuk) is counted in konsumsi calculations', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $personnel = \App\Models\Personnel::create([
+        'name' => 'Bambang Tri',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'SCHEDULED',
+        'foto' => 'bambang.jpg',
+        'email' => 'bambang@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+    ]);
+
+    $konsumsiSiang = \App\Models\Konsumsi::create(['nama' => 'Siang', 'opd_id' => $opd->id]);
+    $shift = \App\Models\Shift::create([
+        'name' => 'Shift Pagi',
+        'opd_id' => $opd->id,
+        'jam_masuk' => '08:00:00',
+        'jam_pulang' => '16:00:00',
+        'type' => 'shift',
+        'color' => '#3b82f6',
+    ]);
+    $shift->konsumsis()->attach([$konsumsiSiang->id]);
+
+    $date = '2026-09-10';
+
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $date,
+        'shift_id' => $shift->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Data lama dengan status TELAT dan status_masuk TELAT
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $date,
+        'status' => 'TELAT',
+        'status_masuk' => 'TELAT',
+        'jam_masuk' => '08:45:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $test = Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi', [
+            'startDate' => '2026-09-10',
+            'endDate' => '2026-09-10',
+            'selectedOpd' => (string) $opd->id,
+            'readyToLoad' => true,
+        ]);
+
+    $summary = $test->get('monthlySummary');
+    expect($summary['daily']['2026-09-10']['auto_siang'])->toBe(1);
+    expect($summary['totalAutoSiang'])->toBe(1);
+
+    // Also check getCalculatedKonsumsi (used by upload modal)
+    $calculated = $test->instance()->getCalculatedKonsumsi($date);
+    expect($calculated['siang'])->toBe(1);
+});
+
+
 
 

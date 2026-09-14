@@ -178,6 +178,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 $isHadir = $abs && (
                     $abs->status === 'HADIR' ||
                     $abs->status === 'TELAT' ||
+                    $abs->status_masuk === 'HADIR' ||
+                    $abs->status_masuk === 'TELAT' ||
                     !empty($abs->jam_masuk)
                 );
 
@@ -341,6 +343,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 $isHadir = $abs && (
                     $abs->status === 'HADIR' ||
                     $abs->status === 'TELAT' ||
+                    $abs->status_masuk === 'HADIR' ||
+                    $abs->status_masuk === 'TELAT' ||
                     !empty($abs->jam_masuk)
                 );
 
@@ -564,6 +568,8 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             $isHadir = $abs && (
                 $abs->status === 'HADIR' ||
                 $abs->status === 'TELAT' ||
+                $abs->status_masuk === 'HADIR' ||
+                $abs->status_masuk === 'TELAT' ||
                 !empty($abs->jam_masuk)
             );
 

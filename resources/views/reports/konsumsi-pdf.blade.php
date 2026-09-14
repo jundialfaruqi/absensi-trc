@@ -375,7 +375,11 @@
 
                                 $isHadir =
                                     $abs &&
-                                    ($abs->status === 'HADIR' || $abs->status === 'TELAT' || !empty($abs->jam_masuk));
+                                    ($abs->status === 'HADIR' ||
+                                        $abs->status === 'TELAT' ||
+                                        $abs->status_masuk === 'HADIR' ||
+                                        $abs->status_masuk === 'TELAT' ||
+                                        !empty($abs->jam_masuk));
 
                                 $cellText = '-';
                                 $cellClass = '';
