@@ -269,5 +269,66 @@ test('modal input jumlah renders dynamic max and onInputJumlah with quota argume
         ->assertSeeHtml('max="1"');
 });
 
+test('grid cells display 0 in the center and auto calculation in bottom-left corner when undocumented', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $personnel = \App\Models\Personnel::create([
+        'name' => 'Budi Santoso',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'SCHEDULED',
+        'foto' => 'budi.jpg',
+        'email' => 'budi@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+    ]);
+
+    $konsumsiSiang = \App\Models\Konsumsi::create(['nama' => 'Siang', 'opd_id' => $opd->id]);
+    $shift = \App\Models\Shift::create([
+        'name' => 'Shift Pagi',
+        'opd_id' => $opd->id,
+        'jam_masuk' => '08:00:00',
+        'jam_pulang' => '16:00:00',
+        'type' => 'shift',
+        'color' => '#3b82f6',
+    ]);
+    $shift->konsumsis()->attach([$konsumsiSiang->id]);
+
+    $dateWithAbsensiOnly = '2026-09-02';
+
+    \Illuminate\Support\Facades\DB::table('jadwals')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $dateWithAbsensiOnly,
+        'shift_id' => $shift->id,
+        'status' => 'SHIFT',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $dateWithAbsensiOnly,
+        'status' => 'HADIR',
+        'jam_masuk' => '08:00:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Test component view
+    Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi', [
+            'startDate' => '2026-09-01',
+            'endDate' => '2026-09-02',
+            'selectedOpd' => (string) $opd->id,
+            'readyToLoad' => true,
+        ])
+        ->assertOk()
+        // Center number should display 0
+        ->assertSeeHtml('>0</span>')
+        // Auto calculation from attendance should appear in bottom-left corner with title
+        ->assertSeeHtml('title="Jumlah dari data absensi: 1"');
+});
+
 
 

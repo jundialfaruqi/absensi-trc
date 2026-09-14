@@ -292,22 +292,11 @@
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
                                                     class="relative z-3 w-full h-full flex flex-col items-center justify-center p-1">
-                                                    @if ($hasDokSiang)
+                                                    @if ($hasDokSiang && $dokSiang > 0)
                                                         {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
                                                             {{ $dokSiang }}
-                                                        </span>
-                                                        {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
-                                                        <span
-                                                            class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
-                                                            title="Jumlah dari data absensi: {{ $autoSiang }}">
-                                                            {{ $autoSiang }}
-                                                        </span>
-                                                    @elseif ($autoSiang > 0)
-                                                        <span
-                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-warning text-warning-content text-xs font-black shadow-md ring-1 ring-white/40">
-                                                            {{ $autoSiang }}
                                                         </span>
                                                     @else
                                                         <span
@@ -315,6 +304,13 @@
                                                             0
                                                         </span>
                                                     @endif
+
+                                                    {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                    <span
+                                                        class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
+                                                        title="Jumlah dari data absensi: {{ $autoSiang }}">
+                                                        {{ $autoSiang }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         @else
@@ -330,27 +326,25 @@
                                                     </span>
                                                 </div>
 
-                                                @if ($hasDokSiang)
+                                                @if ($hasDokSiang && $dokSiang > 0)
                                                     {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
                                                     <span
                                                         class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold group-hover:scale-105 transition-transform">
                                                         {{ $dokSiang }}
                                                     </span>
-                                                    {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
-                                                    <span
-                                                        class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
-                                                        title="Jumlah dari data absensi: {{ $autoSiang }}">
-                                                        {{ $autoSiang }}
-                                                    </span>
-                                                @elseif ($autoSiang > 0)
-                                                    <span
-                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-warning/20 text-warning-content text-xs font-bold group-hover:scale-105 transition-transform">
-                                                        {{ $autoSiang }}
-                                                    </span>
                                                 @else
                                                     <span
-                                                        class="text-base-content/25 text-xs group-hover:text-base-content/50 transition-colors">0</span>
+                                                        class="text-base-content/40 text-xs group-hover:text-base-content/60 transition-colors font-bold">
+                                                        0
+                                                    </span>
                                                 @endif
+
+                                                {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                <span
+                                                    class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
+                                                    title="Jumlah dari data absensi: {{ $autoSiang }}">
+                                                    {{ $autoSiang }}
+                                                </span>
                                             </div>
                                         @endif
                                     </td>
@@ -411,22 +405,11 @@
                                                 {{-- Angka Porsi di Tengah --}}
                                                 <div
                                                     class="relative z-3 w-full h-full flex flex-col items-center justify-center p-1">
-                                                    @if ($hasDokMalam)
+                                                    @if ($hasDokMalam && $dokMalam > 0)
                                                         {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
                                                         <span
                                                             class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
                                                             {{ $dokMalam }}
-                                                        </span>
-                                                        {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
-                                                        <span
-                                                            class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
-                                                            title="Jumlah dari data absensi: {{ $autoMalam }}">
-                                                            {{ $autoMalam }}
-                                                        </span>
-                                                    @elseif ($autoMalam > 0)
-                                                        <span
-                                                            class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900 text-white text-xs font-black shadow-md ring-1 ring-white/40">
-                                                            {{ $autoMalam }}
                                                         </span>
                                                     @else
                                                         <span
@@ -434,6 +417,13 @@
                                                             0
                                                         </span>
                                                     @endif
+
+                                                    {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                    <span
+                                                        class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white/80 bg-black/40 rounded px-0.5 leading-tight pointer-events-none"
+                                                        title="Jumlah dari data absensi: {{ $autoMalam }}">
+                                                        {{ $autoMalam }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         @else
@@ -449,27 +439,25 @@
                                                     </span>
                                                 </div>
 
-                                                @if ($hasDokMalam)
+                                                @if ($hasDokMalam && $dokMalam > 0)
                                                     {{-- Nilai dari dokumentasi_konsumsis sebagai angka utama --}}
                                                     <span
                                                         class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900/15 text-neutral-900 dark:text-neutral-100 text-xs font-bold group-hover:scale-105 transition-transform">
                                                         {{ $dokMalam }}
                                                     </span>
-                                                    {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
-                                                    <span
-                                                        class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
-                                                        title="Jumlah dari data absensi: {{ $autoMalam }}">
-                                                        {{ $autoMalam }}
-                                                    </span>
-                                                @elseif ($autoMalam > 0)
-                                                    <span
-                                                        class="inline-flex items-center justify-center size-6 rounded-full bg-neutral-900/15 text-neutral-900 dark:text-neutral-100 text-xs font-bold group-hover:scale-105 transition-transform">
-                                                        {{ $autoMalam }}
-                                                    </span>
                                                 @else
                                                     <span
-                                                        class="text-base-content/25 text-xs group-hover:text-base-content/50 transition-colors">0</span>
+                                                        class="text-base-content/40 text-xs group-hover:text-base-content/60 transition-colors font-bold">
+                                                        0
+                                                    </span>
                                                 @endif
+
+                                                {{-- Nilai dari absensi melayang di pojok kiri bawah --}}
+                                                <span
+                                                    class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
+                                                    title="Jumlah dari data absensi: {{ $autoMalam }}">
+                                                    {{ $autoMalam }}
+                                                </span>
                                             </div>
                                         @endif
                                     </td>
