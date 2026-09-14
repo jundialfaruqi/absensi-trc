@@ -3887,27 +3887,58 @@
                                     const ctx = canvas.getContext('2d');
                                     ctx.drawImage(srcImg, sx, sy, sw, sh, 0, 0, destW, destH);
 
-                                    // 4. Kompresi ke format WebP maks. 100KB
+                                    // 4. Kompresi ke format WebP (atau JPEG jika di iOS Safari) maks. 100KB
                                     const maxBytes = 100 * 1024;
                                     let currentCanvas = canvas;
                                     let quality = 0.85;
 
+                                    const isWebpSupported = (() => {
+                                        try {
+                                            const c = document.createElement('canvas');
+                                            c.width = 1;
+                                            c.height = 1;
+                                            return c.toDataURL('image/webp').startsWith('data:image/webp');
+                                        } catch (e) {
+                                            return false;
+                                        }
+                                    })();
+
+                                    const targetMime = isWebpSupported ? 'image/webp' : 'image/jpeg';
+                                    const targetExt = isWebpSupported ? 'webp' : 'jpg';
+
+                                    if (targetMime === 'image/jpeg') {
+                                        const bgCanvas = document.createElement('canvas');
+                                        bgCanvas.width = destW;
+                                        bgCanvas.height = destH;
+                                        const bgCtx = bgCanvas.getContext('2d');
+                                        bgCtx.fillStyle = '#FFFFFF';
+                                        bgCtx.fillRect(0, 0, destW, destH);
+                                        bgCtx.drawImage(canvas, 0, 0);
+                                        currentCanvas = bgCanvas;
+                                    }
+
                                     while (true) {
                                         const blob = await new Promise((res) => {
-                                            currentCanvas.toBlob(res, 'image/webp', quality);
+                                            currentCanvas.toBlob(res, targetMime, quality);
                                         });
 
                                         if (!blob) {
-                                            throw new Error('Gagal menghasilkan format WebP.');
+                                            throw new Error('Gagal menghasilkan format gambar.');
                                         }
+
+                                        let actualMime = blob.type || targetMime;
+                                        let actualExt = targetExt;
+                                        if (actualMime === 'image/jpeg') actualExt = 'jpg';
+                                        else if (actualMime === 'image/webp') actualExt = 'webp';
+                                        else if (actualMime === 'image/png') actualExt = 'png';
 
                                         if (blob.size <= maxBytes) {
                                             const baseName = file.name.replace(/\.[^/.]+$/, '').replace(
                                                 /[^a-zA-Z0-9_-]/g, '_');
-                                            const webpFile = new File([blob], `${baseName}.webp`, {
-                                                type: 'image/webp'
+                                            const compressedFile = new File([blob], `${baseName}.${actualExt}`, {
+                                                type: actualMime
                                             });
-                                            resolve(webpFile);
+                                            resolve(compressedFile);
                                             return;
                                         }
 
@@ -3922,6 +3953,10 @@
                                                 scaledCvs.width = nextW;
                                                 scaledCvs.height = nextH;
                                                 const sCtx = scaledCvs.getContext('2d');
+                                                if (targetMime === 'image/jpeg') {
+                                                    sCtx.fillStyle = '#FFFFFF';
+                                                    sCtx.fillRect(0, 0, nextW, nextH);
+                                                }
                                                 sCtx.drawImage(currentCanvas, 0, 0, nextW, nextH);
                                                 currentCanvas = scaledCvs;
                                                 quality = 0.75;
@@ -3930,11 +3965,11 @@
                                                 if (quality <= 0.05) {
                                                     const baseName = file.name.replace(/\.[^/.]+$/, '')
                                                         .replace(/[^a-zA-Z0-9_-]/g, '_');
-                                                    const webpFile = new File([blob],
-                                                        `${baseName}.webp`, {
-                                                            type: 'image/webp'
+                                                    const compressedFile = new File([blob],
+                                                        `${baseName}.${actualExt}`, {
+                                                            type: actualMime
                                                         });
-                                                    resolve(webpFile);
+                                                    resolve(compressedFile);
                                                     return;
                                                 }
                                             }

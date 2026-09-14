@@ -441,7 +441,7 @@
                                                 </div>
 
                                                 @if ($foto1 && (!method_exists($foto1, 'isPreviewable') || $foto1->isPreviewable()))
-                                                    {{-- Preview Foto 1 Baru (Terkompresi WebP) --}}
+                                                    {{-- Preview Foto 1 Baru (Terkompresi WebP/JPEG) --}}
                                                     <div wire:key="foto1-preview-container-{{ $uploadIteration }}">
                                                         <div
                                                             class="w-full aspect-4/3 bg-base-200/80 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group flex items-center justify-center">
@@ -451,7 +451,7 @@
                                                             <div class="absolute top-2 right-2">
                                                                 <span
                                                                     class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
-                                                                    WebP &le; 100KB
+                                                                    &le; 100KB
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -526,7 +526,7 @@
                                                                 Ambil Foto Utama</span>
                                                             <span
                                                                 class="text-[10px] text-base-content/60 text-center max-w-55 mt-0.5">
-                                                                Maks. 10MB dari HP/PC, otomatis dikompres ke WebP
+                                                                Maks. 10MB dari HP/PC, otomatis dikompres
                                                                 (&le;100KB)
                                                             </span>
 
@@ -619,7 +619,7 @@
                                                 </div>
 
                                                 @if ($foto2 && (!method_exists($foto2, 'isPreviewable') || $foto2->isPreviewable()))
-                                                    {{-- Preview Foto 2 Baru (Terkompresi WebP) --}}
+                                                    {{-- Preview Foto 2 Baru (Terkompresi WebP/JPEG) --}}
                                                     <div wire:key="foto2-preview-container-{{ $uploadIteration }}">
                                                         <div
                                                             class="w-full aspect-4/3 bg-base-200/80 rounded-xl overflow-hidden border border-base-300 shadow-inner relative group flex items-center justify-center">
@@ -629,7 +629,7 @@
                                                             <div class="absolute top-2 right-2">
                                                                 <span
                                                                     class="badge badge-sm badge-success text-[10px] font-bold text-white shadow-xs">
-                                                                    WebP &le; 100KB
+                                                                    &le; 100KB
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -704,7 +704,7 @@
                                                                 Ambil Foto Tambahan</span>
                                                             <span
                                                                 class="text-[10px] text-base-content/60 text-center max-w-55 mt-0.5">
-                                                                Maks. 10MB dari HP/PC, otomatis dikompres ke WebP
+                                                                Maks. 10MB dari HP/PC, otomatis dikompres
                                                                 (&le;100KB)
                                                             </span>
 
@@ -1358,15 +1358,27 @@
                             }
 
                             try {
+                                const isWebpSupported = (() => {
+                                    try {
+                                        const c = document.createElement('canvas');
+                                        c.width = 1;
+                                        c.height = 1;
+                                        return c.toDataURL('image/webp').startsWith('data:image/webp');
+                                    } catch (e) {
+                                        return false;
+                                    }
+                                })();
+                                const formatLabel = isWebpSupported ? 'WebP' : 'JPEG';
+
                                 if (slot === 1) {
-                                    this.statusText1 = 'Mengompresi ke WebP (maks. 100KB)...';
+                                    this.statusText1 = `Mengompresi (${formatLabel} maks. 100KB)...`;
                                     this.progress1 = 30;
                                 } else {
-                                    this.statusText2 = 'Mengompresi ke WebP (maks. 100KB)...';
+                                    this.statusText2 = `Mengompresi (${formatLabel} maks. 100KB)...`;
                                     this.progress2 = 30;
                                 }
 
-                                // Kompresi ke format WebP maks 100KB di client browser
+                                // Kompresi ke format WebP (atau JPEG jika di iOS Safari) maks 100KB di client browser
                                 const compressedWebpFile = await this.compressToWebp(
                                     file,
                                     100 * 1024,
@@ -1381,7 +1393,8 @@
                                     (file.size / (1024 * 1024)).toFixed(1) + 'MB' :
                                     Math.round(file.size / 1024) + 'KB';
                                 const finalSizeStr = Math.round(compressedWebpFile.size / 1024) + 'KB';
-                                const infoStr = `${origSizeStr} → ${finalSizeStr} (WebP)`;
+                                const finalExt = (compressedWebpFile.name.split('.').pop() || formatLabel).toUpperCase();
+                                const infoStr = `${origSizeStr} → ${finalSizeStr} (${finalExt})`;
 
                                 if (slot === 1) {
                                     this.compressInfo1 = infoStr;
@@ -1454,6 +1467,20 @@
 
                         compressToWebp(file, maxBytes = 100 * 1024, onProgress = null) {
                             return new Promise((resolve, reject) => {
+                                const isWebpSupported = (() => {
+                                    try {
+                                        const c = document.createElement('canvas');
+                                        c.width = 1;
+                                        c.height = 1;
+                                        return c.toDataURL('image/webp').startsWith('data:image/webp');
+                                    } catch (e) {
+                                        return false;
+                                    }
+                                })();
+
+                                const targetMime = isWebpSupported ? 'image/webp' : 'image/jpeg';
+                                const targetExt = isWebpSupported ? 'webp' : 'jpg';
+
                                 const reader = new FileReader();
                                 reader.onerror = () => reject(new Error(
                                     'Gagal membaca file gambar dari perangkat.'));
@@ -1488,6 +1515,10 @@
                                             canvas.width = destW;
                                             canvas.height = destH;
                                             const ctx = canvas.getContext('2d');
+                                            if (targetMime === 'image/jpeg') {
+                                                ctx.fillStyle = '#FFFFFF';
+                                                ctx.fillRect(0, 0, destW, destH);
+                                            }
                                             ctx.drawImage(img, 0, 0, destW, destH);
 
                                             let currentCanvas = canvas;
@@ -1503,15 +1534,21 @@
                                                 const blob = await new Promise((
                                                     res) => {
                                                     currentCanvas.toBlob(res,
-                                                        'image/webp',
+                                                        targetMime,
                                                         quality);
                                                 });
 
                                                 if (!blob) {
                                                     throw new Error(
-                                                        'Browser tidak mendukung konversi WebP.'
+                                                        'Browser tidak mendukung konversi gambar.'
                                                     );
                                                 }
+
+                                                let actualMime = blob.type || targetMime;
+                                                let actualExt = targetExt;
+                                                if (actualMime === 'image/jpeg') actualExt = 'jpg';
+                                                else if (actualMime === 'image/webp') actualExt = 'webp';
+                                                else if (actualMime === 'image/png') actualExt = 'png';
 
                                                 if (blob.size <= maxBytes) {
                                                     const baseName = (file.name ||
@@ -1519,12 +1556,12 @@
                                                         .replace(/\.[^/.]+$/, '')
                                                         .replace(/[^a-zA-Z0-9_-]/g,
                                                             '_');
-                                                    const webpFile = new File([blob],
-                                                        `${baseName}.webp`, {
-                                                            type: 'image/webp',
+                                                    const compressedFile = new File([blob],
+                                                        `${baseName}.${actualExt}`, {
+                                                            type: actualMime,
                                                             lastModified: Date.now()
                                                         });
-                                                    resolve(webpFile);
+                                                    resolve(compressedFile);
                                                     return;
                                                 }
 
@@ -1547,6 +1584,10 @@
                                                         scaledCvs.height = nextH;
                                                         const sCtx = scaledCvs
                                                             .getContext('2d');
+                                                        if (targetMime === 'image/jpeg') {
+                                                            sCtx.fillStyle = '#FFFFFF';
+                                                            sCtx.fillRect(0, 0, nextW, nextH);
+                                                        }
                                                         sCtx.drawImage(currentCanvas, 0,
                                                             0, nextW, nextH);
                                                         currentCanvas = scaledCvs;
@@ -1562,15 +1603,15 @@
                                                                 .replace(
                                                                     /[^a-zA-Z0-9_-]/g,
                                                                     '_');
-                                                            const webpFile = new File([
+                                                            const compressedFile = new File([
                                                                     blob
                                                                 ],
-                                                                `${baseName}.webp`, {
-                                                                    type: 'image/webp',
+                                                                `${baseName}.${actualExt}`, {
+                                                                    type: actualMime,
                                                                     lastModified: Date
                                                                         .now()
                                                                 });
-                                                            resolve(webpFile);
+                                                            resolve(compressedFile);
                                                             return;
                                                         }
                                                     }
@@ -1580,13 +1621,15 @@
                                             // Fallback
                                             const finalBlob = await new Promise(res =>
                                                 currentCanvas.toBlob(res,
-                                                    'image/webp', quality));
+                                                    targetMime, quality));
                                             const baseName = (file.name || 'foto')
                                                 .replace(/\.[^/.]+$/, '')
                                                 .replace(/[^a-zA-Z0-9_-]/g, '_');
+                                            const finalMime = finalBlob?.type || targetMime;
+                                            const finalExt = finalMime === 'image/jpeg' ? 'jpg' : (finalMime === 'image/webp' ? 'webp' : 'png');
                                             resolve(new File([finalBlob || blob],
-                                                `${baseName}.webp`, {
-                                                    type: 'image/webp'
+                                                `${baseName}.${finalExt}`, {
+                                                    type: finalMime
                                                 }));
 
                                         } catch (err) {
