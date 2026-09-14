@@ -331,7 +331,10 @@ test('grid cells display 0 in the center and auto calculation in bottom-left cor
         // Total column & Total row should show both real count and auto calculation
         ->assertSeeHtml('title="Total Siang dari perhitungan otomatis: 1"')
         ->assertSeeHtml('title="Total otomatis dari data absensi: 1"')
-        ->assertSeeHtml('title="Grand Total dari perhitungan otomatis: 1"');
+        ->assertSeeHtml('title="Grand Total dari perhitungan otomatis: 1"')
+        // Header summary badges should show both real count and auto calculation
+        ->assertSeeHtml('title="Riil: 0 | Otomatis: 1"')
+        ->assertSeeHtml('(Auto: 1)');
 });
 
 

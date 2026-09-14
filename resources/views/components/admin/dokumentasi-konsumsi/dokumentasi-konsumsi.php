@@ -128,6 +128,12 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                 'totalSiang' => 0,
                 'totalMalam' => 0,
                 'grandTotal' => 0,
+                'totalDokSiang' => 0,
+                'totalDokMalam' => 0,
+                'grandTotalDok' => 0,
+                'totalAutoSiang' => 0,
+                'totalAutoMalam' => 0,
+                'grandTotalAuto' => 0,
             ];
         }
 

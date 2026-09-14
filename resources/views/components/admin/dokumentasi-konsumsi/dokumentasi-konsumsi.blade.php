@@ -189,16 +189,22 @@
                     </h2>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="badge badge-warning font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
-                        Siang: {{ number_format($summary['totalSiang']) }}
+                    <span class="badge badge-warning font-bold text-xs gap-1.5 py-3 px-3 shadow-xs rounded-none"
+                        title="Riil: {{ number_format($summary['totalDokSiang'] ?? 0) }} | Otomatis: {{ number_format($summary['totalAutoSiang'] ?? 0) }}">
+                        Siang: {{ number_format($summary['totalDokSiang'] ?? 0) }}
+                        <span class="text-[10px] font-semibold opacity-80">(Auto: {{ number_format($summary['totalAutoSiang'] ?? 0) }})</span>
                     </span>
                     <span
-                        class="badge badge-neutral text-white font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
-                        Malam: {{ number_format($summary['totalMalam']) }}
+                        class="badge badge-neutral text-white font-bold text-xs gap-1.5 py-3 px-3 shadow-xs rounded-none"
+                        title="Riil: {{ number_format($summary['totalDokMalam'] ?? 0) }} | Otomatis: {{ number_format($summary['totalAutoMalam'] ?? 0) }}">
+                        Malam: {{ number_format($summary['totalDokMalam'] ?? 0) }}
+                        <span class="text-[10px] font-semibold opacity-75">(Auto: {{ number_format($summary['totalAutoMalam'] ?? 0) }})</span>
                     </span>
                     <span
-                        class="badge badge-neutral text-success font-bold text-xs gap-1 py-3 px-3 shadow-xs rounded-none">
-                        Total: {{ number_format($summary['grandTotal']) }} Porsi
+                        class="badge badge-neutral text-success font-bold text-xs gap-1.5 py-3 px-3 shadow-xs rounded-none"
+                        title="Riil: {{ number_format($summary['grandTotalDok'] ?? 0) }} | Otomatis: {{ number_format($summary['grandTotalAuto'] ?? 0) }}">
+                        Total: {{ number_format($summary['grandTotalDok'] ?? 0) }}
+                        <span class="text-[10px] font-semibold opacity-80">(Auto: {{ number_format($summary['grandTotalAuto'] ?? 0) }})</span> Porsi
                     </span>
                 </div>
             </div>
