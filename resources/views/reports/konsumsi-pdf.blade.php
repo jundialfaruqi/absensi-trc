@@ -299,10 +299,10 @@
                 <tr>
                     <td style="text-align: left; font-weight: bold; padding-left: 6px;" class="badge-siang">SIANG</td>
                     @foreach ($dates as $date)
-                        @php $valSiang = $dailySummary[$date]['siang'] ?? null; @endphp
-                        <td class="date-column {{ $valSiang !== null && $valSiang > 0 ? 'badge-siang' : '' }}"
-                            style="{{ $valSiang === null ? 'color: #94a3b8; font-weight: normal;' : '' }}">
-                            {{ $valSiang !== null ? $valSiang : '-' }}
+                        @php $valSiang = $dailySummary[$date]['siang'] ?? 0; @endphp
+                        <td class="date-column {{ $valSiang > 0 ? 'badge-siang' : '' }}"
+                            style="{{ $valSiang == 0 ? 'color: #94a3b8; font-weight: normal;' : '' }}">
+                            {{ $valSiang }}
                         </td>
                     @endforeach
                     <td class="summary-column badge-siang">{{ $totalSiangAll }}</td>
@@ -310,10 +310,10 @@
                 <tr>
                     <td style="text-align: left; font-weight: bold; padding-left: 6px;" class="badge-malam">MALAM</td>
                     @foreach ($dates as $date)
-                        @php $valMalam = $dailySummary[$date]['malam'] ?? null; @endphp
-                        <td class="date-column {{ $valMalam !== null && $valMalam > 0 ? 'badge-malam' : '' }}"
-                            style="{{ $valMalam === null ? 'color: #94a3b8; font-weight: normal;' : '' }}">
-                            {{ $valMalam !== null ? $valMalam : '-' }}
+                        @php $valMalam = $dailySummary[$date]['malam'] ?? 0; @endphp
+                        <td class="date-column {{ $valMalam > 0 ? 'badge-malam' : '' }}"
+                            style="{{ $valMalam == 0 ? 'color: #94a3b8; font-weight: normal;' : '' }}">
+                            {{ $valMalam }}
                         </td>
                     @endforeach
                     <td class="summary-column badge-malam">{{ $totalMalamAll }}</td>
@@ -321,10 +321,10 @@
                 <tr class="total-row">
                     <td style="text-align: left; font-weight: bold; padding-left: 6px;">TOTAL</td>
                     @foreach ($dates as $date)
-                        @php $valTotal = $dailySummary[$date]['total'] ?? null; @endphp
+                        @php $valTotal = $dailySummary[$date]['total'] ?? (($dailySummary[$date]['siang'] ?? 0) + ($dailySummary[$date]['malam'] ?? 0)); @endphp
                         <td class="date-column"
-                            style="font-weight: bold; {{ $valTotal === null ? 'color: #94a3b8; font-weight: normal;' : '' }}">
-                            {{ $valTotal !== null ? $valTotal : '-' }}
+                            style="font-weight: bold; {{ $valTotal == 0 ? 'color: #94a3b8; font-weight: normal;' : '' }}">
+                            {{ $valTotal }}
                         </td>
                     @endforeach
                     <td class="summary-column" style="font-weight: bold; background-color: #e2e8f0;">

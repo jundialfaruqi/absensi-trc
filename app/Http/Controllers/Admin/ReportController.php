@@ -264,20 +264,15 @@ class ReportController extends Controller
 
                         if (in_array('siang', $konsumsis)) {
                             $p->total_siang++;
-                            $dailySummary[$d]['siang']++;
-                            $totalSiangAll++;
                         }
                         if (in_array('malam', $konsumsis)) {
                             $p->total_malam++;
-                            $dailySummary[$d]['malam']++;
-                            $totalMalamAll++;
                         }
                     }
-                    $dailySummary[$d]['total'] = $dailySummary[$d]['siang'] + $dailySummary[$d]['malam'];
                 }
             }
 
-            // Override nilai SIANG/MALAM dari tabel dokumentasi_konsumsis jika tersedia
+            // Nilai SIANG/MALAM HANYA diambil dari tabel dokumentasi_konsumsis (jika belum ada atau NULL, bernilai 0)
             $searchDates = array_unique(array_merge($dates, array_map(fn ($d) => $d . ' 00:00:00', $dates)));
             $dokRecords = DokumentasiKonsumsi::whereIn('tanggal', $searchDates)
                 ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
@@ -286,20 +281,15 @@ class ReportController extends Controller
 
             foreach ($dates as $d) {
                 $dok = $dokRecords->get($d);
-                if ($dok !== null) {
-                    // Pakai nilai aktual dari dokumentasi jika diisi (not null), jika null tetap pakai otomatis dari absensi
-                    if ($dok->jumlah_siang !== null) {
-                        $dailySummary[$d]['siang'] = (int) $dok->jumlah_siang;
-                    }
-                    if ($dok->jumlah_malam !== null) {
-                        $dailySummary[$d]['malam'] = (int) $dok->jumlah_malam;
-                    }
-                    $dailySummary[$d]['total'] = $dailySummary[$d]['siang'] + $dailySummary[$d]['malam'];
-                }
-                // Jika belum ada record dokumentasi ($dok === null), $dailySummary[$d] tetap mempertahankan hitungan otomatis dari absensi
+                $siang = ($dok && $dok->jumlah_siang !== null) ? (int) $dok->jumlah_siang : 0;
+                $malam = ($dok && $dok->jumlah_malam !== null) ? (int) $dok->jumlah_malam : 0;
+
+                $dailySummary[$d]['siang'] = $siang;
+                $dailySummary[$d]['malam'] = $malam;
+                $dailySummary[$d]['total'] = $siang + $malam;
             }
 
-            // Hitung ulang grand total dari dailySummary
+            // Hitung grand total dari dailySummary
             $totalSiangAll = array_sum(array_column($dailySummary, 'siang'));
             $totalMalamAll = array_sum(array_column($dailySummary, 'malam'));
 

@@ -581,3 +581,57 @@ test('export konsumsi PDF returns 422 if startDate is after endDate', function (
         'message' => 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.',
     ]);
 });
+
+test('rekap table in konsumsi PDF displays amounts from dokumentasi_konsumsis and 0 when null without auto calc', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $dates = ['2026-09-01', '2026-09-02'];
+    $dailySummary = [
+        '2026-09-01' => ['siang' => 12, 'malam' => 0, 'total' => 12],
+        '2026-09-02' => ['siang' => 0, 'malam' => 0, 'total' => 0],
+    ];
+
+    $html = view('reports.konsumsi-pdf', [
+        'personnels' => collect([]),
+        'dates' => $dates,
+        'dailySummary' => $dailySummary,
+        'totalSiangAll' => 12,
+        'totalMalamAll' => 0,
+        'grandTotalAll' => 12,
+        'month' => 9,
+        'year' => 2026,
+        'monthName' => 'September',
+        'opdName' => $opd->name,
+        'includeRekap' => true,
+        'includeRincian' => false,
+    ])->render();
+
+    expect($html)->toContain('12');
+    // Ensure 0 is rendered for empty or 0 values, not '-'
+    expect($html)->toContain('>0<');
+    expect($html)->not->toContain('>-<');
+});
+
+test('exportKonsumsiPdf controller populates dailySummary solely from DokumentasiKonsumsi ignoring attendance auto calc', function () {
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    DokumentasiKonsumsi::create([
+        'opd_id' => $opd->id,
+        'tanggal' => '2026-09-01',
+        'jumlah_siang' => 8,
+        'jumlah_malam' => null,
+        'created_by' => $user->id,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-02',
+        'include_rekap' => 1,
+        'include_rincian' => 0,
+        'include_dokumentasi' => 0,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+});
