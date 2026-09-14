@@ -150,35 +150,38 @@
 
         .dok-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 12px 0;
-            border: none !important;
+            border-collapse: collapse;
+            border-spacing: 0;
+            border: none;
             table-layout: fixed;
             margin: 0;
         }
 
         .dok-table td {
-            border: none !important;
+            border: none;
         }
 
         .dok-col {
             width: 50%;
             vertical-align: top;
-            border: none !important;
+            border: none;
             border-radius: 0px;
-            padding: 4px;
+            padding: 4px 10px;
             text-align: center;
-            background-color: transparent !important;
+            background-color: transparent;
+        }
+
+        .dok-table td.dok-col-siang {
+            border-right: 1px solid #000000 !important;
         }
 
         .dok-col-siang {
-            background-color: transparent !important;
-            border: none !important;
+            background-color: transparent;
         }
 
         .dok-col-malam {
-            background-color: transparent !important;
-            border: none !important;
+            background-color: transparent;
+            border: none;
         }
 
         .dok-col-title {
