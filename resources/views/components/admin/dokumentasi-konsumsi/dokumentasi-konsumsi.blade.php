@@ -350,8 +350,19 @@
                                     </td>
                                 @endforeach
                                 <td
-                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-warning/15 text-warning-content align-middle">
-                                    {{ number_format($summary['totalSiang']) }}
+                                    class="text-center border-b border-base-200 p-0 font-bold text-xs bg-warning/15 text-warning-content align-middle relative">
+                                    <div class="relative w-full h-12 flex items-center justify-center p-1 select-none">
+                                        {{-- Angka Riil dari tabel dokumentasi_konsumsis --}}
+                                        <span class="font-black text-sm text-warning-content">
+                                            {{ number_format($summary['totalDokSiang'] ?? 0) }}
+                                        </span>
+                                        {{-- Angka Perhitungan Otomatis dari Absensi --}}
+                                        <span
+                                            class="absolute bottom-0.5 left-1 text-[9px] font-bold text-warning-content/70 bg-warning/30 rounded px-1 leading-tight pointer-events-none"
+                                            title="Total Siang dari perhitungan otomatis: {{ number_format($summary['totalAutoSiang'] ?? 0) }}">
+                                            {{ number_format($summary['totalAutoSiang'] ?? 0) }}
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
 
@@ -463,8 +474,19 @@
                                     </td>
                                 @endforeach
                                 <td
-                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-neutral-900/10 text-neutral-900 dark:text-neutral-100 align-middle">
-                                    {{ number_format($summary['totalMalam']) }}
+                                    class="text-center border-b border-base-200 p-0 font-bold text-xs bg-neutral-900/10 text-neutral-900 dark:text-neutral-100 align-middle relative">
+                                    <div class="relative w-full h-12 flex items-center justify-center p-1 select-none">
+                                        {{-- Angka Riil dari tabel dokumentasi_konsumsis --}}
+                                        <span class="font-black text-sm text-neutral-900 dark:text-neutral-100">
+                                            {{ number_format($summary['totalDokMalam'] ?? 0) }}
+                                        </span>
+                                        {{-- Angka Perhitungan Otomatis dari Absensi --}}
+                                        <span
+                                            class="absolute bottom-0.5 left-1 text-[9px] font-bold text-base-content/60 bg-base-200/80 rounded px-1 leading-tight pointer-events-none"
+                                            title="Total Malam dari perhitungan otomatis: {{ number_format($summary['totalAutoMalam'] ?? 0) }}">
+                                            {{ number_format($summary['totalAutoMalam'] ?? 0) }}
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
 
@@ -476,17 +498,40 @@
                                 </td>
                                 @foreach ($dates as $date)
                                     @php
-                                        $countTotal = $summary['daily'][$date]['total'] ?? 0;
+                                        $dokTotal = $summary['daily'][$date]['dok_total'] ?? (($summary['daily'][$date]['dok_siang'] ?? 0) + ($summary['daily'][$date]['dok_malam'] ?? 0));
+                                        $autoTotal = ($summary['daily'][$date]['auto_siang'] ?? 0) + ($summary['daily'][$date]['auto_malam'] ?? 0);
                                         $isToday = \Carbon\Carbon::parse($date)->isToday();
                                     @endphp
                                     <td
-                                        class="text-center border-b border-r border-base-200 p-2 font-black text-xs {{ $isToday ? 'bg-primary/15' : '' }}">
-                                        {{ $countTotal }}
+                                        class="text-center border-b border-r border-base-200 p-0 font-bold text-xs {{ $isToday ? 'bg-primary/15' : '' }} align-middle relative">
+                                        <div class="relative w-full h-12 flex items-center justify-center p-1 select-none">
+                                            {{-- Angka Riil dari tabel dokumentasi_konsumsis --}}
+                                            <span class="font-black text-xs text-base-content">
+                                                {{ $dokTotal }}
+                                            </span>
+                                            {{-- Angka Perhitungan Otomatis dari Absensi --}}
+                                            <span
+                                                class="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-base-content/50 bg-base-200/70 rounded px-0.5 leading-tight pointer-events-none"
+                                                title="Total otomatis dari data absensi: {{ $autoTotal }}">
+                                                {{ $autoTotal }}
+                                            </span>
+                                        </div>
                                     </td>
                                 @endforeach
                                 <td
-                                    class="text-center border-b border-base-200 p-2 font-black text-sm bg-base-300 text-base-content">
-                                    {{ number_format($summary['grandTotal']) }}
+                                    class="text-center border-b border-base-200 p-0 font-bold text-xs bg-base-300 text-base-content align-middle relative">
+                                    <div class="relative w-full h-12 flex items-center justify-center p-1 select-none">
+                                        {{-- Angka Riil dari tabel dokumentasi_konsumsis --}}
+                                        <span class="font-black text-sm text-base-content">
+                                            {{ number_format($summary['grandTotalDok'] ?? 0) }}
+                                        </span>
+                                        {{-- Angka Perhitungan Otomatis dari Absensi --}}
+                                        <span
+                                            class="absolute bottom-0.5 left-1 text-[9px] font-bold text-base-content/60 bg-base-200/90 rounded px-1 leading-tight pointer-events-none"
+                                            title="Grand Total dari perhitungan otomatis: {{ number_format($summary['grandTotalAuto'] ?? 0) }}">
+                                            {{ number_format($summary['grandTotalAuto'] ?? 0) }}
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         @endif

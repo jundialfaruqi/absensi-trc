@@ -327,7 +327,11 @@ test('grid cells display 0 in the center and auto calculation in bottom-left cor
         // Center number should display 0
         ->assertSeeHtml('>0</span>')
         // Auto calculation from attendance should appear in bottom-left corner with title
-        ->assertSeeHtml('title="Jumlah dari data absensi: 1"');
+        ->assertSeeHtml('title="Jumlah dari data absensi: 1"')
+        // Total column & Total row should show both real count and auto calculation
+        ->assertSeeHtml('title="Total Siang dari perhitungan otomatis: 1"')
+        ->assertSeeHtml('title="Total otomatis dari data absensi: 1"')
+        ->assertSeeHtml('title="Grand Total dari perhitungan otomatis: 1"');
 });
 
 

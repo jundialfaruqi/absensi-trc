@@ -197,9 +197,30 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
 
         $totalSiang = 0;
         $totalMalam = 0;
+        $totalDokSiang = 0;
+        $totalDokMalam = 0;
+        $totalAutoSiang = 0;
+        $totalAutoMalam = 0;
 
         foreach ($dates as $date) {
             $dok = $dokMap->get($date);
+
+            $autoS = $daily[$date]['auto_siang'];
+            $autoM = $daily[$date]['auto_malam'];
+            $daily[$date]['auto_total'] = $autoS + $autoM;
+
+            $totalAutoSiang += $autoS;
+            $totalAutoMalam += $autoM;
+
+            // Nilai riil murni dari tabel dokumentasi_konsumsis (0 jika null/belum ada)
+            $dokS = ($dok !== null && $dok->jumlah_siang !== null) ? (int) $dok->jumlah_siang : 0;
+            $dokM = ($dok !== null && $dok->jumlah_malam !== null) ? (int) $dok->jumlah_malam : 0;
+            $daily[$date]['dok_siang'] = $dokS;
+            $daily[$date]['dok_malam'] = $dokM;
+            $daily[$date]['dok_total'] = $dokS + $dokM;
+
+            $totalDokSiang += $dokS;
+            $totalDokMalam += $dokM;
 
             // Jika makan siang dari dokumentasi_konsumsi sudah ada (not null), pakai nilai itu.
             // Jika belum ada atau masih null, tetap akumulasikan yang otomatis dari absensi.
@@ -226,6 +247,12 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             'totalSiang' => $totalSiang,
             'totalMalam' => $totalMalam,
             'grandTotal' => $totalSiang + $totalMalam,
+            'totalDokSiang' => $totalDokSiang,
+            'totalDokMalam' => $totalDokMalam,
+            'grandTotalDok' => $totalDokSiang + $totalDokMalam,
+            'totalAutoSiang' => $totalAutoSiang,
+            'totalAutoMalam' => $totalAutoMalam,
+            'grandTotalAuto' => $totalAutoSiang + $totalAutoMalam,
         ];
     }
 
