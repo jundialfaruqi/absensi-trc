@@ -2761,9 +2761,6 @@
                 </div>
             </form>
         </div>
-        <form method="dialog" class="modal-backdrop">
-            <button type="button" @click="closeKonsumsiModal()">close</button>
-        </form>
     </dialog>
 
     {{-- ─── ALPINE JAVASCRIPT COMPONENT ────────────────────────────────────── --}}
@@ -3552,12 +3549,25 @@
                         // Jika kedua foto sudah ada, otomatis aktifkan sesi 'keduanya'
                         const wire = this.$wire || (typeof $wire !== 'undefined' ? $wire : null);
                         if (wire) {
-                            const hasSiangNow = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get(
-                                'fotoSiang') || wire.fotoSiang));
-                            const hasMalamNow = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get(
-                                'fotoMalam') || wire.fotoMalam));
+                            const hasSiangNow = !!(
+                                this.rawFileSiang || this.rawFileSiang2 ||
+                                this.processedPreviewSiang || this.processedPreviewSiang2 ||
+                                (wire.get('fotoSiang') || wire.fotoSiang) ||
+                                (wire.get('fotoSiang2') || wire.fotoSiang2) ||
+                                (wire.get('existingFotoSiang') || wire.existingFotoSiang) ||
+                                (wire.get('existingFotoSiang2') || wire.existingFotoSiang2)
+                            );
+                            const hasMalamNow = !!(
+                                this.rawFileMalam || this.rawFileMalam2 ||
+                                this.processedPreviewMalam || this.processedPreviewMalam2 ||
+                                (wire.get('fotoMalam') || wire.fotoMalam) ||
+                                (wire.get('fotoMalam2') || wire.fotoMalam2) ||
+                                (wire.get('existingFotoMalam') || wire.existingFotoMalam) ||
+                                (wire.get('existingFotoMalam2') || wire.existingFotoMalam2)
+                            );
                             if (hasSiangNow && hasMalamNow) {
                                 wire.set('sesiKonsumsi', 'keduanya');
+                                this.modalSesi = 'keduanya';
                             }
                         }
                     } catch (err) {
@@ -3746,26 +3756,37 @@
                     }
 
                     // Pastikan sesiKonsumsi otomatis disesuaikan jika ada sesi yang diunggah
-                    const hasSiang = !!(this.rawFileSiang || this.processedPreviewSiang || (wire.get('fotoSiang') ||
-                        wire.fotoSiang));
-                    const hasMalam = !!(this.rawFileMalam || this.processedPreviewMalam || (wire.get('fotoMalam') ||
-                        wire.fotoMalam));
-                    if (hasSiang && hasMalam && (wire.get('sesiKonsumsi') || wire.sesiKonsumsi) !== 'keduanya') {
+                    const hasNewSiang = !!(
+                        this.rawFileSiang || this.rawFileSiang2 ||
+                        this.processedPreviewSiang || this.processedPreviewSiang2 ||
+                        (wire.get('fotoSiang') || wire.fotoSiang) ||
+                        (wire.get('fotoSiang2') || wire.fotoSiang2)
+                    );
+                    const hasNewMalam = !!(
+                        this.rawFileMalam || this.rawFileMalam2 ||
+                        this.processedPreviewMalam || this.processedPreviewMalam2 ||
+                        (wire.get('fotoMalam') || wire.fotoMalam) ||
+                        (wire.get('fotoMalam2') || wire.fotoMalam2)
+                    );
+                    const hasExistingSiang = !!(wire.get('existingFotoSiang') || wire.existingFotoSiang);
+                    const hasExistingMalam = !!(wire.get('existingFotoMalam') || wire.existingFotoMalam);
+
+                    if (hasNewSiang && hasNewMalam) {
                         wire.set('sesiKonsumsi', 'keduanya', false);
                         this.modalSesi = 'keduanya';
-                    } else if (hasSiang && !hasMalam) {
+                    } else if (hasNewSiang && !hasNewMalam) {
                         const curSesi = this.modalSesi || wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
-                        if (curSesi === 'malam') {
-                            const finalSesi = (wire.get('existingFotoMalam') || wire.existingFotoMalam) ? 'keduanya' : 'siang';
+                        if (curSesi === 'malam' || curSesi === 'keduanya') {
+                            const finalSesi = hasExistingMalam ? 'keduanya' : 'siang';
                             wire.set('sesiKonsumsi', finalSesi, false);
                             this.modalSesi = finalSesi;
                         } else {
                             wire.set('sesiKonsumsi', this.modalSesi, false);
                         }
-                    } else if (!hasSiang && hasMalam) {
+                    } else if (!hasNewSiang && hasNewMalam) {
                         const curSesi = this.modalSesi || wire.get('sesiKonsumsi') || wire.sesiKonsumsi;
-                        if (curSesi === 'siang') {
-                            const finalSesi = (wire.get('existingFotoSiang') || wire.existingFotoSiang) ? 'keduanya' : 'malam';
+                        if (curSesi === 'siang' || curSesi === 'keduanya') {
+                            const finalSesi = hasExistingSiang ? 'keduanya' : 'malam';
                             wire.set('sesiKonsumsi', finalSesi, false);
                             this.modalSesi = finalSesi;
                         } else {
@@ -4111,17 +4132,21 @@
                     if (wire) {
                         wire.set(target, null);
 
-                        // Adjust sesiKonsumsi only when clearing main foto
-                        if (target === 'fotoSiang' || target === 'fotoMalam') {
-                            const hasSiangRemaining = !!(this.rawFileSiang || this.processedPreviewSiang);
-                            const hasMalamRemaining = !!(this.rawFileMalam || this.processedPreviewMalam);
-                            if (hasSiangRemaining && !hasMalamRemaining) {
-                                wire.set('sesiKonsumsi', 'siang', false);
-                                this.modalSesi = 'siang';
-                            } else if (!hasSiangRemaining && hasMalamRemaining) {
-                                wire.set('sesiKonsumsi', 'malam', false);
-                                this.modalSesi = 'malam';
-                            }
+                        // Adjust sesiKonsumsi only when clearing photos
+                        const hasSiangRemaining = !!(
+                            this.rawFileSiang || this.rawFileSiang2 ||
+                            this.processedPreviewSiang || this.processedPreviewSiang2
+                        );
+                        const hasMalamRemaining = !!(
+                            this.rawFileMalam || this.rawFileMalam2 ||
+                            this.processedPreviewMalam || this.processedPreviewMalam2
+                        );
+                        if (hasSiangRemaining && !hasMalamRemaining) {
+                            wire.set('sesiKonsumsi', 'siang', false);
+                            this.modalSesi = 'siang';
+                        } else if (!hasSiangRemaining && hasMalamRemaining) {
+                            wire.set('sesiKonsumsi', 'malam', false);
+                            this.modalSesi = 'malam';
                         }
                     }
                 },

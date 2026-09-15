@@ -534,3 +534,82 @@ test('personnel with direct checkout (status HADIR, status_masuk ALPA, jam_pulan
     $calculated = $test->instance()->getCalculatedKonsumsi($date);
     expect($calculated['siang'])->toBe(1);
 });
+
+test('uploading fotoSiang2 and fotoMalam2 in edit modal preserves and saves fotoMalam2 even if sesi is siang', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $targetDate = '2026-09-08';
+    $record = DokumentasiKonsumsi::create([
+        'opd_id' => $opd->id,
+        'tanggal' => $targetDate,
+        'foto_siang' => 'dokumentasi-konsumsi/08-09-2026/existing_siang.webp',
+        'jumlah_siang' => 5,
+        'foto_malam' => 'dokumentasi-konsumsi/08-09-2026/existing_malam.webp',
+        'jumlah_malam' => 5,
+    ]);
+
+    $fakeSiang2 = \Illuminate\Http\UploadedFile::fake()->image('siang2.jpg');
+    $fakeMalam2 = \Illuminate\Http\UploadedFile::fake()->image('malam2.jpg');
+
+    Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi')
+        ->set('selectedOpd', (string) $opd->id)
+        ->call('openEditKonsumsiModal', $targetDate, 'siang')
+        ->assertSet('sesiKonsumsi', 'siang')
+        ->set('fotoSiang2', $fakeSiang2)
+        ->set('fotoMalam2', $fakeMalam2)
+        ->call('saveKonsumsi')
+        ->assertHasNoErrors();
+
+    $record->refresh();
+    expect($record->foto_siang)->toBe('dokumentasi-konsumsi/08-09-2026/existing_siang.webp');
+    expect($record->foto_siang_2)->not->toBeNull();
+    expect($record->foto_malam)->toBe('dokumentasi-konsumsi/08-09-2026/existing_malam.webp');
+    expect($record->foto_malam_2)->not->toBeNull();
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_siang_2);
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_malam_2);
+});
+
+test('uploading all photos with sesi set to siang in create modal saves both siang and malam including foto 2', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+
+    $opd = Opd::create(['name' => 'BPBD']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $targetDate = '2026-09-09';
+
+    $fakeSiang = \Illuminate\Http\UploadedFile::fake()->image('siang.jpg');
+    $fakeSiang2 = \Illuminate\Http\UploadedFile::fake()->image('siang2.jpg');
+    $fakeMalam = \Illuminate\Http\UploadedFile::fake()->image('malam.jpg');
+    $fakeMalam2 = \Illuminate\Http\UploadedFile::fake()->image('malam2.jpg');
+
+    Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi')
+        ->set('selectedOpd', (string) $opd->id)
+        ->call('openAddKonsumsiModal', $targetDate, 'siang')
+        ->assertSet('sesiKonsumsi', 'siang')
+        ->set('jumlahSiang', 3)
+        ->set('fotoSiang', $fakeSiang)
+        ->set('fotoSiang2', $fakeSiang2)
+        ->set('jumlahMalam', 3)
+        ->set('fotoMalam', $fakeMalam)
+        ->set('fotoMalam2', $fakeMalam2)
+        ->call('saveKonsumsi')
+        ->assertHasNoErrors();
+
+    $record = DokumentasiKonsumsi::whereDate('tanggal', $targetDate)->first();
+    expect($record)->not->toBeNull();
+    expect($record->foto_siang)->not->toBeNull();
+    expect($record->foto_siang_2)->not->toBeNull();
+    expect($record->foto_malam)->not->toBeNull();
+    expect($record->foto_malam_2)->not->toBeNull();
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_siang);
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_siang_2);
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_malam);
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_malam_2);
+});

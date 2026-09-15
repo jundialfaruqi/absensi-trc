@@ -711,24 +711,36 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $maxSiang = $this->calculatedSiang;
         $maxMalam = $this->calculatedMalam;
 
-        $hasNewSiang = !empty($this->fotoSiang);
-        $hasNewMalam = !empty($this->fotoMalam);
+        if (empty($this->fotoSiang) && empty($record?->foto_siang) && !empty($this->fotoSiang2)) {
+            $this->fotoSiang = $this->fotoSiang2;
+            $this->fotoSiang2 = null;
+        }
+        if (empty($this->fotoMalam) && empty($record?->foto_malam) && !empty($this->fotoMalam2)) {
+            $this->fotoMalam = $this->fotoMalam2;
+            $this->fotoMalam2 = null;
+        }
+
+        $hasNewSiang = !empty($this->fotoSiang) || !empty($this->fotoSiang2);
+        $hasNewMalam = !empty($this->fotoMalam) || !empty($this->fotoMalam2);
 
         // Tentukan sesi mana saja yang akan divalidasi dan disimpan:
-        // Prioritas: Jika kedua foto diunggah, simpan keduanya secara simultan!
+        // Prioritas: Jika kedua sesi memiliki foto baru diunggah, simpan keduanya secara simultan!
         if ($hasNewSiang && $hasNewMalam) {
             $saveSiang = true;
             $saveMalam = true;
+            $this->sesiKonsumsi = 'keduanya';
         } elseif ($this->sesiKonsumsi === 'keduanya') {
             $saveSiang = true;
             $saveMalam = true;
         } elseif ($this->modalMode === 'create') {
-            if ($hasNewSiang) {
+            if ($hasNewSiang && !$hasNewMalam) {
                 $saveSiang = true;
                 $saveMalam = false;
-            } elseif ($hasNewMalam) {
+                $this->sesiKonsumsi = 'siang';
+            } elseif (!$hasNewSiang && $hasNewMalam) {
                 $saveSiang = false;
                 $saveMalam = true;
+                $this->sesiKonsumsi = 'malam';
             } else {
                 $saveSiang = ($this->sesiKonsumsi === 'siang');
                 $saveMalam = ($this->sesiKonsumsi === 'malam');
@@ -883,13 +895,11 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
             $dataToUpdate['foto_malam_2'] = $record?->foto_malam_2 ?? null;
         }
 
-        DokumentasiKonsumsi::updateOrCreate(
-            [
-                'tanggal' => $this->uploadTanggal,
-                'opd_id' => $opdId,
-            ],
-            $dataToUpdate
-        );
+        if ($record) {
+            $record->update($dataToUpdate);
+        } else {
+            DokumentasiKonsumsi::create($dataToUpdate);
+        }
 
         if ($saveSiang && $saveMalam) {
             $sesiLabel = 'Makan Siang & Makan Malam';
