@@ -455,5 +455,66 @@ class AdminAbsensiApiTest extends TestCase
             ->assertJsonPath('data.total', 1);
         $this->assertEquals('Personel 05', $searchResp->json('data.personnels.0.name'));
     }
+
+    public function test_admin_can_update_and_retrieve_multi_face_descriptors(): void
+    {
+        [$admin1, $token1] = $this->createAdminUser($this->opd1);
+        $penugasan = \App\Models\Penugasan::create(['name' => 'Staf']);
+
+        $personnel = Personnel::create([
+            'name' => 'Budi 3D',
+            'nik' => '1471010000000099',
+            'email' => 'budi3d@example.com',
+            'password' => bcrypt('password'),
+            'foto' => 'personnel/budi.jpg',
+            'face_descriptor_mobile' => null,
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $penugasan->id,
+        ]);
+
+        $valid192Front = json_encode(array_fill(0, 192, 0.05));
+        $valid192Right = json_encode(array_fill(0, 192, 0.08));
+        $valid192Left  = json_encode(array_fill(0, 192, 0.11));
+        $valid192Up    = json_encode(array_fill(0, 192, 0.14));
+
+        // 1. Post multi-face-mobile
+        $response = $this->withHeader('Authorization', "Bearer $token1")
+            ->postJson("/api/v1/admin/personnels/{$personnel->id}/multi-face-mobile", [
+                'poses' => [
+                    ['pose_type' => 'FRONT', 'face_descriptor_mobile' => $valid192Front],
+                    ['pose_type' => 'RIGHT', 'face_descriptor_mobile' => $valid192Right],
+                    ['pose_type' => 'LEFT',  'face_descriptor_mobile' => $valid192Left],
+                    ['pose_type' => 'UP',    'face_descriptor_mobile' => $valid192Up],
+                ],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.updated_poses', ['FRONT', 'RIGHT', 'LEFT', 'UP']);
+
+        // Verifikasi FRONT otomatis tersinkronisasi ke kolom utama personnel->face_descriptor_mobile
+        $this->assertEquals($valid192Front, $personnel->fresh()->face_descriptor_mobile);
+
+        // Verifikasi data masuk ke personnel_face_embeddings
+        $this->assertDatabaseHas('personnel_face_embeddings', [
+            'personnel_id' => $personnel->id,
+            'pose_type' => 'FRONT',
+        ]);
+        $this->assertDatabaseHas('personnel_face_embeddings', [
+            'personnel_id' => $personnel->id,
+            'pose_type' => 'RIGHT',
+        ]);
+
+        // 2. Ambil dari endpoint personnels
+        $getResp = $this->withHeader('Authorization', "Bearer $token1")
+            ->getJson("/api/v1/admin/absensi/personnels?search=Budi 3D");
+
+        $getResp->assertStatus(200);
+        $personnelData = $getResp->json('data.personnels.0');
+        $this->assertNotNull($personnelData);
+        $this->assertArrayHasKey('multi_face_descriptors', $personnelData);
+        $this->assertCount(4, $personnelData['multi_face_descriptors']);
+        $this->assertEquals('FRONT', $personnelData['multi_face_descriptors'][0]['pose']);
+    }
 }
 

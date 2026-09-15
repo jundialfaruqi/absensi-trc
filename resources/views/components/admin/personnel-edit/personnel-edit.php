@@ -52,6 +52,17 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
     public string $face_descriptor_mobile = '';
 
+    public $foto_front;
+    public $foto_right;
+    public $foto_left;
+    public $foto_up;
+    public string $descriptor_front = '';
+    public string $descriptor_right = '';
+    public string $descriptor_left = '';
+    public string $descriptor_up = '';
+    public bool $has_3d_faces = false;
+    public array $existing_3d_poses = [];
+
     public string $kantor_id = '';
 
     public bool $wajib_absen_di_lokasi = false;
@@ -175,6 +186,8 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->pin = $item->pin ?? '';
         $this->face_descriptor = $item->face_descriptor ?? '';
         $this->face_descriptor_mobile = $item->face_descriptor_mobile ?? '';
+        $this->existing_3d_poses = $item->faceEmbeddings()->pluck('pose_type')->toArray();
+        $this->has_3d_faces = count($this->existing_3d_poses) >= 4;
         $this->kantor_id = (string) $item->kantor_id;
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
         $this->face_recognition = (bool) $item->face_recognition;
@@ -384,6 +397,30 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
 
         $personnel = Personnel::findOrFail($this->personnelId);
         $personnel->update($data);
+
+        if ($this->has_3d_faces && ($this->foto_front || $this->descriptor_front)) {
+            $poses = [
+                'FRONT' => ['foto' => $this->foto_front, 'desc' => $this->descriptor_front],
+                'RIGHT' => ['foto' => $this->foto_right, 'desc' => $this->descriptor_right],
+                'LEFT'  => ['foto' => $this->foto_left,  'desc' => $this->descriptor_left],
+                'UP'    => ['foto' => $this->foto_up,    'desc' => $this->descriptor_up],
+            ];
+
+            foreach ($poses as $poseType => $dataPose) {
+                $embedding = $personnel->faceEmbeddings()->firstOrNew(['pose_type' => $poseType]);
+                if (!empty($dataPose['foto'])) {
+                    if ($embedding->foto) {
+                        Storage::disk('public')->delete($embedding->foto);
+                    }
+                    $embedding->foto = $dataPose['foto']->store('personnel-fotos/poses', 'public');
+                    $embedding->face_descriptor_mobile = null;
+                }
+                if (!empty($dataPose['desc'])) {
+                    $embedding->face_descriptor = $dataPose['desc'];
+                }
+                $embedding->save();
+            }
+        }
 
         if (isset($data['foto'])) {
             PersonnelPhotoUpdated::dispatch(

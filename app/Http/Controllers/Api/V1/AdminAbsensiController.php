@@ -70,6 +70,7 @@ class AdminAbsensiController extends Controller
         $query = (clone $baseQuery)->with([
             'opd:id,name',
             'kantor:id,name,latitude,longitude,radius_meter',
+            'faceEmbeddings:id,personnel_id,pose_type,face_descriptor_mobile,foto',
         ])
         ->select([
             'id', 'name', 'nik', 'foto', 'face_descriptor_mobile',
@@ -103,12 +104,21 @@ class AdminAbsensiController extends Controller
         $query->orderBy('name');
 
         $formatPersonnel = function (Personnel $p) {
+            $multiFaceDescriptors = $p->faceEmbeddings?->map(function ($fe) {
+                return [
+                    'pose' => $fe->pose_type,
+                    'face_descriptor_mobile' => $fe->face_descriptor_mobile,
+                    'foto' => $fe->foto ? url('storage/' . $fe->foto) : null,
+                ];
+            })->values()->all() ?? [];
+
             return [
                 'id' => (string) $p->id,
                 'name' => $p->name,
                 'nik' => $p->nik ?? '',
                 'foto' => $p->foto ? url('storage/' . $p->foto) : null,
                 'face_descriptor_mobile' => $p->face_descriptor_mobile,
+                'multi_face_descriptors' => $multiFaceDescriptors,
                 'face_recognition' => (bool) $p->face_recognition,
                 'wajib_absen_di_lokasi' => (bool) $p->wajib_absen_di_lokasi,
                 'attendance_type' => $p->attendance_type ?? 'SHIFT',
@@ -841,6 +851,90 @@ class AdminAbsensiController extends Controller
                 'personnel_id' => (string) $personnel->id,
                 'name' => $personnel->name,
                 'face_descriptor_mobile_count' => 192,
+            ],
+        ]);
+    }
+
+    /**
+     * Memperbarui atau menyimpan multi face descriptor mobile (192-D) untuk berbagai sudut (pose_type) personil.
+     */
+    public function updateMultiFaceDescriptorMobile(Request $request, Personnel $personnel): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+        $isSuperAdmin = $user->hasRole('super-admin');
+
+        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak berwenang memperbarui data biometrik personil di luar OPD Anda.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'poses' => 'required|array|min:1',
+            'poses.*.pose_type' => 'required|string|in:FRONT,RIGHT,LEFT,UP',
+            'poses.*.face_descriptor_mobile' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $decoded = json_decode($value, true);
+                    if (!is_array($decoded) || count($decoded) !== 192) {
+                        return $fail('face_descriptor_mobile harus berupa string JSON array berisi tepat 192 elemen numerik.');
+                    }
+                    foreach ($decoded as $val) {
+                        if (!is_numeric($val) || is_nan((float)$val) || is_infinite((float)$val)) {
+                            return $fail('Semua elemen dalam face_descriptor_mobile harus berupa angka float yang valid.');
+                        }
+                    }
+                },
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $updatedPoses = [];
+        foreach ($request->poses as $poseItem) {
+            $poseType = $poseItem['pose_type'];
+            $descriptor = $poseItem['face_descriptor_mobile'];
+
+            $embedding = $personnel->faceEmbeddings()->firstOrNew(['pose_type' => $poseType]);
+            $embedding->face_descriptor_mobile = $descriptor;
+            $embedding->save();
+
+            // Jika pose FRONT, sinkronkan ke tabel personnel utama demi kompatibilitas penuh
+            if ($poseType === 'FRONT') {
+                $personnel->update([
+                    'face_descriptor_mobile' => $descriptor,
+                ]);
+            }
+
+            $updatedPoses[] = $poseType;
+        }
+
+        PersonnelVectorUpdated::dispatch(
+            $personnel->id,
+            $personnel->opd_id,
+            'ready'
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Multi-angle biometrik MobileFaceNet 192-D berhasil disimpan untuk personil {$personnel->name}.",
+            'data' => [
+                'personnel_id' => (string) $personnel->id,
+                'name' => $personnel->name,
+                'updated_poses' => $updatedPoses,
             ],
         ]);
     }

@@ -31,6 +31,15 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
     public $foto;
     public string $pin = '';
     public string $face_descriptor = '';
+    public $foto_front;
+    public $foto_right;
+    public $foto_left;
+    public $foto_up;
+    public string $descriptor_front = '';
+    public string $descriptor_right = '';
+    public string $descriptor_left = '';
+    public string $descriptor_up = '';
+    public bool $has_3d_faces = false;
     public string $kantor_id = '';
     public bool $wajib_absen_di_lokasi = false;
     public bool $face_recognition = false;
@@ -256,6 +265,28 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
         }
 
         $personnel = Personnel::create($data);
+
+        if ($this->has_3d_faces) {
+            $poses = [
+                'FRONT' => ['foto' => $this->foto_front, 'desc' => $this->descriptor_front],
+                'RIGHT' => ['foto' => $this->foto_right, 'desc' => $this->descriptor_right],
+                'LEFT'  => ['foto' => $this->foto_left,  'desc' => $this->descriptor_left],
+                'UP'    => ['foto' => $this->foto_up,    'desc' => $this->descriptor_up],
+            ];
+
+            foreach ($poses as $poseType => $dataPose) {
+                $fotoPath = null;
+                if (!empty($dataPose['foto'])) {
+                    $fotoPath = $dataPose['foto']->store('personnel-fotos/poses', 'public');
+                }
+                \App\Models\PersonnelFaceEmbedding::create([
+                    'personnel_id' => $personnel->id,
+                    'pose_type' => $poseType,
+                    'foto' => $fotoPath,
+                    'face_descriptor' => $dataPose['desc'] ?: null,
+                ]);
+            }
+        }
 
         if (!empty($personnel->foto)) {
             PersonnelPhotoUpdated::dispatch(
