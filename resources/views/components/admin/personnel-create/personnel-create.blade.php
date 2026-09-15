@@ -396,24 +396,26 @@
                                             </button>
                                         @endcan
 
-                                        {{-- Tombol Upload File --}}
-                                        <div class="relative w-full">
-                                            <input type="file" x-ref="fileInput" class="hidden" accept="image/*"
-                                                @change="handleFileUpload($event)" :disabled="isUploadingFile">
-                                            <button type="button" @click="$refs.fileInput.click()"
-                                                class="btn btn-outline btn-sm w-full gap-2"
-                                                :disabled="isUploadingFile">
-                                                <span x-show="isUploadingFile"
-                                                    class="loading loading-spinner loading-xs"></span>
-                                                <svg x-show="!isUploadingFile" xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                                    stroke="currentColor" class="w-4 h-4">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.5V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                                </svg>
-                                                <span x-text="isUploadingFile ? 'Memproses...' : 'Upload File'"></span>
-                                            </button>
-                                        </div>
+                                        @can('upload-foto-wajah')
+                                            {{-- Tombol Upload File --}}
+                                            <div class="relative w-full">
+                                                <input type="file" x-ref="fileInput" class="hidden" accept="image/*"
+                                                    @change="handleFileUpload($event)" :disabled="isUploadingFile">
+                                                <button type="button" @click="$refs.fileInput.click()"
+                                                    class="btn btn-outline btn-sm w-full gap-2"
+                                                    :disabled="isUploadingFile">
+                                                    <span x-show="isUploadingFile"
+                                                        class="loading loading-spinner loading-xs"></span>
+                                                    <svg x-show="!isUploadingFile" xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                        stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.5V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                                    </svg>
+                                                    <span x-text="isUploadingFile ? 'Memproses...' : 'Upload File'"></span>
+                                                </button>
+                                            </div>
+                                        @endcan
 
                                         <p
                                             class="text-[10px] text-base-content/50 leading-relaxed italic text-center mt-1">
@@ -2444,7 +2446,7 @@
                                             holdRequiredMs = 800;
                                             const isRollOk = Math.abs(rollAngle) <= 10;
                                             const isYawOk = yawRatio >= 0.70 && yawRatio <=
-                                            1.40;
+                                                1.40;
                                             const isPitchOk = pitchRatio >= 0.42 &&
                                                 pitchRatio <= 0.85;
                                             const areEyesOpen = leftEar >= 0.19 && rightEar >=
