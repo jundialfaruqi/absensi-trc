@@ -480,18 +480,20 @@
                                                 x-text="isStartingCamera ? 'Membuka Kamera...' : 'Buka Kamera'"></span>
                                         </button>
 
-                                        {{-- Tombol Perekaman Wajah 3D Multi-Angle (BARU) --}}
-                                        <button type="button" @click="open3DModal()"
-                                            class="btn btn-neutral text-white btn-sm w-full gap-2 font-semibold shadow-sm border-none"
-                                            :disabled="isStartingCamera">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
-                                                class="w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m9-5.25v9" />
-                                            </svg>
-                                            <span>Perekaman Wajah 3D</span>
-                                        </button>
+                                        @can('rekam-wajah-3d')
+                                            {{-- Tombol Perekaman Wajah 3D Multi-Angle (BARU) --}}
+                                            <button type="button" @click="open3DModal()"
+                                                class="btn btn-neutral text-white btn-sm w-full gap-2 font-semibold shadow-sm border-none"
+                                                :disabled="isStartingCamera">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
+                                                    class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m9-5.25v9" />
+                                                </svg>
+                                                <span>Perekaman Wajah 3D</span>
+                                            </button>
+                                        @endcan
 
                                         {{-- Tombol Upload File --}}
                                         <div class="relative w-full">
@@ -1344,7 +1346,8 @@
                                 </div>
 
                                 {{-- Circle Guide HUD Statis dengan Donut Loading Berkesinambungan --}}
-                                <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                                <div
+                                    class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
                                     <div class="relative w-56 h-56 sm:w-60 sm:h-60 flex items-center justify-center">
                                         {{-- SVG Donut Progress Ring --}}
                                         <svg class="w-full h-full" viewBox="0 0 240 240">
@@ -1352,9 +1355,7 @@
                                             <circle cx="120" cy="120" r="100"
                                                 class="transition-colors duration-300"
                                                 :class="isPoseMatched3D ? 'stroke-emerald-500/30' : 'stroke-white/25'"
-                                                stroke-width="3.5"
-                                                stroke-dasharray="6 6"
-                                                fill="none" />
+                                                stroke-width="3.5" stroke-dasharray="6 6" fill="none" />
 
                                             {{-- Subtle Tint Fill saat Posisi Pas --}}
                                             <circle cx="120" cy="120" r="97"
@@ -1364,12 +1365,9 @@
                                             {{-- Donut Loading Progress Arc (Mulai dari Atas / Jam 12, Berkesinambungan) --}}
                                             <circle cx="120" cy="120" r="100"
                                                 class="stroke-emerald-400 transition-all duration-150 ease-out"
-                                                stroke-width="6"
-                                                stroke-linecap="round"
-                                                stroke-dasharray="628.32"
+                                                stroke-width="6" stroke-linecap="round" stroke-dasharray="628.32"
                                                 :stroke-dashoffset="628.32 - (628.32 * total3DProgress / 100)"
-                                                transform="rotate(-90 120 120)"
-                                                fill="none"
+                                                transform="rotate(-90 120 120)" fill="none"
                                                 style="filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.7));" />
 
                                             {{-- 4 Divider Dots pada Sudut 4 Tahap --}}
@@ -2515,9 +2513,12 @@
 
                             calculateEyeAspectRatio(eyePoints) {
                                 if (!eyePoints || eyePoints.length < 6) return 0;
-                                const v1 = Math.hypot(eyePoints[1].x - eyePoints[5].x, eyePoints[1].y - eyePoints[5].y);
-                                const v2 = Math.hypot(eyePoints[2].x - eyePoints[4].x, eyePoints[2].y - eyePoints[4].y);
-                                const h = Math.hypot(eyePoints[0].x - eyePoints[3].x, eyePoints[0].y - eyePoints[3].y);
+                                const v1 = Math.hypot(eyePoints[1].x - eyePoints[5].x, eyePoints[1].y -
+                                    eyePoints[5].y);
+                                const v2 = Math.hypot(eyePoints[2].x - eyePoints[4].x, eyePoints[2].y -
+                                    eyePoints[4].y);
+                                const h = Math.hypot(eyePoints[0].x - eyePoints[3].x, eyePoints[0].y -
+                                    eyePoints[3].y);
                                 return (v1 + v2) / (2 * (h || 0.001));
                             },
 
@@ -2641,9 +2642,12 @@
                                         if (this.current3DStage === 'FRONT') {
                                             holdRequiredMs = 800;
                                             const isRollOk = Math.abs(rollAngle) <= 10;
-                                            const isYawOk = yawRatio >= 0.70 && yawRatio <= 1.40;
-                                            const isPitchOk = pitchRatio >= 0.42 && pitchRatio <= 0.85;
-                                            const areEyesOpen = leftEar >= 0.19 && rightEar >= 0.19;
+                                            const isYawOk = yawRatio >= 0.70 && yawRatio <=
+                                            1.40;
+                                            const isPitchOk = pitchRatio >= 0.42 &&
+                                                pitchRatio <= 0.85;
+                                            const areEyesOpen = leftEar >= 0.19 && rightEar >=
+                                                0.19;
 
                                             if (!isDistanceValid) {
                                                 targetInstruction = faceScale < 0.20 ?
@@ -2672,7 +2676,8 @@
                                             holdRequiredMs = 700;
                                             const isYawRight = yawRatio >= 1.35;
                                             const isRollOk = Math.abs(rollAngle) <= 14;
-                                            const areEyesOpen = leftEar >= 0.16 && rightEar >= 0.16;
+                                            const areEyesOpen = leftEar >= 0.16 && rightEar >=
+                                                0.16;
 
                                             if (!areEyesOpen) {
                                                 targetInstruction =
@@ -2692,7 +2697,8 @@
                                             holdRequiredMs = 700;
                                             const isYawLeft = yawRatio <= 0.72;
                                             const isRollOk = Math.abs(rollAngle) <= 14;
-                                            const areEyesOpen = leftEar >= 0.16 && rightEar >= 0.16;
+                                            const areEyesOpen = leftEar >= 0.16 && rightEar >=
+                                                0.16;
 
                                             if (!areEyesOpen) {
                                                 targetInstruction =
@@ -2712,7 +2718,8 @@
                                             holdRequiredMs = 700;
                                             const isPitchUp = pitchRatio <= 0.44;
                                             const isRollOk = Math.abs(rollAngle) <= 14;
-                                            const areEyesOpen = leftEar >= 0.16 && rightEar >= 0.16;
+                                            const areEyesOpen = leftEar >= 0.16 && rightEar >=
+                                                0.16;
 
                                             if (!areEyesOpen) {
                                                 targetInstruction =
