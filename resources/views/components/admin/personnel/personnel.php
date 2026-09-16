@@ -221,9 +221,6 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
             abort(403, 'Anda tidak memiliki izin untuk menghapus personel ini.');
         }
 
-        if ($item->foto) {
-            Storage::disk('public')->delete($item->foto);
-        }
         $item->delete();
 
         $this->deleteId = null;

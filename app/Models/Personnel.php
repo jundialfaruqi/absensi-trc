@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class Personnel extends Authenticatable
@@ -19,6 +20,28 @@ class Personnel extends Authenticatable
     protected $hidden = [
         'password', 'pin',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Personnel $personnel) {
+            // 1. Hapus semua foto pose 3D dari storage disk public
+            foreach ($personnel->faceEmbeddings as $embedding) {
+                if ($embedding->foto) {
+                    Storage::disk('public')->delete($embedding->foto);
+                }
+            }
+
+            // 2. Hapus foto utama profil jika ada
+            if ($personnel->foto) {
+                Storage::disk('public')->delete($personnel->foto);
+            }
+
+            // 3. Hapus seluruh data record device yang terhubung ke personel ini
+            foreach ($personnel->devices as $device) {
+                $device->delete();
+            }
+        });
+    }
 
     public function opd(): BelongsTo
     {
