@@ -20,14 +20,22 @@ class PersonnelAuthController extends Controller
     public function activate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'license_key' => 'required|string',
+            'license_key' => [
+                'required',
+                'string',
+                'regex:/^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$/',
+            ],
             'device_id' => 'required|string',
             'brand' => 'nullable|string',
             'model' => 'nullable|string',
             'android_version' => 'nullable|string',
+        ], [
+            'license_key.required' => 'Kode lisensi wajib diisi.',
+            'license_key.regex' => 'Format kode lisensi tidak valid (contoh: H4ER-VSHJ-XZ8D).',
+            'device_id.required' => 'Identitas perangkat tidak ditemukan.',
         ]);
 
-        $licenseKey = trim($validated['license_key']);
+        $licenseKey = strtoupper(trim($validated['license_key']));
         $newDeviceId = trim($validated['device_id']);
 
         $device = Device::with(['personnel.opd', 'personnel.kantor', 'personnel.penugasan', 'personnel.faceEmbeddings'])

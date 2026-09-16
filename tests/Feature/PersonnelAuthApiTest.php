@@ -51,7 +51,7 @@ class PersonnelAuthApiTest extends TestCase
             'opd_id' => $this->opd->id,
             'personnel_id' => $this->personnel->id,
             'name' => 'HP Budi',
-            'license_key' => 'TRC-BUDI-1234',
+            'license_key' => 'H4ER-VSHJ-XZ8D',
             'unique_device_id' => 'device_original_id',
             'status' => 'active',
         ]);
@@ -69,7 +69,7 @@ class PersonnelAuthApiTest extends TestCase
     public function test_activate_license_success_and_returns_jwt(): void
     {
         $response = $this->postJson('/api/v1/personel/auth/activate', [
-            'license_key' => 'TRC-BUDI-1234',
+            'license_key' => 'H4ER-VSHJ-XZ8D',
             'device_id' => 'device_phone_1',
             'brand' => 'Samsung',
             'model' => 'Galaxy S23',
@@ -113,7 +113,7 @@ class PersonnelAuthApiTest extends TestCase
     {
         // 1. Aktivasi di HP Pertama
         $res1 = $this->postJson('/api/v1/personel/auth/activate', [
-            'license_key' => 'TRC-BUDI-1234',
+            'license_key' => 'H4ER-VSHJ-XZ8D',
             'device_id' => 'hp_lama_alpha',
         ]);
         $res1->assertStatus(200);
@@ -121,7 +121,7 @@ class PersonnelAuthApiTest extends TestCase
 
         // 2. Aktivasi di HP Kedua (Takeover)
         $res2 = $this->postJson('/api/v1/personel/auth/activate', [
-            'license_key' => 'TRC-BUDI-1234',
+            'license_key' => 'H4ER-VSHJ-XZ8D',
             'device_id' => 'hp_baru_beta',
         ]);
         $res2->assertStatus(200);
@@ -267,5 +267,19 @@ class PersonnelAuthApiTest extends TestCase
 
         $response->assertStatus(401)
             ->assertJsonPath('status', 'error');
+    }
+
+    /**
+     * Test format lisensi yang salah (tidak sesuai XXXX-XXXX-XXXX) ditolak dengan HTTP 422.
+     */
+    public function test_activate_license_invalid_format_is_rejected(): void
+    {
+        $response = $this->postJson('/api/v1/personel/auth/activate', [
+            'license_key' => 'INVALID-FORMAT',
+            'device_id' => 'device_test',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['license_key']);
     }
 }
