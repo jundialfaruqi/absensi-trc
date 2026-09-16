@@ -525,81 +525,96 @@
                                                 class="text-red-500 text-xs mt-1 block text-center">{{ $message }}</span>
                                         @enderror
 
-                                        {{-- Biometric Status Badges (Dual-Stack 128D / 192D & 3D Multi-Angle) --}}
-                                        <div class="flex flex-wrap justify-center gap-1.5 pt-1">
-                                            @if ($has_3d_faces)
-                                                <span
-                                                    class="badge badge-secondary badge-xs gap-1 py-1.5 px-2 text-[10px] font-semibold text-white"
-                                                    title="4 Sudut Wajah (3D) Lengkap">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    3D (4 Sudut) Ready
-                                                </span>
-                                            @endif
+                                        {{-- Biometric Status List (Dual-Stack 128D / 192D, 3D Multi-Angle & AI Adaptif) --}}
+                                        <div class="w-full pt-3 mt-2 border-t border-base-200">
+                                            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2 text-left">
+                                                Status Biometrik
+                                            </div>
+                                            <ul class="space-y-2 text-xs text-left">
+                                                {{-- 1. 3D (4 Sudut) --}}
+                                                <li class="flex items-center gap-2">
+                                                    @if ($has_3d_faces)
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span class="text-black dark:text-white font-medium">3D (4 Sudut) Ready</span>
+                                                    @else
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                        <span class="text-black/40 dark:text-white/40">3D (4 Sudut) Belum Lengkap</span>
+                                                    @endif
+                                                </li>
 
-                                            {{-- 128D Web Status --}}
-                                            @if ($face_descriptor)
-                                                <span
-                                                    class="badge badge-success badge-xs gap-1 py-1.5 px-2 text-[10px]"
-                                                    title="128-D Vector dari web face-api.js">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    128D Ready
-                                                </span>
-                                            @else
-                                                <span class="badge badge-ghost badge-xs gap-1 py-1.5 px-2 text-[10px]"
-                                                    title="128-D belum diekstrak">
-                                                    128D Kosong
-                                                </span>
-                                            @endif
+                                                {{-- 2. 128D Web Status --}}
+                                                <li class="flex items-center gap-2">
+                                                    @if ($face_descriptor)
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span class="text-black dark:text-white font-medium">128D Ready</span>
+                                                    @else
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                        <span class="text-black/40 dark:text-white/40">128D Belum Ada</span>
+                                                    @endif
+                                                </li>
 
-                                            {{-- 192D Mobile Status (Real-time synced via Reverb) --}}
-                                            <template x-if="isSyncingMobile">
-                                                <span
-                                                    class="badge badge-warning badge-xs gap-1 py-1.5 px-2 text-[10px] animate-pulse"
-                                                    title="Menunggu ekstraksi 192-D otomatis dari HP Admin...">
-                                                    <span class="loading loading-spinner loading-xs scale-75"></span>
-                                                    Syncing 192D...
-                                                </span>
-                                            </template>
-                                            <template x-if="!isSyncingMobile && has192D">
-                                                <span class="badge badge-info badge-xs gap-1 py-1.5 px-2 text-[10px]"
-                                                    title="192-D Vector dari MobileFaceNet HP siap">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                    </svg>
-                                                    192D Mobile Ready
-                                                </span>
-                                            </template>
-                                            <template x-if="!isSyncingMobile && !has192D">
-                                                <span class="badge badge-ghost badge-xs gap-1 py-1.5 px-2 text-[10px]"
-                                                    title="192-D belum disinkron dari mobile">
-                                                    192D Belum Sync
-                                                </span>
-                                            </template>
+                                                {{-- 3. 192D Mobile Status (Real-time synced via Reverb & Alpine) --}}
+                                                <li class="flex items-center gap-2">
+                                                    <template x-if="isSyncingMobile">
+                                                        <div class="flex items-center gap-2 text-black dark:text-white">
+                                                            <span class="loading loading-spinner loading-xs text-black dark:text-white"></span>
+                                                            <span class="font-medium">Syncing 192D...</span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!isSyncingMobile && has192D">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <span class="text-black dark:text-white font-medium">192D Mobile Ready</span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!isSyncingMobile && !has192D">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                            <span class="text-black/40 dark:text-white/40">192D Belum Sync</span>
+                                                        </div>
+                                                    </template>
+                                                </li>
 
-                                            @if($has_adaptive_biometrics)
-                                                <div class="flex items-center gap-1.5 mt-1">
-                                                    <span class="badge badge-success badge-xs gap-1 py-1 px-2 text-[10px]" title="AI telah belajar beradaptasi {{ $total_adaptations }} kali">
-                                                        🤖 AI Adaptif ({{ $total_adaptations }}x)
-                                                    </span>
-                                                    <button type="button" 
-                                                        wire:click="resetAdaptiveBiometrics"
-                                                        wire:confirm="Yakin ingin mereset AI Pembelajaran Mandiri ke Master Anchor asli pendaftaran?"
-                                                        class="btn btn-ghost btn-xs text-[10px] text-error hover:bg-error/10 p-0 h-auto underline font-medium"
-                                                        title="Reset template adaptif ke Master Anchor asli">
-                                                        Reset ke Master
-                                                    </button>
-                                                </div>
+                                                {{-- 4. AI Adaptif --}}
+                                                <li class="flex items-center gap-2">
+                                                    @if ($has_adaptive_biometrics)
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span class="text-black dark:text-white font-medium">AI Adaptif ({{ $total_adaptations }}x)</span>
+                                                    @else
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                        <span class="text-black/40 dark:text-white/40">AI Adaptif (Belum Ada)</span>
+                                                    @endif
+                                                </li>
+                                            </ul>
+
+                                            {{-- Tombol Reset Full Width btn-error --}}
+                                            @if ($has_adaptive_biometrics)
+                                                <button type="button" 
+                                                    wire:click="resetAdaptiveBiometrics"
+                                                    wire:confirm="Yakin ingin mereset AI Pembelajaran Mandiri ke Master Anchor asli pendaftaran?"
+                                                    class="btn btn-error btn-sm w-full mt-3 text-white font-semibold gap-1.5 shadow-sm"
+                                                    title="Kembalikan template adaptif ke Master Anchor asli">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    Reset ke Master
+                                                </button>
                                             @endif
                                         </div>
                                     </div>
