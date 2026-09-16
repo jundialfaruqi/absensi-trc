@@ -12,7 +12,15 @@ class PersonnelFaceEmbedding extends Model
         'pose_type',
         'face_descriptor',
         'face_descriptor_mobile',
+        'adaptive_descriptor_mobile',
+        'adaptation_count',
+        'last_adapted_at',
         'foto',
+    ];
+
+    protected $casts = [
+        'adaptation_count' => 'integer',
+        'last_adapted_at' => 'datetime',
     ];
 
     public function personnel(): BelongsTo
@@ -20,3 +28,4 @@ class PersonnelFaceEmbedding extends Model
         return $this->belongsTo(Personnel::class);
     }
 }
+

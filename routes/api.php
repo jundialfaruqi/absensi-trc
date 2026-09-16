@@ -69,5 +69,7 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         ->middleware('throttle:30,1');
     Route::post('/personnels/{personnel}/multi-face-mobile', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'updateMultiFaceDescriptorMobile'])
         ->middleware('throttle:30,1');
+    Route::post('/personnels/{personnel}/reset-face-learning', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'resetFaceLearning'])
+        ->middleware('throttle:30,1');
 });
 

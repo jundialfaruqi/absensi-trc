@@ -586,6 +586,21 @@
                                                     192D Belum Sync
                                                 </span>
                                             </template>
+
+                                            @if($has_adaptive_biometrics)
+                                                <div class="flex items-center gap-1.5 mt-1">
+                                                    <span class="badge badge-success badge-xs gap-1 py-1 px-2 text-[10px]" title="AI telah belajar beradaptasi {{ $total_adaptations }} kali">
+                                                        🤖 AI Adaptif ({{ $total_adaptations }}x)
+                                                    </span>
+                                                    <button type="button" 
+                                                        wire:click="resetAdaptiveBiometrics"
+                                                        wire:confirm="Yakin ingin mereset AI Pembelajaran Mandiri ke Master Anchor asli pendaftaran?"
+                                                        class="btn btn-ghost btn-xs text-[10px] text-error hover:bg-error/10 p-0 h-auto underline font-medium"
+                                                        title="Reset template adaptif ke Master Anchor asli">
+                                                        Reset ke Master
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

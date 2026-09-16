@@ -62,6 +62,8 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     public string $descriptor_up = '';
     public bool $has_3d_faces = false;
     public array $existing_3d_poses = [];
+    public int $total_adaptations = 0;
+    public bool $has_adaptive_biometrics = false;
 
     public string $kantor_id = '';
 
@@ -188,6 +190,8 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->face_descriptor_mobile = $item->face_descriptor_mobile ?? '';
         $this->existing_3d_poses = $item->faceEmbeddings()->pluck('pose_type')->toArray();
         $this->has_3d_faces = count($this->existing_3d_poses) >= 4;
+        $this->total_adaptations = (int) $item->faceEmbeddings()->sum('adaptation_count');
+        $this->has_adaptive_biometrics = $item->faceEmbeddings()->whereNotNull('adaptive_descriptor_mobile')->exists();
         $this->kantor_id = (string) $item->kantor_id;
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
         $this->face_recognition = (bool) $item->face_recognition;
@@ -450,6 +454,20 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'message' => 'Data Personnel berhasil diperbarui.'.$licenseMsg,
         ]);
 
-        return $this->redirectRoute('personnel', [], true, true);
+        $this->redirect(route('personnel'), navigate: true);
+    }
+
+    public function resetAdaptiveBiometrics(\App\Services\AdaptiveFaceLearningService $service): void
+    {
+        $item = Personnel::findOrFail($this->personnel_id);
+        $service->resetToMaster($item);
+        $this->total_adaptations = 0;
+        $this->has_adaptive_biometrics = false;
+
+        $this->dispatch('set-pending-toast', [
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Template adaptif wajah berhasil direset ke Master Anchor asli.',
+        ]);
     }
 };

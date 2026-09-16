@@ -54,4 +54,10 @@ class Personnel extends Authenticatable
     {
         return $this->hasMany(PersonnelFaceEmbedding::class);
     }
+
+    public function faceLearningLogs(): HasMany
+    {
+        return $this->hasMany(PersonnelFaceLearningLog::class);
+    }
 }
+

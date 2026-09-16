@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Events\PersonnelVectorUpdated;
+use App\Services\AdaptiveFaceLearningService;
+use Illuminate\Support\Facades\Log;
 
 class AdminAbsensiController extends Controller
 {
@@ -70,7 +72,7 @@ class AdminAbsensiController extends Controller
         $query = (clone $baseQuery)->with([
             'opd:id,name',
             'kantor:id,name,latitude,longitude,radius_meter',
-            'faceEmbeddings:id,personnel_id,pose_type,face_descriptor_mobile,foto',
+            'faceEmbeddings:id,personnel_id,pose_type,face_descriptor_mobile,adaptive_descriptor_mobile,adaptation_count,last_adapted_at,foto',
         ])
         ->select([
             'id', 'name', 'nik', 'foto', 'face_descriptor_mobile',
@@ -108,6 +110,9 @@ class AdminAbsensiController extends Controller
                 return [
                     'pose' => $fe->pose_type,
                     'face_descriptor_mobile' => $fe->face_descriptor_mobile,
+                    'adaptive_descriptor_mobile' => $fe->adaptive_descriptor_mobile,
+                    'adaptation_count' => (int) ($fe->adaptation_count ?? 0),
+                    'last_adapted_at' => $fe->last_adapted_at ? $fe->last_adapted_at->toIso8601String() : null,
                     'foto' => $fe->foto ? url('storage/' . $fe->foto) : null,
                 ];
             })->values()->all() ?? [];
@@ -119,6 +124,8 @@ class AdminAbsensiController extends Controller
                 'foto' => $p->foto ? url('storage/' . $p->foto) : null,
                 'face_descriptor_mobile' => $p->face_descriptor_mobile,
                 'multi_face_descriptors' => $multiFaceDescriptors,
+                'has_adaptive' => $p->faceEmbeddings?->contains(fn($fe) => !empty($fe->adaptive_descriptor_mobile)) ?? false,
+                'total_adaptations' => (int) ($p->faceEmbeddings?->sum('adaptation_count') ?? 0),
                 'face_recognition' => (bool) $p->face_recognition,
                 'wajib_absen_di_lokasi' => (bool) $p->wajib_absen_di_lokasi,
                 'attendance_type' => $p->attendance_type ?? 'SHIFT',
@@ -485,7 +492,7 @@ class AdminAbsensiController extends Controller
     /**
      * Menyimpan transaksi absensi (Masuk atau Pulang) oleh Admin OPD supervisor.
      */
-    public function store(Request $request, AbsensiLokasiService $lokasiService): JsonResponse
+    public function store(Request $request, AbsensiLokasiService $lokasiService, AdaptiveFaceLearningService $adaptiveService): JsonResponse
     {
         if ($authError = $this->authorizeAdmin($request)) {
             return $authError;
@@ -505,6 +512,10 @@ class AdminAbsensiController extends Controller
             'platform' => 'nullable|string',
             'device_name' => 'nullable|string',
             'unique_device_id' => 'nullable|string',
+            'face_descriptor_mobile' => 'nullable',
+            'confidence_score' => 'nullable|numeric',
+            'euler_angles' => 'nullable|array',
+            'pose_type' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -767,6 +778,24 @@ class AdminAbsensiController extends Controller
             ]);
         }
 
+        // Pilar 4: Self-Learning Biometric Adaptation (EMA)
+        $adaptationResult = null;
+        if ($request->filled('face_descriptor_mobile') && $request->filled('confidence_score')) {
+            try {
+                $adaptationResult = $adaptiveService->attemptAdaptation(
+                    personnel: $personnel,
+                    capturedDescriptor: $request->input('face_descriptor_mobile'),
+                    confidenceScore: (float) $request->input('confidence_score'),
+                    poseType: $request->input('pose_type', 'FRONT'),
+                    absensiId: $absensi->id,
+                    deviceInfo: $deviceName . ' (' . $platform . ')',
+                    eulerAngles: $request->input('euler_angles')
+                );
+            } catch (\Throwable $e) {
+                Log::error("Error executing biometric adaptation: " . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => $pesan,
@@ -783,6 +812,7 @@ class AdminAbsensiController extends Controller
                 'jarak_meter' => $hasilLokasi['jarak_meter'],
                 'kantor_name' => $hasilLokasi['kantor_name'],
                 'foto_url' => url('storage/' . $fileName),
+                'adaptation' => $adaptationResult,
             ],
         ]);
     }
@@ -936,6 +966,36 @@ class AdminAbsensiController extends Controller
                 'name' => $personnel->name,
                 'updated_poses' => $updatedPoses,
             ],
+        ]);
+    }
+
+    /**
+     * Mengembalikan template adaptif personil ke Master Anchor asli (Reset to Master).
+     */
+    public function resetFaceLearning(Request $request, Personnel $personnel, AdaptiveFaceLearningService $adaptiveService): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+        $isSuperAdmin = $user->hasRole('super-admin');
+
+        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak berwenang mereset data biometrik personil di luar OPD Anda.',
+            ], 403);
+        }
+
+        $poseType = $request->input('pose_type'); // null = reset semua pose
+        $result = $adaptiveService->resetToMaster($personnel, $poseType);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $result['message'],
+            'data' => $result,
         ]);
     }
 }
