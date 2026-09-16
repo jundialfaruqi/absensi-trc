@@ -60,16 +60,22 @@ class PersonnelFaceEnrollmentController extends Controller
             if ($request->hasFile("poses.$index.foto")) {
                 $file = $request->file("poses.$index.foto");
                 $filename = 'personnel_' . $personnel->id . '_' . strtolower($poseType) . '_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
-                $photoPath = $file->storeAs('personnel_faces', $filename, 'public');
+                $photoPath = $file->storeAs('personnel-fotos/poses', $filename, 'public');
             } elseif (!empty($poseData['foto']) && is_string($poseData['foto']) && str_starts_with($poseData['foto'], 'data:image')) {
                 // Base64 image
                 $data = explode(',', $poseData['foto']);
                 $decodedImg = base64_decode($data[1] ?? '');
                 if ($decodedImg) {
                     $filename = 'personnel_' . $personnel->id . '_' . strtolower($poseType) . '_' . time() . '_' . Str::random(6) . '.jpg';
-                    Storage::disk('public')->put('personnel_faces/' . $filename, $decodedImg);
-                    $photoPath = 'personnel_faces/' . $filename;
+                    Storage::disk('public')->put('personnel-fotos/poses/' . $filename, $decodedImg);
+                    $photoPath = 'personnel-fotos/poses/' . $filename;
                 }
+            }
+
+            // Hapus foto lama jika ada berkas baru yang diunggah
+            $existingFoto = $personnel->faceEmbeddings()->where('pose_type', $poseType)->value('foto');
+            if ($photoPath && $existingFoto && $existingFoto !== $photoPath) {
+                Storage::disk('public')->delete($existingFoto);
             }
 
             // Web descriptor (128-D) jika ada
@@ -92,7 +98,7 @@ class PersonnelFaceEnrollmentController extends Controller
                 [
                     'face_descriptor_mobile' => $desc192Json,
                     'face_descriptor' => $descWeb,
-                    'foto' => $photoPath ?: ($personnel->faceEmbeddings()->where('pose_type', $poseType)->value('foto')),
+                    'foto' => $photoPath ?: $existingFoto,
                     'last_adapted_at' => now(),
                 ]
             );
