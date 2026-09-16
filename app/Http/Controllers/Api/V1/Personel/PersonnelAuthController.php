@@ -146,6 +146,12 @@ class PersonnelAuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Token berhasil diperbarui.',
+            'data' => [
+                'token_type' => $result['token_type'],
+                'access_token' => $result['access_token'],
+                'refresh_token' => $result['refresh_token'],
+                'expires_in' => $result['expires_in'],
+            ],
             'access_token' => $result['access_token'],
             'refresh_token' => $result['refresh_token'],
             'token_type' => $result['token_type'],

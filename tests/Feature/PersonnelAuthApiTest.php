@@ -53,8 +53,14 @@ class PersonnelAuthApiTest extends TestCase
             'name' => 'HP Budi',
             'license_key' => 'TRC-BUDI-1234',
             'unique_device_id' => 'device_original_id',
-            'status' => 'inactive',
+            'status' => 'active',
         ]);
+
+        $this->jwtService->generatePersonnelRefreshToken(
+            $this->personnel,
+            $this->device->id,
+            $this->device->unique_device_id
+        );
     }
 
     /**
@@ -230,5 +236,36 @@ class PersonnelAuthApiTest extends TestCase
             ->assertJsonPath('total_poses', 1);
 
         $this->assertCount(192, $response->json('master_descriptor_192'));
+    }
+
+    /**
+     * Test perangkat yang disuspend atau diblokir langsung ditolak dengan HTTP 403.
+     */
+    public function test_suspended_device_is_rejected_with_403(): void
+    {
+        $this->device->update(['status' => 'suspended']);
+        $token = $this->jwtService->generatePersonnelAccessToken($this->personnel);
+
+        $response = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson('/api/v1/personel/auth/me');
+
+        $response->assertStatus(403)
+            ->assertJsonPath('status', 'error');
+    }
+
+    /**
+     * Test jika seluruh refresh token dihapus/dicabut, sesi langsung ditolak dengan HTTP 401.
+     */
+    public function test_revoked_or_empty_refresh_tokens_rejected_with_401(): void
+    {
+        // Kosongkan refresh token personel
+        PersonnelRefreshToken::where('personnel_id', $this->personnel->id)->delete();
+        $token = $this->jwtService->generatePersonnelAccessToken($this->personnel);
+
+        $response = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson('/api/v1/personel/auth/me');
+
+        $response->assertStatus(401)
+            ->assertJsonPath('status', 'error');
     }
 }
