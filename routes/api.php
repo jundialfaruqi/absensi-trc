@@ -73,3 +73,35 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         ->middleware('throttle:30,1');
 });
 
+/*
+|--------------------------------------------------------------------------
+| V1 Personnel Authentication Routes (Auto-Takeover & Pure JWT)
+|--------------------------------------------------------------------------
+| Khusus aplikasi Absensi TRC Personel (Mandiri).
+*/
+Route::prefix('v1/personel/auth')->middleware('noindex')->group(function () {
+    // Public: Aktivasi lisensi (Auto-Takeover) & Refresh token
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::post('/activate', [\App\Http\Controllers\Api\V1\Personel\PersonnelAuthController::class, 'activate']);
+        Route::post('/refresh', [\App\Http\Controllers\Api\V1\Personel\PersonnelAuthController::class, 'refresh']);
+    });
+
+    // Protected: Logout & Me
+    Route::middleware('jwt.personel')->group(function () {
+        Route::post('/logout', [\App\Http\Controllers\Api\V1\Personel\PersonnelAuthController::class, 'logout']);
+        Route::get('/me', [\App\Http\Controllers\Api\V1\Personel\PersonnelAuthController::class, 'me']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| V1 Personnel Features (Face 3D Enrollment, Biometric Template, etc.)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(function () {
+    // Perekaman Wajah 3D Multi-Angle & Master Template 192D
+    Route::post('/face-enroll', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'enroll'])
+        ->middleware('throttle:30,1');
+    Route::get('/face-template', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'template']);
+});
+

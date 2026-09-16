@@ -127,7 +127,7 @@ class JwtService
     }
 
     /**
-     * Cabut refresh token (Logout).
+     * Cabut refresh token admin (Logout).
      */
     public function revokeRefreshToken(string $rawToken): bool
     {
@@ -140,5 +140,134 @@ class JwtService
         }
 
         return false;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personnel Token Management (Pure JWT + Refresh Token)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Generate Access Token (JWT) untuk Personel.
+     */
+    public function generatePersonnelAccessToken(\App\Models\Personnel $personnel, int $ttlMinutes = 60): string
+    {
+        $now = time();
+        $opd = $personnel->opd;
+
+        $payload = [
+            'iss' => config('app.url') ?? 'https://absensitrc.pekanbaru.go.id',
+            'aud' => 'absensitrc-personel-app',
+            'iat' => $now,
+            'nbf' => $now,
+            'exp' => $now + ($ttlMinutes * 60),
+            'sub' => $personnel->id,
+            'nik' => $personnel->nik,
+            'name' => $personnel->name,
+            'type' => 'personnel',
+            'opd_id' => $personnel->opd_id,
+            'opd_name' => $opd?->name,
+            'kantor_id' => $personnel->kantor_id,
+            'penugasan_id' => $personnel->penugasan_id,
+        ];
+
+        return JWT::encode($payload, $this->getSecretKey(), 'HS256');
+    }
+
+    /**
+     * Generate Refresh Token untuk Personel.
+     */
+    public function generatePersonnelRefreshToken(
+        \App\Models\Personnel $personnel,
+        ?int $deviceId = null,
+        ?string $uniqueDeviceId = null,
+        ?string $deviceName = null,
+        ?string $ip = null,
+        int $ttlDays = 30
+    ): string {
+        $rawToken = Str::random(64);
+        $tokenHash = hash('sha256', $rawToken);
+
+        \App\Models\PersonnelRefreshToken::create([
+            'personnel_id' => $personnel->id,
+            'device_id' => $deviceId,
+            'unique_device_id' => $uniqueDeviceId,
+            'token_hash' => $tokenHash,
+            'device_name' => $deviceName,
+            'ip_address' => $ip,
+            'expires_at' => now()->addDays($ttlDays),
+        ]);
+
+        return $rawToken;
+    }
+
+    /**
+     * Rotasi Refresh Token Personel (Silent Refresh).
+     */
+    public function rotatePersonnelRefreshToken(
+        string $rawToken,
+        ?string $uniqueDeviceId = null,
+        ?string $deviceName = null,
+        ?string $ip = null
+    ): ?array {
+        $tokenHash = hash('sha256', $rawToken);
+
+        $record = \App\Models\PersonnelRefreshToken::with(['personnel.opd', 'personnel.kantor'])
+            ->where('token_hash', $tokenHash)
+            ->first();
+
+        if (!$record || !$record->isValid() || !$record->personnel) {
+            return null;
+        }
+
+        $personnel = $record->personnel;
+
+        // Cabut token lama (rotasi)
+        $record->update(['revoked_at' => now()]);
+
+        // Terbitkan token baru
+        $newAccessToken = $this->generatePersonnelAccessToken($personnel);
+        $newRefreshToken = $this->generatePersonnelRefreshToken(
+            $personnel,
+            $record->device_id,
+            $uniqueDeviceId ?: $record->unique_device_id,
+            $deviceName ?: $record->device_name,
+            $ip ?: $record->ip_address
+        );
+
+        return [
+            'access_token' => $newAccessToken,
+            'refresh_token' => $newRefreshToken,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
+            'personnel' => $personnel,
+        ];
+    }
+
+    /**
+     * Cabut refresh token personel (Logout).
+     */
+    public function revokePersonnelRefreshToken(string $rawToken): bool
+    {
+        $tokenHash = hash('sha256', $rawToken);
+
+        $record = \App\Models\PersonnelRefreshToken::where('token_hash', $tokenHash)->first();
+        if ($record && $record->revoked_at === null) {
+            $record->update(['revoked_at' => now()]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Cabut seluruh token milik personel (Digunakan saat Takeover).
+     */
+    public function revokeAllPersonnelTokens(int $personnelId): void
+    {
+        \App\Models\PersonnelRefreshToken::where('personnel_id', $personnelId)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
     }
 }

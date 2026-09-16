@@ -1,0 +1,162 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Personel;
+
+use App\Http\Controllers\Controller;
+use App\Models\Personnel;
+use App\Models\PersonnelFaceEmbedding;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class PersonnelFaceEnrollmentController extends Controller
+{
+    /**
+     * Daftarkan atau perbarui 4 pose wajah 3D milik personel.
+     */
+    public function enroll(Request $request): JsonResponse
+    {
+        /** @var Personnel $personnel */
+        $personnel = $request->attributes->get('personnel');
+
+        $request->validate([
+            'poses' => 'required|array|min:1',
+            'poses.*.pose_type' => 'required|string|in:FRONT,RIGHT,LEFT,UP',
+            'poses.*.face_descriptor_mobile' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $decoded = is_array($value) ? $value : json_decode($value, true);
+                    if (!is_array($decoded) || count($decoded) !== 192) {
+                        return $fail('face_descriptor_mobile harus berupa array tepat 192 elemen numerik float.');
+                    }
+                    foreach ($decoded as $num) {
+                        if (!is_numeric($num)) {
+                            return $fail('Setiap elemen dalam face_descriptor_mobile harus numerik.');
+                        }
+                    }
+                },
+            ],
+            'poses.*.foto' => 'nullable', // Bisa file upload atau dataUrl
+            'poses.*.face_descriptor' => 'nullable', // 128-D descriptor untuk web
+        ]);
+
+        $savedPoses = [];
+        $frontDescriptor192 = null;
+        $frontPhotoPath = null;
+        $frontDescriptorWeb = null;
+
+        foreach ($request->poses as $index => $poseData) {
+            $poseType = strtoupper($poseData['pose_type']);
+
+            // Parse 192D
+            $desc192 = is_array($poseData['face_descriptor_mobile'])
+                ? $poseData['face_descriptor_mobile']
+                : json_decode($poseData['face_descriptor_mobile'], true);
+            $desc192Json = json_encode(array_map('floatval', $desc192));
+
+            // Upload foto jika disertakan
+            $photoPath = null;
+            if ($request->hasFile("poses.$index.foto")) {
+                $file = $request->file("poses.$index.foto");
+                $filename = 'personnel_' . $personnel->id . '_' . strtolower($poseType) . '_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+                $photoPath = $file->storeAs('personnel_faces', $filename, 'public');
+            } elseif (!empty($poseData['foto']) && is_string($poseData['foto']) && str_starts_with($poseData['foto'], 'data:image')) {
+                // Base64 image
+                $data = explode(',', $poseData['foto']);
+                $decodedImg = base64_decode($data[1] ?? '');
+                if ($decodedImg) {
+                    $filename = 'personnel_' . $personnel->id . '_' . strtolower($poseType) . '_' . time() . '_' . Str::random(6) . '.jpg';
+                    Storage::disk('public')->put('personnel_faces/' . $filename, $decodedImg);
+                    $photoPath = 'personnel_faces/' . $filename;
+                }
+            }
+
+            // Web descriptor (128-D) jika ada
+            $descWeb = null;
+            if (!empty($poseData['face_descriptor'])) {
+                $descWebRaw = is_array($poseData['face_descriptor'])
+                    ? $poseData['face_descriptor']
+                    : json_decode($poseData['face_descriptor'], true);
+                if (is_array($descWebRaw)) {
+                    $descWeb = json_encode(array_map('floatval', $descWebRaw));
+                }
+            }
+
+            // Update or Create pose record
+            $embedding = PersonnelFaceEmbedding::updateOrCreate(
+                [
+                    'personnel_id' => $personnel->id,
+                    'pose_type' => $poseType,
+                ],
+                [
+                    'face_descriptor_mobile' => $desc192Json,
+                    'face_descriptor' => $descWeb,
+                    'foto' => $photoPath ?: ($personnel->faceEmbeddings()->where('pose_type', $poseType)->value('foto')),
+                    'last_adapted_at' => now(),
+                ]
+            );
+
+            $savedPoses[] = $poseType;
+
+            if ($poseType === 'FRONT') {
+                $frontDescriptor192 = $desc192Json;
+                $frontPhotoPath = $photoPath;
+                $frontDescriptorWeb = $descWeb;
+            }
+        }
+
+        // Sinkronisasi pose FRONT ke model utama Personnel
+        if ($frontDescriptor192) {
+            $personnel->face_descriptor_mobile = $frontDescriptor192;
+            if ($frontPhotoPath) {
+                $personnel->foto = $frontPhotoPath;
+            }
+            if ($frontDescriptorWeb) {
+                $personnel->face_descriptor = $frontDescriptorWeb;
+            }
+            $personnel->face_recognition = true;
+            $personnel->save();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Perekaman wajah 3D berhasil disimpan ke server.',
+            'personnel_id' => $personnel->id,
+            'saved_poses' => $savedPoses,
+            'has_192d' => !empty($personnel->face_descriptor_mobile),
+            'face_recognition_enabled' => (bool)$personnel->face_recognition,
+        ]);
+    }
+
+    /**
+     * Dapatkan master template wajah personel (192D & pose 3D) untuk pencocokan 1:1 on-device.
+     */
+    public function template(Request $request): JsonResponse
+    {
+        /** @var Personnel $personnel */
+        $personnel = $request->attributes->get('personnel');
+
+        $personnel->load('faceEmbeddings');
+
+        $poses = [];
+        foreach ($personnel->faceEmbeddings as $fe) {
+            $poses[] = [
+                'pose_type' => $fe->pose_type,
+                'face_descriptor_mobile' => $fe->face_descriptor_mobile ? json_decode($fe->face_descriptor_mobile, true) : null,
+                'foto' => $fe->foto ? asset('storage/' . $fe->foto) : null,
+                'last_adapted_at' => $fe->last_adapted_at?->toIso8601String(),
+            ];
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'personnel_id' => $personnel->id,
+            'name' => $personnel->name,
+            'nik' => $personnel->nik,
+            'master_descriptor_192' => $personnel->face_descriptor_mobile ? json_decode($personnel->face_descriptor_mobile, true) : null,
+            'poses' => $poses,
+            'total_poses' => count($poses),
+        ]);
+    }
+}

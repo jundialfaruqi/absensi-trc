@@ -59,5 +59,10 @@ class Personnel extends Authenticatable
     {
         return $this->hasMany(PersonnelFaceLearningLog::class);
     }
+
+    public function refreshTokens(): HasMany
+    {
+        return $this->hasMany(PersonnelRefreshToken::class);
+    }
 }
 

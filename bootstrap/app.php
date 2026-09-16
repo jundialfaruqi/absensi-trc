@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'device_auth' => \App\Http\Middleware\CheckDeviceLicense::class,
             'noindex' => \App\Http\Middleware\NoIndexMiddleware::class,
             'jwt.admin' => \App\Http\Middleware\JwtAdminAuthMiddleware::class,
+            'jwt.personel' => \App\Http\Middleware\JwtPersonnelAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
