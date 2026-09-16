@@ -37,14 +37,14 @@ class PersonnelAuthController extends Controller
         if (!$device) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Kode lisensi tidak valid atau tidak ditemukan dalam sistem.',
+                'message' => 'Kode lisensi tidak valid.',
             ], 404);
         }
 
         if ($device->status === 'blocked') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Lisensi ini telah diblokir oleh Admin. Silakan hubungi operator OPD Anda.',
+                'message' => 'Lisensi tidak aktif, silahkan hubungi Admin untuk aktivasi.',
             ], 403);
         }
 
