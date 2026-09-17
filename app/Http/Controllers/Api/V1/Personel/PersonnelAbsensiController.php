@@ -858,58 +858,116 @@ class PersonnelAbsensiController extends Controller
             }
         }
 
-        // 4. Ambil log aktifitas terbaru (maksimal 5 log)
+        // 4. Ambil log aktifitas terbaru (maksimal 10 transaksi absensi)
         $recentLogs = Absensi::where('personnel_id', $personnel->id)
             ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
             ->latest('tanggal')
             ->latest('updated_at')
-            ->take(5)
+            ->take(10)
             ->get();
 
         $recentActivities = [];
         foreach ($recentLogs as $log) {
             $kantorName = $log->kantor?->nama_kantor ?? $personnel->kantor?->nama_kantor ?? 'Posko TRC';
             $kantorPulangName = $log->kantorPulang?->nama_kantor ?? $kantorName;
-            $tglStr = $log->tanggal ? Carbon::parse($log->tanggal)->translatedFormat('d M Y') : $todayStr;
+            
+            $tglCarbon = $log->tanggal instanceof Carbon
+                ? $log->tanggal
+                : Carbon::parse($log->tanggal);
+            $tglStr = $tglCarbon->translatedFormat('d M Y');
+            $tglFullStr = $tglCarbon->translatedFormat('l, d M Y');
+            $shiftName = $log->jadwal?->shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
 
-            // Jika ada jam pulang
+            // Jika ada jam pulang -> Tambahkan sebagai Card Aktifitas Pulang
             if ($log->jam_pulang) {
-                $jamPulangStr = Carbon::parse($log->jam_pulang)->format('H:i');
-                $isPulangCepat = $log->status_pulang === 'PULANG CEPAT';
+                $jamPulangCarbon = $log->jam_pulang instanceof Carbon
+                    ? $log->jam_pulang
+                    : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $log->jam_pulang);
+                $jamPulangStr = $jamPulangCarbon->format('H:i');
+                $isPulangCepat = strtoupper((string) $log->status_pulang) === 'PULANG CEPAT';
+                $fotoPulangUrl = $log->foto_pulang ? asset('storage/' . $log->foto_pulang) : null;
+
                 $recentActivities[] = [
                     'id' => (string) $log->id . '_pulang',
                     'type' => 'pulang',
                     'title' => 'Presensi Pulang',
                     'subtitle' => $kantorPulangName,
-                    'time' => "$jamPulangStr WIB - $tglStr",
+                    'time' => "{$jamPulangStr} WIB",
                     'date' => $tglStr,
+                    'full_date' => $tglFullStr,
                     'status' => $isPulangCepat ? 'Pulang Cepat' : 'Selesai',
                     'status_type' => $isPulangCepat ? 'pulang_cepat' : 'pulang',
-                    'created_at' => $log->jam_pulang instanceof Carbon ? $log->jam_pulang->toISOString() : Carbon::parse($log->tanggal->format('Y-m-d') . ' ' . $log->jam_pulang)->toISOString(),
+                    'foto_url' => $fotoPulangUrl,
+                    'shift_name' => $shiftName,
+                    'jarak_meter' => $log->jarak_meter_pulang,
+                    'created_at' => $jamPulangCarbon->toISOString(),
                 ];
             }
 
-            // Jika ada jam masuk
+            // Jika ada jam masuk -> Tambahkan sebagai Card Aktifitas Masuk
             if ($log->jam_masuk) {
-                $jamMasukStr = Carbon::parse($log->jam_masuk)->format('H:i');
-                $isTelat = $log->status_masuk === 'TELAT';
+                $jamMasukCarbon = $log->jam_masuk instanceof Carbon
+                    ? $log->jam_masuk
+                    : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $log->jam_masuk);
+                $jamMasukStr = $jamMasukCarbon->format('H:i');
+                $isTelat = strtoupper((string) $log->status_masuk) === 'TELAT';
+                $fotoMasukUrl = $log->foto_masuk ? asset('storage/' . $log->foto_masuk) : null;
+
                 $recentActivities[] = [
                     'id' => (string) $log->id . '_masuk',
                     'type' => 'masuk',
                     'title' => 'Presensi Masuk',
                     'subtitle' => $kantorName,
-                    'time' => "$jamMasukStr WIB - $tglStr",
+                    'time' => "{$jamMasukStr} WIB",
                     'date' => $tglStr,
+                    'full_date' => $tglFullStr,
                     'status' => $isTelat ? 'Terlambat' : 'Tepat Waktu',
                     'status_type' => $isTelat ? 'telat' : 'masuk',
-                    'created_at' => $log->jam_masuk instanceof Carbon ? $log->jam_masuk->toISOString() : Carbon::parse($log->tanggal->format('Y-m-d') . ' ' . $log->jam_masuk)->toISOString(),
+                    'foto_url' => $fotoMasukUrl,
+                    'shift_name' => $shiftName,
+                    'jarak_meter' => $log->jarak_meter,
+                    'created_at' => $jamMasukCarbon->toISOString(),
+                ];
+            }
+
+            // Jika tidak ada jam masuk dan jam pulang (misal Izin, Sakit, Cuti, Alpa)
+            if (!$log->jam_masuk && !$log->jam_pulang) {
+                $statusUpper = strtoupper((string) $log->status);
+                $statusLabel = match ($statusUpper) {
+                    'IZIN' => 'Izin',
+                    'SAKIT' => 'Sakit',
+                    'CUTI' => 'Cuti',
+                    'DINAS' => 'Dinas Luar',
+                    'ALPA' => 'Alpa',
+                    default => ucfirst(strtolower($log->status ?: 'Tidak Hadir')),
+                };
+                $statusType = match ($statusUpper) {
+                    'IZIN', 'SAKIT', 'CUTI', 'DINAS' => 'izin',
+                    'ALPA' => 'alpa',
+                    default => 'info',
+                };
+
+                $recentActivities[] = [
+                    'id' => (string) $log->id . '_status',
+                    'type' => strtolower($statusUpper),
+                    'title' => 'Status: ' . $statusLabel,
+                    'subtitle' => $log->keterangan ?: ($log->nomor_surat ? "No: {$log->nomor_surat}" : 'Presensi Harian'),
+                    'time' => '-',
+                    'date' => $tglStr,
+                    'full_date' => $tglFullStr,
+                    'status' => $statusLabel,
+                    'status_type' => $statusType,
+                    'foto_url' => null,
+                    'shift_name' => $shiftName,
+                    'jarak_meter' => null,
+                    'created_at' => $tglCarbon->startOfDay()->toISOString(),
                 ];
             }
         }
 
         // Urutkan recentActivities berdasarkan timestamp terbaru
         usort($recentActivities, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
-        $recentActivities = array_slice($recentActivities, 0, 5);
+        $recentActivities = array_slice($recentActivities, 0, 8);
 
         return response()->json([
             'status' => 'success',
