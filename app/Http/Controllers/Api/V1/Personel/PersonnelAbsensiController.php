@@ -871,13 +871,13 @@ class PersonnelAbsensiController extends Controller
             $kantorName = $log->kantor?->name 
                 ?? $log->kantor?->nama_kantor 
                 ?? $personnel->kantor?->name 
-                ?? $personnel->penugasan?->name 
-                ?? $personnel->opd?->name 
-                ?? 'Kantor Penugasan';
+                ?? 'Lapangan';
 
             $kantorPulangName = $log->kantorPulang?->name 
                 ?? $log->kantorPulang?->nama_kantor 
-                ?? $kantorName;
+                ?? $log->kantor?->name 
+                ?? $personnel->kantor?->name 
+                ?? 'Lapangan';
             
             $tglCarbon = $log->tanggal instanceof Carbon
                 ? $log->tanggal
