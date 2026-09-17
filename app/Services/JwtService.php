@@ -170,7 +170,9 @@ class JwtService
             'opd_id' => $personnel->opd_id,
             'opd_name' => $opd?->name,
             'kantor_id' => $personnel->kantor_id,
+            'kantor_name' => $personnel->kantor?->name ?? $personnel->kantor?->nama_kantor,
             'penugasan_id' => $personnel->penugasan_id,
+            'penugasan_name' => $personnel->penugasan?->name,
         ];
 
         return JWT::encode($payload, $this->getSecretKey(), 'HS256');

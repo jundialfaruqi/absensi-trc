@@ -123,7 +123,9 @@ class PersonnelAuthController extends Controller
                 'opd_id' => $personnel->opd_id,
                 'opd_name' => $personnel->opd?->name,
                 'kantor_id' => $personnel->kantor_id,
+                'kantor_name' => $personnel->kantor?->name ?? $personnel->kantor?->nama_kantor,
                 'penugasan_id' => $personnel->penugasan_id,
+                'penugasan_name' => $personnel->penugasan?->name,
             ],
             'device' => [
                 'id' => $device->id,
@@ -161,29 +163,23 @@ class PersonnelAuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Token berhasil diperbarui.',
-            'data' => [
-                'token_type' => $result['token_type'],
-                'access_token' => $result['access_token'],
-                'refresh_token' => $result['refresh_token'],
-                'expires_in' => $result['expires_in'],
-            ],
             'access_token' => $result['access_token'],
             'refresh_token' => $result['refresh_token'],
-            'token_type' => $result['token_type'],
-            'expires_in' => $result['expires_in'],
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
         ]);
     }
 
     /**
-     * Logout dan cabut refresh token aktif.
+     * Invalidate (revoke) refresh token saat logout.
      */
     public function logout(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'refresh_token' => 'required|string',
-        ]);
+        $refreshToken = $request->input('refresh_token');
 
-        $this->jwtService->revokePersonnelRefreshToken($validated['refresh_token']);
+        if ($refreshToken) {
+            $this->jwtService->revokePersonnelRefreshToken($refreshToken);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -215,8 +211,9 @@ class PersonnelAuthController extends Controller
                 'opd_id' => $personnel->opd_id,
                 'opd_name' => $personnel->opd?->name,
                 'kantor_id' => $personnel->kantor_id,
-                'kantor_name' => $personnel->kantor?->nama_kantor,
+                'kantor_name' => $personnel->kantor?->name ?? $personnel->kantor?->nama_kantor,
                 'penugasan_id' => $personnel->penugasan_id,
+                'penugasan_name' => $personnel->penugasan?->name,
                 'regu' => $personnel->regu,
                 'nomor_hp' => $personnel->nomor_hp,
                 'wajib_absen_di_lokasi' => (bool)$personnel->wajib_absen_di_lokasi,
