@@ -155,12 +155,12 @@ class PersonnelAbsensiController extends Controller
         // 1. Cek apakah tidak ada jadwal
         if (!$jadwal) {
             if ($personnel->attendance_type === 'FLEXIBLE') {
-                if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+                if ($absensi && $absensi->jam_pulang) {
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
                         'action_type' => 'selesai',
-                        'message' => 'Anda telah menyelesaikan presensi masuk dan pulang hari ini (Mode Fleksibel).',
+                        'message' => 'Anda telah menyelesaikan presensi' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' hari ini (Mode Fleksibel).',
                         'data' => [
                             'personnel' => [
                                 'id' => (string) $personnel->id,
@@ -207,12 +207,12 @@ class PersonnelAbsensiController extends Controller
         // 2. Cek apakah jadwal adalah LIBUR / OFF
         if ($jadwal->shift && $jadwal->shift->type === 'off') {
             if ($personnel->attendance_type === 'FLEXIBLE') {
-                if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+                if ($absensi && $absensi->jam_pulang) {
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
                         'action_type' => 'selesai',
-                        'message' => 'Anda telah menyelesaikan presensi masuk dan pulang hari ini (Mode Fleksibel).',
+                        'message' => 'Anda telah menyelesaikan presensi' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' hari ini (Mode Fleksibel).',
                         'data' => [
                             'personnel' => [
                                 'id' => (string) $personnel->id,
@@ -268,13 +268,13 @@ class PersonnelAbsensiController extends Controller
             'end_time' => Carbon::parse($shift->end_time)->format('H:i:s'),
         ];
 
-        // Cek apakah sudah absen lengkap (masuk & pulang)
-        if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+        // Cek apakah sudah absen pulang untuk jadwal ini (baik normal maupun direct check-out)
+        if ($absensi && $absensi->jam_pulang) {
             return response()->json([
                 'status' => 'info',
                 'can_attend' => false,
                 'action_type' => 'selesai',
-                'message' => 'Anda telah menyelesaikan presensi masuk dan pulang untuk jadwal hari ini.',
+                'message' => 'Anda telah menyelesaikan presensi' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' untuk jadwal hari ini.',
                 'data' => [
                     'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
                     'shift' => $shiftData,
@@ -310,8 +310,8 @@ class PersonnelAbsensiController extends Controller
             $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
             $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
-            // DIRECT CHECK-OUT: Jika belum absen masuk dan waktu sekarang sudah masuk/melewati window pulang
-            if ((!$absensi || !$absensi->jam_masuk) && $now->greaterThanOrEqualTo($windowOutStart)) {
+            // DIRECT CHECK-OUT: Jika belum absen masuk & belum absen pulang dan waktu sekarang sudah masuk/melewati window pulang
+            if ((!$absensi || !$absensi->jam_masuk) && (!$absensi || !$absensi->jam_pulang) && $now->greaterThanOrEqualTo($windowOutStart)) {
                 $isDirectCheckOut = true;
             }
 
@@ -568,17 +568,23 @@ class PersonnelAbsensiController extends Controller
         }
 
         $shift = $jadwal?->shift;
-        $absensi = Absensi::firstOrNew([
-            'personnel_id' => $personnel->id,
-            'tanggal' => $activeDate,
-        ]);
+        $absensi = Absensi::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $activeDate)
+            ->first();
+
+        if (!$absensi) {
+            $absensi = new Absensi([
+                'personnel_id' => $personnel->id,
+                'tanggal' => $activeDate,
+            ]);
+        }
 
         if ($absensi->exists && $absensi->jam_pulang) {
             return response()->json([
-                'status' => 'info',
+                'status' => 'error',
                 'message' => 'Anda sudah menyelesaikan seluruh sesi absensi untuk jadwal ini.',
                 'data' => $absensi,
-            ]);
+            ], 422);
         }
 
         $platform = $request->platform ?: 'android';

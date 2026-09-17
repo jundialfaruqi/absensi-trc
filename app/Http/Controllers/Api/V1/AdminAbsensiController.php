@@ -259,12 +259,12 @@ class AdminAbsensiController extends Controller
         // 1. Jika mode flexible atau tidak ada jadwal
         if (!$jadwal) {
             if ($personnel->attendance_type === 'FLEXIBLE') {
-                if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+                if ($absensi && $absensi->jam_pulang) {
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
                         'action_type' => 'selesai',
-                        'message' => 'Personel sudah menyelesaikan absen masuk dan pulang hari ini.',
+                        'message' => 'Personel sudah menyelesaikan absen' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' hari ini.',
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
                             'absensi' => $absensi,
@@ -626,10 +626,10 @@ class AdminAbsensiController extends Controller
 
         if ($absensi->exists && $absensi->jam_pulang) {
             return response()->json([
-                'status' => 'info',
+                'status' => 'error',
                 'message' => 'Personel ini sudah menyelesaikan seluruh sesi absensi untuk jadwal ini.',
                 'data' => $absensi,
-            ]);
+            ], 422);
         }
 
         $platform = $request->platform ?: 'android';
