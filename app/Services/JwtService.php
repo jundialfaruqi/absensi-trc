@@ -151,7 +151,7 @@ class JwtService
     /**
      * Generate Access Token (JWT) untuk Personel.
      */
-    public function generatePersonnelAccessToken(\App\Models\Personnel $personnel, int $ttlMinutes = 60): string
+    public function generatePersonnelAccessToken(\App\Models\Personnel $personnel, ?string $deviceId = null, int $ttlMinutes = 60): string
     {
         $now = time();
         $opd = $personnel->opd;
@@ -166,6 +166,7 @@ class JwtService
             'nik' => $personnel->nik,
             'name' => $personnel->name,
             'type' => 'personnel',
+            'device_id' => $deviceId,
             'opd_id' => $personnel->opd_id,
             'opd_name' => $opd?->name,
             'kantor_id' => $personnel->kantor_id,
@@ -222,16 +223,17 @@ class JwtService
         }
 
         $personnel = $record->personnel;
+        $activeDeviceId = $uniqueDeviceId ?: $record->unique_device_id;
 
         // Cabut token lama (rotasi)
         $record->update(['revoked_at' => now()]);
 
         // Terbitkan token baru
-        $newAccessToken = $this->generatePersonnelAccessToken($personnel);
+        $newAccessToken = $this->generatePersonnelAccessToken($personnel, $activeDeviceId);
         $newRefreshToken = $this->generatePersonnelRefreshToken(
             $personnel,
             $record->device_id,
-            $uniqueDeviceId ?: $record->unique_device_id,
+            $activeDeviceId,
             $deviceName ?: $record->device_name,
             $ip ?: $record->ip_address
         );

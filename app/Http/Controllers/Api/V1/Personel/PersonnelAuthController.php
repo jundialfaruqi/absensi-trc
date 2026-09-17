@@ -81,7 +81,7 @@ class PersonnelAuthController extends Controller
         $this->jwtService->revokeAllPersonnelTokens($personnel->id);
 
         // 3. GENERATE TOKENS: Terbitkan Access Token (JWT) & Refresh Token baru
-        $accessToken = $this->jwtService->generatePersonnelAccessToken($personnel);
+        $accessToken = $this->jwtService->generatePersonnelAccessToken($personnel, $newDeviceId);
         $refreshToken = $this->jwtService->generatePersonnelRefreshToken(
             $personnel,
             $device->id,

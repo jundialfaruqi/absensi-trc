@@ -73,7 +73,28 @@ class JwtPersonnelAuthMiddleware
             ], 403);
         }
 
-        // 2. Validasi Sesi Aktif (Refresh token tidak boleh kosong atau dicabut)
+        // 2. Validasi Binding Perangkat (Instant Takeover Kick-Out)
+        // Jika lisensi telah dialihkan ke perangkat lain (unique_device_id berbeda di database):
+        if (!empty($device->unique_device_id)) {
+            // A. Validasi via klaim device_id pada Access Token (JWT)
+            if (isset($payload->device_id) && !empty($payload->device_id) && $payload->device_id !== $device->unique_device_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lisensi Anda telah dialihkan ke perangkat lain. Silakan aktivasi kembali.',
+                ], 401);
+            }
+
+            // B. Validasi via Header HTTP X-Device-Id (jika dikirim oleh aplikasi)
+            $headerDeviceId = $request->header('X-Device-Id');
+            if (!empty($headerDeviceId) && $headerDeviceId !== $device->unique_device_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lisensi Anda telah dialihkan ke perangkat lain. Silakan aktivasi kembali.',
+                ], 401);
+            }
+        }
+
+        // 3. Validasi Sesi Aktif (Refresh token tidak boleh kosong atau dicabut)
         $hasActiveSession = PersonnelRefreshToken::where('personnel_id', $personnel->id)
             ->where('expires_at', '>', now())
             ->whereNull('revoked_at')
