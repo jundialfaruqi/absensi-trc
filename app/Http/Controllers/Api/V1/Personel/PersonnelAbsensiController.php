@@ -850,7 +850,7 @@ class PersonnelAbsensiController extends Controller
             } elseif ($todayAbsensi->jam_pulang) {
                 $statusHariIni = 'Sudah Absen Pulang (' . Carbon::parse($todayAbsensi->jam_pulang)->format('H:i') . ' WIB)';
             } elseif (in_array(strtoupper((string) $todayAbsensi->status), ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
-                $statusHariIni = 'Status: ' . ucfirst(strtolower($todayAbsensi->status));
+                $statusHariIni = ucfirst(strtolower($todayAbsensi->status));
             }
         } else {
             if ($personnel->attendance_type !== 'FLEXIBLE') {
@@ -985,7 +985,7 @@ class PersonnelAbsensiController extends Controller
                 $recentActivities[] = [
                     'id' => (string) $log->id . '_status',
                     'type' => strtolower($statusUpper),
-                    'title' => 'Status: ' . $statusLabel,
+                    'title' => $statusLabel,
                     'subtitle' => $log->keterangan ?: ($log->nomor_surat ? "No: {$log->nomor_surat}" : 'Presensi Harian'),
                     'time' => '-',
                     'date' => $tglStr,
