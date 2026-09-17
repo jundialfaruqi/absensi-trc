@@ -807,6 +807,7 @@ class PersonnelAbsensiController extends Controller
         $hadirCount = 0;
         $alpaCount = 0;
         $izinCount = 0;
+        $liburCount = 0;
 
         foreach ($absensis as $a) {
             $statusUpper = strtoupper((string) $a->status);
@@ -814,8 +815,10 @@ class PersonnelAbsensiController extends Controller
                 $hadirCount++;
             } elseif ($statusUpper === 'ALPA') {
                 $alpaCount++;
-            } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
+            } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI'])) {
                 $izinCount++;
+            } elseif (in_array($statusUpper, ['LIBUR', 'DINAS'])) {
+                $liburCount++;
             }
         }
 
@@ -1076,6 +1079,7 @@ class PersonnelAbsensiController extends Controller
                 'hadir_count' => $hadirCount,
                 'alpa_count' => $alpaCount,
                 'izin_count' => $izinCount,
+                'libur_count' => $liburCount,
                 'total_hari' => $totalHari,
                 'hadir_percentage' => $hadirPercentage,
                 'status_hari_ini' => $statusHariIni,
@@ -1170,9 +1174,9 @@ class PersonnelAbsensiController extends Controller
                         // Tanggal di masa depan (> hari ini) tidak dihitung Alpa, tampilkan '-'
                         $itemStatus = '-';
                     }
-                } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
+                } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI'])) {
                     $izinCount++;
-                } elseif ($statusUpper === 'LIBUR') {
+                } elseif (in_array($statusUpper, ['LIBUR', 'DINAS'])) {
                     $liburCount++;
                 }
 
@@ -1234,10 +1238,12 @@ class PersonnelAbsensiController extends Controller
                         $status = 'LIBUR';
                     }
                     $keterangan = $shift->keterangan ?: 'Hari Libur';
-                    if ($status === 'LIBUR') {
+                    if (in_array($status, ['LIBUR', 'DINAS'])) {
                         $liburCount++;
-                    } else {
+                    } elseif (in_array($status, ['IZIN', 'SAKIT', 'CUTI'])) {
                         $izinCount++;
+                    } else {
+                        $liburCount++;
                     }
                 }
 

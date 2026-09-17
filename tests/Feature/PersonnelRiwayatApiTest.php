@@ -117,4 +117,56 @@ class PersonnelRiwayatApiTest extends TestCase
         $this->assertNull($response->json('data.riwayat.0.jam_masuk'));
         $this->assertNull($response->json('data.riwayat.0.jam_pulang'));
     }
+
+    public function test_dinas_is_counted_in_total_libur_not_in_total_izin(): void
+    {
+        // 1. Buat data absensi: 1 IZIN, 1 SAKIT, 1 CUTI, 1 DINAS, 1 LIBUR
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => '2026-04-01',
+            'status' => 'IZIN',
+        ]);
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => '2026-04-02',
+            'status' => 'SAKIT',
+        ]);
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => '2026-04-03',
+            'status' => 'CUTI',
+        ]);
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => '2026-04-04',
+            'status' => 'DINAS',
+        ]);
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => '2026-04-05',
+            'status' => 'LIBUR',
+        ]);
+
+        // Cek Riwayat API
+        $responseRiwayat = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+            ->getJson('/api/v1/personel/absensi/riwayat?month=4&year=2026');
+
+        $responseRiwayat->assertStatus(200);
+        $summary = $responseRiwayat->json('data.summary');
+        
+        // total_izin HANYA menghitung IZIN, SAKIT, CUTI (harus 3)
+        $this->assertEquals(3, $summary['total_izin']);
+        // total_libur harus menghitung LIBUR dan DINAS (minimal 2)
+        $this->assertGreaterThanOrEqual(2, $summary['total_libur']);
+
+        // Cek Dashboard Summary API
+        $responseDashboard = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+            ->getJson('/api/v1/personel/dashboard/summary?month=4&year=2026');
+
+        $responseDashboard->assertStatus(200);
+        $dashData = $responseDashboard->json('data');
+
+        $this->assertEquals(3, $dashData['izin_count']);
+        $this->assertEquals(2, $dashData['libur_count']);
+    }
 }
