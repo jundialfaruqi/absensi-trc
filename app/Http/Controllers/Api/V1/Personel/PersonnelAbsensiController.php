@@ -1137,18 +1137,22 @@ class PersonnelAbsensiController extends Controller
                 ];
             } else {
                 // Tidak ada data absensi di tanggal ini
-                $isSunday = $currentDate->isSunday();
-                $isOff = $jadwal?->shift?->type === 'off';
+                // Libur HANYA ditentukan dari shift yang berjenis 'off' atau shift bernama 'Libur'
+                $shift = $jadwal?->shift;
+                $isOff = false;
+                if ($shift) {
+                    $isOff = ($shift->type === 'off') || (stripos($shift->name ?? '', 'libur') !== false);
+                }
 
                 $status = '-';
                 $keterangan = null;
-                if ($isSunday || $isOff) {
+                if ($isOff) {
                     $status = 'LIBUR';
                     $keterangan = 'Hari Libur';
                     $liburCount++;
                 }
 
-                $shiftName = $jadwal?->shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
+                $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
 
                 $items[] = [
                     'id' => 'empty_' . $tglStr,
