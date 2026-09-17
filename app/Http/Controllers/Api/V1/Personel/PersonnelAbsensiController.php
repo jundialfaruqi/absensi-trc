@@ -884,7 +884,14 @@ class PersonnelAbsensiController extends Controller
                 : Carbon::parse($log->tanggal);
             $tglStr = $tglCarbon->translatedFormat('d M Y');
             $tglFullStr = $tglCarbon->translatedFormat('l, d M Y');
-            $shiftName = $log->jadwal?->shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
+            $shift = $log->jadwal?->shift;
+            $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
+            $shiftHours = null;
+            if ($shift && $shift->start_time && $shift->end_time) {
+                $sStart = Carbon::parse($shift->start_time)->format('H:i');
+                $sEnd = Carbon::parse($shift->end_time)->format('H:i');
+                $shiftHours = "{$sStart} - {$sEnd}";
+            }
 
             // Jika ada jam pulang -> Tambahkan sebagai Card Aktifitas Pulang
             if ($log->jam_pulang) {
@@ -907,6 +914,7 @@ class PersonnelAbsensiController extends Controller
                     'status_type' => $isPulangCepat ? 'pulang_cepat' : 'pulang',
                     'foto_url' => $fotoPulangUrl,
                     'shift_name' => $shiftName,
+                    'shift_hours' => $shiftHours,
                     'jarak_meter' => $log->jarak_meter_pulang,
                     'created_at' => $jamPulangCarbon->toISOString(),
                 ];
@@ -933,6 +941,7 @@ class PersonnelAbsensiController extends Controller
                     'status_type' => $isTelat ? 'telat' : 'masuk',
                     'foto_url' => $fotoMasukUrl,
                     'shift_name' => $shiftName,
+                    'shift_hours' => $shiftHours,
                     'jarak_meter' => $log->jarak_meter,
                     'created_at' => $jamMasukCarbon->toISOString(),
                 ];
@@ -967,6 +976,7 @@ class PersonnelAbsensiController extends Controller
                     'status_type' => $statusType,
                     'foto_url' => null,
                     'shift_name' => $shiftName,
+                    'shift_hours' => $shiftHours,
                     'jarak_meter' => null,
                     'created_at' => $tglCarbon->startOfDay()->toISOString(),
                 ];
