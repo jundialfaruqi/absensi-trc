@@ -104,13 +104,15 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
         ->middleware('throttle:30,1');
     Route::get('/face-template', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'template']);
 
-    // Dashboard Summary (Statistik Bulan Ini & Aktifitas Terbaru)
+    // Dashboard Summary & Riwayat Presensi
     Route::get('/dashboard/summary', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'dashboardSummary']);
+    Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
 
     // Fitur Presensi Mandiri 1:1 Biometrik
     Route::prefix('absensi')->group(function () {
         Route::get('/biometrics', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'myBiometrics']);
         Route::get('/check-status', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'checkStatus']);
+        Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
         Route::post('/store', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'store'])
             ->middleware('throttle:30,1');
     });

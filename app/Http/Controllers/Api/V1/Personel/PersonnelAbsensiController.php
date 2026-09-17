@@ -1009,4 +1009,129 @@ class PersonnelAbsensiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Dapatkan daftar riwayat presensi bulanan lengkap untuk personel login.
+     */
+    public function riwayat(Request $request): JsonResponse
+    {
+        /** @var Personnel $personnel */
+        $personnel = $request->attributes->get('personnel');
+
+        $month = (int) $request->query('month', date('m'));
+        $year = (int) $request->query('year', date('Y'));
+
+        if ($month < 1 || $month > 12) {
+            $month = (int) date('m');
+        }
+        if ($year < 2020 || $year > 2050) {
+            $year = (int) date('Y');
+        }
+
+        $targetDate = Carbon::createFromDate($year, $month, 1);
+        $monthName = $targetDate->translatedFormat('F Y');
+
+        // Ambil data absensi pada bulan & tahun yang diminta
+        $records = Absensi::where('personnel_id', $personnel->id)
+            ->whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $month)
+            ->with(['jadwal.shift', 'kantor', 'kantorPulang'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $items = [];
+        $hadirCount = 0;
+        $telatCount = 0;
+        $alpaCount = 0;
+        $izinCount = 0;
+        $liburCount = 0;
+
+        foreach ($records as $rec) {
+            $tglCarbon = $rec->tanggal instanceof Carbon ? $rec->tanggal : Carbon::parse($rec->tanggal);
+            $shift = $rec->jadwal?->shift;
+            $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : ($rec->status === 'LIBUR' ? 'Libur' : null));
+            
+            $shiftHours = null;
+            if ($shift && $shift->start_time && $shift->end_time) {
+                $sStart = Carbon::parse($shift->start_time)->format('H:i');
+                $sEnd = Carbon::parse($shift->end_time)->format('H:i');
+                $shiftHours = "{$sStart} - {$sEnd}";
+            }
+
+            // Stat counters
+            $statusUpper = strtoupper((string) $rec->status);
+            $statusMasukUpper = strtoupper((string) $rec->status_masuk);
+
+            if ($statusUpper === 'HADIR') {
+                $hadirCount++;
+            } elseif ($statusUpper === 'ALPA') {
+                $alpaCount++;
+            } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
+                $izinCount++;
+            } elseif ($statusUpper === 'LIBUR') {
+                $liburCount++;
+            }
+
+            if ($statusMasukUpper === 'TELAT') {
+                $telatCount++;
+            }
+
+            // Format Jam Masuk
+            $jamMasukStr = null;
+            if ($rec->jam_masuk) {
+                $jm = $rec->jam_masuk instanceof Carbon ? $rec->jam_masuk : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $rec->jam_masuk);
+                $jamMasukStr = $jm->format('H:i') . ' WIB';
+            }
+
+            // Format Jam Pulang
+            $jamPulangStr = null;
+            if ($rec->jam_pulang) {
+                $jp = $rec->jam_pulang instanceof Carbon ? $rec->jam_pulang : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $rec->jam_pulang);
+                $jamPulangStr = $jp->format('H:i') . ' WIB';
+            }
+
+            $kantorName = $rec->kantor?->name ?? $rec->kantor?->nama_kantor ?? $personnel->kantor?->name ?? 'Kantor Penugasan';
+
+            $items[] = [
+                'id' => (string) $rec->id,
+                'tanggal' => $tglCarbon->format('Y-m-d'),
+                'tanggal_formatted' => $tglCarbon->translatedFormat('d M Y'),
+                'hari' => $tglCarbon->translatedFormat('l'),
+                'full_date' => $tglCarbon->translatedFormat('l, d F Y'),
+                'status' => $rec->status,
+                'keterangan' => $rec->keterangan,
+                'is_edited' => !empty($rec->edited_at),
+                'shift_name' => $shiftName,
+                'shift_hours' => $shiftHours,
+                'jam_masuk' => $jamMasukStr,
+                'status_masuk' => $rec->status_masuk,
+                'foto_masuk' => $rec->foto_masuk ? asset('storage/' . $rec->foto_masuk) : null,
+                'jarak_masuk' => $rec->jarak_meter,
+                'jam_pulang' => $jamPulangStr,
+                'status_pulang' => $rec->status_pulang,
+                'foto_pulang' => $rec->foto_pulang ? asset('storage/' . $rec->foto_pulang) : null,
+                'jarak_pulang' => $rec->jarak_meter_pulang,
+                'kantor_name' => $kantorName,
+            ];
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data riwayat presensi berhasil dimuat.',
+            'data' => [
+                'month' => $month,
+                'year' => $year,
+                'month_name' => $monthName,
+                'summary' => [
+                    'total_hari' => count($items),
+                    'total_hadir' => $hadirCount,
+                    'total_terlambat' => $telatCount,
+                    'total_alpa' => $alpaCount,
+                    'total_izin' => $izinCount,
+                    'total_libur' => $liburCount,
+                ],
+                'riwayat' => $items,
+            ],
+        ]);
+    }
 }
