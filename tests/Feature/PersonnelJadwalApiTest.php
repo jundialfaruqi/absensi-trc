@@ -110,11 +110,6 @@ class PersonnelJadwalApiTest extends TestCase
                 'data' => [
                     'month' => 5,
                     'year' => 2026,
-                    'summary' => [
-                        'total_hari' => 31,
-                        'total_shift' => 1,
-                        'total_libur' => 1,
-                    ],
                 ],
             ]);
 

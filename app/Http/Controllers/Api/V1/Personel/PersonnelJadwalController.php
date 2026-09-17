@@ -45,10 +45,6 @@ class PersonnelJadwalController extends Controller
             });
 
         $items = [];
-        $totalShift = 0;
-        $totalLibur = 0;
-        $totalIzin = 0;
-        $totalDinas = 0;
 
         for ($d = 1; $d <= $daysInMonth; $d++) {
             $currentDate = Carbon::createFromDate($year, $month, $d)->startOfDay();
@@ -74,17 +70,6 @@ class PersonnelJadwalController extends Controller
                 $statusUpper = strtoupper((string) ($jadwal->status ?: 'SHIFT'));
                 $isOff = ($shiftType === 'off') || (stripos($shiftName, 'libur') !== false) || in_array($statusUpper, ['LIBUR', 'OFF']);
 
-                if ($statusUpper === 'DINAS' || stripos($shiftName, 'dinas') !== false) {
-                    $totalDinas++;
-                    $totalLibur++;
-                } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI'])) {
-                    $totalIzin++;
-                } elseif ($isOff) {
-                    $totalLibur++;
-                } else {
-                    $totalShift++;
-                }
-
                 $items[] = [
                     'id' => (string) $jadwal->id,
                     'tanggal' => $tglStr,
@@ -106,10 +91,6 @@ class PersonnelJadwalController extends Controller
                 $isFlexible = $personnel->attendance_type === 'FLEXIBLE';
                 $shiftName = $isFlexible ? 'Fleksibel' : '-';
                 $shiftHours = null;
-
-                if ($isFlexible) {
-                    $totalShift++;
-                }
 
                 $items[] = [
                     'id' => 'empty_' . $tglStr,
@@ -137,13 +118,6 @@ class PersonnelJadwalController extends Controller
                 'month' => $month,
                 'year' => $year,
                 'month_name' => $monthName,
-                'summary' => [
-                    'total_hari' => $daysInMonth,
-                    'total_shift' => $totalShift,
-                    'total_libur' => $totalLibur,
-                    'total_izin' => $totalIzin,
-                    'total_dinas' => $totalDinas,
-                ],
                 'jadwal' => $items,
             ],
         ]);
