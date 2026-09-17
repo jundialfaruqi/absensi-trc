@@ -662,7 +662,6 @@ class PersonnelAbsensiController extends Controller
             }
 
             $absensi->jadwal_id = $jadwal?->id;
-            $absensi->shift_id = $shift?->id;
             $absensi->status = 'HADIR';
 
             if ($isDirectCheckOut) {
@@ -698,7 +697,6 @@ class PersonnelAbsensiController extends Controller
             }
 
             $absensi->jadwal_id = $jadwal?->id;
-            $absensi->shift_id = $shift?->id;
             $absensi->kantor_id = $hasilLokasi['kantor_id'];
             $absensi->jam_masuk = $now;
             $absensi->status_masuk = $statusMasuk;
