@@ -779,7 +779,7 @@ class PersonnelAbsensiController extends Controller
     {
         /** @var Personnel $personnel */
         $personnel = $request->attributes->get('personnel');
-        $personnel->load(['opd', 'kantor']);
+        $personnel->load(['opd', 'kantor', 'penugasan']);
 
         $now = Carbon::now();
         $year = (int) $request->query('year', $now->year);
@@ -868,8 +868,16 @@ class PersonnelAbsensiController extends Controller
 
         $recentActivities = [];
         foreach ($recentLogs as $log) {
-            $kantorName = $log->kantor?->nama_kantor ?? $personnel->kantor?->nama_kantor ?? 'Posko TRC';
-            $kantorPulangName = $log->kantorPulang?->nama_kantor ?? $kantorName;
+            $kantorName = $log->kantor?->name 
+                ?? $log->kantor?->nama_kantor 
+                ?? $personnel->kantor?->name 
+                ?? $personnel->penugasan?->name 
+                ?? $personnel->opd?->name 
+                ?? 'Kantor Penugasan';
+
+            $kantorPulangName = $log->kantorPulang?->name 
+                ?? $log->kantorPulang?->nama_kantor 
+                ?? $kantorName;
             
             $tglCarbon = $log->tanggal instanceof Carbon
                 ? $log->tanggal
