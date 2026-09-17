@@ -906,9 +906,13 @@ class PersonnelAbsensiController extends Controller
         // Tentukan status utama secara dinamis dari tabel absensi
         $statusUtama = $todayAbsensi?->status;
         if (empty($statusUtama)) {
-            if ($todayJadwal?->shift?->type === 'off') {
-                $statusUtama = $todayJadwal->shift->keterangan ?: ($todayJadwal->shift->name === 'L' ? 'LIBUR' : 'DINAS');
-            } elseif ($todayJadwal?->status && $todayJadwal->status !== 'SHIFT') {
+            $shiftObj = $todayJadwal?->shift;
+            $isShiftOff = $shiftObj && ($shiftObj->type === 'off' || stripos($shiftObj->name ?? '', 'libur') !== false);
+
+            if ($isShiftOff) {
+                $statusUtama = $shiftObj->keterangan 
+                    ?: (stripos($shiftObj->name ?? '', 'dinas') !== false ? 'DINAS' : 'LIBUR');
+            } elseif ($todayJadwal?->status && !in_array(strtoupper($todayJadwal->status), ['SHIFT', 'KERJA'])) {
                 $statusUtama = $todayJadwal->status;
             } else {
                 $statusUtama = 'ALPA';
