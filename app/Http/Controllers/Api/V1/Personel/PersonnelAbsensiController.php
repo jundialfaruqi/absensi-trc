@@ -956,22 +956,31 @@ class PersonnelAbsensiController extends Controller
                 ];
             }
 
-            // Jika tidak ada jam masuk dan jam pulang (misal Izin, Sakit, Cuti, Alpa)
+            // Jika tidak ada jam masuk dan jam pulang (misal Izin, Sakit, Cuti, Alpa, Dinas Luar, Libur)
             if (!$log->jam_masuk && !$log->jam_pulang) {
                 $statusUpper = strtoupper((string) $log->status);
-                $statusLabel = match ($statusUpper) {
-                    'IZIN' => 'Izin',
-                    'SAKIT' => 'Sakit',
-                    'CUTI' => 'Cuti',
-                    'DINAS' => 'Dinas Luar',
-                    'ALPA' => 'Alpa',
-                    default => ucfirst(strtolower($log->status ?: 'Tidak Hadir')),
-                };
-                $statusType = match ($statusUpper) {
-                    'IZIN', 'SAKIT', 'CUTI', 'DINAS' => 'izin',
-                    'ALPA' => 'alpa',
-                    default => 'info',
-                };
+                $isShiftOff = $shift && ($shift->type === 'off' || strtolower($shift->name ?? '') === 'libur');
+
+                if ($statusUpper === 'DINAS' || str_contains(strtoupper($shift?->keterangan ?? ''), 'DINAS')) {
+                    $statusLabel = 'Dinas Luar';
+                    $statusType = 'dinas';
+                } elseif ($isShiftOff || $statusUpper === 'LIBUR' || $statusUpper === 'OFF') {
+                    $statusLabel = 'Libur';
+                    $statusType = 'libur';
+                } else {
+                    $statusLabel = match ($statusUpper) {
+                        'IZIN' => 'Izin',
+                        'SAKIT' => 'Sakit',
+                        'CUTI' => 'Cuti',
+                        'ALPA' => 'Alpa',
+                        default => ucfirst(strtolower($log->status ?: 'Tidak Hadir')),
+                    };
+                    $statusType = match ($statusUpper) {
+                        'IZIN', 'SAKIT', 'CUTI' => 'izin',
+                        'ALPA' => 'alpa',
+                        default => 'info',
+                    };
+                }
 
                 $recentActivities[] = [
                     'id' => (string) $log->id . '_status',
