@@ -169,4 +169,32 @@ class PersonnelRiwayatApiTest extends TestCase
         $this->assertEquals(3, $dashData['izin_count']);
         $this->assertEquals(2, $dashData['libur_count']);
     }
+
+    public function test_dashboard_summary_excludes_future_alpa_records(): void
+    {
+        $today = Carbon::today();
+        $yesterday = $today->copy()->subDay()->format('Y-m-d');
+        $tomorrow = $today->copy()->addDay()->format('Y-m-d');
+
+        // 1 ALPA masa lalu (kemarin)
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => $yesterday,
+            'status' => 'ALPA',
+        ]);
+
+        // 1 ALPA masa depan (besok)
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'tanggal' => $tomorrow,
+            'status' => 'ALPA',
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+            ->getJson('/api/v1/personel/dashboard/summary?month=' . $today->month . '&year=' . $today->year);
+
+        $response->assertStatus(200);
+        // Hanya 1 alpa (kemarin) yang terhitung, alpa besok tidak dihitung
+        $this->assertEquals(1, $response->json('data.alpa_count'));
+    }
 }

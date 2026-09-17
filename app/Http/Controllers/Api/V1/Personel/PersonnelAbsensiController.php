@@ -814,13 +814,19 @@ class PersonnelAbsensiController extends Controller
         $alpaCount = 0;
         $izinCount = 0;
         $liburCount = 0;
+        $today = Carbon::today();
 
         foreach ($absensis as $a) {
+            $tgl = $a->tanggal instanceof Carbon ? $a->tanggal : Carbon::parse($a->tanggal);
+            $isFuture = $tgl->startOfDay()->greaterThan($today);
             $statusUpper = strtoupper((string) $a->status);
+
             if (in_array($statusUpper, ['HADIR', 'TELAT']) || $a->jam_masuk || $a->jam_pulang) {
                 $hadirCount++;
             } elseif ($statusUpper === 'ALPA') {
-                $alpaCount++;
+                if (!$isFuture) {
+                    $alpaCount++;
+                }
             } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI'])) {
                 $izinCount++;
             } elseif (in_array($statusUpper, ['LIBUR', 'DINAS'])) {
@@ -993,7 +999,7 @@ class PersonnelAbsensiController extends Controller
                     'time' => $jamMasukCarbon->format('H:i') . ' WIB',
                     'date' => $tglStr,
                     'full_date' => $tglFullStr,
-                    'status' => $isTelat ? 'Terlambat' : 'Tepat Waktu',
+                    'status' => $isTelat ? 'Terlambat' : 'Hadir',
                     'status_type' => $isTelat ? 'telat' : 'masuk',
                     'foto_url' => $todayAbsensi->foto_masuk ? asset('storage/' . $todayAbsensi->foto_masuk) : null,
                     'shift_name' => $shiftName,
@@ -1041,7 +1047,7 @@ class PersonnelAbsensiController extends Controller
                     'time' => $jamPulangCarbon->format('H:i') . ' WIB',
                     'date' => $tglStr,
                     'full_date' => $tglFullStr,
-                    'status' => $isPulangCepat ? 'Pulang Cepat' : 'Selesai',
+                    'status' => $isPulangCepat ? 'Pulang Cepat' : 'Hadir',
                     'status_type' => $isPulangCepat ? 'pulang_cepat' : 'pulang',
                     'foto_url' => $todayAbsensi->foto_pulang ? asset('storage/' . $todayAbsensi->foto_pulang) : null,
                     'shift_name' => $shiftName,
