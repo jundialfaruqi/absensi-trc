@@ -339,6 +339,18 @@ class PersonnelDashboardController extends Controller
             $recentActivities = [$cardMasuk, $cardPulang];
         }
 
+        $kantor = $personnel->kantor;
+        $kantorData = null;
+        if ($kantor) {
+            $kantorData = [
+                'id' => (string) $kantor->id,
+                'name' => $kantor->name ?? $kantor->nama_kantor ?? 'Kantor Penugasan',
+                'latitude' => (float) ($kantor->latitude ?? 0.0),
+                'longitude' => (float) ($kantor->longitude ?? 0.0),
+                'radius_meter' => (int) ($kantor->radius_meter ?? $kantor->radius ?? 100),
+            ];
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -352,6 +364,7 @@ class PersonnelDashboardController extends Controller
                 'total_hari' => $totalHari,
                 'hadir_percentage' => $hadirPercentage,
                 'status_hari_ini' => $statusHariIni,
+                'kantor' => $kantorData,
                 'recent_activities' => $recentActivities,
             ],
         ]);
