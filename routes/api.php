@@ -103,5 +103,13 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
     Route::post('/face-enroll', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'enroll'])
         ->middleware('throttle:30,1');
     Route::get('/face-template', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'template']);
+
+    // Fitur Presensi Mandiri 1:1 Biometrik
+    Route::prefix('absensi')->group(function () {
+        Route::get('/biometrics', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'myBiometrics']);
+        Route::get('/check-status', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'checkStatus']);
+        Route::post('/store', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'store'])
+            ->middleware('throttle:30,1');
+    });
 });
 
