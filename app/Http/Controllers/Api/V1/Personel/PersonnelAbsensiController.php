@@ -867,170 +867,223 @@ class PersonnelAbsensiController extends Controller
             }
         }
 
-        // 4. Ambil log aktifitas terbaru (khusus hari ini)
-        $recentLogs = Absensi::where('personnel_id', $personnel->id)
+        // 4. Bangun Aktifitas Hari Ini (Section Aktifitas Hari Ini)
+        $tglStr = $now->translatedFormat('d M Y');
+        $tglFullStr = $now->translatedFormat('l, d M Y');
+
+        $todayAbsensi = Absensi::where('personnel_id', $personnel->id)
             ->whereDate('tanggal', $todayStr)
             ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
-            ->latest('updated_at')
-            ->get();
+            ->first();
+
+        $todayJadwal = Jadwal::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $todayStr)
+            ->with('shift')
+            ->first();
+
+        $shift = $todayAbsensi?->jadwal?->shift ?? $todayJadwal?->shift;
+        $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
+        $shiftHours = null;
+        if ($shift && $shift->start_time && $shift->end_time) {
+            $sStart = Carbon::parse($shift->start_time)->format('H:i');
+            $sEnd = Carbon::parse($shift->end_time)->format('H:i');
+            $shiftHours = "{$sStart} - {$sEnd}";
+        }
+
+        $kantorName = $todayAbsensi?->kantor?->name 
+            ?? $todayAbsensi?->kantor?->nama_kantor 
+            ?? $personnel->kantor?->name 
+            ?? 'Lapangan';
+
+        $kantorPulangName = $todayAbsensi?->kantorPulang?->name 
+            ?? $todayAbsensi?->kantorPulang?->nama_kantor 
+            ?? $todayAbsensi?->kantor?->name 
+            ?? $personnel->kantor?->name 
+            ?? 'Lapangan';
+
+        $isShiftOff = $shift && ($shift->type === 'off' || strtolower($shift->name ?? '') === 'libur');
+        $statusUpper = strtoupper((string) ($todayAbsensi?->status ?? ''));
+        $isDinas = $statusUpper === 'DINAS' || str_contains(strtoupper($shift?->keterangan ?? ''), 'DINAS');
+        $isLibur = ($isShiftOff && !$isDinas) || $statusUpper === 'LIBUR' || $statusUpper === 'OFF';
+        $isIzin = in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI']);
 
         $recentActivities = [];
 
-        // Jika belum ada log absensi hari ini tapi shift hari ini adalah LIBUR atau DINAS (type: off)
-        if ($recentLogs->isEmpty() && $personnel->attendance_type !== 'FLEXIBLE') {
-            $todayJadwal = Jadwal::where('personnel_id', $personnel->id)
-                ->whereDate('tanggal', $todayStr)
-                ->with('shift')
-                ->first();
+        if ($isLibur) {
+            // Shift OFF: Libur (Cukup 1 Card)
+            $recentActivities[] = [
+                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_libur',
+                'type' => 'libur',
+                'title' => 'Libur',
+                'subtitle' => $shift?->keterangan ?: 'Jadwal Libur (OFF)',
+                'time' => '-',
+                'date' => $tglStr,
+                'full_date' => $tglFullStr,
+                'status' => 'Libur',
+                'status_type' => 'libur',
+                'foto_url' => null,
+                'shift_name' => $shiftName,
+                'shift_hours' => null,
+                'jarak_meter' => null,
+                'created_at' => $now->startOfDay()->toISOString(),
+            ];
+        } elseif ($isDinas) {
+            // Shift OFF: Dinas Luar (Cukup 1 Card)
+            $recentActivities[] = [
+                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_dinas',
+                'type' => 'dinas',
+                'title' => 'Dinas Luar',
+                'subtitle' => $shift?->keterangan ?: ($todayAbsensi?->keterangan ?: 'Tugas Luar Kantor'),
+                'time' => '-',
+                'date' => $tglStr,
+                'full_date' => $tglFullStr,
+                'status' => 'Dinas Luar',
+                'status_type' => 'dinas',
+                'foto_url' => null,
+                'shift_name' => $shiftName,
+                'shift_hours' => null,
+                'jarak_meter' => null,
+                'created_at' => $now->startOfDay()->toISOString(),
+            ];
+        } elseif ($isIzin) {
+            // Status Izin / Sakit / Cuti (Cukup 1 Card)
+            $label = match ($statusUpper) {
+                'SAKIT' => 'Sakit',
+                'CUTI' => 'Cuti',
+                default => 'Izin',
+            };
+            $recentActivities[] = [
+                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_' . strtolower($statusUpper),
+                'type' => strtolower($statusUpper),
+                'title' => $label,
+                'subtitle' => $todayAbsensi?->keterangan ?: ($todayAbsensi?->nomor_surat ? "No: {$todayAbsensi->nomor_surat}" : 'Pengajuan Izin'),
+                'time' => '-',
+                'date' => $tglStr,
+                'full_date' => $tglFullStr,
+                'status' => $label,
+                'status_type' => 'izin',
+                'foto_url' => null,
+                'shift_name' => $shiftName,
+                'shift_hours' => null,
+                'jarak_meter' => null,
+                'created_at' => $now->startOfDay()->toISOString(),
+            ];
+        } else {
+            // Jadwal Kerja Normal: TAMPILKAN 2 CARD (Presensi Masuk dan Presensi Pulang)
+            $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
+            $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
+            $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
+            $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
-            if ($todayJadwal && $todayJadwal->shift && ($todayJadwal->shift->type === 'off' || strtolower($todayJadwal->shift->name ?? '') === 'libur')) {
-                $isDinas = str_contains(strtoupper($todayJadwal->shift->keterangan ?? ''), 'DINAS');
-                $recentActivities[] = [
-                    'id' => (string) $todayJadwal->id . ($isDinas ? '_dinas' : '_libur'),
-                    'type' => $isDinas ? 'dinas' : 'libur',
-                    'title' => $isDinas ? 'Dinas Luar' : 'Libur',
-                    'subtitle' => $todayJadwal->shift->keterangan ?: ($isDinas ? 'Dinas Luar' : 'Jadwal Libur (OFF)'),
-                    'time' => '-',
-                    'date' => $now->translatedFormat('d M Y'),
-                    'full_date' => $now->translatedFormat('l, d M Y'),
-                    'status' => $isDinas ? 'Dinas Luar' : 'Libur',
-                    'status_type' => $isDinas ? 'dinas' : 'libur',
-                    'foto_url' => null,
-                    'shift_name' => $todayJadwal->shift->name,
-                    'shift_hours' => null,
-                    'jarak_meter' => null,
-                    'created_at' => $now->startOfDay()->toISOString(),
-                ];
-            }
-        }
-        foreach ($recentLogs as $log) {
-            $kantorName = $log->kantor?->name 
-                ?? $log->kantor?->nama_kantor 
-                ?? $personnel->kantor?->name 
-                ?? 'Lapangan';
+            $windowInEnd = null;
+            $windowOutEnd = null;
 
-            $kantorPulangName = $log->kantorPulang?->name 
-                ?? $log->kantorPulang?->nama_kantor 
-                ?? $log->kantor?->name 
-                ?? $personnel->kantor?->name 
-                ?? 'Lapangan';
-            
-            $tglCarbon = $log->tanggal instanceof Carbon
-                ? $log->tanggal
-                : Carbon::parse($log->tanggal);
-            $tglStr = $tglCarbon->translatedFormat('d M Y');
-            $tglFullStr = $tglCarbon->translatedFormat('l, d M Y');
-            $shift = $log->jadwal?->shift;
-            $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
-            $shiftHours = null;
             if ($shift && $shift->start_time && $shift->end_time) {
-                $sStart = Carbon::parse($shift->start_time)->format('H:i');
-                $sEnd = Carbon::parse($shift->end_time)->format('H:i');
-                $shiftHours = "{$sStart} - {$sEnd}";
+                $startTime = Carbon::parse($todayStr)->setTimeFrom($shift->start_time);
+                $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
+
+                $isNightShift = Carbon::parse($shift->start_time)->format('H:i:s') >= Carbon::parse($shift->end_time)->format('H:i:s');
+                $endDate = $isNightShift ? Carbon::parse($todayStr)->addDay()->format('Y-m-d') : $todayStr;
+                $endTime = Carbon::parse($endDate)->setTimeFrom($shift->end_time);
+                $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
             }
 
-            // Jika ada jam pulang -> Tambahkan sebagai Card Aktifitas Pulang
-            if ($log->jam_pulang) {
-                $jamPulangCarbon = $log->jam_pulang instanceof Carbon
-                    ? $log->jam_pulang
-                    : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $log->jam_pulang);
-                $jamPulangStr = $jamPulangCarbon->format('H:i');
-                $isPulangCepat = strtoupper((string) $log->status_pulang) === 'PULANG CEPAT';
-                $fotoPulangUrl = $log->foto_pulang ? asset('storage/' . $log->foto_pulang) : null;
-
-                $recentActivities[] = [
-                    'id' => (string) $log->id . '_pulang',
-                    'type' => 'pulang',
-                    'title' => 'Presensi Pulang',
-                    'subtitle' => $kantorPulangName,
-                    'time' => "{$jamPulangStr} WIB",
-                    'date' => $tglStr,
-                    'full_date' => $tglFullStr,
-                    'status' => $isPulangCepat ? 'Pulang Cepat' : 'Selesai',
-                    'status_type' => $isPulangCepat ? 'pulang_cepat' : 'pulang',
-                    'foto_url' => $fotoPulangUrl,
-                    'shift_name' => $shiftName,
-                    'shift_hours' => $shiftHours,
-                    'jarak_meter' => $log->jarak_meter_pulang,
-                    'created_at' => $jamPulangCarbon->toISOString(),
-                ];
-            }
-
-            // Jika ada jam masuk -> Tambahkan sebagai Card Aktifitas Masuk
-            if ($log->jam_masuk) {
-                $jamMasukCarbon = $log->jam_masuk instanceof Carbon
-                    ? $log->jam_masuk
-                    : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $log->jam_masuk);
-                $jamMasukStr = $jamMasukCarbon->format('H:i');
-                $isTelat = strtoupper((string) $log->status_masuk) === 'TELAT';
-                $fotoMasukUrl = $log->foto_masuk ? asset('storage/' . $log->foto_masuk) : null;
-
-                $recentActivities[] = [
-                    'id' => (string) $log->id . '_masuk',
+            // --- 1. Card Presensi Masuk ---
+            if ($todayAbsensi && $todayAbsensi->jam_masuk) {
+                $jamMasukCarbon = $todayAbsensi->jam_masuk instanceof Carbon
+                    ? $todayAbsensi->jam_masuk
+                    : Carbon::parse($todayStr . ' ' . $todayAbsensi->jam_masuk);
+                $isTelat = strtoupper((string) $todayAbsensi->status_masuk) === 'TELAT';
+                $cardMasuk = [
+                    'id' => (string) $todayAbsensi->id . '_masuk',
                     'type' => 'masuk',
                     'title' => 'Presensi Masuk',
                     'subtitle' => $kantorName,
-                    'time' => "{$jamMasukStr} WIB",
+                    'time' => $jamMasukCarbon->format('H:i') . ' WIB',
                     'date' => $tglStr,
                     'full_date' => $tglFullStr,
                     'status' => $isTelat ? 'Terlambat' : 'Tepat Waktu',
                     'status_type' => $isTelat ? 'telat' : 'masuk',
-                    'foto_url' => $fotoMasukUrl,
+                    'foto_url' => $todayAbsensi->foto_masuk ? asset('storage/' . $todayAbsensi->foto_masuk) : null,
                     'shift_name' => $shiftName,
                     'shift_hours' => $shiftHours,
-                    'jarak_meter' => $log->jarak_meter,
+                    'jarak_meter' => $todayAbsensi->jarak_meter,
                     'created_at' => $jamMasukCarbon->toISOString(),
                 ];
-            }
-
-            // Jika tidak ada jam masuk dan jam pulang (misal Izin, Sakit, Cuti, Alpa, Dinas Luar, Libur)
-            if (!$log->jam_masuk && !$log->jam_pulang) {
-                $statusUpper = strtoupper((string) $log->status);
-                $isShiftOff = $shift && ($shift->type === 'off' || strtolower($shift->name ?? '') === 'libur');
-
-                if ($statusUpper === 'DINAS' || str_contains(strtoupper($shift?->keterangan ?? ''), 'DINAS')) {
-                    $statusLabel = 'Dinas Luar';
-                    $statusType = 'dinas';
-                } elseif ($isShiftOff || $statusUpper === 'LIBUR' || $statusUpper === 'OFF') {
-                    $statusLabel = 'Libur';
-                    $statusType = 'libur';
-                } else {
-                    $statusLabel = match ($statusUpper) {
-                        'IZIN' => 'Izin',
-                        'SAKIT' => 'Sakit',
-                        'CUTI' => 'Cuti',
-                        'ALPA' => 'Alpa',
-                        default => ucfirst(strtolower($log->status ?: 'Tidak Hadir')),
-                    };
-                    $statusType = match ($statusUpper) {
-                        'IZIN', 'SAKIT', 'CUTI' => 'izin',
-                        'ALPA' => 'alpa',
-                        default => 'info',
-                    };
+            } else {
+                $isMasukAlpa = false;
+                if ($windowInEnd && $now->greaterThan($windowInEnd)) {
+                    $isMasukAlpa = true;
+                } elseif ($todayAbsensi && (in_array(strtoupper((string) $todayAbsensi->status_masuk), ['ALPA', 'TIDAK MASUK']) || strtoupper((string) $todayAbsensi->status) === 'ALPA')) {
+                    $isMasukAlpa = true;
                 }
 
-                $recentActivities[] = [
-                    'id' => (string) $log->id . '_status',
-                    'type' => strtolower($statusUpper),
-                    'title' => $statusLabel,
-                    'subtitle' => $log->keterangan ?: ($log->nomor_surat ? "No: {$log->nomor_surat}" : 'Presensi Harian'),
+                $cardMasuk = [
+                    'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_masuk',
+                    'type' => 'masuk',
+                    'title' => 'Presensi Masuk',
+                    'subtitle' => $kantorName,
                     'time' => '-',
                     'date' => $tglStr,
                     'full_date' => $tglFullStr,
-                    'status' => $statusLabel,
-                    'status_type' => $statusType,
+                    'status' => $isMasukAlpa ? 'Alpa' : 'Belum Absen',
+                    'status_type' => $isMasukAlpa ? 'alpa' : 'pending',
                     'foto_url' => null,
                     'shift_name' => $shiftName,
                     'shift_hours' => $shiftHours,
                     'jarak_meter' => null,
-                    'created_at' => $tglCarbon->startOfDay()->toISOString(),
+                    'created_at' => $now->startOfDay()->toISOString(),
                 ];
             }
-        }
 
-        // Urutkan recentActivities berdasarkan timestamp terbaru
-        usort($recentActivities, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
-        $recentActivities = array_slice($recentActivities, 0, 8);
+            // --- 2. Card Presensi Pulang ---
+            if ($todayAbsensi && $todayAbsensi->jam_pulang) {
+                $jamPulangCarbon = $todayAbsensi->jam_pulang instanceof Carbon
+                    ? $todayAbsensi->jam_pulang
+                    : Carbon::parse($todayStr . ' ' . $todayAbsensi->jam_pulang);
+                $isPulangCepat = strtoupper((string) $todayAbsensi->status_pulang) === 'PULANG CEPAT';
+                $cardPulang = [
+                    'id' => (string) $todayAbsensi->id . '_pulang',
+                    'type' => 'pulang',
+                    'title' => 'Presensi Pulang',
+                    'subtitle' => $kantorPulangName,
+                    'time' => $jamPulangCarbon->format('H:i') . ' WIB',
+                    'date' => $tglStr,
+                    'full_date' => $tglFullStr,
+                    'status' => $isPulangCepat ? 'Pulang Cepat' : 'Selesai',
+                    'status_type' => $isPulangCepat ? 'pulang_cepat' : 'pulang',
+                    'foto_url' => $todayAbsensi->foto_pulang ? asset('storage/' . $todayAbsensi->foto_pulang) : null,
+                    'shift_name' => $shiftName,
+                    'shift_hours' => $shiftHours,
+                    'jarak_meter' => $todayAbsensi->jarak_meter_pulang,
+                    'created_at' => $jamPulangCarbon->toISOString(),
+                ];
+            } else {
+                $isPulangAlpa = false;
+                if ($windowOutEnd && $now->greaterThan($windowOutEnd)) {
+                    $isPulangAlpa = true;
+                }
+
+                $cardPulang = [
+                    'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_pulang',
+                    'type' => 'pulang',
+                    'title' => 'Presensi Pulang',
+                    'subtitle' => $kantorPulangName,
+                    'time' => '-',
+                    'date' => $tglStr,
+                    'full_date' => $tglFullStr,
+                    'status' => $isPulangAlpa ? 'Alpa' : 'Belum Pulang',
+                    'status_type' => $isPulangAlpa ? 'alpa' : 'pending',
+                    'foto_url' => null,
+                    'shift_name' => $shiftName,
+                    'shift_hours' => $shiftHours,
+                    'jarak_meter' => null,
+                    'created_at' => $now->startOfDay()->addMinute()->toISOString(),
+                ];
+            }
+
+            $recentActivities = [$cardMasuk, $cardPulang];
+        }
 
         return response()->json([
             'status' => 'success',
