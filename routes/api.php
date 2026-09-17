@@ -105,20 +105,20 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
     Route::get('/face-template', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'template']);
 
     // Dashboard Summary, Jadwal Kerja, & Riwayat Presensi
-    Route::get('/dashboard/summary', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'dashboardSummary']);
+    Route::get('/dashboard/summary', [\App\Http\Controllers\Api\V1\Personel\PersonnelDashboardController::class, 'summary']);
     Route::get('/jadwal', [\App\Http\Controllers\Api\V1\Personel\PersonnelJadwalController::class, 'index']);
-    Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
-    Route::get('/banners', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'getBanners']);
+    Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelRiwayatController::class, 'index']);
+    Route::get('/banners', [\App\Http\Controllers\Api\V1\Personel\PersonnelBannerController::class, 'index']);
 
     // Real-Time Location Tracking & Push Notification FCM Token
-    Route::post('/device/location', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'updateLocation']);
+    Route::post('/device/location', [\App\Http\Controllers\Api\V1\Personel\PersonnelLocationController::class, 'updateLocation']);
     Route::post('/device/fcm-token', [\App\Http\Controllers\Api\V1\Personel\PersonnelAuthController::class, 'updateFcmToken']);
 
     // Fitur Presensi Mandiri 1:1 Biometrik
     Route::prefix('absensi')->group(function () {
         Route::get('/biometrics', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'myBiometrics']);
         Route::get('/check-status', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'checkStatus']);
-        Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
+        Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelRiwayatController::class, 'index']);
         Route::post('/store', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'store'])
             ->middleware('throttle:30,1');
     });
