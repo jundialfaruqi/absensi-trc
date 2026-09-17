@@ -264,8 +264,8 @@ class PersonnelAbsensiController extends Controller
         $shiftData = [
             'id' => (string) $shift->id,
             'name' => $shift->name,
-            'start_time' => $shift->start_time,
-            'end_time' => $shift->end_time,
+            'start_time' => Carbon::parse($shift->start_time)->format('H:i:s'),
+            'end_time' => Carbon::parse($shift->end_time)->format('H:i:s'),
         ];
 
         // Cek apakah sudah absen lengkap (masuk & pulang)
@@ -292,10 +292,13 @@ class PersonnelAbsensiController extends Controller
         // Hitung Window Presensi (Toleransi Waktu)
         $isDirectCheckOut = false;
         if ($shift->start_time && $shift->end_time) {
-            $startTime = Carbon::parse($activeDate . ' ' . $shift->start_time);
-            $isNightShift = Carbon::parse($shift->start_time)->format('H:i:s') >= Carbon::parse($shift->end_time)->format('H:i:s');
+            $sStart = Carbon::parse($shift->start_time);
+            $sEnd = Carbon::parse($shift->end_time);
+
+            $startTime = Carbon::parse($activeDate)->setTime($sStart->hour, $sStart->minute, $sStart->second);
+            $isNightShift = $sStart->format('H:i:s') >= $sEnd->format('H:i:s');
             $endDate = $isNightShift ? Carbon::parse($activeDate)->addDay()->format('Y-m-d') : $activeDate;
-            $endTime = Carbon::parse($endDate . ' ' . $shift->end_time);
+            $endTime = Carbon::parse($endDate)->setTime($sEnd->hour, $sEnd->minute, $sEnd->second);
 
             $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
             $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
