@@ -851,6 +851,8 @@ class PersonnelAbsensiController extends Controller
                 $statusHariIni = 'Sudah Absen Pulang (' . Carbon::parse($todayAbsensi->jam_pulang)->format('H:i') . ' WIB)';
             } elseif (in_array(strtoupper((string) $todayAbsensi->status), ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
                 $statusHariIni = ucfirst(strtolower($todayAbsensi->status));
+            } elseif (strtoupper((string) $todayAbsensi->status) === 'LIBUR') {
+                $statusHariIni = 'Hari Ini Libur';
             }
         } else {
             if ($personnel->attendance_type !== 'FLEXIBLE') {
@@ -901,67 +903,43 @@ class PersonnelAbsensiController extends Controller
             ?? $personnel->kantor?->name 
             ?? 'Lapangan';
 
-        $isShiftOff = $shift && ($shift->type === 'off' || strtolower($shift->name ?? '') === 'libur');
-        $statusUpper = strtoupper((string) ($todayAbsensi?->status ?? ''));
-        $isDinas = $statusUpper === 'DINAS' || str_contains(strtoupper($shift?->keterangan ?? ''), 'DINAS');
-        $isLibur = ($isShiftOff && !$isDinas) || $statusUpper === 'LIBUR' || $statusUpper === 'OFF';
-        $isIzin = in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI']);
+        // Tentukan status utama secara dinamis dari tabel absensi
+        $statusUtama = $todayAbsensi?->status;
+        if (empty($statusUtama)) {
+            if ($todayJadwal?->shift?->type === 'off') {
+                $statusUtama = $todayJadwal->shift->keterangan ?: ($todayJadwal->shift->name === 'L' ? 'LIBUR' : 'DINAS');
+            } elseif ($todayJadwal?->status && $todayJadwal->status !== 'SHIFT') {
+                $statusUtama = $todayJadwal->status;
+            } else {
+                $statusUtama = 'ALPA';
+            }
+        }
+        $statusUpper = strtoupper(trim((string) $statusUtama));
+
+        // Jika status nya ALPA atau jam kerja normal (HADIR/sudah absen), tampilkan 2 Card (Presensi Masuk dan Pulang).
+        // Selain itu (LIBUR, DINAS, IZIN, SAKIT, CUTI, dll), cukup tampilkan 1 Card dengan judul sesuai status utama di tabel absensi.
+        $isWorkingShift = ($statusUpper === 'ALPA' || $statusUpper === 'HADIR' || ($todayAbsensi && ($todayAbsensi->jam_masuk || $todayAbsensi->jam_pulang)));
 
         $recentActivities = [];
 
-        if ($isLibur) {
-            // Shift OFF: Libur (Cukup 1 Card)
+        if (!$isWorkingShift) {
+            // Status utama non-kerja (LIBUR, DINAS, IZIN, SAKIT, CUTI, dll): Cukup 1 Card
+            $statusName = $statusUpper;
+            $statusType = strtolower($statusUpper);
+            $subtitle = $todayAbsensi?->keterangan 
+                ?: ($shift?->keterangan 
+                    ?: ($todayAbsensi?->nomor_surat ? "No: {$todayAbsensi->nomor_surat}" : $statusName));
+
             $recentActivities[] = [
-                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_libur',
-                'type' => 'libur',
-                'title' => 'Libur',
-                'subtitle' => $shift?->keterangan ?: 'Jadwal Libur (OFF)',
+                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_' . $statusType,
+                'type' => $statusType,
+                'title' => $statusName,
+                'subtitle' => $subtitle,
                 'time' => '-',
                 'date' => $tglStr,
                 'full_date' => $tglFullStr,
-                'status' => 'Libur',
-                'status_type' => 'libur',
-                'foto_url' => null,
-                'shift_name' => $shiftName,
-                'shift_hours' => null,
-                'jarak_meter' => null,
-                'created_at' => $now->startOfDay()->toISOString(),
-            ];
-        } elseif ($isDinas) {
-            // Shift OFF: DINAS (Cukup 1 Card)
-            $recentActivities[] = [
-                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_dinas',
-                'type' => 'dinas',
-                'title' => 'DINAS',
-                'subtitle' => $shift?->keterangan ?: ($todayAbsensi?->keterangan ?: 'Tugas Dinas'),
-                'time' => '-',
-                'date' => $tglStr,
-                'full_date' => $tglFullStr,
-                'status' => 'DINAS',
-                'status_type' => 'dinas',
-                'foto_url' => null,
-                'shift_name' => $shiftName,
-                'shift_hours' => null,
-                'jarak_meter' => null,
-                'created_at' => $now->startOfDay()->toISOString(),
-            ];
-        } elseif ($isIzin) {
-            // Status Izin / Sakit / Cuti (Cukup 1 Card)
-            $label = match ($statusUpper) {
-                'SAKIT' => 'Sakit',
-                'CUTI' => 'Cuti',
-                default => 'Izin',
-            };
-            $recentActivities[] = [
-                'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_' . strtolower($statusUpper),
-                'type' => strtolower($statusUpper),
-                'title' => $label,
-                'subtitle' => $todayAbsensi?->keterangan ?: ($todayAbsensi?->nomor_surat ? "No: {$todayAbsensi->nomor_surat}" : 'Pengajuan Izin'),
-                'time' => '-',
-                'date' => $tglStr,
-                'full_date' => $tglFullStr,
-                'status' => $label,
-                'status_type' => 'izin',
+                'status' => $statusName,
+                'status_type' => $statusType,
                 'foto_url' => null,
                 'shift_name' => $shiftName,
                 'shift_hours' => null,
@@ -969,7 +947,7 @@ class PersonnelAbsensiController extends Controller
                 'created_at' => $now->startOfDay()->toISOString(),
             ];
         } else {
-            // Jadwal Kerja Normal: TAMPILKAN 2 CARD (Presensi Masuk dan Presensi Pulang)
+            // Jadwal Kerja Normal / Status ALPA: TAMPILKAN 2 CARD (Presensi Masuk dan Presensi Pulang)
             $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
             $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
             $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
