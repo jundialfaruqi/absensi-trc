@@ -104,8 +104,9 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
         ->middleware('throttle:30,1');
     Route::get('/face-template', [\App\Http\Controllers\Api\V1\Personel\PersonnelFaceEnrollmentController::class, 'template']);
 
-    // Dashboard Summary & Riwayat Presensi
+    // Dashboard Summary, Jadwal Kerja, & Riwayat Presensi
     Route::get('/dashboard/summary', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'dashboardSummary']);
+    Route::get('/jadwal', [\App\Http\Controllers\Api\V1\Personel\PersonnelJadwalController::class, 'index']);
     Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
 
     // Fitur Presensi Mandiri 1:1 Biometrik
