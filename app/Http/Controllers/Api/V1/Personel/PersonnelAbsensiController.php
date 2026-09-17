@@ -771,4 +771,160 @@ class PersonnelAbsensiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Dapatkan ringkasan statistik kehadiran bulan berjalan & log aktifitas terbaru milik personel yang sedang login.
+     */
+    public function dashboardSummary(Request $request): JsonResponse
+    {
+        /** @var Personnel $personnel */
+        $personnel = $request->attributes->get('personnel');
+        $personnel->load(['opd', 'kantor']);
+
+        $now = Carbon::now();
+        $year = (int) $request->query('year', $now->year);
+        $month = (int) $request->query('month', $now->month);
+
+        $targetMonth = Carbon::create($year, $month, 1);
+        $startOfMonth = $targetMonth->copy()->startOfMonth()->format('Y-m-d');
+        $endOfMonth = $targetMonth->copy()->endOfMonth()->format('Y-m-d');
+        $todayStr = $now->format('Y-m-d');
+
+        // 1. Ambil seluruh data absensi personel di bulan tersebut
+        $absensis = Absensi::where('personnel_id', $personnel->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->get();
+
+        $hadirCount = 0;
+        $alpaCount = 0;
+        $izinCount = 0;
+
+        foreach ($absensis as $a) {
+            $statusUpper = strtoupper((string) $a->status);
+            if (in_array($statusUpper, ['HADIR', 'TELAT']) || $a->jam_masuk || $a->jam_pulang) {
+                $hadirCount++;
+            } elseif ($statusUpper === 'ALPA') {
+                $alpaCount++;
+            } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
+                $izinCount++;
+            }
+        }
+
+        // 2. Hitung total hari dinas/kerja bulan ini
+        if ($personnel->attendance_type === 'FLEXIBLE') {
+            $totalHari = max($hadirCount + $alpaCount + $izinCount, $now->isSameMonth($targetMonth) ? $now->day : $targetMonth->daysInMonth);
+        } else {
+            $totalJadwal = Jadwal::where('personnel_id', $personnel->id)
+                ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                ->whereHas('shift', fn ($q) => $q->where('type', 'shift'))
+                ->count();
+
+            $totalHari = $totalJadwal > 0 ? $totalJadwal : ($now->isSameMonth($targetMonth) ? $now->day : $targetMonth->daysInMonth);
+        }
+
+        $hadirPercentage = $totalHari > 0 ? (int) round(($hadirCount / $totalHari) * 100) : 0;
+        if ($hadirPercentage > 100) {
+            $hadirPercentage = 100;
+        }
+
+        // 3. Tentukan status presensi hari ini
+        $statusHariIni = 'Belum Melakukan Presensi';
+        $todayAbsensi = Absensi::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $todayStr)
+            ->first();
+
+        if ($todayAbsensi) {
+            if ($todayAbsensi->jam_masuk && $todayAbsensi->jam_pulang) {
+                $statusHariIni = 'Sudah Selesai (Pulang: ' . Carbon::parse($todayAbsensi->jam_pulang)->format('H:i') . ' WIB)';
+            } elseif ($todayAbsensi->jam_masuk) {
+                $statusHariIni = 'Sudah Absen Masuk (' . Carbon::parse($todayAbsensi->jam_masuk)->format('H:i') . ' WIB)';
+            } elseif ($todayAbsensi->jam_pulang) {
+                $statusHariIni = 'Sudah Absen Pulang (' . Carbon::parse($todayAbsensi->jam_pulang)->format('H:i') . ' WIB)';
+            } elseif (in_array(strtoupper((string) $todayAbsensi->status), ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
+                $statusHariIni = 'Status: ' . ucfirst(strtolower($todayAbsensi->status));
+            }
+        } else {
+            if ($personnel->attendance_type !== 'FLEXIBLE') {
+                $todayJadwal = Jadwal::where('personnel_id', $personnel->id)
+                    ->whereDate('tanggal', $todayStr)
+                    ->with('shift')
+                    ->first();
+
+                if ($todayJadwal && $todayJadwal->shift && $todayJadwal->shift->type === 'off') {
+                    $statusHariIni = 'Hari Ini Libur (OFF)';
+                } elseif ($todayJadwal && $todayJadwal->shift) {
+                    $statusHariIni = 'Belum Absen (Shift ' . $todayJadwal->shift->name . ')';
+                }
+            }
+        }
+
+        // 4. Ambil log aktifitas terbaru (maksimal 5 log)
+        $recentLogs = Absensi::where('personnel_id', $personnel->id)
+            ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
+            ->latest('tanggal')
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        $recentActivities = [];
+        foreach ($recentLogs as $log) {
+            $kantorName = $log->kantor?->nama_kantor ?? $personnel->kantor?->nama_kantor ?? 'Posko TRC';
+            $kantorPulangName = $log->kantorPulang?->nama_kantor ?? $kantorName;
+            $tglStr = $log->tanggal ? Carbon::parse($log->tanggal)->translatedFormat('d M Y') : $todayStr;
+
+            // Jika ada jam pulang
+            if ($log->jam_pulang) {
+                $jamPulangStr = Carbon::parse($log->jam_pulang)->format('H:i');
+                $isPulangCepat = $log->status_pulang === 'PULANG CEPAT';
+                $recentActivities[] = [
+                    'id' => (string) $log->id . '_pulang',
+                    'type' => 'pulang',
+                    'title' => 'Presensi Pulang',
+                    'subtitle' => $kantorPulangName,
+                    'time' => "$jamPulangStr WIB - $tglStr",
+                    'date' => $tglStr,
+                    'status' => $isPulangCepat ? 'Pulang Cepat' : 'Selesai',
+                    'status_type' => $isPulangCepat ? 'pulang_cepat' : 'pulang',
+                    'created_at' => $log->jam_pulang instanceof Carbon ? $log->jam_pulang->toISOString() : Carbon::parse($log->tanggal->format('Y-m-d') . ' ' . $log->jam_pulang)->toISOString(),
+                ];
+            }
+
+            // Jika ada jam masuk
+            if ($log->jam_masuk) {
+                $jamMasukStr = Carbon::parse($log->jam_masuk)->format('H:i');
+                $isTelat = $log->status_masuk === 'TELAT';
+                $recentActivities[] = [
+                    'id' => (string) $log->id . '_masuk',
+                    'type' => 'masuk',
+                    'title' => 'Presensi Masuk',
+                    'subtitle' => $kantorName,
+                    'time' => "$jamMasukStr WIB - $tglStr",
+                    'date' => $tglStr,
+                    'status' => $isTelat ? 'Terlambat' : 'Tepat Waktu',
+                    'status_type' => $isTelat ? 'telat' : 'masuk',
+                    'created_at' => $log->jam_masuk instanceof Carbon ? $log->jam_masuk->toISOString() : Carbon::parse($log->tanggal->format('Y-m-d') . ' ' . $log->jam_masuk)->toISOString(),
+                ];
+            }
+        }
+
+        // Urutkan recentActivities berdasarkan timestamp terbaru
+        usort($recentActivities, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
+        $recentActivities = array_slice($recentActivities, 0, 5);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'month_name' => $targetMonth->translatedFormat('F Y'),
+                'month' => $month,
+                'year' => $year,
+                'hadir_count' => $hadirCount,
+                'alpa_count' => $alpaCount,
+                'izin_count' => $izinCount,
+                'total_hari' => $totalHari,
+                'hadir_percentage' => $hadirPercentage,
+                'status_hari_ini' => $statusHariIni,
+                'recent_activities' => $recentActivities,
+            ],
+        ]);
+    }
 }
