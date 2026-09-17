@@ -1143,7 +1143,7 @@ class PersonnelAbsensiController extends Controller
 
             if ($rec) {
                 $shift = $rec->jadwal?->shift ?? $jadwal?->shift;
-                $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : ($rec->status === 'LIBUR' ? 'Libur' : null));
+                $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
                 
                 $shiftHours = null;
                 if ($shift && $shift->start_time && $shift->end_time) {
@@ -1215,7 +1215,7 @@ class PersonnelAbsensiController extends Controller
                 ];
             } else {
                 // Tidak ada data absensi di tanggal ini
-                // Libur HANYA ditentukan dari shift yang berjenis 'off' atau shift bernama 'Libur'
+                // Dapatkan status dari jadwal / shift off secara dinamis
                 $shift = $jadwal?->shift;
                 $isOff = false;
                 if ($shift) {
@@ -1225,9 +1225,16 @@ class PersonnelAbsensiController extends Controller
                 $status = '-';
                 $keterangan = null;
                 if ($isOff) {
-                    $status = 'LIBUR';
-                    $keterangan = 'Hari Libur';
-                    $liburCount++;
+                    $status = strtoupper(trim((string) ($shift->keterangan ?: ($jadwal?->status && $jadwal->status !== 'SHIFT' ? $jadwal->status : ($shift->name === 'L' ? 'LIBUR' : 'DINAS')))));
+                    if (empty($status) || $status === 'OFF') {
+                        $status = 'LIBUR';
+                    }
+                    $keterangan = $shift->keterangan ?: 'Hari Libur';
+                    if ($status === 'LIBUR') {
+                        $liburCount++;
+                    } else {
+                        $izinCount++;
+                    }
                 }
 
                 $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
