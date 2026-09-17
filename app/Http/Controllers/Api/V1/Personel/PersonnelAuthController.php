@@ -29,6 +29,7 @@ class PersonnelAuthController extends Controller
             'brand' => 'nullable|string',
             'model' => 'nullable|string',
             'android_version' => 'nullable|string',
+            'fcm_token' => 'nullable|string',
         ], [
             'license_key.required' => 'Kode lisensi wajib diisi.',
             'license_key.regex' => 'Format kode lisensi tidak valid (contoh: H4ER-VSHJ-XZ8D).',
@@ -76,6 +77,12 @@ class PersonnelAuthController extends Controller
             'activated_at' => now(),
             'last_seen_at' => now(),
         ]);
+
+        if (!empty($validated['fcm_token'])) {
+            $personnel->update([
+                'fcm_token' => $validated['fcm_token'],
+            ]);
+        }
 
         // 2. REVOKE SESSIONS: Cabut seluruh refresh token sesi sebelumnya (Kick-Out HP lama)
         $this->jwtService->revokeAllPersonnelTokens($personnel->id);
@@ -220,6 +227,35 @@ class PersonnelAuthController extends Controller
                     'pose_count' => $poseCount,
                 ],
             ],
+        ]);
+    }
+
+    /**
+     * Update FCM push notification token for authenticated personnel.
+     */
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        /** @var \App\Models\Personnel|null $personnel */
+        $personnel = $request->attributes->get('personnel');
+
+        if (!$personnel) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data personel tidak ditemukan.',
+            ], 404);
+        }
+
+        $personnel->update([
+            'fcm_token' => $validated['fcm_token'],
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'FCM Token berhasil diperbarui.',
         ]);
     }
 }

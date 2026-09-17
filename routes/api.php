@@ -109,8 +109,9 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
     Route::get('/jadwal', [\App\Http\Controllers\Api\V1\Personel\PersonnelJadwalController::class, 'index']);
     Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
 
-    // Real-Time Location Tracking
+    // Real-Time Location Tracking & Push Notification FCM Token
     Route::post('/device/location', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'updateLocation']);
+    Route::post('/device/fcm-token', [\App\Http\Controllers\Api\V1\Personel\PersonnelAuthController::class, 'updateFcmToken']);
 
     // Fitur Presensi Mandiri 1:1 Biometrik
     Route::prefix('absensi')->group(function () {
