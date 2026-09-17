@@ -910,13 +910,13 @@ class PersonnelAbsensiController extends Controller
         $kantorName = $todayAbsensi?->kantor?->name 
             ?? $todayAbsensi?->kantor?->nama_kantor 
             ?? $personnel->kantor?->name 
-            ?? 'Lapangan';
+            ?? '-';
 
         $kantorPulangName = $todayAbsensi?->kantorPulang?->name 
             ?? $todayAbsensi?->kantorPulang?->nama_kantor 
             ?? $todayAbsensi?->kantor?->name 
             ?? $personnel->kantor?->name 
-            ?? 'Lapangan';
+            ?? '-';
 
         // Tentukan status utama secara dinamis dari tabel absensi
         $statusUtama = $todayAbsensi?->status;
