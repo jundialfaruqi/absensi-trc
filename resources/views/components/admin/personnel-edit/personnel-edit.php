@@ -19,6 +19,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Events\PersonnelPhotoUpdated;
+use App\Events\PersonnelVectorUpdated;
 
 new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -457,9 +458,75 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->redirect(route('personnel'), navigate: true);
     }
 
+    public function deleteFaceData(): void
+    {
+        $personnel = Personnel::findOrFail($this->personnelId);
+
+        if (! $this->canEditPersonnel($personnel)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data personel ini.');
+        }
+
+        // 1. Hapus seluruh berkas foto pose 3D jika ada di storage
+        if ($personnel->faceEmbeddings) {
+            foreach ($personnel->faceEmbeddings as $embedding) {
+                if ($embedding->foto && Storage::disk('public')->exists($embedding->foto)) {
+                    Storage::disk('public')->delete($embedding->foto);
+                }
+            }
+            $personnel->faceEmbeddings()->delete();
+        }
+
+        // 2. Hapus berkas foto utama jika ada di storage
+        if ($personnel->foto && Storage::disk('public')->exists($personnel->foto)) {
+            Storage::disk('public')->delete($personnel->foto);
+        }
+
+        // 3. Reset kolom biometrik di database
+        $personnel->update([
+            'foto' => null,
+            'face_descriptor' => null,
+            'face_descriptor_mobile' => null,
+            'face_recognition' => false,
+        ]);
+
+        // 4. Reset properti Livewire
+        $this->oldFoto = null;
+        $this->foto = null;
+        $this->face_descriptor = '';
+        $this->face_descriptor_mobile = '';
+        $this->descriptor_front = '';
+        $this->descriptor_right = '';
+        $this->descriptor_left = '';
+        $this->descriptor_up = '';
+        $this->foto_front = null;
+        $this->foto_right = null;
+        $this->foto_left = null;
+        $this->foto_up = null;
+        $this->has_3d_faces = false;
+        $this->existing_3d_poses = [];
+        $this->total_adaptations = 0;
+        $this->has_adaptive_biometrics = false;
+        $this->face_recognition = false;
+
+        // 5. Broadcast event real-time sinkronisasi
+        PersonnelVectorUpdated::dispatch(
+            $personnel->id,
+            $personnel->opd_id,
+            'deleted'
+        );
+
+        $this->dispatch('face-data-deleted');
+
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Data Wajah Dihapus',
+            'message' => 'Seluruh data biometrik wajah (128D, 192D, 3D poses) dan foto personel berhasil dihapus.',
+        ]);
+    }
+
     public function resetAdaptiveBiometrics(\App\Services\AdaptiveFaceLearningService $service): void
     {
-        $item = Personnel::findOrFail($this->personnel_id);
+        $item = Personnel::findOrFail($this->personnelId);
         $service->resetToMaster($item);
         $this->total_adaptations = 0;
         $this->has_adaptive_biometrics = false;
