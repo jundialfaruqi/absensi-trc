@@ -123,6 +123,12 @@ class PersonnelFaceEnrollmentController extends Controller
             }
             $personnel->face_recognition = true;
             $personnel->save();
+
+            \App\Events\PersonnelVectorUpdated::dispatch(
+                $personnel->id,
+                $personnel->opd_id,
+                'ready'
+            );
         }
 
         return response()->json([
