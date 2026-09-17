@@ -867,15 +867,42 @@ class PersonnelAbsensiController extends Controller
             }
         }
 
-        // 4. Ambil log aktifitas terbaru (maksimal 10 transaksi absensi)
+        // 4. Ambil log aktifitas terbaru (khusus hari ini)
         $recentLogs = Absensi::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $todayStr)
             ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
-            ->latest('tanggal')
             ->latest('updated_at')
-            ->take(10)
             ->get();
 
         $recentActivities = [];
+
+        // Jika belum ada log absensi hari ini tapi shift hari ini adalah LIBUR atau DINAS (type: off)
+        if ($recentLogs->isEmpty() && $personnel->attendance_type !== 'FLEXIBLE') {
+            $todayJadwal = Jadwal::where('personnel_id', $personnel->id)
+                ->whereDate('tanggal', $todayStr)
+                ->with('shift')
+                ->first();
+
+            if ($todayJadwal && $todayJadwal->shift && ($todayJadwal->shift->type === 'off' || strtolower($todayJadwal->shift->name ?? '') === 'libur')) {
+                $isDinas = str_contains(strtoupper($todayJadwal->shift->keterangan ?? ''), 'DINAS');
+                $recentActivities[] = [
+                    'id' => (string) $todayJadwal->id . ($isDinas ? '_dinas' : '_libur'),
+                    'type' => $isDinas ? 'dinas' : 'libur',
+                    'title' => $isDinas ? 'Dinas Luar' : 'Libur',
+                    'subtitle' => $todayJadwal->shift->keterangan ?: ($isDinas ? 'Dinas Luar' : 'Jadwal Libur (OFF)'),
+                    'time' => '-',
+                    'date' => $now->translatedFormat('d M Y'),
+                    'full_date' => $now->translatedFormat('l, d M Y'),
+                    'status' => $isDinas ? 'Dinas Luar' : 'Libur',
+                    'status_type' => $isDinas ? 'dinas' : 'libur',
+                    'foto_url' => null,
+                    'shift_name' => $todayJadwal->shift->name,
+                    'shift_hours' => null,
+                    'jarak_meter' => null,
+                    'created_at' => $now->startOfDay()->toISOString(),
+                ];
+            }
+        }
         foreach ($recentLogs as $log) {
             $kantorName = $log->kantor?->name 
                 ?? $log->kantor?->nama_kantor 
