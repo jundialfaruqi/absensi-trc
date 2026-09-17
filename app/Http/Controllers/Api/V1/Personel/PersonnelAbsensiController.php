@@ -12,6 +12,7 @@ use App\Services\AdaptiveFaceLearningService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -146,8 +147,50 @@ class PersonnelAbsensiController extends Controller
                 ->first();
         }
 
-        // Cek apakah personel sedang libur atau tidak ada jadwal
-        if (!$jadwal || !$jadwal->shift || $jadwal->shift->type === 'off') {
+        // Ambil transaksi absensi yang ada pada tanggal jadwal aktif
+        $absensi = Absensi::where('personnel_id', $id)
+            ->whereDate('tanggal', $activeDate)
+            ->first();
+
+        // 1. Cek apakah tidak ada jadwal
+        if (!$jadwal) {
+            if ($personnel->attendance_type === 'FLEXIBLE') {
+                if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+                    return response()->json([
+                        'status' => 'info',
+                        'can_attend' => false,
+                        'action_type' => 'selesai',
+                        'message' => 'Anda telah menyelesaikan presensi masuk dan pulang hari ini (Mode Fleksibel).',
+                        'data' => [
+                            'personnel' => [
+                                'id' => (string) $personnel->id,
+                                'name' => $personnel->name,
+                                'opd_name' => $personnel->opd?->name ?? '-',
+                            ],
+                            'action_type' => 'selesai',
+                            'absensi' => $absensi,
+                        ],
+                    ]);
+                }
+
+                $nextAction = ($absensi && $absensi->jam_masuk) ? 'pulang' : 'masuk';
+                return response()->json([
+                    'status' => 'success',
+                    'can_attend' => true,
+                    'action_type' => $nextAction,
+                    'message' => "Siap melakukan presensi $nextAction (Mode Fleksibel).",
+                    'data' => [
+                        'personnel' => [
+                            'id' => (string) $personnel->id,
+                            'name' => $personnel->name,
+                            'opd_name' => $personnel->opd?->name ?? '-',
+                        ],
+                        'action_type' => $nextAction,
+                        'absensi' => $absensi,
+                    ],
+                ]);
+            }
+
             return response()->json([
                 'status' => 'info',
                 'can_attend' => false,
@@ -161,6 +204,62 @@ class PersonnelAbsensiController extends Controller
             ]);
         }
 
+        // 2. Cek apakah jadwal adalah LIBUR / OFF
+        if ($jadwal->shift && $jadwal->shift->type === 'off') {
+            if ($personnel->attendance_type === 'FLEXIBLE') {
+                if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
+                    return response()->json([
+                        'status' => 'info',
+                        'can_attend' => false,
+                        'action_type' => 'selesai',
+                        'message' => 'Anda telah menyelesaikan presensi masuk dan pulang hari ini (Mode Fleksibel).',
+                        'data' => [
+                            'personnel' => [
+                                'id' => (string) $personnel->id,
+                                'name' => $personnel->name,
+                                'opd_name' => $personnel->opd?->name ?? '-',
+                            ],
+                            'action_type' => 'selesai',
+                            'absensi' => $absensi,
+                        ],
+                    ]);
+                }
+
+                $nextAction = ($absensi && $absensi->jam_masuk) ? 'pulang' : 'masuk';
+                return response()->json([
+                    'status' => 'success',
+                    'can_attend' => true,
+                    'action_type' => $nextAction,
+                    'message' => "Siap melakukan presensi $nextAction (Mode Fleksibel).",
+                    'data' => [
+                        'personnel' => [
+                            'id' => (string) $personnel->id,
+                            'name' => $personnel->name,
+                            'opd_name' => $personnel->opd?->name ?? '-',
+                        ],
+                        'action_type' => $nextAction,
+                        'absensi' => $absensi,
+                    ],
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'info',
+                'can_attend' => false,
+                'action_type' => 'libur',
+                'message' => 'Hari ini adalah hari libur (OFF) untuk jadwal dinas Anda.',
+                'data' => [
+                    'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
+                    'shift' => ['name' => $jadwal->shift->name],
+                    'jadwal' => [
+                        'id' => (string) $jadwal->id,
+                        'tanggal' => $activeDate,
+                        'shift' => ['name' => $jadwal->shift->name],
+                    ],
+                ],
+            ]);
+        }
+
         $shift = $jadwal->shift;
         $shiftData = [
             'id' => (string) $shift->id,
@@ -168,11 +267,6 @@ class PersonnelAbsensiController extends Controller
             'start_time' => $shift->start_time,
             'end_time' => $shift->end_time,
         ];
-
-        // Ambil transaksi absensi yang ada pada tanggal jadwal aktif
-        $absensi = Absensi::where('personnel_id', $id)
-            ->whereDate('tanggal', $activeDate)
-            ->first();
 
         // Cek apakah sudah absen lengkap (masuk & pulang)
         if ($absensi && $absensi->jam_masuk && $absensi->jam_pulang) {
@@ -203,9 +297,9 @@ class PersonnelAbsensiController extends Controller
             $endDate = $isNightShift ? Carbon::parse($activeDate)->addDay()->format('Y-m-d') : $activeDate;
             $endTime = Carbon::parse($endDate . ' ' . $shift->end_time);
 
-            $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 60);
+            $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
             $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
-            $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 60);
+            $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
             $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
             $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
@@ -465,112 +559,216 @@ class PersonnelAbsensiController extends Controller
                 ->first();
         }
 
-        if (!$jadwal || !$jadwal->shift || $jadwal->shift->type === 'off') {
+        if ((!$jadwal || !$jadwal->shift || $jadwal->shift->type === 'off') && $personnel->attendance_type !== 'FLEXIBLE') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tidak dapat melakukan presensi karena tidak ada jadwal dinas aktif hari ini.',
             ], 422);
         }
 
-        $shift = $jadwal->shift;
+        $shift = $jadwal?->shift;
         $absensi = Absensi::firstOrNew([
             'personnel_id' => $personnel->id,
             'tanggal' => $activeDate,
         ]);
 
-        $isDirectCheckOut = false;
-        if ($shift->start_time && $shift->end_time) {
-            $isNightShift = Carbon::parse($shift->start_time)->format('H:i:s') >= Carbon::parse($shift->end_time)->format('H:i:s');
-            $endDate = $isNightShift ? Carbon::parse($activeDate)->addDay()->format('Y-m-d') : $activeDate;
-            $endTime = Carbon::parse($endDate . ' ' . $shift->end_time);
-            $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 60);
-            $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
-
-            if (!$absensi->jam_masuk && $now->greaterThanOrEqualTo($windowOutStart)) {
-                $isDirectCheckOut = true;
-            }
+        if ($absensi->exists && $absensi->jam_pulang) {
+            return response()->json([
+                'status' => 'info',
+                'message' => 'Anda sudah menyelesaikan seluruh sesi absensi untuk jadwal ini.',
+                'data' => $absensi,
+            ]);
         }
 
-        $action = ($isDirectCheckOut || $absensi->jam_masuk) ? 'pulang' : 'masuk';
-        $currentTime = $now->format('H:i:s');
+        $platform = $request->platform ?: 'android';
+        $deviceName = $request->device_name ?: 'Mobile Personel';
+        $uniqueId = $request->unique_device_id ?: 'personnel-' . $personnel->id;
 
-        if ($action === 'masuk') {
-            $absensi->jadwal_id = $jadwal->id;
-            $absensi->shift_id = $shift->id;
-            $absensi->jam_masuk = $currentTime;
-            $absensi->lat_masuk = $request->lat;
-            $absensi->long_masuk = $request->lng;
-            $absensi->foto_masuk = $fileName;
+        // 3b. Validasi Jendela Waktu Jadwal Shift (Time Window Validation)
+        $isDirectCheckOut = false;
+        if ($jadwal && $jadwal->shift && $jadwal->shift->start_time && $jadwal->shift->end_time && $jadwal->shift->type !== 'off') {
+            $mulaiIn = (int) Setting::get('absensi_masuk_mulai', 30);
+            $selesaiIn = (int) Setting::get('absensi_masuk_selesai', 120);
+            $mulaiOut = (int) Setting::get('absensi_pulang_mulai', 30);
+            $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
-            // Status keterlambatan
-            if ($shift->start_time) {
-                $toleransiTerlambat = (int) Setting::get('absensi_toleransi_terlambat', 15);
-                $jadwalMasuk = Carbon::parse($activeDate . ' ' . $shift->start_time);
-                $batasToleransi = $jadwalMasuk->copy()->addMinutes($toleransiTerlambat);
+            $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
+            $windowInStart = $startTime->copy()->subMinutes($mulaiIn);
+            $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
-                if ($now->greaterThan($batasToleransi)) {
-                    $absensi->status = 'terlambat';
-                } else {
-                    $absensi->status = 'hadir';
+            $pulangDate = $activeDate;
+            if (Carbon::parse($shift->start_time)->format('H:i:s') >= Carbon::parse($shift->end_time)->format('H:i:s')) {
+                $pulangDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+            }
+            $endTime = Carbon::parse($pulangDate)->setTimeFrom($shift->end_time);
+            $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
+            $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
+
+            if (!$absensi->exists || !$absensi->jam_masuk) {
+                // Skenario: Belum Absen Masuk
+                if ($now->between($windowOutStart, $windowOutEnd)) {
+                    // DIRECT CHECK-OUT: Diizinkan langsung absen pulang jika berada di jendela pulang
+                    $isDirectCheckOut = true;
+                } elseif ($now->lessThan($windowInStart)) {
+                    $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Belum waktunya Absen Masuk. Jadwal shift {$shift->name} masuk pukul {$startTime->format('H:i')} WIB (dibuka mulai {$windowInStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
+                    ], 422);
+                } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB). Silakan kembali $diff lagi untuk Absen Pulang.",
+                    ], 422);
+                } elseif ($now->greaterThan($windowOutEnd)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu toleransi presensi untuk jadwal ini telah berakhir ({$windowOutEnd->format('H:i')} WIB).",
+                    ], 422);
                 }
             } else {
-                $absensi->status = 'hadir';
-            }
-        } else {
-            // Skenario Absen Pulang
-            $absensi->jadwal_id = $jadwal->id;
-            $absensi->shift_id = $shift->id;
-            $absensi->jam_pulang = $currentTime;
-            $absensi->lat_pulang = $request->lat;
-            $absensi->long_pulang = $request->lng;
-            $absensi->foto_pulang = $fileName;
+                // Skenario: Mencoba Absen Pulang (Sudah Masuk)
+                if ($now->lessThan($windowOutStart)) {
+                    $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Belum waktunya Absen Pulang. Jadwal shift {$shift->name} pulang pukul {$endTime->format('H:i')} WIB (dibuka mulai {$windowOutStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
+                    ], 422);
+                }
 
-            if ($isDirectCheckOut && !$absensi->jam_masuk) {
-                $absensi->status = 'hadir';
+                if ($now->greaterThan($windowOutEnd)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Batas waktu toleransi Absen Pulang untuk jadwal ini telah berakhir ({$windowOutEnd->format('H:i')} WIB).",
+                    ], 422);
+                }
             }
         }
 
-        $absensi->save();
+        // 4. LOGIKA ABSEN MASUK VS PULANG
+        if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && !$absensi->jam_pulang)) {
+            // --- ABSEN PULANG (Normal atau Direct Check-Out) ---
+            $statusPulang = 'HADIR';
+            if ($jadwal && $jadwal->shift && $jadwal->shift->end_time) {
+                $eDate = $activeDate;
+                if ($jadwal->shift->start_time && Carbon::parse($jadwal->shift->start_time)->format('H:i:s') >= Carbon::parse($jadwal->shift->end_time)->format('H:i:s')) {
+                    $eDate = Carbon::parse($activeDate)->addDay()->format('Y-m-d');
+                }
+                $shiftEnd = Carbon::parse($eDate)->setTimeFrom($jadwal->shift->end_time);
+                if ($now->lessThan($shiftEnd)) {
+                    $statusPulang = 'PULANG CEPAT';
+                }
+            }
 
-        // 5. Pilar 4: Adaptive Face Learning jika confidence tinggi
+            $absensi->jadwal_id = $jadwal?->id;
+            $absensi->shift_id = $shift?->id;
+            $absensi->status = 'HADIR';
+
+            if ($isDirectCheckOut) {
+                // Sesi masuk tidak dilakukan -> ditandai ALPA
+                $absensi->status_masuk = 'ALPA';
+            }
+
+            $absensi->kantor_id_pulang = $hasilLokasi['kantor_id'];
+            $absensi->jam_pulang = $now;
+            $absensi->status_pulang = $statusPulang;
+            $absensi->foto_pulang = $fileName;
+            $absensi->lat_pulang = $request->lat;
+            $absensi->lng_pulang = $request->lng;
+            $absensi->jarak_meter_pulang = $hasilLokasi['jarak_meter'];
+            $absensi->is_within_radius_pulang = $hasilLokasi['is_within_radius'];
+            $absensi->platform_pulang = $platform;
+            $absensi->device_name_pulang = $deviceName;
+            $absensi->unique_device_id_pulang = $uniqueId;
+            $absensi->save();
+
+            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat." . ($isDirectCheckOut ? " (Masuk: ALPA)" : "");
+            $actionType = 'pulang';
+        } elseif (!$absensi->exists || !$absensi->jam_masuk) {
+            // --- ABSEN MASUK ---
+            $statusMasuk = 'HADIR';
+            if ($jadwal && $jadwal->shift && $jadwal->shift->start_time) {
+                $shiftStart = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
+                $toleransi = (int) ($jadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 15));
+                $batasToleransi = $shiftStart->copy()->addMinutes($toleransi);
+                if ($now->greaterThan($batasToleransi)) {
+                    $statusMasuk = 'TELAT';
+                }
+            }
+
+            $absensi->jadwal_id = $jadwal?->id;
+            $absensi->shift_id = $shift?->id;
+            $absensi->kantor_id = $hasilLokasi['kantor_id'];
+            $absensi->jam_masuk = $now;
+            $absensi->status_masuk = $statusMasuk;
+            $absensi->status = 'HADIR';
+            $absensi->foto_masuk = $fileName;
+            $absensi->lat_masuk = $request->lat;
+            $absensi->lng_masuk = $request->lng;
+            $absensi->jarak_meter = $hasilLokasi['jarak_meter'];
+            $absensi->is_within_radius = $hasilLokasi['is_within_radius'];
+            $absensi->platform_masuk = $platform;
+            $absensi->device_name_masuk = $deviceName;
+            $absensi->unique_device_id_masuk = $uniqueId;
+            $absensi->save();
+
+            $pesan = "Absen MASUK ($statusMasuk) berhasil dicatat.";
+            $actionType = 'masuk';
+        } else {
+            return response()->json([
+                'status' => 'info',
+                'message' => 'Anda sudah menyelesaikan seluruh sesi absen masuk dan pulang.',
+                'data' => $absensi,
+            ]);
+        }
+
+        // 5. Pilar 4: Self-Learning Biometric Adaptation (EMA)
+        $adaptationResult = null;
         $adapted = false;
         if ($request->filled('face_descriptor_mobile') && $request->filled('confidence_score')) {
-            $descriptorRaw = $request->input('face_descriptor_mobile');
-            $descriptor = is_array($descriptorRaw) ? $descriptorRaw : json_decode($descriptorRaw, true);
-
-            if (is_array($descriptor) && count($descriptor) === 192) {
-                $adaptiveResult = $adaptiveService->adaptEmbedding(
-                    personnelId: $personnel->id,
-                    newEmbedding: $descriptor,
-                    similarityScore: (float) $request->input('confidence_score'),
+            try {
+                $adaptationResult = $adaptiveService->attemptAdaptation(
+                    personnel: $personnel,
+                    capturedDescriptor: $request->input('face_descriptor_mobile'),
+                    confidenceScore: (float) $request->input('confidence_score'),
                     poseType: $request->input('pose_type', 'FRONT'),
+                    absensiId: $absensi->id,
+                    deviceInfo: $deviceName . ' (' . $platform . ')',
                     eulerAngles: $request->input('euler_angles')
                 );
-                $adapted = $adaptiveResult['adapted'] ?? false;
+                $adapted = $adaptationResult['adapted'] ?? false;
+            } catch (\Throwable $e) {
+                Log::error("Error executing biometric adaptation in PersonnelAbsensiController: " . $e->getMessage());
             }
         }
 
         return response()->json([
             'status' => 'success',
-            'action_type' => $action,
-            'message' => "Presensi $action berhasil dicatat pada " . $now->format('H:i') . ' WIB.',
+            'action_type' => $actionType,
+            'message' => $pesan,
             'data' => [
                 'id' => (string) $absensi->id,
-                'action_type' => $action,
+                'action_type' => $actionType,
                 'tanggal' => $activeDate,
-                'jam' => $currentTime,
+                'jam' => $now->format('H:i:s'),
                 'status' => $absensi->status,
+                'status_masuk' => $absensi->status_masuk,
+                'status_pulang' => $absensi->status_pulang,
+                'jarak_meter' => $hasilLokasi['jarak_meter'],
+                'kantor_name' => $hasilLokasi['kantor_name'],
                 'personnel' => [
                     'id' => (string) $personnel->id,
                     'name' => $personnel->name,
                 ],
-                'shift' => [
+                'shift' => $shift ? [
                     'id' => (string) $shift->id,
                     'name' => $shift->name,
-                ],
+                ] : null,
                 'foto_url' => asset('storage/' . $fileName),
                 'adaptive_learning' => [
                     'adapted' => $adapted,
+                    'result' => $adaptationResult,
                 ],
             ],
         ]);
