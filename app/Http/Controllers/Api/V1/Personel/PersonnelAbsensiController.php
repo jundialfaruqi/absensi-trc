@@ -852,11 +852,56 @@ class PersonnelAbsensiController extends Controller
             $hadirPercentage = 100;
         }
 
-        // 3. Tentukan status presensi hari ini
-        $statusHariIni = 'Belum Melakukan Presensi';
-        $todayAbsensi = Absensi::where('personnel_id', $personnel->id)
-            ->whereDate('tanggal', $todayStr)
+        // 3. Tentukan status presensi hari ini / shift aktif
+        $yesterdayStr = $now->copy()->subDay()->format('Y-m-d');
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
+
+        $activeDate = $todayStr;
+        $activeJadwal = null;
+        $activeAbsensi = null;
+
+        // Cek apakah ada jadwal shift malam kemarin yang masih aktif berjalan (belum pulang & dalam batas window pulang)
+        $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
+            ->whereDate('tanggal', $yesterdayStr)
+            ->with(['shift', 'kantor'])
             ->first();
+
+        if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
+            $sTime = Carbon::parse($yesterdayJadwal->shift->start_time);
+            $eTime = Carbon::parse($yesterdayJadwal->shift->end_time);
+
+            if ($sTime->format('H:i:s') >= $eTime->format('H:i:s')) {
+                $endDatetime = Carbon::parse($todayStr)->setTimeFrom($eTime);
+                $windowOutEnd = $endDatetime->copy()->addMinutes($selesaiOut);
+
+                if ($now->lessThanOrEqualTo($windowOutEnd)) {
+                    $existingYest = Absensi::where('personnel_id', $personnel->id)
+                        ->whereDate('tanggal', $yesterdayStr)
+                        ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
+                        ->first();
+                    if ($existingYest && $existingYest->jam_masuk && !$existingYest->jam_pulang) {
+                        $activeJadwal = $yesterdayJadwal;
+                        $activeAbsensi = $existingYest;
+                        $activeDate = $yesterdayStr;
+                    }
+                }
+            }
+        }
+
+        if (!$activeJadwal) {
+            $activeJadwal = Jadwal::where('personnel_id', $personnel->id)
+                ->whereDate('tanggal', $todayStr)
+                ->with(['shift', 'kantor'])
+                ->first();
+            $activeAbsensi = Absensi::where('personnel_id', $personnel->id)
+                ->whereDate('tanggal', $todayStr)
+                ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
+                ->first();
+        }
+
+        $statusHariIni = 'Belum Melakukan Presensi';
+        $todayAbsensi = $activeAbsensi;
+        $todayJadwal = $activeJadwal;
 
         if ($todayAbsensi) {
             if ($todayAbsensi->jam_masuk && $todayAbsensi->jam_pulang) {
@@ -872,11 +917,6 @@ class PersonnelAbsensiController extends Controller
             }
         } else {
             if ($personnel->attendance_type !== 'FLEXIBLE') {
-                $todayJadwal = Jadwal::where('personnel_id', $personnel->id)
-                    ->whereDate('tanggal', $todayStr)
-                    ->with('shift')
-                    ->first();
-
                 if ($todayJadwal && $todayJadwal->shift && $todayJadwal->shift->type === 'off') {
                     $statusHariIni = 'Hari Ini Libur (OFF)';
                 } elseif ($todayJadwal && $todayJadwal->shift) {
@@ -886,18 +926,9 @@ class PersonnelAbsensiController extends Controller
         }
 
         // 4. Bangun Aktifitas Hari Ini (Section Aktifitas Hari Ini)
-        $tglStr = $now->translatedFormat('d M Y');
-        $tglFullStr = $now->translatedFormat('l, d M Y');
-
-        $todayAbsensi = Absensi::where('personnel_id', $personnel->id)
-            ->whereDate('tanggal', $todayStr)
-            ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
-            ->first();
-
-        $todayJadwal = Jadwal::where('personnel_id', $personnel->id)
-            ->whereDate('tanggal', $todayStr)
-            ->with('shift')
-            ->first();
+        $tglCarbon = Carbon::parse($activeDate);
+        $tglStr = $tglCarbon->translatedFormat('d M Y');
+        $tglFullStr = $tglCarbon->translatedFormat('l, d M Y');
 
         $shift = $todayAbsensi?->jadwal?->shift ?? $todayJadwal?->shift;
         $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
@@ -977,11 +1008,11 @@ class PersonnelAbsensiController extends Controller
             $windowOutEnd = null;
 
             if ($shift && $shift->start_time && $shift->end_time) {
-                $startTime = Carbon::parse($todayStr)->setTimeFrom($shift->start_time);
+                $startTime = Carbon::parse($activeDate)->setTimeFrom($shift->start_time);
                 $windowInEnd = $startTime->copy()->addMinutes($selesaiIn);
 
                 $isNightShift = Carbon::parse($shift->start_time)->format('H:i:s') >= Carbon::parse($shift->end_time)->format('H:i:s');
-                $endDate = $isNightShift ? Carbon::parse($todayStr)->addDay()->format('Y-m-d') : $todayStr;
+                $endDate = $isNightShift ? Carbon::parse($activeDate)->addDay()->format('Y-m-d') : $activeDate;
                 $endTime = Carbon::parse($endDate)->setTimeFrom($shift->end_time);
                 $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
             }
