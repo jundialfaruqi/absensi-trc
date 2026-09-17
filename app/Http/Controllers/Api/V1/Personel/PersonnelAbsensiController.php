@@ -1030,14 +1030,29 @@ class PersonnelAbsensiController extends Controller
 
         $targetDate = Carbon::createFromDate($year, $month, 1);
         $monthName = $targetDate->translatedFormat('F Y');
+        $daysInMonth = $targetDate->daysInMonth;
 
-        // Ambil data absensi pada bulan & tahun yang diminta
+        // Ambil seluruh data absensi pada bulan & tahun yang diminta
         $records = Absensi::where('personnel_id', $personnel->id)
             ->whereYear('tanggal', $year)
             ->whereMonth('tanggal', $month)
             ->with(['jadwal.shift', 'kantor', 'kantorPulang'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
+            ->get()
+            ->keyBy(function ($item) {
+                $t = $item->tanggal instanceof Carbon ? $item->tanggal : Carbon::parse($item->tanggal);
+                return $t->format('Y-m-d');
+            });
+
+        // Ambil jadwal jika ada
+        $jadwals = Jadwal::where('personnel_id', $personnel->id)
+            ->whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $month)
+            ->with('shift')
+            ->get()
+            ->keyBy(function ($item) {
+                $t = $item->tanggal instanceof Carbon ? $item->tanggal : Carbon::parse($item->tanggal);
+                return $t->format('Y-m-d');
+            });
 
         $items = [];
         $hadirCount = 0;
@@ -1046,73 +1061,117 @@ class PersonnelAbsensiController extends Controller
         $izinCount = 0;
         $liburCount = 0;
 
-        foreach ($records as $rec) {
-            $tglCarbon = $rec->tanggal instanceof Carbon ? $rec->tanggal : Carbon::parse($rec->tanggal);
-            $shift = $rec->jadwal?->shift;
-            $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : ($rec->status === 'LIBUR' ? 'Libur' : null));
-            
-            $shiftHours = null;
-            if ($shift && $shift->start_time && $shift->end_time) {
-                $sStart = Carbon::parse($shift->start_time)->format('H:i');
-                $sEnd = Carbon::parse($shift->end_time)->format('H:i');
-                $shiftHours = "{$sStart} - {$sEnd}";
+        // Generate seluruh tanggal dari 1 sampai akhir bulan (1 kalender penuh)
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $currentDate = Carbon::createFromDate($year, $month, $d);
+            $tglStr = $currentDate->format('Y-m-d');
+
+            $rec = $records->get($tglStr);
+            $jadwal = $jadwals->get($tglStr);
+
+            if ($rec) {
+                $shift = $rec->jadwal?->shift ?? $jadwal?->shift;
+                $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : ($rec->status === 'LIBUR' ? 'Libur' : null));
+                
+                $shiftHours = null;
+                if ($shift && $shift->start_time && $shift->end_time) {
+                    $sStart = Carbon::parse($shift->start_time)->format('H:i');
+                    $sEnd = Carbon::parse($shift->end_time)->format('H:i');
+                    $shiftHours = "{$sStart} - {$sEnd}";
+                }
+
+                // Stat counters
+                $statusUpper = strtoupper((string) $rec->status);
+                $statusMasukUpper = strtoupper((string) $rec->status_masuk);
+
+                if ($statusUpper === 'HADIR') {
+                    $hadirCount++;
+                } elseif ($statusUpper === 'ALPA') {
+                    $alpaCount++;
+                } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
+                    $izinCount++;
+                } elseif ($statusUpper === 'LIBUR') {
+                    $liburCount++;
+                }
+
+                if ($statusMasukUpper === 'TELAT') {
+                    $telatCount++;
+                }
+
+                // Format Jam Masuk
+                $jamMasukStr = null;
+                if ($rec->jam_masuk) {
+                    $jm = $rec->jam_masuk instanceof Carbon ? $rec->jam_masuk : Carbon::parse($tglStr . ' ' . $rec->jam_masuk);
+                    $jamMasukStr = $jm->format('H:i') . ' WIB';
+                }
+
+                // Format Jam Pulang
+                $jamPulangStr = null;
+                if ($rec->jam_pulang) {
+                    $jp = $rec->jam_pulang instanceof Carbon ? $rec->jam_pulang : Carbon::parse($tglStr . ' ' . $rec->jam_pulang);
+                    $jamPulangStr = $jp->format('H:i') . ' WIB';
+                }
+
+                $kantorName = $rec->kantor?->name ?? $rec->kantor?->nama_kantor ?? $personnel->kantor?->name ?? 'Kantor Penugasan';
+
+                $items[] = [
+                    'id' => (string) $rec->id,
+                    'tanggal' => $tglStr,
+                    'tanggal_formatted' => $currentDate->translatedFormat('d M Y'),
+                    'hari' => $currentDate->translatedFormat('l'),
+                    'full_date' => $currentDate->translatedFormat('l, d F Y'),
+                    'status' => $rec->status,
+                    'keterangan' => $rec->keterangan,
+                    'is_edited' => !empty($rec->edited_at),
+                    'shift_name' => $shiftName,
+                    'shift_hours' => $shiftHours,
+                    'jam_masuk' => $jamMasukStr,
+                    'status_masuk' => $rec->status_masuk,
+                    'foto_masuk' => $rec->foto_masuk ? asset('storage/' . $rec->foto_masuk) : null,
+                    'jarak_masuk' => $rec->jarak_meter,
+                    'jam_pulang' => $jamPulangStr,
+                    'status_pulang' => $rec->status_pulang,
+                    'foto_pulang' => $rec->foto_pulang ? asset('storage/' . $rec->foto_pulang) : null,
+                    'jarak_pulang' => $rec->jarak_meter_pulang,
+                    'kantor_name' => $kantorName,
+                ];
+            } else {
+                // Tidak ada data absensi di tanggal ini
+                $isSunday = $currentDate->isSunday();
+                $isOff = $jadwal?->shift?->type === 'off';
+
+                $status = '-';
+                $keterangan = null;
+                if ($isSunday || $isOff) {
+                    $status = 'LIBUR';
+                    $keterangan = 'Hari Libur';
+                    $liburCount++;
+                }
+
+                $shiftName = $jadwal?->shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : null);
+
+                $items[] = [
+                    'id' => 'empty_' . $tglStr,
+                    'tanggal' => $tglStr,
+                    'tanggal_formatted' => $currentDate->translatedFormat('d M Y'),
+                    'hari' => $currentDate->translatedFormat('l'),
+                    'full_date' => $currentDate->translatedFormat('l, d F Y'),
+                    'status' => $status,
+                    'keterangan' => $keterangan,
+                    'is_edited' => false,
+                    'shift_name' => $shiftName,
+                    'shift_hours' => null,
+                    'jam_masuk' => null,
+                    'status_masuk' => null,
+                    'foto_masuk' => null,
+                    'jarak_masuk' => null,
+                    'jam_pulang' => null,
+                    'status_pulang' => null,
+                    'foto_pulang' => null,
+                    'jarak_pulang' => null,
+                    'kantor_name' => $personnel->kantor?->name ?? null,
+                ];
             }
-
-            // Stat counters
-            $statusUpper = strtoupper((string) $rec->status);
-            $statusMasukUpper = strtoupper((string) $rec->status_masuk);
-
-            if ($statusUpper === 'HADIR') {
-                $hadirCount++;
-            } elseif ($statusUpper === 'ALPA') {
-                $alpaCount++;
-            } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
-                $izinCount++;
-            } elseif ($statusUpper === 'LIBUR') {
-                $liburCount++;
-            }
-
-            if ($statusMasukUpper === 'TELAT') {
-                $telatCount++;
-            }
-
-            // Format Jam Masuk
-            $jamMasukStr = null;
-            if ($rec->jam_masuk) {
-                $jm = $rec->jam_masuk instanceof Carbon ? $rec->jam_masuk : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $rec->jam_masuk);
-                $jamMasukStr = $jm->format('H:i') . ' WIB';
-            }
-
-            // Format Jam Pulang
-            $jamPulangStr = null;
-            if ($rec->jam_pulang) {
-                $jp = $rec->jam_pulang instanceof Carbon ? $rec->jam_pulang : Carbon::parse($tglCarbon->format('Y-m-d') . ' ' . $rec->jam_pulang);
-                $jamPulangStr = $jp->format('H:i') . ' WIB';
-            }
-
-            $kantorName = $rec->kantor?->name ?? $rec->kantor?->nama_kantor ?? $personnel->kantor?->name ?? 'Kantor Penugasan';
-
-            $items[] = [
-                'id' => (string) $rec->id,
-                'tanggal' => $tglCarbon->format('Y-m-d'),
-                'tanggal_formatted' => $tglCarbon->translatedFormat('d M Y'),
-                'hari' => $tglCarbon->translatedFormat('l'),
-                'full_date' => $tglCarbon->translatedFormat('l, d F Y'),
-                'status' => $rec->status,
-                'keterangan' => $rec->keterangan,
-                'is_edited' => !empty($rec->edited_at),
-                'shift_name' => $shiftName,
-                'shift_hours' => $shiftHours,
-                'jam_masuk' => $jamMasukStr,
-                'status_masuk' => $rec->status_masuk,
-                'foto_masuk' => $rec->foto_masuk ? asset('storage/' . $rec->foto_masuk) : null,
-                'jarak_masuk' => $rec->jarak_meter,
-                'jam_pulang' => $jamPulangStr,
-                'status_pulang' => $rec->status_pulang,
-                'foto_pulang' => $rec->foto_pulang ? asset('storage/' . $rec->foto_pulang) : null,
-                'jarak_pulang' => $rec->jarak_meter_pulang,
-                'kantor_name' => $kantorName,
-            ];
         }
 
         return response()->json([
@@ -1123,7 +1182,7 @@ class PersonnelAbsensiController extends Controller
                 'year' => $year,
                 'month_name' => $monthName,
                 'summary' => [
-                    'total_hari' => count($items),
+                    'total_hari' => $daysInMonth,
                     'total_hadir' => $hadirCount,
                     'total_terlambat' => $telatCount,
                     'total_alpa' => $alpaCount,

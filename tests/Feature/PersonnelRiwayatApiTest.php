@@ -101,7 +101,7 @@ class PersonnelRiwayatApiTest extends TestCase
                     'month' => 4,
                     'year' => 2026,
                     'summary' => [
-                        'total_hari' => 1,
+                        'total_hari' => 30,
                         'total_hadir' => 1,
                         'total_terlambat' => 0,
                         'total_alpa' => 0,
@@ -109,8 +109,12 @@ class PersonnelRiwayatApiTest extends TestCase
                 ],
             ]);
 
-        $this->assertCount(1, $response->json('data.riwayat'));
-        $this->assertEquals('Shift Pagi', $response->json('data.riwayat.0.shift_name'));
-        $this->assertEquals('HADIR', $response->json('data.riwayat.0.status'));
+        $this->assertCount(30, $response->json('data.riwayat'));
+        // Hari ke-15 (index 14)
+        $this->assertEquals('Shift Pagi', $response->json('data.riwayat.14.shift_name'));
+        $this->assertEquals('HADIR', $response->json('data.riwayat.14.status'));
+        // Hari ke-1 (index 0: tidak ada absensi)
+        $this->assertNull($response->json('data.riwayat.0.jam_masuk'));
+        $this->assertNull($response->json('data.riwayat.0.jam_pulang'));
     }
 }
