@@ -54,21 +54,39 @@ class PersonnelJadwalController extends Controller
 
             if ($jadwal) {
                 $shift = $jadwal->shift;
-                $shiftName = $shift?->name ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : ($jadwal->status ?: '-'));
-                $shiftType = $shift?->type ?? ($jadwal->status === 'LIBUR' ? 'off' : 'shift');
-                
+                $shiftCode = $shift?->name;
+                $shiftKeterangan = $shift?->keterangan;
+                $statusUpper = strtoupper((string) ($jadwal->status ?: 'SHIFT'));
+                $shiftCodeUpper = strtoupper((string) $shiftCode);
+                $shiftKetUpper = strtoupper((string) $shiftKeterangan);
+
+                // Cek apakah DINAS
+                $isDinas = ($statusUpper === 'DINAS') ||
+                    ($shiftCodeUpper === 'D') ||
+                    (str_contains($shiftKetUpper, 'DINAS'));
+
+                // Cek apakah LIBUR / OFF (hanya jika bukan DINAS)
+                $isOff = !$isDinas && (
+                    ($statusUpper === 'LIBUR') ||
+                    ($statusUpper === 'OFF') ||
+                    ($shiftCodeUpper === 'L') ||
+                    (str_contains($shiftKetUpper, 'LIBUR')) ||
+                    ($shift?->type === 'off')
+                );
+
+                $shiftType = $shift?->type ?? ($isOff ? 'off' : ($isDinas ? 'dinas' : 'shift'));
+                $status = $isDinas ? 'DINAS' : ($isOff ? 'LIBUR' : ($jadwal->status ?: 'SHIFT'));
+                $shiftName = $shiftCode ?? ($personnel->attendance_type === 'FLEXIBLE' ? 'Fleksibel' : ($status ?: '-'));
+
                 $shiftHours = null;
                 $startTime = null;
                 $endTime = null;
 
-                if ($shift && $shift->start_time && $shift->end_time) {
+                if (!$isOff && !$isDinas && $shift && $shift->start_time && $shift->end_time) {
                     $startTime = Carbon::parse($shift->start_time)->format('H:i');
                     $endTime = Carbon::parse($shift->end_time)->format('H:i');
                     $shiftHours = "{$startTime} - {$endTime}";
                 }
-
-                $statusUpper = strtoupper((string) ($jadwal->status ?: 'SHIFT'));
-                $isOff = ($shiftType === 'off') || (stripos($shiftName, 'libur') !== false) || in_array($statusUpper, ['LIBUR', 'OFF']);
 
                 $items[] = [
                     'id' => (string) $jadwal->id,
@@ -76,15 +94,16 @@ class PersonnelJadwalController extends Controller
                     'tanggal_formatted' => $currentDate->translatedFormat('d M Y'),
                     'hari' => $currentDate->translatedFormat('l'),
                     'full_date' => $currentDate->translatedFormat('l, d F Y'),
-                    'status' => $jadwal->status ?: 'SHIFT',
+                    'status' => $status,
                     'shift_name' => $shiftName,
                     'shift_type' => $shiftType,
                     'shift_hours' => $shiftHours,
                     'start_time' => $startTime,
                     'end_time' => $endTime,
                     'color' => $shift?->color,
-                    'keterangan' => $jadwal->keterangan ?: $shift?->keterangan,
+                    'keterangan' => $jadwal->keterangan ?: $shiftKeterangan,
                     'is_off' => $isOff,
+                    'is_dinas' => $isDinas,
                 ];
             } else {
                 // Tidak ada entri jadwal di tanggal ini
