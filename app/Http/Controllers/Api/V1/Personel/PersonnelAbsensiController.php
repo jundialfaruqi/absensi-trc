@@ -928,16 +928,16 @@ class PersonnelAbsensiController extends Controller
                 'created_at' => $now->startOfDay()->toISOString(),
             ];
         } elseif ($isDinas) {
-            // Shift OFF: Dinas Luar (Cukup 1 Card)
+            // Shift OFF: DINAS (Cukup 1 Card)
             $recentActivities[] = [
                 'id' => ($todayAbsensi ? (string) $todayAbsensi->id : 'today') . '_dinas',
                 'type' => 'dinas',
-                'title' => 'Dinas Luar',
-                'subtitle' => $shift?->keterangan ?: ($todayAbsensi?->keterangan ?: 'Tugas Luar Kantor'),
+                'title' => 'DINAS',
+                'subtitle' => $shift?->keterangan ?: ($todayAbsensi?->keterangan ?: 'Tugas Dinas'),
                 'time' => '-',
                 'date' => $tglStr,
                 'full_date' => $tglFullStr,
-                'status' => 'Dinas Luar',
+                'status' => 'DINAS',
                 'status_type' => 'dinas',
                 'foto_url' => null,
                 'shift_name' => $shiftName,
