@@ -1060,11 +1060,13 @@ class PersonnelAbsensiController extends Controller
         $alpaCount = 0;
         $izinCount = 0;
         $liburCount = 0;
+        $today = Carbon::today();
 
         // Generate seluruh tanggal dari 1 sampai akhir bulan (1 kalender penuh)
         for ($d = 1; $d <= $daysInMonth; $d++) {
-            $currentDate = Carbon::createFromDate($year, $month, $d);
+            $currentDate = Carbon::createFromDate($year, $month, $d)->startOfDay();
             $tglStr = $currentDate->format('Y-m-d');
+            $isFuture = $currentDate->greaterThan($today);
 
             $rec = $records->get($tglStr);
             $jadwal = $jadwals->get($tglStr);
@@ -1083,11 +1085,17 @@ class PersonnelAbsensiController extends Controller
                 // Stat counters
                 $statusUpper = strtoupper((string) $rec->status);
                 $statusMasukUpper = strtoupper((string) $rec->status_masuk);
+                $itemStatus = $rec->status;
 
                 if ($statusUpper === 'HADIR') {
                     $hadirCount++;
                 } elseif ($statusUpper === 'ALPA') {
-                    $alpaCount++;
+                    if (!$isFuture) {
+                        $alpaCount++;
+                    } else {
+                        // Tanggal di masa depan (> hari ini) tidak dihitung Alpa, tampilkan '-'
+                        $itemStatus = '-';
+                    }
                 } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI', 'DINAS'])) {
                     $izinCount++;
                 } elseif ($statusUpper === 'LIBUR') {
@@ -1100,14 +1108,14 @@ class PersonnelAbsensiController extends Controller
 
                 // Format Jam Masuk
                 $jamMasukStr = null;
-                if ($rec->jam_masuk) {
+                if ($rec->jam_masuk && (!$isFuture || $statusUpper !== 'ALPA')) {
                     $jm = $rec->jam_masuk instanceof Carbon ? $rec->jam_masuk : Carbon::parse($tglStr . ' ' . $rec->jam_masuk);
                     $jamMasukStr = $jm->format('H:i') . ' WIB';
                 }
 
                 // Format Jam Pulang
                 $jamPulangStr = null;
-                if ($rec->jam_pulang) {
+                if ($rec->jam_pulang && (!$isFuture || $statusUpper !== 'ALPA')) {
                     $jp = $rec->jam_pulang instanceof Carbon ? $rec->jam_pulang : Carbon::parse($tglStr . ' ' . $rec->jam_pulang);
                     $jamPulangStr = $jp->format('H:i') . ' WIB';
                 }
@@ -1120,17 +1128,17 @@ class PersonnelAbsensiController extends Controller
                     'tanggal_formatted' => $currentDate->translatedFormat('d M Y'),
                     'hari' => $currentDate->translatedFormat('l'),
                     'full_date' => $currentDate->translatedFormat('l, d F Y'),
-                    'status' => $rec->status,
+                    'status' => $itemStatus,
                     'keterangan' => $rec->keterangan,
                     'is_edited' => !empty($rec->edited_at),
                     'shift_name' => $shiftName,
                     'shift_hours' => $shiftHours,
                     'jam_masuk' => $jamMasukStr,
-                    'status_masuk' => $rec->status_masuk,
+                    'status_masuk' => $isFuture && $statusUpper === 'ALPA' ? null : $rec->status_masuk,
                     'foto_masuk' => $rec->foto_masuk ? asset('storage/' . $rec->foto_masuk) : null,
                     'jarak_masuk' => $rec->jarak_meter,
                     'jam_pulang' => $jamPulangStr,
-                    'status_pulang' => $rec->status_pulang,
+                    'status_pulang' => $isFuture && $statusUpper === 'ALPA' ? null : $rec->status_pulang,
                     'foto_pulang' => $rec->foto_pulang ? asset('storage/' . $rec->foto_pulang) : null,
                     'jarak_pulang' => $rec->jarak_meter_pulang,
                     'kantor_name' => $kantorName,
