@@ -564,12 +564,10 @@ class AdminAbsensiController extends Controller
             ], 422);
         }
 
-        $fileName = 'absensi/' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
         ob_start();
         imagejpeg($gdImg, null, 80);
         $cleanJpeg = ob_get_clean();
         imagedestroy($gdImg);
-        Storage::disk('public')->put($fileName, $cleanJpeg);
 
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
@@ -701,7 +699,9 @@ class AdminAbsensiController extends Controller
             }
         }
 
-        // 4. LOGIKA ABSEN MASUK VS PULANG
+        // 4. LOGIKA ABSEN MASUK VS PULANG (Simpan ke Sub-folder per tanggal: absensi/YYYY-MM-DD/)
+        $folderPath = 'absensi/' . $activeDate;
+
         if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && !$absensi->jam_pulang)) {
             // --- ABSEN PULANG (Normal atau Direct Check-Out) ---
             $statusPulang = 'HADIR';
@@ -715,6 +715,9 @@ class AdminAbsensiController extends Controller
                     $statusPulang = 'PULANG CEPAT';
                 }
             }
+
+            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
+            Storage::disk('public')->put($fileName, $cleanJpeg);
 
             $absensi->jadwal_id = $jadwal?->id;
             $absensi->status = 'HADIR'; // Status keseluruhan tetap HADIR
@@ -751,6 +754,9 @@ class AdminAbsensiController extends Controller
                     $statusMasuk = 'TELAT';
                 }
             }
+
+            $fileName = $folderPath . '/in_' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
+            Storage::disk('public')->put($fileName, $cleanJpeg);
 
             $absensi->jadwal_id = $jadwal?->id;
             $absensi->kantor_id = $hasilLokasi['kantor_id'];
