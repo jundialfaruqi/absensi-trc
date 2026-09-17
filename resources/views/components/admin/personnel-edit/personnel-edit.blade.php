@@ -1721,7 +1721,12 @@
                                         window.Echo.channel('personnel-biometrics')
                                             .listen('PersonnelVectorUpdated', (e) => {
                                                 if (e.personnel_id == {{ $personnelId }}) {
-                                                    this.has192D = true;
+                                                    if (e.action === 'deleted') {
+                                                        this.has192D = false;
+                                                        this.capturedPhotoPreview = null;
+                                                    } else {
+                                                        this.has192D = true;
+                                                    }
                                                     this.isSyncingMobile = false;
                                                     if (this.syncTimeout) {
                                                         clearTimeout(this.syncTimeout);
@@ -1733,6 +1738,15 @@
                                         console.warn("Could not listen to Echo channel: ", e);
                                     }
                                 }
+
+                                window.addEventListener('face-data-deleted', () => {
+                                    this.has192D = false;
+                                    this.capturedPhotoPreview = null;
+                                    this.uploadedFaceBox = { found: false, left: '0%', top: '0%', width: '0%', height: '0%' };
+                                    this.poses3D = { FRONT: null, RIGHT: null, LEFT: null, UP: null };
+                                    this.stageHoldProgress = 0;
+                                    this.current3DStage = 'TUTORIAL';
+                                });
                             },
 
                             async startCamera() {
