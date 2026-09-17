@@ -197,4 +197,44 @@ class PersonnelRiwayatApiTest extends TestCase
         // Hanya 1 alpa (kemarin) yang terhitung, alpa besok tidak dihitung
         $this->assertEquals(1, $response->json('data.alpa_count'));
     }
+
+    public function test_dashboard_summary_handles_ongoing_overnight_shift(): void
+    {
+        $today = Carbon::today();
+        $yesterday = $today->copy()->subDay()->format('Y-m-d');
+
+        $nightShift = Shift::create([
+            'name' => 'Shift Malam',
+            'start_time' => '20:00:00',
+            'end_time' => '08:00:00',
+            'type' => 'shift',
+        ]);
+
+        $jadwal = Jadwal::create([
+            'personnel_id' => $this->personnel->id,
+            'shift_id' => $nightShift->id,
+            'tanggal' => $yesterday,
+            'status' => 'SHIFT',
+        ]);
+
+        Absensi::create([
+            'personnel_id' => $this->personnel->id,
+            'jadwal_id' => $jadwal->id,
+            'tanggal' => $yesterday,
+            'jam_masuk' => '20:05:00',
+            'status_masuk' => 'HADIR',
+            'status' => 'HADIR',
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+            ->getJson('/api/v1/personel/dashboard/summary?month=' . $today->month . '&year=' . $today->year);
+
+        $response->assertStatus(200);
+        $activities = $response->json('data.recent_activities');
+        $this->assertCount(2, $activities);
+        $this->assertEquals('Presensi Masuk', $activities[0]['title']);
+        $this->assertEquals('20:05 WIB', $activities[0]['time']);
+        $this->assertEquals('Presensi Pulang', $activities[1]['title']);
+        $this->assertEquals('-', $activities[1]['time']);
+    }
 }

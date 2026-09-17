@@ -863,7 +863,7 @@ class PersonnelAbsensiController extends Controller
         // Cek apakah ada jadwal shift malam kemarin yang masih aktif berjalan (belum pulang & dalam batas window pulang)
         $yesterdayJadwal = Jadwal::where('personnel_id', $personnel->id)
             ->whereDate('tanggal', $yesterdayStr)
-            ->with(['shift', 'kantor'])
+            ->with('shift')
             ->first();
 
         if ($yesterdayJadwal && $yesterdayJadwal->shift && $yesterdayJadwal->shift->type !== 'off' && $yesterdayJadwal->shift->start_time && $yesterdayJadwal->shift->end_time) {
@@ -891,7 +891,7 @@ class PersonnelAbsensiController extends Controller
         if (!$activeJadwal) {
             $activeJadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $todayStr)
-                ->with(['shift', 'kantor'])
+                ->with('shift')
                 ->first();
             $activeAbsensi = Absensi::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $todayStr)
