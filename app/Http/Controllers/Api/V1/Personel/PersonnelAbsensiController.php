@@ -1210,7 +1210,7 @@ class PersonnelAbsensiController extends Controller
                     $jamPulangStr = $jp->format('H:i') . ' WIB';
                 }
 
-                $kantorName = $rec->kantor?->name ?? $rec->kantor?->nama_kantor ?? $personnel->kantor?->name ?? 'Kantor Penugasan';
+                $kantorName = $rec->kantor?->name ?? $rec->kantor?->nama_kantor ?? $personnel->kantor?->name ?? '-';
 
                 $items[] = [
                     'id' => (string) $rec->id,
@@ -1280,7 +1280,7 @@ class PersonnelAbsensiController extends Controller
                     'status_pulang' => null,
                     'foto_pulang' => null,
                     'jarak_pulang' => null,
-                    'kantor_name' => $personnel->kantor?->name ?? null,
+                    'kantor_name' => $personnel->kantor?->name ?? '-',
                 ];
             }
         }
