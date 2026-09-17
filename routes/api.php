@@ -108,6 +108,7 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
     Route::get('/dashboard/summary', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'dashboardSummary']);
     Route::get('/jadwal', [\App\Http\Controllers\Api\V1\Personel\PersonnelJadwalController::class, 'index']);
     Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'riwayat']);
+    Route::get('/banners', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'getBanners']);
 
     // Real-Time Location Tracking & Push Notification FCM Token
     Route::post('/device/location', [\App\Http\Controllers\Api\V1\Personel\PersonnelAbsensiController::class, 'updateLocation']);

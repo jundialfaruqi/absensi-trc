@@ -1355,4 +1355,29 @@ class PersonnelAbsensiController extends Controller
             'message' => 'Lokasi perangkat berhasil diperbarui.',
         ]);
     }
+
+    /**
+     * Dapatkan daftar banner pengumuman / berita aktif untuk aplikasi mobile.
+     */
+    public function getBanners(Request $request): JsonResponse
+    {
+        $banners = \App\Models\Berita::where('is_banner_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'judul' => $b->judul,
+                    'deskripsi' => $b->deskripsi,
+                    'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
+                    'slug' => $b->slug,
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Daftar banner aktif berhasil dimuat.',
+            'data' => $banners,
+        ]);
+    }
 }
