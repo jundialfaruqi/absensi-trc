@@ -407,15 +407,39 @@
                                 <div class="flex flex-col gap-4 items-center">
                                     {{-- Preview Foto --}}
                                     <div
-                                        class="relative w-full max-w-70 aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 border-base-300 shadow-inner flex items-center justify-center">
-                                        {{-- Preview Client-Side Instan --}}
-                                        <template x-if="capturedPhotoPreview">
+                                        class="relative w-full max-w-70 aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 transition-all duration-200 shadow-inner flex items-center justify-center group"
+                                        :class="activePreviewPose ? 'border-primary ring-2 ring-primary/40 shadow-lg' : 'border-base-300'">
+
+                                        {{-- Banner Overlay Header saat Preview Pose 3D Aktif --}}
+                                        <div x-show="activePreviewPose" x-transition.opacity.duration.150ms
+                                            class="absolute top-2 left-2 right-2 z-30 flex items-center justify-between bg-black/80 backdrop-blur-md text-white px-2.5 py-1.5 rounded-lg border border-white/20 shadow-md">
+                                            <div class="flex items-center gap-1.5 min-w-0">
+                                                <span class="text-[10px] font-bold tracking-wide truncate">
+                                                    Pose 3D: <span class="text-primary font-extrabold" x-text="previewPoseLabel"></span>
+                                                </span>
+                                            </div>
+                                            <button type="button" @click.stop="clearPosePreview()"
+                                                title="Kembali ke Foto Utama"
+                                                class="btn btn-circle btn-ghost btn-xs text-white/80 hover:text-white hover:bg-white/20 h-5 w-5 min-h-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        {{-- 1. Preview Foto Pose 3D yang sedang di-klik --}}
+                                        <template x-if="activePreviewPose && previewPosePhoto">
+                                            <img :src="previewPosePhoto" :alt="previewPoseLabel" class="w-full h-full object-cover transition-all duration-200">
+                                        </template>
+
+                                        {{-- 2. Preview Client-Side Instan --}}
+                                        <template x-if="!activePreviewPose && capturedPhotoPreview">
                                             <img :src="capturedPhotoPreview" alt="Preview Foto"
                                                 class="w-full h-full object-cover">
                                         </template>
 
-                                        {{-- Preview Server Livewire / Database --}}
-                                        <div x-show="!capturedPhotoPreview"
+                                        {{-- 3. Preview Server Livewire / Database --}}
+                                        <div x-show="!activePreviewPose && !capturedPhotoPreview"
                                             class="w-full h-full flex items-center justify-center">
                                             @if ($foto && !$errors->has('foto'))
                                                 <img x-ref="previewImage" src="{{ $foto->temporaryUrl() }}"
@@ -440,7 +464,7 @@
                                         </div>
 
                                         {{-- Overlay Bounding Box untuk upload file --}}
-                                        <div x-show="!isCameraOpen && uploadedFaceBox.found"
+                                        <div x-show="!isCameraOpen && uploadedFaceBox.found && !activePreviewPose"
                                             class="absolute pointer-events-none transition-all duration-150 ease-out border-2 rounded-lg z-20 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.45)]"
                                             :style="`left: ${uploadedFaceBox.left}; top: ${uploadedFaceBox.top}; width: ${uploadedFaceBox.width}; height: ${uploadedFaceBox.height};`">
                                             <span
@@ -475,10 +499,12 @@
                                     @endphp
                                     <div class="w-full max-w-70 mb-3">
                                         <div class="flex items-center justify-between mb-2">
-                                            <span
-                                                class="text-[11px] font-semibold text-gray-500 dark:text-base-content/70 uppercase tracking-wider">
-                                                Biometrik Wajah 3D
-                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <span
+                                                    class="text-[11px] font-semibold text-gray-500 dark:text-base-content/70 uppercase tracking-wider">
+                                                    Biometrik Wajah 3D
+                                                </span>
+                                            </div>
                                             <template
                                                 x-if="poses3D.FRONT && poses3D.RIGHT && poses3D.LEFT && poses3D.UP">
                                                 <span
@@ -504,11 +530,28 @@
                                                 @php
                                                     $existing = $existing_3d_photos[$key] ?? null;
                                                     $hasExisting = !empty($existing['foto']);
+                                                    $existingUrl = $hasExisting ? $existing['foto'] : '';
                                                 @endphp
                                                 <div
-                                                    class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                                    @click="togglePosePreview('{{ $key }}', (poses3D.{{ $key }} && poses3D.{{ $key }}.dataUrl) ? poses3D.{{ $key }}.dataUrl : '{{ $existingUrl }}', '{{ $pose['name'] }} ({{ $pose['angle'] }})')"
+                                                    :class="activePreviewPose === '{{ $key }}' ? 'ring-2 ring-primary border-primary bg-primary/10 shadow-md scale-[1.02]' : 'bg-base-200/60 border-base-300 hover:border-primary/50 hover:bg-base-200'"
+                                                    class="p-2 rounded-xl border flex flex-col items-center text-center transition-all duration-150 relative group select-none"
+                                                    :style="((poses3D.{{ $key }} && poses3D.{{ $key }}.dataUrl) || '{{ $existingUrl }}') ? 'cursor: pointer;' : 'cursor: default;'"
+                                                    :title="((poses3D.{{ $key }} && poses3D.{{ $key }}.dataUrl) || '{{ $existingUrl }}') ? 'Klik untuk melihat pose {{ $pose['name'] }} di canvas utama' : 'Belum ada foto pose ini'">
+
                                                     <div
                                                         class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                        {{-- Hover overlay preview icon --}}
+                                                        <template x-if="(poses3D.{{ $key }} && poses3D.{{ $key }}.dataUrl) || '{{ $existingUrl }}'">
+                                                            <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center text-white z-10 pointer-events-none">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                </svg>
+                                                                <span class="text-[8px] font-semibold" x-text="activePreviewPose === '{{ $key }}' ? 'Tutup' : 'Lihat'"></span>
+                                                            </div>
+                                                        </template>
+
                                                         {{-- Jika sedang ada capture baru di Alpine --}}
                                                         <template
                                                             x-if="poses3D.{{ $key }} && poses3D.{{ $key }}.dataUrl">
@@ -546,19 +589,26 @@
                                                             <span
                                                                 class="text-[9px] font-normal text-base-content/60">({{ $pose['angle'] }})</span></span>
 
-                                                        {{-- Alpine badge if fresh scan, else Blade badge --}}
-                                                        <template x-if="poses3D.{{ $key }}">
-                                                            <span
-                                                                class="badge badge-secondary badge-xs text-[8px] text-white">Baru</span>
+                                                        {{-- Active Preview indicator or normal badge --}}
+                                                        <template x-if="activePreviewPose === '{{ $key }}'">
+                                                            <span class="badge badge-primary badge-xs text-[8px] text-white font-bold">Preview</span>
                                                         </template>
-                                                        <template x-if="!poses3D.{{ $key }}">
-                                                            @if ($hasExisting)
-                                                                <span
-                                                                    class="badge badge-success badge-xs text-[8px] text-white">Tersimpan</span>
-                                                            @else
-                                                                <span
-                                                                    class="badge badge-ghost badge-xs text-[8px] text-base-content/40">Kosong</span>
-                                                            @endif
+                                                        <template x-if="activePreviewPose !== '{{ $key }}'">
+                                                            <div>
+                                                                <template x-if="poses3D.{{ $key }}">
+                                                                    <span
+                                                                        class="badge badge-secondary badge-xs text-[8px] text-white">Baru</span>
+                                                                </template>
+                                                                <template x-if="!poses3D.{{ $key }}">
+                                                                    @if ($hasExisting)
+                                                                        <span
+                                                                            class="badge badge-success badge-xs text-[8px] text-white">Tersimpan</span>
+                                                                    @else
+                                                                        <span
+                                                                            class="badge badge-ghost badge-xs text-[8px] text-base-content/40">Kosong</span>
+                                                                    @endif
+                                                                </template>
+                                                            </div>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -1852,6 +1902,28 @@
                             isSyncingMobile: false,
                             syncTimeout: null,
 
+                            // State Overlay Preview Pose 3D pada Canvas Utama
+                            activePreviewPose: null,
+                            previewPosePhoto: null,
+                            previewPoseLabel: '',
+
+                            togglePosePreview(poseKey, photoUrl, poseLabel) {
+                                if (!photoUrl) return;
+                                if (this.activePreviewPose === poseKey) {
+                                    this.clearPosePreview();
+                                } else {
+                                    this.activePreviewPose = poseKey;
+                                    this.previewPosePhoto = photoUrl;
+                                    this.previewPoseLabel = poseLabel;
+                                }
+                            },
+
+                            clearPosePreview() {
+                                this.activePreviewPose = null;
+                                this.previewPosePhoto = null;
+                                this.previewPoseLabel = '';
+                            },
+
                             init() {
                                 const EchoConstructor = window._EchoHandler || window.Echo;
                                 if (typeof EchoConstructor === 'function' && !window.Echo) {
@@ -1883,6 +1955,7 @@
                                                     if (e.action === 'deleted') {
                                                         this.has192D = false;
                                                         this.capturedPhotoPreview = null;
+                                                        this.clearPosePreview();
                                                     } else {
                                                         this.has192D = true;
                                                     }
@@ -1901,6 +1974,7 @@
                                 window.addEventListener('face-data-deleted', () => {
                                     this.has192D = false;
                                     this.capturedPhotoPreview = null;
+                                    this.clearPosePreview();
                                     this.uploadedFaceBox = {
                                         found: false,
                                         left: '0%',
@@ -1920,6 +1994,7 @@
                             },
 
                             async startCamera() {
+                                this.clearPosePreview();
                                 this.isStartingCamera = true;
                                 this.capturedImage = null;
                                 this.pendingCroppedFile = null;
@@ -2335,6 +2410,7 @@
                                 const rawFile = event.target.files[0];
                                 if (!rawFile) return;
 
+                                this.clearPosePreview();
                                 this.isUploadingFile = true;
                                 try {
                                     if (!this.faceApiLoaded) await this.loadModels();
@@ -2618,6 +2694,7 @@
                             },
 
                             open3DModal() {
+                                this.clearPosePreview();
                                 this.current3DStage = 'TUTORIAL';
                                 this.is3DCameraOpen = true;
                                 this.stageHoldProgress = 0;

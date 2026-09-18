@@ -307,16 +307,41 @@
                             <div class="form-control w-full">
                                 <div class="flex flex-col gap-4 items-center">
                                     {{-- Preview Foto --}}
+                                    {{-- Preview Foto --}}
                                     <div
-                                        class="relative w-full max-w-70 aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 border-base-300 shadow-inner flex items-center justify-center">
-                                        {{-- Preview Client-Side Instan --}}
-                                        <template x-if="capturedPhotoPreview">
+                                        class="relative w-full max-w-70 aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 transition-all duration-200 shadow-inner flex items-center justify-center group"
+                                        :class="activePreviewPose ? 'border-primary ring-2 ring-primary/40 shadow-lg' : 'border-base-300'">
+
+                                        {{-- Banner Overlay Header saat Preview Pose 3D Aktif --}}
+                                        <div x-show="activePreviewPose" x-transition.opacity.duration.150ms
+                                            class="absolute top-2 left-2 right-2 z-30 flex items-center justify-between bg-black/80 backdrop-blur-md text-white px-2.5 py-1.5 rounded-lg border border-white/20 shadow-md">
+                                            <div class="flex items-center gap-1.5 min-w-0">
+                                                <span class="text-[10px] font-bold tracking-wide truncate">
+                                                    Pose 3D: <span class="text-primary font-extrabold" x-text="previewPoseLabel"></span>
+                                                </span>
+                                            </div>
+                                            <button type="button" @click.stop="clearPosePreview()"
+                                                title="Kembali ke Foto Utama"
+                                                class="btn btn-circle btn-ghost btn-xs text-white/80 hover:text-white hover:bg-white/20 h-5 w-5 min-h-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        {{-- 1. Preview Foto Pose 3D yang sedang di-klik --}}
+                                        <template x-if="activePreviewPose && previewPosePhoto">
+                                            <img :src="previewPosePhoto" :alt="previewPoseLabel" class="w-full h-full object-cover transition-all duration-200">
+                                        </template>
+
+                                        {{-- 2. Preview Client-Side Instan --}}
+                                        <template x-if="!activePreviewPose && capturedPhotoPreview">
                                             <img :src="capturedPhotoPreview" alt="Preview Foto"
                                                 class="w-full h-full object-cover">
                                         </template>
 
-                                        {{-- Preview Server Livewire / Database --}}
-                                        <div x-show="!capturedPhotoPreview"
+                                        {{-- 3. Preview Server Livewire / Database --}}
+                                        <div x-show="!activePreviewPose && !capturedPhotoPreview"
                                             class="w-full h-full flex items-center justify-center">
                                             @if ($foto && !$errors->has('foto'))
                                                 <img x-ref="previewImage" src="{{ $foto->temporaryUrl() }}"
@@ -338,7 +363,7 @@
                                         </div>
 
                                         {{-- Overlay Bounding Box untuk upload file --}}
-                                        <div x-show="!isCameraOpen && uploadedFaceBox.found"
+                                        <div x-show="!isCameraOpen && uploadedFaceBox.found && !activePreviewPose"
                                             class="absolute pointer-events-none transition-all duration-150 ease-out border-2 rounded-lg z-20 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.45)]"
                                             :style="`left: ${uploadedFaceBox.left}; top: ${uploadedFaceBox.top}; width: ${uploadedFaceBox.width}; height: ${uploadedFaceBox.height};`">
                                             <span
@@ -378,8 +403,23 @@
 
                                         <div class="grid grid-cols-2 gap-2 w-full">
                                             {{-- 1. Depan (0°) --}}
-                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                            <div
+                                                @click="togglePosePreview('FRONT', poses3D.FRONT?.dataUrl, 'Depan (0°)')"
+                                                :class="activePreviewPose === 'FRONT' ? 'ring-2 ring-primary border-primary bg-primary/10 shadow-md scale-[1.02]' : 'bg-base-200/60 border-base-300 hover:border-primary/50 hover:bg-base-200'"
+                                                class="p-2 rounded-xl border flex flex-col items-center text-center transition-all duration-150 relative group select-none"
+                                                :style="poses3D.FRONT?.dataUrl ? 'cursor: pointer;' : 'cursor: default;'"
+                                                :title="poses3D.FRONT?.dataUrl ? 'Klik untuk melihat pose Depan di canvas utama' : 'Belum ada foto pose ini'">
                                                 <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    {{-- Hover eye overlay --}}
+                                                    <template x-if="poses3D.FRONT && poses3D.FRONT.dataUrl">
+                                                        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center text-white z-10 pointer-events-none">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span class="text-[8px] font-semibold" x-text="activePreviewPose === 'FRONT' ? 'Tutup' : 'Lihat'"></span>
+                                                        </div>
+                                                    </template>
                                                     <template x-if="poses3D.FRONT && poses3D.FRONT.dataUrl">
                                                         <img :src="poses3D.FRONT.dataUrl" alt="Depan (0°)" class="w-full h-full object-cover">
                                                     </template>
@@ -394,13 +434,33 @@
                                                 </div>
                                                 <div class="w-full flex items-center justify-between px-0.5">
                                                     <span class="text-[10px] font-bold">Depan <span class="text-[9px] font-normal text-base-content/60">(0°)</span></span>
-                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.FRONT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.FRONT ? 'Ready' : 'Kosong'"></span>
+                                                    <template x-if="activePreviewPose === 'FRONT'">
+                                                        <span class="badge badge-primary badge-xs text-[8px] text-white font-bold">Preview</span>
+                                                    </template>
+                                                    <template x-if="activePreviewPose !== 'FRONT'">
+                                                        <span class="badge badge-xs text-[8px]" :class="poses3D.FRONT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.FRONT ? 'Ready' : 'Kosong'"></span>
+                                                    </template>
                                                 </div>
                                             </div>
 
                                             {{-- 2. Kanan (+30°) --}}
-                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                            <div
+                                                @click="togglePosePreview('RIGHT', poses3D.RIGHT?.dataUrl, 'Kanan (+30°)')"
+                                                :class="activePreviewPose === 'RIGHT' ? 'ring-2 ring-primary border-primary bg-primary/10 shadow-md scale-[1.02]' : 'bg-base-200/60 border-base-300 hover:border-primary/50 hover:bg-base-200'"
+                                                class="p-2 rounded-xl border flex flex-col items-center text-center transition-all duration-150 relative group select-none"
+                                                :style="poses3D.RIGHT?.dataUrl ? 'cursor: pointer;' : 'cursor: default;'"
+                                                :title="poses3D.RIGHT?.dataUrl ? 'Klik untuk melihat pose Kanan di canvas utama' : 'Belum ada foto pose ini'">
                                                 <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    {{-- Hover eye overlay --}}
+                                                    <template x-if="poses3D.RIGHT && poses3D.RIGHT.dataUrl">
+                                                        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center text-white z-10 pointer-events-none">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span class="text-[8px] font-semibold" x-text="activePreviewPose === 'RIGHT' ? 'Tutup' : 'Lihat'"></span>
+                                                        </div>
+                                                    </template>
                                                     <template x-if="poses3D.RIGHT && poses3D.RIGHT.dataUrl">
                                                         <img :src="poses3D.RIGHT.dataUrl" alt="Kanan (+30°)" class="w-full h-full object-cover">
                                                     </template>
@@ -415,13 +475,33 @@
                                                 </div>
                                                 <div class="w-full flex items-center justify-between px-0.5">
                                                     <span class="text-[10px] font-bold">Kanan <span class="text-[9px] font-normal text-base-content/60">(+30°)</span></span>
-                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.RIGHT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.RIGHT ? 'Ready' : 'Kosong'"></span>
+                                                    <template x-if="activePreviewPose === 'RIGHT'">
+                                                        <span class="badge badge-primary badge-xs text-[8px] text-white font-bold">Preview</span>
+                                                    </template>
+                                                    <template x-if="activePreviewPose !== 'RIGHT'">
+                                                        <span class="badge badge-xs text-[8px]" :class="poses3D.RIGHT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.RIGHT ? 'Ready' : 'Kosong'"></span>
+                                                    </template>
                                                 </div>
                                             </div>
 
                                             {{-- 3. Kiri (-30°) --}}
-                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                            <div
+                                                @click="togglePosePreview('LEFT', poses3D.LEFT?.dataUrl, 'Kiri (-30°)')"
+                                                :class="activePreviewPose === 'LEFT' ? 'ring-2 ring-primary border-primary bg-primary/10 shadow-md scale-[1.02]' : 'bg-base-200/60 border-base-300 hover:border-primary/50 hover:bg-base-200'"
+                                                class="p-2 rounded-xl border flex flex-col items-center text-center transition-all duration-150 relative group select-none"
+                                                :style="poses3D.LEFT?.dataUrl ? 'cursor: pointer;' : 'cursor: default;'"
+                                                :title="poses3D.LEFT?.dataUrl ? 'Klik untuk melihat pose Kiri di canvas utama' : 'Belum ada foto pose ini'">
                                                 <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    {{-- Hover eye overlay --}}
+                                                    <template x-if="poses3D.LEFT && poses3D.LEFT.dataUrl">
+                                                        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center text-white z-10 pointer-events-none">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span class="text-[8px] font-semibold" x-text="activePreviewPose === 'LEFT' ? 'Tutup' : 'Lihat'"></span>
+                                                        </div>
+                                                    </template>
                                                     <template x-if="poses3D.LEFT && poses3D.LEFT.dataUrl">
                                                         <img :src="poses3D.LEFT.dataUrl" alt="Kiri (-30°)" class="w-full h-full object-cover">
                                                     </template>
@@ -436,13 +516,33 @@
                                                 </div>
                                                 <div class="w-full flex items-center justify-between px-0.5">
                                                     <span class="text-[10px] font-bold">Kiri <span class="text-[9px] font-normal text-base-content/60">(-30°)</span></span>
-                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.LEFT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.LEFT ? 'Ready' : 'Kosong'"></span>
+                                                    <template x-if="activePreviewPose === 'LEFT'">
+                                                        <span class="badge badge-primary badge-xs text-[8px] text-white font-bold">Preview</span>
+                                                    </template>
+                                                    <template x-if="activePreviewPose !== 'LEFT'">
+                                                        <span class="badge badge-xs text-[8px]" :class="poses3D.LEFT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.LEFT ? 'Ready' : 'Kosong'"></span>
+                                                    </template>
                                                 </div>
                                             </div>
 
                                             {{-- 4. Atas (+20°) --}}
-                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                            <div
+                                                @click="togglePosePreview('UP', poses3D.UP?.dataUrl, 'Atas (+20°)')"
+                                                :class="activePreviewPose === 'UP' ? 'ring-2 ring-primary border-primary bg-primary/10 shadow-md scale-[1.02]' : 'bg-base-200/60 border-base-300 hover:border-primary/50 hover:bg-base-200'"
+                                                class="p-2 rounded-xl border flex flex-col items-center text-center transition-all duration-150 relative group select-none"
+                                                :style="poses3D.UP?.dataUrl ? 'cursor: pointer;' : 'cursor: default;'"
+                                                :title="poses3D.UP?.dataUrl ? 'Klik untuk melihat pose Atas di canvas utama' : 'Belum ada foto pose ini'">
                                                 <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    {{-- Hover eye overlay --}}
+                                                    <template x-if="poses3D.UP && poses3D.UP.dataUrl">
+                                                        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center text-white z-10 pointer-events-none">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span class="text-[8px] font-semibold" x-text="activePreviewPose === 'UP' ? 'Tutup' : 'Lihat'"></span>
+                                                        </div>
+                                                    </template>
                                                     <template x-if="poses3D.UP && poses3D.UP.dataUrl">
                                                         <img :src="poses3D.UP.dataUrl" alt="Atas (+20°)" class="w-full h-full object-cover">
                                                     </template>
@@ -457,7 +557,12 @@
                                                 </div>
                                                 <div class="w-full flex items-center justify-between px-0.5">
                                                     <span class="text-[10px] font-bold">Atas <span class="text-[9px] font-normal text-base-content/60">(+20°)</span></span>
-                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.UP ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.UP ? 'Ready' : 'Kosong'"></span>
+                                                    <template x-if="activePreviewPose === 'UP'">
+                                                        <span class="badge badge-primary badge-xs text-[8px] text-white font-bold">Preview</span>
+                                                    </template>
+                                                    <template x-if="activePreviewPose !== 'UP'">
+                                                        <span class="badge badge-xs text-[8px]" :class="poses3D.UP ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.UP ? 'Ready' : 'Kosong'"></span>
+                                                    </template>
                                                 </div>
                                             </div>
                                         </div>
@@ -1631,7 +1736,30 @@
                             },
                             isPoseValid: false,
 
+                            // State Overlay Preview Pose 3D pada Canvas Utama
+                            activePreviewPose: null,
+                            previewPosePhoto: null,
+                            previewPoseLabel: '',
+
+                            togglePosePreview(poseKey, photoUrl, poseLabel) {
+                                if (!photoUrl) return;
+                                if (this.activePreviewPose === poseKey) {
+                                    this.clearPosePreview();
+                                } else {
+                                    this.activePreviewPose = poseKey;
+                                    this.previewPosePhoto = photoUrl;
+                                    this.previewPoseLabel = poseLabel;
+                                }
+                            },
+
+                            clearPosePreview() {
+                                this.activePreviewPose = null;
+                                this.previewPosePhoto = null;
+                                this.previewPoseLabel = '';
+                            },
+
                             async startCamera() {
+                                this.clearPosePreview();
                                 this.isStartingCamera = true;
                                 this.capturedImage = null;
                                 this.pendingCroppedFile = null;
@@ -2047,6 +2175,7 @@
                                 const rawFile = event.target.files[0];
                                 if (!rawFile) return;
 
+                                this.clearPosePreview();
                                 this.isUploadingFile = true;
                                 try {
                                     if (!this.faceApiLoaded) await this.loadModels();
@@ -2305,6 +2434,7 @@
                             },
 
                             open3DModal() {
+                                this.clearPosePreview();
                                 this.current3DStage = 'TUTORIAL';
                                 this.is3DCameraOpen = true;
                                 this.stageHoldProgress = 0;
