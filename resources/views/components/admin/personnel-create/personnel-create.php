@@ -143,12 +143,17 @@ new #[Title('Tambah Personnel')] #[Layout('layouts::admin.app')] class extends C
             'nik' => [
                 'required',
                 'string',
-                'max:16',
+                'digits:16',
                 Rule::unique('personnels', 'nik'),
             ],
             'opd_id' => 'required|exists:opds,id',
             'penugasan_id' => 'required|exists:penugasans,id',
-            'nomor_hp' => 'nullable|string|max:13',
+            'nomor_hp' => [
+                'required',
+                'string',
+                'digits_between:10,13',
+                Rule::unique('personnels', 'nomor_hp'),
+            ],
             'pin' => [
                 'required',
                 'string',

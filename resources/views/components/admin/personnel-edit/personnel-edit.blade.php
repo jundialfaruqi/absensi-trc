@@ -75,7 +75,8 @@
                                 {{-- Nomor HP --}}
                                 <div class="form-control w-full">
                                     <label class="label mb-1 px-1">
-                                        <span class="label-text text-sm font-medium text-base-content">Nomor HP</span>
+                                        <span class="label-text text-sm font-medium text-base-content">Nomor HP <span
+                                                class="text-error">*</span></span>
                                     </label>
                                     <input type="tel" wire:model="nomor_hp" maxlength="13"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"

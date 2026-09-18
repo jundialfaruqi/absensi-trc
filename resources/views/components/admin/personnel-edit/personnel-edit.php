@@ -226,12 +226,17 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'nik' => [
                 'required',
                 'string',
-                'max:16',
+                'digits:16',
                 Rule::unique('personnels', 'nik')->ignore($this->personnelId),
             ],
             'opd_id' => 'required|exists:opds,id',
             'penugasan_id' => 'required|exists:penugasans,id',
-            'nomor_hp' => 'nullable|string|max:13',
+            'nomor_hp' => [
+                'required',
+                'string',
+                'digits_between:10,13',
+                Rule::unique('personnels', 'nomor_hp')->ignore($this->personnelId),
+            ],
             'email' => [
                 'required',
                 'email',
