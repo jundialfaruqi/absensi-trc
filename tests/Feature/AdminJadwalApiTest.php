@@ -90,10 +90,12 @@ class AdminJadwalApiTest extends TestCase
         // Personel OPD 1 (Damkar)
         $personnel1 = Personnel::create([
             'name' => 'Petugas Damkar 1',
+            'nik' => '1234567890123450',
+            'nomor_hp' => '081234567890',
             'foto' => 'personnels/avatar1.jpg',
             'email' => 'damkar1@pekanbaru.go.id',
             'password' => bcrypt('password'),
-            'pin' => '123456',
+            'pin' => bcrypt('111111'),
             'opd_id' => $this->opd1->id,
             'penugasan_id' => $this->penugasan->id,
             'attendance_type' => 'SHIFT',
@@ -102,10 +104,12 @@ class AdminJadwalApiTest extends TestCase
         // Personel OPD 2 (Satpol PP)
         $personnel2 = Personnel::create([
             'name' => 'Petugas Satpol 1',
+            'nik' => '1234567890123453',
+            'nomor_hp' => '081234567893',
             'foto' => 'personnels/avatar2.jpg',
             'email' => 'satpol1@pekanbaru.go.id',
             'password' => bcrypt('password'),
-            'pin' => '654321',
+            'pin' => bcrypt('222222'),
             'opd_id' => $this->opd2->id,
             'penugasan_id' => $this->penugasan->id,
             'attendance_type' => 'SHIFT',
@@ -183,10 +187,12 @@ class AdminJadwalApiTest extends TestCase
 
         $personnel1 = Personnel::create([
             'name' => 'Petugas Damkar 1',
+            'nik' => '1234567890123454',
+            'nomor_hp' => '081234567894',
             'foto' => 'personnels/avatar1.jpg',
             'email' => 'damkar1@pekanbaru.go.id',
             'password' => bcrypt('password'),
-            'pin' => '123456',
+            'pin' => bcrypt('333333'),
             'opd_id' => $this->opd1->id,
             'penugasan_id' => $this->penugasan->id,
             'attendance_type' => 'SHIFT',
@@ -194,10 +200,12 @@ class AdminJadwalApiTest extends TestCase
 
         $personnel2 = Personnel::create([
             'name' => 'Petugas Satpol 1',
+            'nik' => '1234567890123455',
+            'nomor_hp' => '081234567895',
             'foto' => 'personnels/avatar2.jpg',
             'email' => 'satpol1@pekanbaru.go.id',
             'password' => bcrypt('password'),
-            'pin' => '654321',
+            'pin' => bcrypt('444444'),
             'opd_id' => $this->opd2->id,
             'penugasan_id' => $this->penugasan->id,
             'attendance_type' => 'SHIFT',
@@ -257,5 +265,91 @@ class AdminJadwalApiTest extends TestCase
 
         $activities = $response->json('data.activities');
         $this->assertCount(2, $activities);
+    }
+
+    public function test_filter_siang_and_malam_includes_flexible_personnel(): void
+    {
+        $today = Carbon::today()->format('Y-m-d');
+
+        // 1. Personel Fleksibel Siang
+        $personnelSiang = Personnel::create([
+            'name' => 'Budi Siang Flex',
+            'nik' => '1234567890123451',
+            'nomor_hp' => '081234567891',
+            'email' => 'budi.flex@test.com',
+            'password' => bcrypt('password'),
+            'pin' => bcrypt('555555'),
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $this->penugasan->id,
+            'attendance_type' => 'FLEXIBLE',
+        ]);
+        Absensi::create([
+            'personnel_id' => $personnelSiang->id,
+            'tanggal' => $today,
+            'jam_masuk' => $today . ' 08:00:00',
+            'jam_pulang' => $today . ' 14:00:00',
+            'status' => 'HADIR',
+            'status_masuk' => 'HADIR',
+            'status_pulang' => 'HADIR',
+        ]);
+
+        // 2. Personel Fleksibel Malam
+        $personnelMalam = Personnel::create([
+            'name' => 'Siti Malam Flex',
+            'nik' => '1234567890123452',
+            'nomor_hp' => '081234567892',
+            'email' => 'siti.flex@test.com',
+            'password' => bcrypt('password'),
+            'pin' => bcrypt('666666'),
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $this->penugasan->id,
+            'attendance_type' => 'FLEXIBLE',
+        ]);
+        Absensi::create([
+            'personnel_id' => $personnelMalam->id,
+            'tanggal' => $today,
+            'jam_masuk' => $today . ' 19:30:00',
+            'jam_pulang' => $today . ' 23:30:00',
+            'status' => 'HADIR',
+            'status_masuk' => 'HADIR',
+            'status_pulang' => 'HADIR',
+        ]);
+
+        $superAdmin = User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin2@pekanbaru.go.id',
+            'password' => Hash::make('supersecret'),
+        ]);
+        $superAdmin->assignRole($this->superAdminRole);
+
+        $loginResponse = $this->postJson('/api/v1/admin/auth/login', [
+            'email' => 'superadmin2@pekanbaru.go.id',
+            'password' => 'supersecret',
+        ]);
+        $token = $loginResponse->json('data.access_token');
+
+        // Test Filter Siang -> Harus mencakup Budi Siang Flex, bukan Siti Malam Flex
+        $respSiang = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson("/api/v1/admin/jadwal?tanggal=$today&shift=siang");
+        $respSiang->assertStatus(200)
+            ->assertJsonPath('data.stats.total_required', 1);
+        $namesSiang = collect($respSiang->json('data.activities'))->pluck('personnel.name')->all();
+        $this->assertContains('Budi Siang Flex', $namesSiang);
+        $this->assertNotContains('Siti Malam Flex', $namesSiang);
+
+        // Test Filter Malam -> Harus mencakup Siti Malam Flex, bukan Budi Siang Flex
+        $respMalam = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson("/api/v1/admin/jadwal?tanggal=$today&shift=malam");
+        $respMalam->assertStatus(200)
+            ->assertJsonPath('data.stats.total_required', 1);
+        $namesMalam = collect($respMalam->json('data.activities'))->pluck('personnel.name')->all();
+        $this->assertContains('Siti Malam Flex', $namesMalam);
+        $this->assertNotContains('Budi Siang Flex', $namesMalam);
+
+        // Test Filter Flexible -> Harus mencakup keduanya
+        $respFlex = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson("/api/v1/admin/jadwal?tanggal=$today&shift=flexible");
+        $respFlex->assertStatus(200)
+            ->assertJsonPath('data.stats.total_required', 2);
     }
 }
