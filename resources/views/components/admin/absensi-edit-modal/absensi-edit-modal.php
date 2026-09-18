@@ -169,16 +169,32 @@ new class extends Component
             $this->uniqueDeviceIdMasuk = $absensi->unique_device_id_masuk;
             $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
 
-            if ($this->uniqueDeviceIdMasuk) {
-                $device = Device::find($this->uniqueDeviceIdMasuk);
-                $this->isOfficialDeviceMasuk = ! is_null($device);
-                $this->officialDeviceNameMasuk = $device?->name;
-            }
-            if ($this->uniqueDeviceIdPulang) {
-                $device = Device::find($this->uniqueDeviceIdPulang);
-                $this->isOfficialDevicePulang = ! is_null($device);
-                $this->officialDeviceNamePulang = $device?->name;
-            }
+            $resolveDevice = function ($uniqueDeviceId, $personnelId) {
+                if (! empty($uniqueDeviceId)) {
+                    $device = is_numeric($uniqueDeviceId)
+                        ? Device::find($uniqueDeviceId)
+                        : Device::where('unique_device_id', $uniqueDeviceId)->first();
+
+                    if ($device) {
+                        return $device;
+                    }
+                }
+
+                if ($personnelId) {
+                    return Device::where('personnel_id', $personnelId)->where('status', 'active')->latest()->first()
+                        ?? Device::where('personnel_id', $personnelId)->latest()->first();
+                }
+
+                return null;
+            };
+
+            $deviceMasuk = $resolveDevice($this->uniqueDeviceIdMasuk, $absensi->personnel_id);
+            $this->isOfficialDeviceMasuk = ! is_null($deviceMasuk);
+            $this->officialDeviceNameMasuk = $deviceMasuk?->name;
+
+            $devicePulang = $resolveDevice($this->uniqueDeviceIdPulang, $absensi->personnel_id);
+            $this->isOfficialDevicePulang = ! is_null($devicePulang);
+            $this->officialDeviceNamePulang = $devicePulang?->name;
 
             $this->isEdited = ! is_null($absensi->original_status_masuk);
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\Device;
 use App\Models\Jadwal;
 use App\Models\Personnel;
 use App\Models\Setting;
@@ -632,9 +633,12 @@ class AdminAbsensiController extends Controller
             ], 422);
         }
 
+        $registeredDevice = Device::where('personnel_id', $personnel->id)->where('status', 'active')->latest()->first()
+            ?? Device::where('personnel_id', $personnel->id)->latest()->first();
+
         $platform = $request->platform ?: 'android';
-        $deviceName = $request->device_name ?: 'Admin Mobile';
-        $uniqueId = $request->unique_device_id ?: 'admin-' . $user->id;
+        $deviceName = $request->device_name ?: "Admin Supervisor ({$user->name})";
+        $uniqueId = $registeredDevice?->id ?? ($request->unique_device_id ?: 'admin-' . $user->id);
 
         // 3b. Validasi Jendela Waktu Jadwal Shift (Time Window Validation)
         $isDirectCheckOut = false;
