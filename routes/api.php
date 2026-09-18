@@ -77,6 +77,17 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
             ->middleware('throttle:30,1');
     });
 
+    // Manajemen Perangkat Mobile Admin
+    Route::prefix('devices')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'index']);
+        Route::get('/form-options', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'formOptions']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'store']);
+        Route::post('/{id}', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'update']);
+        Route::post('/{id}/toggle-status', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'toggleStatus']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'destroy']);
+    });
+
     // Perekaman Biometrik (192-D MobileFaceNet)
     Route::post('/personnels/{personnel}/face-mobile', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'updateFaceDescriptorMobile'])
         ->middleware('throttle:30,1');
