@@ -63,6 +63,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     public string $descriptor_up = '';
     public bool $has_3d_faces = false;
     public array $existing_3d_poses = [];
+    public array $existing_3d_photos = [];
     public int $total_adaptations = 0;
     public bool $has_adaptive_biometrics = false;
 
@@ -189,10 +190,28 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->pin = $item->pin ?? '';
         $this->face_descriptor = $item->face_descriptor ?? '';
         $this->face_descriptor_mobile = $item->face_descriptor_mobile ?? '';
-        $this->existing_3d_poses = $item->faceEmbeddings()->pluck('pose_type')->toArray();
+        $embeddings = $item->faceEmbeddings()->get()->keyBy('pose_type');
+        $this->existing_3d_poses = $embeddings->keys()->toArray();
         $this->has_3d_faces = count($this->existing_3d_poses) >= 4;
-        $this->total_adaptations = (int) $item->faceEmbeddings()->sum('adaptation_count');
-        $this->has_adaptive_biometrics = $item->faceEmbeddings()->whereNotNull('adaptive_descriptor_mobile')->exists();
+        $this->total_adaptations = (int) $embeddings->sum('adaptation_count');
+        $this->has_adaptive_biometrics = $embeddings->whereNotNull('adaptive_descriptor_mobile')->isNotEmpty();
+
+        $this->existing_3d_photos = [];
+        foreach (['FRONT', 'RIGHT', 'LEFT', 'UP'] as $pose) {
+            if (isset($embeddings[$pose])) {
+                $emb = $embeddings[$pose];
+                $this->existing_3d_photos[$pose] = [
+                    'foto' => $emb->foto ? Storage::url($emb->foto) : null,
+                    'has_128d' => !empty($emb->face_descriptor),
+                    'has_192d' => !empty($emb->face_descriptor_mobile),
+                    'has_adaptive' => !empty($emb->adaptive_descriptor_mobile),
+                    'adaptation_count' => (int) $emb->adaptation_count,
+                ];
+            } else {
+                $this->existing_3d_photos[$pose] = null;
+            }
+        }
+
         $this->kantor_id = (string) $item->kantor_id;
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
         $this->face_recognition = (bool) $item->face_recognition;
@@ -509,6 +528,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->foto_up = null;
         $this->has_3d_faces = false;
         $this->existing_3d_poses = [];
+        $this->existing_3d_photos = [];
         $this->total_adaptations = 0;
         $this->has_adaptive_biometrics = false;
         $this->face_recognition = false;
@@ -533,8 +553,7 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     {
         $item = Personnel::findOrFail($this->personnelId);
         $service->resetToMaster($item);
-        $this->total_adaptations = 0;
-        $this->has_adaptive_biometrics = false;
+        $this->loadPersonnelData($this->personnelId);
 
         $this->dispatch('set-pending-toast', [
             'type' => 'success',

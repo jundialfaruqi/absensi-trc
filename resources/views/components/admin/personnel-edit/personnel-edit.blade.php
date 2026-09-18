@@ -20,7 +20,7 @@
         </div>
 
         @if ($readyToLoad)
-            <form wire:submit="save">
+            <form wire:submit="save" autocomplete="off">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                     {{-- Kiri: Data Profil --}}
@@ -46,13 +46,13 @@
                                 {{-- NIK --}}
                                 <div class="form-control w-full">
                                     <label class="label mb-1 px-1">
-                                        <span class="label-text text-sm font-medium text-base-content">NIK (No Induk
-                                            Kependudukan) <span class="text-error">*</span></span>
+                                        <span class="label-text text-sm font-medium text-base-content">NIK / No.
+                                            Identitas <span class="text-error">*</span></span>
                                     </label>
-                                    <input type="text" wire:model="nik" maxlength="16" pattern="[0-9]*"
-                                        inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                    <input type="text" wire:model="nik" maxlength="16"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                         class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('nik') input-error @enderror"
-                                        placeholder="16 digit NIK personel...">
+                                        placeholder="16 Digit NIK">
                                     @error('nik')
                                         <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                                     @enderror
@@ -66,7 +66,7 @@
                                     </label>
                                     <input type="email" wire:model="email"
                                         class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full transition-all @error('email') input-error @enderror"
-                                        placeholder="Cth: john@example.com">
+                                        placeholder="nama@email.com">
                                     @error('email')
                                         <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                                     @enderror
@@ -75,8 +75,8 @@
                                 {{-- Nomor HP --}}
                                 <div class="form-control w-full">
                                     <label class="label mb-1 px-1">
-                                        <span class="label-text text-sm font-medium text-base-content">Nomor HP <span
-                                                class="text-error">*</span></span>
+                                        <span class="label-text text-sm font-medium text-base-content">Nomor HP /
+                                            WhatsApp <span class="text-error">*</span></span>
                                     </label>
                                     <input type="tel" wire:model="nomor_hp" maxlength="13"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
@@ -94,6 +94,7 @@
                                     </label>
                                     <div class="relative flex items-center">
                                         <input x-bind:type="show ? 'text' : 'password'" wire:model="password"
+                                            autocomplete="new-password"
                                             class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all @error('password') input-error @enderror"
                                             placeholder="(Kosongkan jika tidak diubah)">
                                         <button type="button" @click="show = !show"
@@ -128,6 +129,7 @@
                                     <div class="relative flex items-center">
                                         <input x-bind:type="show ? 'text' : 'password'"
                                             wire:model="password_confirmation"
+                                            autocomplete="new-password"
                                             class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all"
                                             placeholder="(Kosongkan jika tidak diubah)">
                                         <button type="button" @click="show = !show"
@@ -241,6 +243,7 @@
                                     <div class="join w-full">
                                         <div class="relative flex-1">
                                             <input x-bind:type="show ? 'text' : 'password'" wire:model="pin"
+                                                autocomplete="off"
                                                 maxlength="6" pattern="[0-9]*" inputmode="numeric"
                                                 class="input input-bordered focus:input-primary placeholder:text-base-content/60 w-full pr-10 transition-all join-item @error('pin') input-error @enderror"
                                                 placeholder="6 digit PIN otomatis...">
@@ -461,6 +464,108 @@
                                         </div>
                                     </div>
 
+                                    {{-- 4 Grid Biometrik Wajah 3D (Tepat di bawah foto utama) --}}
+                                    @php
+                                        $posesConfig = [
+                                            'FRONT' => ['name' => 'Depan', 'angle' => '0°'],
+                                            'RIGHT' => ['name' => 'Kanan', 'angle' => '+30°'],
+                                            'LEFT' => ['name' => 'Kiri', 'angle' => '-30°'],
+                                            'UP' => ['name' => 'Atas', 'angle' => '+20°'],
+                                        ];
+                                    @endphp
+                                    <div class="w-full max-w-70 mb-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span
+                                                class="text-[11px] font-semibold text-gray-500 dark:text-base-content/70 uppercase tracking-wider">
+                                                Biometrik Wajah 3D
+                                            </span>
+                                            <template
+                                                x-if="poses3D.FRONT && poses3D.RIGHT && poses3D.LEFT && poses3D.UP">
+                                                <span
+                                                    class="badge badge-secondary badge-xs font-semibold text-white">4/4
+                                                    Baru</span>
+                                            </template>
+                                            <template
+                                                x-if="!(poses3D.FRONT && poses3D.RIGHT && poses3D.LEFT && poses3D.UP)">
+                                                @if ($has_3d_faces)
+                                                    <span
+                                                        class="badge badge-success badge-xs font-semibold text-white">4/4
+                                                        Tersimpan</span>
+                                                @else
+                                                    <span
+                                                        class="badge badge-ghost badge-xs text-base-content/60">{{ count($existing_3d_poses) }}/4
+                                                        Poses</span>
+                                                @endif
+                                            </template>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 w-full">
+                                            @foreach ($posesConfig as $key => $pose)
+                                                @php
+                                                    $existing = $existing_3d_photos[$key] ?? null;
+                                                    $hasExisting = !empty($existing['foto']);
+                                                @endphp
+                                                <div
+                                                    class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                                    <div
+                                                        class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                        {{-- Jika sedang ada capture baru di Alpine --}}
+                                                        <template
+                                                            x-if="poses3D.{{ $key }} && poses3D.{{ $key }}.dataUrl">
+                                                            <img :src="poses3D.{{ $key }}.dataUrl"
+                                                                alt="{{ $pose['name'] }}"
+                                                                class="w-full h-full object-cover">
+                                                        </template>
+
+                                                        {{-- Jika belum ada capture baru, tampilkan foto tersimpan atau placeholder --}}
+                                                        <div x-show="!poses3D.{{ $key }} || !poses3D.{{ $key }}.dataUrl"
+                                                            class="w-full h-full flex items-center justify-center">
+                                                            @if ($hasExisting)
+                                                                <img src="{{ $existing['foto'] }}"
+                                                                    alt="{{ $pose['name'] }}"
+                                                                    class="w-full h-full object-cover">
+                                                            @else
+                                                                <div
+                                                                    class="flex flex-col items-center justify-center text-base-content/30 p-2">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="w-6 h-6 mb-1" fill="none"
+                                                                        viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            stroke-width="1.5"
+                                                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                                    </svg>
+                                                                    <span class="text-[9px]">Belum Ada</span>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="w-full flex items-center justify-between px-0.5">
+                                                        <span class="text-[10px] font-bold">{{ $pose['name'] }}
+                                                            <span
+                                                                class="text-[9px] font-normal text-base-content/60">({{ $pose['angle'] }})</span></span>
+
+                                                        {{-- Alpine badge if fresh scan, else Blade badge --}}
+                                                        <template x-if="poses3D.{{ $key }}">
+                                                            <span
+                                                                class="badge badge-secondary badge-xs text-[8px] text-white">Baru</span>
+                                                        </template>
+                                                        <template x-if="!poses3D.{{ $key }}">
+                                                            @if ($hasExisting)
+                                                                <span
+                                                                    class="badge badge-success badge-xs text-[8px] text-white">Tersimpan</span>
+                                                            @else
+                                                                <span
+                                                                    class="badge badge-ghost badge-xs text-[8px] text-base-content/40">Kosong</span>
+                                                            @endif
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
                                     {{-- Tombol Aksi di Card Kanan --}}
                                     <div class="flex flex-col gap-2.5 w-full max-w-70">
                                         {{-- Tombol Buka Kamera (Memicu Modal Pop-up di Tengah Atas) --}}
@@ -517,13 +622,15 @@
 
                                         {{-- Tombol Hapus Data Wajah --}}
                                         @if ($oldFoto || $face_descriptor || !empty($face_descriptor_mobile) || $has_3d_faces || count($existing_3d_poses) > 0)
-                                            <button type="button" 
-                                                wire:click="deleteFaceData"
+                                            <button type="button" wire:click="deleteFaceData"
                                                 wire:confirm="Yakin ingin menghapus seluruh data wajah, foto profil, dan biometrik 3D personel ini?"
                                                 class="btn btn-error btn-outline btn-sm w-full gap-2 font-semibold shadow-sm"
                                                 :disabled="isStartingCamera || isStarting3DCamera">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                    class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                 </svg>
                                                 <span>Hapus Data Wajah</span>
                                             </button>
@@ -542,62 +649,91 @@
 
                                         {{-- Biometric Status List (Dual-Stack 128D / 192D, 3D Multi-Angle & AI Adaptif) --}}
                                         <div class="w-full pt-3 mt-2 border-t border-base-200">
-                                            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2 text-left">
+                                            <div
+                                                class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2 text-left">
                                                 Status Biometrik
                                             </div>
                                             <ul class="space-y-2 text-xs text-left">
                                                 {{-- 1. 3D (4 Sudut) --}}
                                                 <li class="flex items-center gap-2">
                                                     @if ($has_3d_faces)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-4 h-4 text-black dark:text-white shrink-0"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
-                                                        <span class="text-black dark:text-white font-medium">3D (4 Sudut) Ready</span>
+                                                        <span class="text-black dark:text-white font-medium">3D (4
+                                                            Sudut) Ready</span>
                                                     @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
-                                                        <span class="text-black/40 dark:text-white/40">3D (4 Sudut) Belum Lengkap</span>
+                                                        <span class="text-black/40 dark:text-white/40">3D (4 Sudut)
+                                                            Belum Lengkap</span>
                                                     @endif
                                                 </li>
 
                                                 {{-- 2. 128D Web Status --}}
                                                 <li class="flex items-center gap-2">
                                                     @if ($face_descriptor)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-4 h-4 text-black dark:text-white shrink-0"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
-                                                        <span class="text-black dark:text-white font-medium">128D Ready</span>
+                                                        <span class="text-black dark:text-white font-medium">128D
+                                                            Ready</span>
                                                     @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
-                                                        <span class="text-black/40 dark:text-white/40">128D Belum Ada</span>
+                                                        <span class="text-black/40 dark:text-white/40">128D Belum
+                                                            Ada</span>
                                                     @endif
                                                 </li>
 
                                                 {{-- 3. 192D Mobile Status (Real-time synced via Reverb & Alpine) --}}
                                                 <li class="flex items-center gap-2">
                                                     <template x-if="isSyncingMobile">
-                                                        <div class="flex items-center gap-2 text-black dark:text-white">
-                                                            <span class="loading loading-spinner loading-xs text-black dark:text-white"></span>
+                                                        <div
+                                                            class="flex items-center gap-2 text-black dark:text-white">
+                                                            <span
+                                                                class="loading loading-spinner loading-xs text-black dark:text-white"></span>
                                                             <span class="font-medium">Syncing 192D...</span>
                                                         </div>
                                                     </template>
                                                     <template x-if="!isSyncingMobile && has192D">
                                                         <div class="flex items-center gap-2">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="w-4 h-4 text-black dark:text-white shrink-0"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
                                                             </svg>
-                                                            <span class="text-black dark:text-white font-medium">192D Mobile Ready</span>
+                                                            <span class="text-black dark:text-white font-medium">192D
+                                                                Mobile Ready</span>
                                                         </div>
                                                     </template>
                                                     <template x-if="!isSyncingMobile && !has192D">
                                                         <div class="flex items-center gap-2">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                             </svg>
-                                                            <span class="text-black/40 dark:text-white/40">192D Belum Sync</span>
+                                                            <span class="text-black/40 dark:text-white/40">192D Belum
+                                                                Sync</span>
                                                         </div>
                                                     </template>
                                                 </li>
@@ -605,28 +741,38 @@
                                                 {{-- 4. AI Adaptif --}}
                                                 <li class="flex items-center gap-2">
                                                     @if ($has_adaptive_biometrics)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black dark:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-4 h-4 text-black dark:text-white shrink-0"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
-                                                        <span class="text-black dark:text-white font-medium">AI Adaptif ({{ $total_adaptations }}x)</span>
+                                                        <span class="text-black dark:text-white font-medium">AI Adaptif
+                                                            ({{ $total_adaptations }}x)</span>
                                                     @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-4 h-4 text-black/40 dark:text-white/40 shrink-0"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
-                                                        <span class="text-black/40 dark:text-white/40">AI Adaptif (Belum Ada)</span>
+                                                        <span class="text-black/40 dark:text-white/40">AI Adaptif
+                                                            (Belum Ada)</span>
                                                     @endif
                                                 </li>
                                             </ul>
 
                                             {{-- Tombol Reset Full Width btn-error --}}
                                             @if ($has_adaptive_biometrics)
-                                                <button type="button" 
-                                                    wire:click="resetAdaptiveBiometrics"
+                                                <button type="button" wire:click="resetAdaptiveBiometrics"
                                                     wire:confirm="Yakin ingin mereset AI Pembelajaran Mandiri ke Master Anchor asli pendaftaran?"
                                                     class="btn btn-error btn-sm w-full mt-3 text-white font-semibold gap-1.5 shadow-sm"
                                                     title="Kembalikan template adaptif ke Master Anchor asli">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                     </svg>
                                                     Reset ke Master
                                                 </button>
@@ -1264,13 +1410,15 @@
                                                 class="fill-base-content/80" />
                                             <!-- Nose pointing left -->
                                             <path d="M 43 40 L 37 45 L 41 47" class="stroke-base-content/60"
-                                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
                                             <!-- Smile shifted left -->
                                             <path d="M 40 50 Q 44 54 50 51" class="stroke-base-content/70"
                                                 stroke-width="1.8" stroke-linecap="round" />
                                         </svg>
                                     </div>
-                                    <span class="font-bold text-xs text-base-content leading-tight">Menoleh Kiri</span>
+                                    <span class="font-bold text-xs text-base-content leading-tight">Menoleh
+                                        Kiri</span>
                                     <p class="text-[10px] text-base-content/60 mt-0.5 leading-tight">Putar kepala
                                         perlahan ke kiri Anda</p>
                                 </div>
@@ -1599,10 +1747,20 @@
                 <div class="card bg-base-100 md:col-span-1 h-fit shadow-sm border border-base-200">
                     <div class="card-body p-6 flex flex-col items-center">
                         <div class="skeleton h-6 w-40 mb-4"></div>
-                        <div class="skeleton w-full max-w-70 aspect-5/6 rounded-lg mb-4"></div>
-                        <div class="flex gap-2 w-full max-w-70">
-                            <div class="skeleton h-8 flex-1 rounded-lg"></div>
-                            <div class="skeleton h-8 flex-1 rounded-lg"></div>
+                        <div class="skeleton w-full max-w-70 aspect-5/6 rounded-lg mb-3"></div>
+                        <div class="w-full max-w-70 mb-3">
+                            <div class="skeleton h-4 w-32 mb-2"></div>
+                            <div class="grid grid-cols-2 gap-2 w-full">
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 w-full max-w-70 mb-4">
+                            <div class="skeleton h-8 w-full rounded-lg"></div>
+                            <div class="skeleton h-8 w-full rounded-lg"></div>
+                            <div class="skeleton h-8 w-full rounded-lg"></div>
                         </div>
                     </div>
                 </div>
@@ -1743,8 +1901,19 @@
                                 window.addEventListener('face-data-deleted', () => {
                                     this.has192D = false;
                                     this.capturedPhotoPreview = null;
-                                    this.uploadedFaceBox = { found: false, left: '0%', top: '0%', width: '0%', height: '0%' };
-                                    this.poses3D = { FRONT: null, RIGHT: null, LEFT: null, UP: null };
+                                    this.uploadedFaceBox = {
+                                        found: false,
+                                        left: '0%',
+                                        top: '0%',
+                                        width: '0%',
+                                        height: '0%'
+                                    };
+                                    this.poses3D = {
+                                        FRONT: null,
+                                        RIGHT: null,
+                                        LEFT: null,
+                                        UP: null
+                                    };
                                     this.stageHoldProgress = 0;
                                     this.current3DStage = 'TUTORIAL';
                                 });
@@ -2702,7 +2871,7 @@
                                             holdRequiredMs = 800;
                                             const isRollOk = Math.abs(rollAngle) <= 10;
                                             const isYawOk = yawRatio >= 0.70 && yawRatio <=
-                                            1.40;
+                                                1.40;
                                             const isPitchOk = pitchRatio >= 0.42 &&
                                                 pitchRatio <= 0.85;
                                             const areEyesOpen = leftEar >= 0.19 && rightEar >=

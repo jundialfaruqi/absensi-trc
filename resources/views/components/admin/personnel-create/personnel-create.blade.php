@@ -362,6 +362,107 @@
                                         </div>
                                     </div>
 
+                                    {{-- 4 Grid Biometrik Wajah 3D (Tepat di bawah foto utama) --}}
+                                    <div class="w-full max-w-70 mb-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-[11px] font-semibold text-gray-500 dark:text-base-content/70 uppercase tracking-wider">
+                                                Biometrik Wajah 3D
+                                            </span>
+                                            <template x-if="poses3D.FRONT && poses3D.RIGHT && poses3D.LEFT && poses3D.UP">
+                                                <span class="badge badge-success badge-xs font-semibold text-white">4/4 Ready</span>
+                                            </template>
+                                            <template x-if="!(poses3D.FRONT && poses3D.RIGHT && poses3D.LEFT && poses3D.UP)">
+                                                <span class="badge badge-ghost badge-xs text-base-content/60" x-text="`${(poses3D.FRONT?1:0) + (poses3D.RIGHT?1:0) + (poses3D.LEFT?1:0) + (poses3D.UP?1:0)}/4 Poses`"></span>
+                                            </template>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 w-full">
+                                            {{-- 1. Depan (0°) --}}
+                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                                <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    <template x-if="poses3D.FRONT && poses3D.FRONT.dataUrl">
+                                                        <img :src="poses3D.FRONT.dataUrl" alt="Depan (0°)" class="w-full h-full object-cover">
+                                                    </template>
+                                                    <template x-if="!poses3D.FRONT || !poses3D.FRONT.dataUrl">
+                                                        <div class="flex flex-col items-center justify-center text-base-content/30 p-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                            </svg>
+                                                            <span class="text-[9px]">Belum Ada</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="w-full flex items-center justify-between px-0.5">
+                                                    <span class="text-[10px] font-bold">Depan <span class="text-[9px] font-normal text-base-content/60">(0°)</span></span>
+                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.FRONT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.FRONT ? 'Ready' : 'Kosong'"></span>
+                                                </div>
+                                            </div>
+
+                                            {{-- 2. Kanan (+30°) --}}
+                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                                <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    <template x-if="poses3D.RIGHT && poses3D.RIGHT.dataUrl">
+                                                        <img :src="poses3D.RIGHT.dataUrl" alt="Kanan (+30°)" class="w-full h-full object-cover">
+                                                    </template>
+                                                    <template x-if="!poses3D.RIGHT || !poses3D.RIGHT.dataUrl">
+                                                        <div class="flex flex-col items-center justify-center text-base-content/30 p-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                            </svg>
+                                                            <span class="text-[9px]">Belum Ada</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="w-full flex items-center justify-between px-0.5">
+                                                    <span class="text-[10px] font-bold">Kanan <span class="text-[9px] font-normal text-base-content/60">(+30°)</span></span>
+                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.RIGHT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.RIGHT ? 'Ready' : 'Kosong'"></span>
+                                                </div>
+                                            </div>
+
+                                            {{-- 3. Kiri (-30°) --}}
+                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                                <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    <template x-if="poses3D.LEFT && poses3D.LEFT.dataUrl">
+                                                        <img :src="poses3D.LEFT.dataUrl" alt="Kiri (-30°)" class="w-full h-full object-cover">
+                                                    </template>
+                                                    <template x-if="!poses3D.LEFT || !poses3D.LEFT.dataUrl">
+                                                        <div class="flex flex-col items-center justify-center text-base-content/30 p-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                            </svg>
+                                                            <span class="text-[9px]">Belum Ada</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="w-full flex items-center justify-between px-0.5">
+                                                    <span class="text-[10px] font-bold">Kiri <span class="text-[9px] font-normal text-base-content/60">(-30°)</span></span>
+                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.LEFT ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.LEFT ? 'Ready' : 'Kosong'"></span>
+                                                </div>
+                                            </div>
+
+                                            {{-- 4. Atas (+20°) --}}
+                                            <div class="bg-base-200/60 p-2 rounded-xl border border-base-300 flex flex-col items-center text-center">
+                                                <div class="w-full aspect-square rounded-lg overflow-hidden bg-base-300 relative mb-1.5 flex items-center justify-center border border-base-content/5 shadow-inner">
+                                                    <template x-if="poses3D.UP && poses3D.UP.dataUrl">
+                                                        <img :src="poses3D.UP.dataUrl" alt="Atas (+20°)" class="w-full h-full object-cover">
+                                                    </template>
+                                                    <template x-if="!poses3D.UP || !poses3D.UP.dataUrl">
+                                                        <div class="flex flex-col items-center justify-center text-base-content/30 p-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                            </svg>
+                                                            <span class="text-[9px]">Belum Ada</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="w-full flex items-center justify-between px-0.5">
+                                                    <span class="text-[10px] font-bold">Atas <span class="text-[9px] font-normal text-base-content/60">(+20°)</span></span>
+                                                    <span class="badge badge-xs text-[8px]" :class="poses3D.UP ? 'badge-success text-white' : 'badge-ghost text-base-content/40'" x-text="poses3D.UP ? 'Ready' : 'Kosong'"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {{-- Tombol Aksi di Card Kanan --}}
                                     <div class="flex flex-col gap-2.5 w-full max-w-70">
                                         {{-- Tombol Buka Kamera (Memicu Modal Pop-up di Tengah Atas) --}}
@@ -421,7 +522,7 @@
                                         <p
                                             class="text-[10px] text-base-content/50 leading-relaxed italic text-center mt-1">
                                             Direkomendasikan mengambil foto langsung agar AI dapat mendeteksi wajah
-                                            dengan lebih akurat.
+                                             dengan lebih akurat.
                                         </p>
 
                                         @error('foto')
@@ -440,7 +541,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    3D (4 Sudut) Ready
+                                                    3D Ready
                                                 </span>
                                             @endif
 
@@ -802,7 +903,7 @@
                     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                     x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
                     x-transition:leave-end="opacity-0"
-                    class="fixed inset-0 z-[99999] flex items-start justify-center pt-4 sm:pt-8 px-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+                    class="fixed inset-0 z-99999 flex items-start justify-center pt-4 sm:pt-8 px-4 bg-black/85 backdrop-blur-md overflow-y-auto"
                     @keydown.escape.window="stop3DCamera()">
 
                     {{-- Backdrop (Tidak tertutup jika klik luar tanpa sengaja) --}}
@@ -1191,7 +1292,7 @@
                                     Batal
                                 </button>
                                 <button type="button" @click="start3DCamera()"
-                                    class="btn bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold shadow-md shadow-emerald-500/25 border-none gap-2 px-5"
+                                    class="btn bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold shadow-md shadow-emerald-500/25 border-none gap-2 px-5"
                                     :disabled="isStarting3DCamera">
                                     <span x-show="isStarting3DCamera"
                                         class="loading loading-spinner loading-xs"></span>
@@ -1428,10 +1529,20 @@
                 <div class="card bg-base-100 md:col-span-1 h-fit shadow-sm border border-base-200">
                     <div class="card-body p-6 flex flex-col items-center">
                         <div class="skeleton h-6 w-40 mb-4"></div>
-                        <div class="skeleton w-full max-w-70 aspect-5/6 rounded-lg mb-4"></div>
-                        <div class="flex gap-2 w-full max-w-70">
-                            <div class="skeleton h-8 flex-1 rounded-lg"></div>
-                            <div class="skeleton h-8 flex-1 rounded-lg"></div>
+                        <div class="skeleton w-full max-w-70 aspect-5/6 rounded-lg mb-3"></div>
+                        <div class="w-full max-w-70 mb-3">
+                            <div class="skeleton h-4 w-32 mb-2"></div>
+                            <div class="grid grid-cols-2 gap-2 w-full">
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                                <div class="skeleton aspect-square rounded-xl"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 w-full max-w-70 mb-4">
+                            <div class="skeleton h-8 w-full rounded-lg"></div>
+                            <div class="skeleton h-8 w-full rounded-lg"></div>
+                            <div class="skeleton h-8 w-full rounded-lg"></div>
                         </div>
                     </div>
                 </div>
