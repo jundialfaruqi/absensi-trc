@@ -88,6 +88,16 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         Route::delete('/{id}', [\App\Http\Controllers\Api\V1\AdminDeviceController::class, 'destroy']);
     });
 
+    // Manajemen Titik Kantor Admin
+    Route::prefix('kantors')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'index']);
+        Route::get('/form-options', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'formOptions']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'store']);
+        Route::post('/{id}', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'destroy']);
+    });
+
     // Perekaman Biometrik (192-D MobileFaceNet)
     Route::post('/personnels/{personnel}/face-mobile', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'updateFaceDescriptorMobile'])
         ->middleware('throttle:30,1');
