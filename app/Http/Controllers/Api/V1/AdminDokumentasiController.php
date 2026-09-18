@@ -160,8 +160,8 @@ class AdminDokumentasiController extends Controller
                 'shift' => ['required', 'in:siang,malam'],
                 'jumlah_porsi' => ['required', 'integer', 'min:0'],
                 'keterangan' => ['nullable', 'string', 'max:1000'],
-                'foto1' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
-                'foto2' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+                'foto1' => ['required', 'image', 'mimes:jpeg,jpg,webp', 'max:2048'],
+                'foto2' => ['nullable', 'image', 'mimes:jpeg,jpg,webp', 'max:2048'],
             ], [
                 'tanggal.required' => 'Tanggal dokumentasi wajib diisi.',
                 'tanggal.date_format' => 'Format tanggal harus YYYY-MM-DD.',
@@ -172,10 +172,10 @@ class AdminDokumentasiController extends Controller
                 'jumlah_porsi.min' => 'Jumlah porsi tidak boleh kurang dari 0.',
                 'foto1.required' => 'Foto dokumentasi utama wajib diunggah.',
                 'foto1.image' => 'File foto utama harus berupa gambar.',
-                'foto1.mimes' => 'Format foto utama harus JPEG, JPG, PNG, atau WebP.',
+                'foto1.mimes' => 'Format foto utama harus JPEG, JPG, atau WebP.',
                 'foto1.max' => 'Ukuran foto utama maksimal 2MB (2048KB).',
                 'foto2.image' => 'File foto kedua harus berupa gambar.',
-                'foto2.mimes' => 'Format foto kedua harus JPEG, JPG, PNG, atau WebP.',
+                'foto2.mimes' => 'Format foto kedua harus JPEG, JPG, atau WebP.',
                 'foto2.max' => 'Ukuran foto kedua maksimal 2MB (2048KB).',
             ]);
 

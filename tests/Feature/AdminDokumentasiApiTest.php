@@ -215,4 +215,90 @@ class AdminDokumentasiApiTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonPath('success', false);
     }
+
+    public function test_upload_fails_when_file_is_png(): void
+    {
+        $admin = $this->createAdminUser($this->opd1);
+        $today = Carbon::now()->format('Y-m-d');
+
+        $penugasan = Penugasan::create(['name' => 'Regu 1']);
+        $p1 = Personnel::create([
+            'name' => 'Personel Satu',
+            'nik' => '1111111111111111',
+            'email' => 'personel1@trc.com',
+            'nomor_hp' => '081234567890',
+            'pin' => '123456',
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $penugasan->id,
+            'password' => Hash::make('password'),
+        ]);
+        Jadwal::create([
+            'personnel_id' => $p1->id,
+            'shift_id' => $this->shiftPagi->id,
+            'tanggal' => $today,
+        ]);
+        Absensi::create([
+            'personnel_id' => $p1->id,
+            'tanggal' => $today,
+            'status' => 'HADIR',
+            'jam_masuk' => '07:55:00',
+        ]);
+
+        $fotoPng = UploadedFile::fake()->create('makan_siang.png', 50, 'image/png');
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $admin['token'])
+            ->postJson('/api/v1/admin/dokumentasi', [
+                'tanggal' => $today,
+                'shift' => 'siang',
+                'jumlah_porsi' => 1,
+                'foto1' => $fotoPng,
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Format foto utama harus JPEG, JPG, atau WebP.');
+    }
+
+    public function test_upload_succeeds_with_webp_image(): void
+    {
+        $admin = $this->createAdminUser($this->opd1);
+        $today = Carbon::now()->format('Y-m-d');
+
+        $penugasan = Penugasan::create(['name' => 'Regu 1']);
+        $p1 = Personnel::create([
+            'name' => 'Personel Satu',
+            'nik' => '1111111111111111',
+            'email' => 'personel1@trc.com',
+            'nomor_hp' => '081234567890',
+            'pin' => '123456',
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $penugasan->id,
+            'password' => Hash::make('password'),
+        ]);
+        Jadwal::create([
+            'personnel_id' => $p1->id,
+            'shift_id' => $this->shiftPagi->id,
+            'tanggal' => $today,
+        ]);
+        Absensi::create([
+            'personnel_id' => $p1->id,
+            'tanggal' => $today,
+            'status' => 'HADIR',
+            'jam_masuk' => '07:55:00',
+        ]);
+
+        $fotoWebp = UploadedFile::fake()->create('makan_siang.webp', 45, 'image/webp');
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $admin['token'])
+            ->postJson('/api/v1/admin/dokumentasi', [
+                'tanggal' => $today,
+                'shift' => 'siang',
+                'jumlah_porsi' => 1,
+                'foto1' => $fotoWebp,
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true);
+    }
 }
+
