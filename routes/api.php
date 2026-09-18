@@ -98,6 +98,12 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         Route::delete('/{id}', [\App\Http\Controllers\Api\V1\AdminKantorController::class, 'destroy']);
     });
 
+    // Upload Dokumentasi Konsumsi Harian
+    Route::prefix('dokumentasi')->group(function () {
+        Route::get('/check', [\App\Http\Controllers\Api\V1\AdminDokumentasiController::class, 'check']);
+        Route::post('/', [\App\Http\Controllers\Api\V1\AdminDokumentasiController::class, 'store']);
+    });
+
     // Perekaman Biometrik (192-D MobileFaceNet)
     Route::post('/personnels/{personnel}/face-mobile', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'updateFaceDescriptorMobile'])
         ->middleware('throttle:30,1');
