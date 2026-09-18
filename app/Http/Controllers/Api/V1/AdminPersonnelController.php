@@ -780,10 +780,10 @@ class AdminPersonnelController extends Controller
 
         if ($frontDescriptor192) {
             $personnel->face_descriptor_mobile = $frontDescriptor192;
-            if ($frontPhotoPath) {
+            if (!$personnel->foto && $frontPhotoPath) {
                 $personnel->foto = $frontPhotoPath;
             }
-            if ($frontDescriptorWeb) {
+            if (!$personnel->face_descriptor && $frontDescriptorWeb) {
                 $personnel->face_descriptor = $frontDescriptorWeb;
             }
             $personnel->face_recognition = true;

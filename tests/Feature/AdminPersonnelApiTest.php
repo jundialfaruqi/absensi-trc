@@ -421,4 +421,58 @@ class AdminPersonnelApiTest extends TestCase
         $this->assertNotNull($personnel->face_descriptor_mobile);
         $this->assertCount(4, $personnel->faceEmbeddings);
     }
+
+    public function test_enroll_3d_face_poses_does_not_overwrite_existing_2d_photo(): void
+    {
+        $admin = $this->createAdminUser($this->opd1);
+
+        $personnel = Personnel::create([
+            'name' => 'Citra Lestari',
+            'nik' => '3201123456780006',
+            'opd_id' => $this->opd1->id,
+            'penugasan_id' => $this->penugasan1->id,
+            'nomor_hp' => '081288888888',
+            'email' => 'citra@trc.com',
+            'pin' => '444333',
+            'foto' => 'personnel-fotos/existing_2d_photo.jpg',
+            'face_descriptor' => json_encode(array_fill(0, 128, 0.1)),
+            'password' => Hash::make('password'),
+        ]);
+
+        $poses = [
+            [
+                'pose_type' => 'FRONT',
+                'face_descriptor_mobile' => array_fill(0, 192, 0.5),
+            ],
+            [
+                'pose_type' => 'RIGHT',
+                'face_descriptor_mobile' => array_fill(0, 192, 0.6),
+            ],
+            [
+                'pose_type' => 'LEFT',
+                'face_descriptor_mobile' => array_fill(0, 192, 0.7),
+            ],
+            [
+                'pose_type' => 'UP',
+                'face_descriptor_mobile' => array_fill(0, 192, 0.8),
+            ],
+        ];
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $admin['token'])
+            ->postJson("/api/v1/admin/personnels/{$personnel->id}/face-enroll", [
+                'poses' => $poses,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $personnel->refresh();
+        // Master 2D photo and 2D descriptor must NOT be overwritten
+        $this->assertEquals('personnel-fotos/existing_2d_photo.jpg', $personnel->foto);
+        $this->assertEquals(json_encode(array_fill(0, 128, 0.1)), $personnel->face_descriptor);
+        // Mobile 192D biometric and embeddings must be updated properly
+        $this->assertNotNull($personnel->face_descriptor_mobile);
+        $this->assertCount(4, $personnel->faceEmbeddings);
+        $this->assertTrue((bool)$personnel->face_recognition);
+    }
 }

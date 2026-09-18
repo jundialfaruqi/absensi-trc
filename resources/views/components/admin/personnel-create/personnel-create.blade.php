@@ -2771,11 +2771,10 @@
                                     @this.set('descriptor_up', this.poses3D.UP.descriptor);
                                     @this.set('has_3d_faces', true);
 
-                                    // Set foto utama & descriptor utama (FRONT) agar kompatibel 100% dengan sistem lama
-                                    await uploadFile('foto', this.poses3D.FRONT.file);
-                                    @this.set('face_descriptor', this.poses3D.FRONT.descriptor);
-
-                                    this.capturedPhotoPreview = this.poses3D.FRONT.dataUrl;
+                                    // Fallback descriptor 128D jika belum ada dari foto 2D
+                                    if (!@this.get('face_descriptor')) {
+                                        @this.set('face_descriptor', this.poses3D.FRONT.descriptor);
+                                    }
 
                                     this.stop3DCamera();
                                 } catch (err) {
