@@ -405,41 +405,78 @@
 
                             <div class="form-control w-full">
                                 <div class="flex flex-col gap-4 items-center">
-                                    {{-- Preview Foto --}}
-                                    <div
-                                        class="relative w-full max-w-70 aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 transition-all duration-200 shadow-inner flex items-center justify-center group"
-                                        :class="activePreviewPose ? 'border-primary ring-2 ring-primary/40 shadow-lg' : 'border-base-300'">
-
-                                        {{-- Banner Overlay Header saat Preview Pose 3D Aktif --}}
-                                        <div x-show="activePreviewPose" x-transition.opacity.duration.150ms
-                                            class="absolute top-2 left-2 right-2 z-30 flex items-center justify-between bg-black/80 backdrop-blur-md text-white px-2.5 py-1.5 rounded-lg border border-white/20 shadow-md">
+                                    {{-- Mode Perbandingan Side-by-Side (Saat Pose 3D Diklik) --}}
+                                    <div x-show="activePreviewPose" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="w-full max-w-70">
+                                        {{-- Header Bar Perbandingan --}}
+                                        <div class="flex items-center justify-between bg-base-200/80 px-2.5 py-1.5 rounded-xl border border-base-300 mb-2 shadow-xs">
                                             <div class="flex items-center gap-1.5 min-w-0">
-                                                <span class="text-[10px] font-bold tracking-wide truncate">
-                                                    Pose 3D: <span class="text-primary font-extrabold" x-text="previewPoseLabel"></span>
-                                                </span>
-                                            </div>
-                                            <button type="button" @click.stop="clearPosePreview()"
-                                                title="Kembali ke Foto Utama"
-                                                class="btn btn-circle btn-ghost btn-xs text-white/80 hover:text-white hover:bg-white/20 h-5 w-5 min-h-0">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                                 </svg>
+                                                <span class="text-[10px] font-bold tracking-wide truncate">Perbandingan Foto</span>
+                                            </div>
+                                            <button type="button" @click="clearPosePreview()"
+                                                title="Tutup Perbandingan"
+                                                class="btn btn-ghost btn-xs text-base-content/70 hover:text-error hover:bg-error/10 gap-1 px-1.5 h-5 min-h-0 text-[9px] font-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                <span>Tutup</span>
                                             </button>
                                         </div>
 
-                                        {{-- 1. Preview Foto Pose 3D yang sedang di-klik --}}
-                                        <template x-if="activePreviewPose && previewPosePhoto">
-                                            <img :src="previewPosePhoto" :alt="previewPoseLabel" class="w-full h-full object-cover transition-all duration-200">
-                                        </template>
+                                        {{-- Grid 2 Kolom Side-by-Side --}}
+                                        <div class="grid grid-cols-2 gap-2 w-full">
+                                            {{-- Sisi Kiri: Foto Acuan 2D --}}
+                                            <div class="flex flex-col items-center">
+                                                <div class="relative w-full aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 border-base-300 shadow-inner flex items-center justify-center">
+                                                    {{-- Preview Client-Side Instan --}}
+                                                    <template x-if="capturedPhotoPreview">
+                                                        <img :src="capturedPhotoPreview" alt="Foto Acuan 2D" class="w-full h-full object-cover">
+                                                    </template>
 
-                                        {{-- 2. Preview Client-Side Instan --}}
-                                        <template x-if="!activePreviewPose && capturedPhotoPreview">
+                                                    {{-- Preview Server Livewire / Database --}}
+                                                    <div x-show="!capturedPhotoPreview" class="w-full h-full flex items-center justify-center">
+                                                        @if ($foto && !$errors->has('foto'))
+                                                            <img src="{{ $foto->temporaryUrl() }}" alt="Foto Acuan 2D" class="w-full h-full object-cover">
+                                                        @elseif ($oldFoto)
+                                                            <img src="{{ Storage::url($oldFoto) }}" alt="Foto Acuan 2D" class="w-full h-full object-cover">
+                                                        @else
+                                                            <div class="flex flex-col items-center justify-center gap-1 text-base-content/40 p-2 text-center">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                                </svg>
+                                                                <span class="text-[8px]">Belum Ada</span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <span class="text-[9px] font-bold text-base-content/70 mt-1 uppercase tracking-wider text-center">Foto Acuan 2D</span>
+                                            </div>
+
+                                            {{-- Sisi Kanan: Foto Pose 3D yang Diklik --}}
+                                            <div class="flex flex-col items-center">
+                                                <div class="relative w-full aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 border-primary ring-2 ring-primary/20 shadow-md flex items-center justify-center">
+                                                    <template x-if="previewPosePhoto">
+                                                        <img :src="previewPosePhoto" :alt="previewPoseLabel" class="w-full h-full object-cover">
+                                                    </template>
+                                                </div>
+                                                <span class="text-[9px] font-bold text-primary mt-1 uppercase tracking-wider truncate max-w-full text-center" x-text="previewPoseLabel"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Preview Foto Tunggal (Mode Normal saat tidak ada perbandingan 3D) --}}
+                                    <div x-show="!activePreviewPose"
+                                        class="relative w-full max-w-70 aspect-5/6 bg-base-200 rounded-xl overflow-hidden border-2 border-base-300 shadow-inner flex items-center justify-center">
+                                        {{-- Preview Client-Side Instan --}}
+                                        <template x-if="capturedPhotoPreview">
                                             <img :src="capturedPhotoPreview" alt="Preview Foto"
                                                 class="w-full h-full object-cover">
                                         </template>
 
-                                        {{-- 3. Preview Server Livewire / Database --}}
-                                        <div x-show="!activePreviewPose && !capturedPhotoPreview"
+                                        {{-- Preview Server Livewire / Database --}}
+                                        <div x-show="!capturedPhotoPreview"
                                             class="w-full h-full flex items-center justify-center">
                                             @if ($foto && !$errors->has('foto'))
                                                 <img x-ref="previewImage" src="{{ $foto->temporaryUrl() }}"
@@ -464,7 +501,7 @@
                                         </div>
 
                                         {{-- Overlay Bounding Box untuk upload file --}}
-                                        <div x-show="!isCameraOpen && uploadedFaceBox.found && !activePreviewPose"
+                                        <div x-show="!isCameraOpen && uploadedFaceBox.found"
                                             class="absolute pointer-events-none transition-all duration-150 ease-out border-2 rounded-lg z-20 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.45)]"
                                             :style="`left: ${uploadedFaceBox.left}; top: ${uploadedFaceBox.top}; width: ${uploadedFaceBox.width}; height: ${uploadedFaceBox.height};`">
                                             <span
