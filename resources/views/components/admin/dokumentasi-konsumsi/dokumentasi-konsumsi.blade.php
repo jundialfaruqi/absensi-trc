@@ -696,22 +696,38 @@
                                             $isToday = \Carbon\Carbon::parse($date)->isToday();
 
                                             $cellType = 'none';
-                                            if ($isHadir && $jadwal && $jadwal->shift) {
-                                                $konsumsis = $jadwal->shift->konsumsis
-                                                    ->pluck('nama')
-                                                    ->map(fn($k) => strtolower(trim($k)))
-                                                    ->toArray();
-                                                $hasSiang = in_array('siang', $konsumsis);
-                                                $hasMalam = in_array('malam', $konsumsis);
+                                            if ($isHadir) {
+                                                if ($personnel->attendance_type === 'FLEXIBLE') {
+                                                    $flexibleKons = $this->resolveFlexibleKonsumsis($abs);
+                                                    $hasSiang = in_array('siang', $flexibleKons);
+                                                    $hasMalam = in_array('malam', $flexibleKons);
 
-                                                if ($hasSiang && $hasMalam) {
-                                                    $cellType = 'both';
-                                                } elseif ($hasSiang) {
-                                                    $cellType = 'siang';
-                                                } elseif ($hasMalam) {
-                                                    $cellType = 'malam';
-                                                } else {
-                                                    $cellType = 'hadir-no-meal';
+                                                    if ($hasSiang && $hasMalam) {
+                                                        $cellType = 'both';
+                                                    } elseif ($hasSiang) {
+                                                        $cellType = 'siang';
+                                                    } elseif ($hasMalam) {
+                                                        $cellType = 'malam';
+                                                    } else {
+                                                        $cellType = 'hadir-no-meal';
+                                                    }
+                                                } elseif ($jadwal && $jadwal->shift) {
+                                                    $konsumsis = $jadwal->shift->konsumsis
+                                                        ->pluck('nama')
+                                                        ->map(fn($k) => strtolower(trim($k)))
+                                                        ->toArray();
+                                                    $hasSiang = in_array('siang', $konsumsis);
+                                                    $hasMalam = in_array('malam', $konsumsis);
+
+                                                    if ($hasSiang && $hasMalam) {
+                                                        $cellType = 'both';
+                                                    } elseif ($hasSiang) {
+                                                        $cellType = 'siang';
+                                                    } elseif ($hasMalam) {
+                                                        $cellType = 'malam';
+                                                    } else {
+                                                        $cellType = 'hadir-no-meal';
+                                                    }
                                                 }
                                             } elseif (
                                                 $abs &&

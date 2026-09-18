@@ -4,6 +4,7 @@ use App\Models\Absensi;
 use App\Models\ApkRelease;
 use App\Models\LeaveRequest;
 use App\Models\Personnel;
+use App\Models\Setting;
 use App\Models\Shift;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -97,7 +98,40 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
                 } elseif ($this->filterShift === 'flexible') {
                     $q->whereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'));
                 } else {
-                    $q->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $this->filterShift));
+                    $filter = strtolower($this->filterShift);
+                    $siangMulai = Setting::get('konsumsi_siang_mulai', '06:00');
+                    $siangSelesai = Setting::get('konsumsi_siang_selesai', '15:59');
+                    $malamMulai = Setting::get('konsumsi_malam_mulai', '16:00');
+                    $malamSelesai = Setting::get('konsumsi_malam_selesai', '05:59');
+
+                    $q->where(function ($sub) use ($filter, $siangMulai, $siangSelesai, $malamMulai, $malamSelesai) {
+                        // 1. Shift Terjadwal dengan konsumsi terkait
+                        $sub->whereHas('jadwal.shift.konsumsis', fn ($sq) => $sq->where('nama', $filter));
+
+                        // 2. Personel Fleksibel yang hadir pada rentang jam terkait
+                        $sub->orWhere(function ($flexQ) use ($filter, $siangMulai, $siangSelesai, $malamMulai, $malamSelesai) {
+                            $flexQ->whereHas('personnel', fn ($pq) => $pq->where('attendance_type', 'FLEXIBLE'))
+                                ->where(function ($timeQ) use ($filter, $siangMulai, $siangSelesai, $malamMulai, $malamSelesai) {
+                                    if ($filter === 'siang') {
+                                        $timeQ->where(function ($inQ) use ($siangMulai, $siangSelesai) {
+                                            $inQ->whereTime('jam_masuk', '>=', $siangMulai)
+                                                ->whereTime('jam_masuk', '<=', $siangSelesai);
+                                        })->orWhere(function ($outQ) use ($siangSelesai) {
+                                            $outQ->whereTime('jam_pulang', '>=', '11:30')
+                                                ->whereTime('jam_pulang', '<=', $siangSelesai);
+                                        });
+                                    } elseif ($filter === 'malam') {
+                                        $timeQ->where(function ($inQ) use ($malamMulai, $malamSelesai) {
+                                            $inQ->whereTime('jam_masuk', '>=', $malamMulai)
+                                                ->orWhereTime('jam_masuk', '<=', $malamSelesai);
+                                        })->orWhere(function ($outQ) use ($malamSelesai) {
+                                            $outQ->whereTime('jam_pulang', '>=', '19:00')
+                                                ->orWhereTime('jam_pulang', '<=', $malamSelesai);
+                                        });
+                                    }
+                                });
+                        });
+                    });
                 }
             });
 

@@ -229,6 +229,87 @@
             </div>
         </div>
 
+        {{-- Jadwal Konsumsi Personel Fleksibel --}}
+        <div class="card bg-base-100 border border-base-200 overflow-hidden">
+            <div class="card-body p-6">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-0 rounded-full text-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M19 3v12h-5c-.023 -3.681 .184 -7.406 5 -12zm0 12v6h-1v-3m-10 -14v17m-3 -17v3a3 3 0 1 0 6 0v-3" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-black uppercase">Jadwal Konsumsi Personel Fleksibel</h2>
+                        <p class="text-[10px] text-base-content/50 uppercase font-medium mt-0.5">
+                            Batas jam kehadiran riil untuk penentuan porsi makan siang & malam
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Sesi Siang --}}
+                    <div class="p-4 rounded-xl bg-base-200/50 border border-base-200 space-y-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="badge badge-warning badge-xs"></div>
+                            <span class="text-[10px] font-black uppercase tracking-widest">Sesi Makan Siang (S)</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control w-full">
+                                <label class="label pt-0"><span
+                                        class="text-[9px] font-bold uppercase opacity-50">Mulai</span></label>
+                                <input type="time" wire:model="konsumsiSiangMulai"
+                                    class="input input-sm input-bordered focus:input-warning font-bold text-xs" />
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label pt-0"><span
+                                        class="text-[9px] font-bold uppercase opacity-50">Selesai</span></label>
+                                <input type="time" wire:model="konsumsiSiangSelesai"
+                                    class="input input-sm input-bordered focus:input-warning font-bold text-xs" />
+                            </div>
+                        </div>
+                        <p class="text-[9px] text-base-content/40 font-medium uppercase leading-relaxed italic">
+                            * Personel fleksibel yang hadir di rentang jam ini otomatis mendapatkan porsi Makan Siang.
+                        </p>
+                    </div>
+
+                    {{-- Sesi Malam --}}
+                    <div class="p-4 rounded-xl bg-base-200/50 border border-base-200 space-y-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="badge bg-neutral-900 badge-xs"></div>
+                            <span class="text-[10px] font-black uppercase tracking-widest">Sesi Makan Malam (M)</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control w-full">
+                                <label class="label pt-0"><span
+                                        class="text-[9px] font-bold uppercase opacity-50">Mulai</span></label>
+                                <input type="time" wire:model="konsumsiMalamMulai"
+                                    class="input input-sm input-bordered focus:input-neutral font-bold text-xs" />
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label pt-0"><span
+                                        class="text-[9px] font-bold uppercase opacity-50">Selesai</span></label>
+                                <input type="time" wire:model="konsumsiMalamSelesai"
+                                    class="input input-sm input-bordered focus:input-neutral font-bold text-xs" />
+                            </div>
+                        </div>
+                        <p class="text-[9px] text-base-content/40 font-medium uppercase leading-relaxed italic">
+                            * Personel fleksibel yang hadir di rentang jam ini otomatis mendapatkan porsi Makan Malam.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-actions justify-end mt-auto pt-6 border-t border-base-200">
+                    <button wire:click="saveKonsumsiSettings" wire:loading.attr="disabled"
+                        class="btn btn-warning text-warning-content font-bold">
+                        <span wire:loading.remove wire:target="saveKonsumsiSettings">Simpan Pengaturan Konsumsi</span>
+                        <span wire:loading wire:target="saveKonsumsiSettings">Menyimpan...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         {{-- Download App Card --}}
         {{-- Download App Card (PREVIEW) --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">

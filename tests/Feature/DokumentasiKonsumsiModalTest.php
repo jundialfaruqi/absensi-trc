@@ -90,6 +90,7 @@ test('monthlySummary synchronizes totals by prioritizing dokumentasi_konsumsi an
 
     $personnel = \App\Models\Personnel::create([
         'name' => 'Budi Santoso',
+        'nomor_hp' => '081234567890',
         'opd_id' => $opd->id,
         'penugasan_id' => 1,
         'foto' => 'budi.jpg',
@@ -223,6 +224,7 @@ test('modal input jumlah renders dynamic max and onInputJumlah with quota argume
 
     $personnel = \App\Models\Personnel::create([
         'name' => 'Doni',
+        'nomor_hp' => '081234567891',
         'opd_id' => $opd->id,
         'penugasan_id' => 1,
         'foto' => 'doni.jpg',
@@ -276,6 +278,7 @@ test('grid cells display 0 in the center and auto calculation in bottom-left cor
 
     $personnel = \App\Models\Personnel::create([
         'name' => 'Budi Santoso',
+        'nomor_hp' => '081234567892',
         'opd_id' => $opd->id,
         'penugasan_id' => 1,
         'attendance_type' => 'SCHEDULED',
@@ -344,6 +347,7 @@ test('personnel with TELAT status (status or status_masuk) is counted in konsums
 
     $personnel = \App\Models\Personnel::create([
         'name' => 'Bambang Tri',
+        'nomor_hp' => '081234567893',
         'opd_id' => $opd->id,
         'penugasan_id' => 1,
         'attendance_type' => 'SCHEDULED',
@@ -410,6 +414,7 @@ test('personnel with status IZIN (even with jam_masuk) is NOT counted in konsums
 
     $personnel = \App\Models\Personnel::create([
         'name' => 'Asep Saepul',
+        'nomor_hp' => '081234567894',
         'opd_id' => $opd->id,
         'penugasan_id' => 1,
         'attendance_type' => 'SCHEDULED',
@@ -475,6 +480,7 @@ test('personnel with direct checkout (status HADIR, status_masuk ALPA, jam_pulan
 
     $personnel = \App\Models\Personnel::create([
         'name' => 'Benny Direct',
+        'nomor_hp' => '081234567895',
         'opd_id' => $opd->id,
         'penugasan_id' => 1,
         'attendance_type' => 'SCHEDULED',
@@ -612,4 +618,111 @@ test('uploading all photos with sesi set to siang in create modal saves both sia
     \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_siang_2);
     \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_malam);
     \Illuminate\Support\Facades\Storage::disk('public')->assertExists($record->foto_malam_2);
+});
+
+test('personnel with FLEXIBLE attendance type is automatically counted dynamically based on real attendance hours', function () {
+    $opd = Opd::create(['name' => 'Dishub']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    // Personel 1: Masuk Siang (08:15 - 15:30) -> Siang saja
+    $personnelSiang = \App\Models\Personnel::create([
+        'name' => 'Deni Siang',
+        'nomor_hp' => '081234567801',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'FLEXIBLE',
+        'foto' => 'deni1.jpg',
+        'email' => 'deni1@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123451',
+    ]);
+
+    // Personel 2: Masuk Malam (19:30 - 02:00) -> Malam saja
+    $personnelMalam = \App\Models\Personnel::create([
+        'name' => 'Deni Malam',
+        'nomor_hp' => '081234567802',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'FLEXIBLE',
+        'foto' => 'deni2.jpg',
+        'email' => 'deni2@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123452',
+    ]);
+
+    // Personel 3: Masuk Siang Pulang Malam (08:00 - 21:30, 13.5 jam) -> Siang & Malam (S+M)
+    $personnelBoth = \App\Models\Personnel::create([
+        'name' => 'Deni Lembur',
+        'nomor_hp' => '081234567803',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'FLEXIBLE',
+        'foto' => 'deni3.jpg',
+        'email' => 'deni3@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123453',
+    ]);
+
+    $date = '2026-09-12';
+
+    // Absensi Siang
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnelSiang->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '08:15:00',
+        'jam_pulang' => '15:30:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Absensi Malam
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnelMalam->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '19:30:00',
+        'jam_pulang' => '02:00:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Absensi Lembur (Siang & Malam)
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $personnelBoth->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '08:00:00',
+        'jam_pulang' => '21:30:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $test = Livewire::actingAs($user)
+        ->test('admin::dokumentasi-konsumsi', [
+            'startDate' => '2026-09-12',
+            'endDate' => '2026-09-12',
+            'selectedOpd' => (string) $opd->id,
+            'readyToLoad' => true,
+        ]);
+
+    $summary = $test->get('monthlySummary');
+    // Siang: Deni Siang (1) + Deni Lembur (1) = 2
+    expect($summary['daily']['2026-09-12']['auto_siang'])->toBe(2);
+    // Malam: Deni Malam (1) + Deni Lembur (1) = 2
+    expect($summary['daily']['2026-09-12']['auto_malam'])->toBe(2);
+    expect($summary['grandTotalAuto'])->toBe(4);
+
+    $calculated = $test->instance()->getCalculatedKonsumsi($date);
+    expect($calculated['siang'])->toBe(2);
+    expect($calculated['malam'])->toBe(2);
+
+    // Assert nama personel muncul di view
+    $test->assertSee('Deni Siang')
+        ->assertSee('Deni Malam')
+        ->assertSee('Deni Lembur');
 });

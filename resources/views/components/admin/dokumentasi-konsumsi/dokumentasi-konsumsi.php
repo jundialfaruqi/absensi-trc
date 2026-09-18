@@ -10,6 +10,7 @@ use Livewire\WithFileUploads;
 use App\Models\Personnel;
 use App\Models\Opd;
 use App\Models\Shift;
+use App\Models\Setting;
 use App\Models\DokumentasiKonsumsi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -119,6 +120,74 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         return $dates;
     }
 
+    public function resolveFlexibleKonsumsis($abs): array
+    {
+        if (!$abs) {
+            return ['siang'];
+        }
+
+        $siangMulai = Setting::get('konsumsi_siang_mulai', '06:00');
+        $siangSelesai = Setting::get('konsumsi_siang_selesai', '15:59');
+        $malamMulai = Setting::get('konsumsi_malam_mulai', '16:00');
+        $malamSelesai = Setting::get('konsumsi_malam_selesai', '05:59');
+
+        $jamMasuk = $abs->jam_masuk ? Carbon::parse($abs->jam_masuk) : null;
+        $jamPulang = $abs->jam_pulang ? Carbon::parse($abs->jam_pulang) : null;
+
+        if (!$jamMasuk && !$jamPulang) {
+            return ['siang'];
+        }
+
+        $masukTime = $jamMasuk ? $jamMasuk->format('H:i') : null;
+        $pulangTime = $jamPulang ? $jamPulang->format('H:i') : null;
+
+        $hasSiang = false;
+        $hasMalam = false;
+
+        // 1. Deteksi sesi masuk
+        if ($masukTime) {
+            if ($masukTime >= $siangMulai && $masukTime <= $siangSelesai) {
+                $hasSiang = true;
+            } elseif ($masukTime >= $malamMulai || $masukTime <= $malamSelesai) {
+                $hasMalam = true;
+            }
+        }
+
+        // 2. Deteksi sesi pulang (bekerja melewati jam makan)
+        if ($pulangTime) {
+            if ($pulangTime >= '11:30' && $pulangTime <= $siangSelesai) {
+                $hasSiang = true;
+            }
+            if ($pulangTime >= '19:00' || $pulangTime <= $malamSelesai) {
+                $hasMalam = true;
+            }
+        }
+
+        // 3. Deteksi durasi dinas/lembur panjang (>= 9 jam melintasi siang & malam)
+        if ($jamMasuk && $jamPulang) {
+            $diffHours = $jamMasuk->diffInHours($jamPulang);
+            if ($diffHours >= 9) {
+                $hasSiang = true;
+                $hasMalam = true;
+            }
+        }
+
+        // Fallback jika hadir tapi belum match
+        if (!$hasSiang && !$hasMalam) {
+            $hasSiang = true;
+        }
+
+        $result = [];
+        if ($hasSiang) {
+            $result[] = 'siang';
+        }
+        if ($hasMalam) {
+            $result[] = 'malam';
+        }
+
+        return $result;
+    }
+
     #[Computed]
     public function monthlySummary(): array
     {
@@ -170,6 +239,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         foreach ($personnels as $personnel) {
             $absensiMap = $personnel->absensis->keyBy(fn ($a) => $a->tanggal->format('Y-m-d'));
             $jadwalMap = $personnel->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
+            $isFlexibleType = ($personnel->attendance_type === 'FLEXIBLE');
 
             foreach ($dates as $date) {
                 $abs = $absensiMap->get($date);
@@ -186,14 +256,24 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                         !empty($abs->jam_pulang)
                     );
 
-                if ($isHadir && $jadwal && $jadwal->shift) {
-                    $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
+                if ($isHadir) {
+                    if ($isFlexibleType) {
+                        $flexibleKons = $this->resolveFlexibleKonsumsis($abs);
+                        if (in_array('siang', $flexibleKons)) {
+                            $daily[$date]['auto_siang']++;
+                        }
+                        if (in_array('malam', $flexibleKons)) {
+                            $daily[$date]['auto_malam']++;
+                        }
+                    } elseif ($jadwal && $jadwal->shift) {
+                        $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
 
-                    if (in_array('siang', $konsumsis)) {
-                        $daily[$date]['auto_siang']++;
-                    }
-                    if (in_array('malam', $konsumsis)) {
-                        $daily[$date]['auto_malam']++;
+                        if (in_array('siang', $konsumsis)) {
+                            $daily[$date]['auto_siang']++;
+                        }
+                        if (in_array('malam', $konsumsis)) {
+                            $daily[$date]['auto_malam']++;
+                        }
                     }
                 }
             }
@@ -335,6 +415,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         $paginator->getCollection()->transform(function ($personnel) use ($dates) {
             $personnel->absensi_map = $personnel->absensis->keyBy(fn ($a) => $a->tanggal->format('Y-m-d'));
             $personnel->jadwal_map = $personnel->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
+            $isFlexibleType = ($personnel->attendance_type === 'FLEXIBLE');
 
             $totalSiang = 0;
             $totalMalam = 0;
@@ -354,13 +435,23 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                         !empty($abs->jam_pulang)
                     );
 
-                if ($isHadir && $jadwal && $jadwal->shift) {
-                    $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
-                    if (in_array('siang', $konsumsis)) {
-                        $totalSiang++;
-                    }
-                    if (in_array('malam', $konsumsis)) {
-                        $totalMalam++;
+                if ($isHadir) {
+                    if ($isFlexibleType) {
+                        $flexibleKons = $this->resolveFlexibleKonsumsis($abs);
+                        if (in_array('siang', $flexibleKons)) {
+                            $totalSiang++;
+                        }
+                        if (in_array('malam', $flexibleKons)) {
+                            $totalMalam++;
+                        }
+                    } elseif ($jadwal && $jadwal->shift) {
+                        $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
+                        if (in_array('siang', $konsumsis)) {
+                            $totalSiang++;
+                        }
+                        if (in_array('malam', $konsumsis)) {
+                            $totalMalam++;
+                        }
                     }
                 }
             }
@@ -570,6 +661,7 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
         foreach ($personnels as $personnel) {
             $abs = $personnel->absensis->first();
             $jadwal = $personnel->jadwals->first();
+            $isFlexibleType = ($personnel->attendance_type === 'FLEXIBLE');
 
             $isHadir = $abs &&
                 !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
@@ -582,13 +674,23 @@ new #[Title('Dokumentasi Konsumsi')] #[Layout('layouts::admin.app')] class exten
                     !empty($abs->jam_pulang)
                 );
 
-            if ($isHadir && $jadwal && $jadwal->shift) {
-                $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
-                if (in_array('siang', $konsumsis)) {
-                    $siang++;
-                }
-                if (in_array('malam', $konsumsis)) {
-                    $malam++;
+            if ($isHadir) {
+                if ($isFlexibleType) {
+                    $flexibleKons = $this->resolveFlexibleKonsumsis($abs);
+                    if (in_array('siang', $flexibleKons)) {
+                        $siang++;
+                    }
+                    if (in_array('malam', $flexibleKons)) {
+                        $malam++;
+                    }
+                } elseif ($jadwal && $jadwal->shift) {
+                    $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
+                    if (in_array('siang', $konsumsis)) {
+                        $siang++;
+                    }
+                    if (in_array('malam', $konsumsis)) {
+                        $malam++;
+                    }
                 }
             }
         }

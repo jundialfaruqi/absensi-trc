@@ -17,6 +17,12 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     public $pinMaxAttempts;
     public $pinLock5;
     public $pinLock10;
+
+    // Konsumsi Flexible Settings
+    public $konsumsiSiangMulai;
+    public $konsumsiSiangSelesai;
+    public $konsumsiMalamMulai;
+    public $konsumsiMalamSelesai;
     
     // APK Information Settings
     public $apkVersion;
@@ -63,6 +69,11 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         $this->pinLock5 = Setting::get('pin_lock_duration_5', 5);
         $this->pinLock10 = Setting::get('pin_lock_duration_10', 15);
         
+        $this->konsumsiSiangMulai = Setting::get('konsumsi_siang_mulai', '06:00');
+        $this->konsumsiSiangSelesai = Setting::get('konsumsi_siang_selesai', '15:59');
+        $this->konsumsiMalamMulai = Setting::get('konsumsi_malam_mulai', '16:00');
+        $this->konsumsiMalamSelesai = Setting::get('konsumsi_malam_selesai', '05:59');
+
         $this->loadApkSettings();
     }
 
@@ -136,6 +147,23 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         Setting::set('pin_lock_duration_10', $this->pinLock10, 'integer');
 
         $this->dispatch('toast', type: 'success', message: 'Pengaturan keamanan PIN berhasil disimpan.');
+    }
+
+    public function saveKonsumsiSettings()
+    {
+        $this->validate([
+            'konsumsiSiangMulai' => 'required',
+            'konsumsiSiangSelesai' => 'required',
+            'konsumsiMalamMulai' => 'required',
+            'konsumsiMalamSelesai' => 'required',
+        ]);
+
+        Setting::set('konsumsi_siang_mulai', $this->konsumsiSiangMulai, 'string');
+        Setting::set('konsumsi_siang_selesai', $this->konsumsiSiangSelesai, 'string');
+        Setting::set('konsumsi_malam_mulai', $this->konsumsiMalamMulai, 'string');
+        Setting::set('konsumsi_malam_selesai', $this->konsumsiMalamSelesai, 'string');
+
+        $this->dispatch('toast', type: 'success', message: 'Pengaturan rentang jam konsumsi personel fleksibel berhasil disimpan.');
     }
 
     public function saveApkSettings()
