@@ -64,6 +64,19 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         Route::post('/store', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'store']);
     });
 
+    // Manajemen Personel Admin
+    Route::prefix('personnels')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'index']);
+        Route::get('/form-options', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'formOptions']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'store']);
+        Route::post('/{id}', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'destroy']);
+        Route::delete('/{id}/face-data', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'deleteFaceData']);
+        Route::post('/{id}/face-enroll', [\App\Http\Controllers\Api\V1\AdminPersonnelController::class, 'enrollFace'])
+            ->middleware('throttle:30,1');
+    });
+
     // Perekaman Biometrik (192-D MobileFaceNet)
     Route::post('/personnels/{personnel}/face-mobile', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'updateFaceDescriptorMobile'])
         ->middleware('throttle:30,1');
