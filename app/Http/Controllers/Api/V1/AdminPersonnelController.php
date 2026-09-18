@@ -274,10 +274,10 @@ class AdminPersonnelController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'nik' => 'required|string|max:16|unique:personnels,nik',
+            'nik' => 'required|string|digits:16|unique:personnels,nik',
             'opd_id' => 'required|exists:opds,id',
             'penugasan_id' => 'required|exists:penugasans,id',
-            'nomor_hp' => 'nullable|string|max:15',
+            'nomor_hp' => 'nullable|string|digits_between:10,13',
             'pin' => 'nullable|string|size:6|unique:personnels,pin',
             'kantor_id' => 'nullable|exists:kantors,id',
             'attendance_type' => 'required|in:SCHEDULED,FLEXIBLE',
@@ -287,7 +287,9 @@ class AdminPersonnelController extends Controller
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'nik.required' => 'NIK / NIP wajib diisi.',
+            'nik.digits' => 'NIK / NIP harus 16 digit angka.',
             'nik.unique' => 'NIK / NIP sudah terdaftar di sistem.',
+            'nomor_hp.digits_between' => 'Nomor WhatsApp / HP harus berupa 10-13 digit angka.',
             'opd_id.required' => 'OPD wajib dipilih.',
             'penugasan_id.required' => 'Penugasan wajib dipilih.',
             'pin.unique' => 'PIN sudah digunakan personel lain.',
@@ -421,12 +423,12 @@ class AdminPersonnelController extends Controller
             'nik' => [
                 'required',
                 'string',
-                'max:16',
+                'digits:16',
                 Rule::unique('personnels', 'nik')->ignore($id),
             ],
             'opd_id' => 'required|exists:opds,id',
             'penugasan_id' => 'required|exists:penugasans,id',
-            'nomor_hp' => 'nullable|string|max:15',
+            'nomor_hp' => 'nullable|string|digits_between:10,13',
             'email' => [
                 'required',
                 'email',
@@ -448,7 +450,9 @@ class AdminPersonnelController extends Controller
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'nik.required' => 'NIK / NIP wajib diisi.',
+            'nik.digits' => 'NIK / NIP harus 16 digit angka.',
             'nik.unique' => 'NIK / NIP sudah terdaftar di sistem.',
+            'nomor_hp.digits_between' => 'Nomor WhatsApp / HP harus berupa 10-13 digit angka.',
             'email.required' => 'Email wajib diisi.',
             'email.unique' => 'Email sudah digunakan.',
             'pin.required' => 'PIN wajib diisi.',
