@@ -84,6 +84,7 @@ class AdminPersonnelController extends Controller
                 'penugasan:id,name',
                 'kantor:id,name',
                 'faceEmbeddings:id,personnel_id,pose_type',
+                'devices:id,personnel_id,license_key,name,status',
             ]);
 
         // Filter OPD
@@ -111,6 +112,7 @@ class AdminPersonnelController extends Controller
 
         $items = collect($paginator->items())->map(function (Personnel $p) {
             $poses = $p->faceEmbeddings->pluck('pose_type')->toArray();
+            $device = $p->devices->first();
             return [
                 'id' => $p->id,
                 'name' => $p->name,
@@ -129,6 +131,8 @@ class AdminPersonnelController extends Controller
                 'face_recognition' => (bool)$p->face_recognition,
                 'has_face_data' => !empty($p->face_descriptor_mobile) || count($poses) >= 4,
                 'total_3d_poses' => count($poses),
+                'license_key' => $device?->license_key,
+                'has_personal_device' => !empty($device),
             ];
         });
 
