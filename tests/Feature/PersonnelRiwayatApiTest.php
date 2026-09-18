@@ -200,41 +200,125 @@ class PersonnelRiwayatApiTest extends TestCase
 
     public function test_dashboard_summary_handles_ongoing_overnight_shift(): void
     {
-        $today = Carbon::today();
-        $yesterday = $today->copy()->subDay()->format('Y-m-d');
+        $morningNow = Carbon::parse('2026-09-18 06:30:00');
+        Carbon::setTestNow($morningNow);
 
-        $nightShift = Shift::create([
-            'name' => 'Shift Malam',
-            'start_time' => '20:00:00',
-            'end_time' => '08:00:00',
-            'type' => 'shift',
-        ]);
+        try {
+            $today = Carbon::today();
+            $yesterday = $today->copy()->subDay()->format('Y-m-d');
 
-        $jadwal = Jadwal::create([
-            'personnel_id' => $this->personnel->id,
-            'shift_id' => $nightShift->id,
-            'tanggal' => $yesterday,
-            'status' => 'SHIFT',
-        ]);
+            $nightShift = Shift::create([
+                'name' => 'Shift Malam',
+                'start_time' => '20:00:00',
+                'end_time' => '08:00:00',
+                'type' => 'shift',
+            ]);
 
-        Absensi::create([
-            'personnel_id' => $this->personnel->id,
-            'jadwal_id' => $jadwal->id,
-            'tanggal' => $yesterday,
-            'jam_masuk' => '20:05:00',
-            'status_masuk' => 'HADIR',
-            'status' => 'HADIR',
-        ]);
+            $jadwal = Jadwal::create([
+                'personnel_id' => $this->personnel->id,
+                'shift_id' => $nightShift->id,
+                'tanggal' => $yesterday,
+                'status' => 'SHIFT',
+            ]);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
-            ->getJson('/api/v1/personel/dashboard/summary?month=' . $today->month . '&year=' . $today->year);
+            Absensi::create([
+                'personnel_id' => $this->personnel->id,
+                'jadwal_id' => $jadwal->id,
+                'tanggal' => $yesterday,
+                'jam_masuk' => '20:05:00',
+                'status_masuk' => 'HADIR',
+                'status' => 'HADIR',
+            ]);
 
-        $response->assertStatus(200);
-        $activities = $response->json('data.recent_activities');
-        $this->assertCount(2, $activities);
-        $this->assertEquals('Presensi Masuk', $activities[0]['title']);
-        $this->assertEquals('20:05 WIB', $activities[0]['time']);
-        $this->assertEquals('Presensi Pulang', $activities[1]['title']);
-        $this->assertEquals('-', $activities[1]['time']);
+            $response = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+                ->getJson('/api/v1/personel/dashboard/summary?month=' . $today->month . '&year=' . $today->year);
+
+            $response->assertStatus(200);
+            $activities = $response->json('data.recent_activities');
+            $this->assertCount(2, $activities);
+            $this->assertEquals('Presensi Masuk', $activities[0]['title']);
+            $this->assertEquals('20:05 WIB', $activities[0]['time']);
+            $this->assertEquals('Presensi Pulang', $activities[1]['title']);
+            $this->assertEquals('-', $activities[1]['time']);
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_dashboard_summary_does_not_mark_today_upcoming_night_shift_as_alpa(): void
+    {
+        $daytimeNow = Carbon::parse('2026-09-18 11:06:00');
+        Carbon::setTestNow($daytimeNow);
+
+        try {
+            $nightShift = Shift::create([
+                'name' => 'Shift Malam 23.50',
+                'start_time' => '23:50:00',
+                'end_time' => '08:00:00',
+                'type' => 'shift',
+            ]);
+
+            // Jadwal 17-09-2026 (kemarin)
+            $jadwal17 = Jadwal::create([
+                'personnel_id' => $this->personnel->id,
+                'shift_id' => $nightShift->id,
+                'tanggal' => '2026-09-17',
+                'status' => 'SHIFT',
+            ]);
+
+            // Absensi 17-09-2026: direct check-out di tanggal 18 pagi jam 08:00 WIB
+            Absensi::create([
+                'personnel_id' => $this->personnel->id,
+                'jadwal_id' => $jadwal17->id,
+                'tanggal' => '2026-09-17',
+                'jam_masuk' => null,
+                'status_masuk' => 'ALPA',
+                'jam_pulang' => '08:00:00',
+                'status_pulang' => 'HADIR',
+                'status' => 'HADIR',
+            ]);
+
+            // Jadwal 18-09-2026 (hari ini)
+            $jadwal18 = Jadwal::create([
+                'personnel_id' => $this->personnel->id,
+                'shift_id' => $nightShift->id,
+                'tanggal' => '2026-09-18',
+                'status' => 'SHIFT',
+            ]);
+
+            // Pre-generated absensi row di DB dengan default ALPA
+            Absensi::create([
+                'personnel_id' => $this->personnel->id,
+                'jadwal_id' => $jadwal18->id,
+                'tanggal' => '2026-09-18',
+                'jam_masuk' => null,
+                'status_masuk' => 'ALPA',
+                'jam_pulang' => null,
+                'status_pulang' => 'ALPA',
+                'status' => 'ALPA',
+            ]);
+
+            $response = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+                ->getJson('/api/v1/personel/dashboard/summary?month=9&year=2026');
+
+            $response->assertStatus(200);
+            $activities = $response->json('data.recent_activities');
+            $this->assertCount(2, $activities);
+
+            // Card Presensi Masuk hari ini tidak boleh ALPA (harus status '-' dan status_type 'pending')
+            $this->assertEquals('Presensi Masuk', $activities[0]['title']);
+            $this->assertEquals('-', $activities[0]['status']);
+            $this->assertEquals('pending', $activities[0]['status_type']);
+
+            // Card Presensi Pulang hari ini tidak boleh ALPA
+            $this->assertEquals('Presensi Pulang', $activities[1]['title']);
+            $this->assertEquals('-', $activities[1]['status']);
+            $this->assertEquals('pending', $activities[1]['status_type']);
+
+            // Alpa count bulan ini tidak boleh menghitung tanggal 18 hari ini yang shiftnya belum berakhir
+            $this->assertEquals(0, $response->json('data.alpa_count'));
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 }

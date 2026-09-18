@@ -30,6 +30,7 @@ class PersonnelDashboardController extends Controller
         $startOfMonth = $targetMonth->copy()->startOfMonth()->format('Y-m-d');
         $endOfMonth = $targetMonth->copy()->endOfMonth()->format('Y-m-d');
         $todayStr = $now->format('Y-m-d');
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
         // 1. Ambil seluruh data absensi personel di bulan tersebut
         $absensis = Absensi::where('personnel_id', $personnel->id)
@@ -45,13 +46,31 @@ class PersonnelDashboardController extends Controller
         foreach ($absensis as $a) {
             $tgl = $a->tanggal instanceof Carbon ? $a->tanggal : Carbon::parse($a->tanggal);
             $isFuture = $tgl->startOfDay()->greaterThan($today);
+            $isToday = $tgl->startOfDay()->equalTo($today);
             $statusUpper = strtoupper((string) $a->status);
 
             if (in_array($statusUpper, ['HADIR', 'TELAT']) || $a->jam_masuk || $a->jam_pulang) {
                 $hadirCount++;
             } elseif ($statusUpper === 'ALPA') {
                 if (!$isFuture) {
-                    $alpaCount++;
+                    if ($isToday) {
+                        // Untuk hari ini, hanya hitung Alpa jika seluruh jendela shift telah berakhir (terlewat)
+                        $shiftToday = $a->jadwal?->shift;
+                        $isTodayExpired = false;
+                        if ($shiftToday && $shiftToday->end_time) {
+                            $isNightShiftToday = Carbon::parse($shiftToday->start_time)->format('H:i:s') >= Carbon::parse($shiftToday->end_time)->format('H:i:s');
+                            $endDateToday = $isNightShiftToday ? $now->copy()->addDay()->format('Y-m-d') : $todayStr;
+                            $endLimitToday = Carbon::parse($endDateToday)->setTimeFrom($shiftToday->end_time)->addMinutes($selesaiOut);
+                            if ($now->greaterThan($endLimitToday)) {
+                                $isTodayExpired = true;
+                            }
+                        }
+                        if ($isTodayExpired) {
+                            $alpaCount++;
+                        }
+                    } else {
+                        $alpaCount++;
+                    }
                 }
             } elseif (in_array($statusUpper, ['IZIN', 'SAKIT', 'CUTI'])) {
                 $izinCount++;
@@ -104,7 +123,7 @@ class PersonnelDashboardController extends Controller
                         ->whereDate('tanggal', $yesterdayStr)
                         ->with(['kantor', 'kantorPulang', 'jadwal.shift'])
                         ->first();
-                    if ($existingYest && $existingYest->jam_masuk && !$existingYest->jam_pulang) {
+                    if ($existingYest && !$existingYest->jam_pulang) {
                         $activeJadwal = $yesterdayJadwal;
                         $activeAbsensi = $existingYest;
                         $activeDate = $yesterdayStr;
@@ -128,7 +147,7 @@ class PersonnelDashboardController extends Controller
         $todayAbsensi = $activeAbsensi;
         $todayJadwal = $activeJadwal;
 
-        if ($todayAbsensi) {
+        if ($todayAbsensi && ($todayAbsensi->jam_masuk || $todayAbsensi->jam_pulang || in_array(strtoupper((string) $todayAbsensi->status), ['IZIN', 'SAKIT', 'CUTI', 'DINAS', 'LIBUR']))) {
             if ($todayAbsensi->jam_masuk && $todayAbsensi->jam_pulang) {
                 $statusHariIni = 'Sudah Selesai (Pulang: ' . Carbon::parse($todayAbsensi->jam_pulang)->format('H:i') . ' WIB)';
             } elseif ($todayAbsensi->jam_masuk) {
@@ -177,8 +196,9 @@ class PersonnelDashboardController extends Controller
 
         // Tentukan status utama secara dinamis dari tabel absensi
         $statusUtama = $todayAbsensi?->status;
-        if (empty($statusUtama)) {
-            $shiftObj = $todayJadwal?->shift;
+        $isTodayOrFuture = Carbon::parse($activeDate)->startOfDay()->greaterThanOrEqualTo($now->copy()->startOfDay());
+        if (empty($statusUtama) || ($isTodayOrFuture && strtoupper((string) $statusUtama) === 'ALPA' && !$todayAbsensi?->jam_masuk && !$todayAbsensi?->jam_pulang)) {
+            $shiftObj = $todayAbsensi?->jadwal?->shift ?? $todayJadwal?->shift;
             $isShiftOff = $shiftObj && ($shiftObj->type === 'off' || stripos($shiftObj->name ?? '', 'libur') !== false);
 
             if ($isShiftOff) {
@@ -187,14 +207,14 @@ class PersonnelDashboardController extends Controller
             } elseif ($todayJadwal?->status && !in_array(strtoupper($todayJadwal->status), ['SHIFT', 'KERJA'])) {
                 $statusUtama = $todayJadwal->status;
             } else {
-                $statusUtama = 'ALPA';
+                $statusUtama = 'SHIFT';
             }
         }
         $statusUpper = strtoupper(trim((string) $statusUtama));
 
-        // Jika status nya ALPA atau jam kerja normal (HADIR/sudah absen), tampilkan 2 Card (Presensi Masuk dan Pulang).
+        // Jika status nya ALPA/SHIFT atau jam kerja normal (HADIR/sudah absen), tampilkan 2 Card (Presensi Masuk dan Pulang).
         // Selain itu (LIBUR, DINAS, IZIN, SAKIT, CUTI, dll), cukup tampilkan 1 Card dengan judul sesuai status utama di tabel absensi.
-        $isWorkingShift = ($statusUpper === 'ALPA' || $statusUpper === 'HADIR' || ($todayAbsensi && ($todayAbsensi->jam_masuk || $todayAbsensi->jam_pulang)));
+        $isWorkingShift = ($statusUpper === 'ALPA' || $statusUpper === 'HADIR' || $statusUpper === 'SHIFT' || ($todayAbsensi && ($todayAbsensi->jam_masuk || $todayAbsensi->jam_pulang)));
 
         $recentActivities = [];
 
@@ -242,6 +262,8 @@ class PersonnelDashboardController extends Controller
                 $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
             }
 
+            $isPastDate = Carbon::parse($activeDate)->startOfDay()->lessThan($now->copy()->startOfDay());
+
             // --- 1. Card Presensi Masuk ---
             if ($todayAbsensi && $todayAbsensi->jam_masuk) {
                 $jamMasukCarbon = $todayAbsensi->jam_masuk instanceof Carbon
@@ -266,9 +288,11 @@ class PersonnelDashboardController extends Controller
                 ];
             } else {
                 $isMasukAlpa = false;
-                if ($windowInEnd && $now->greaterThan($windowInEnd)) {
-                    $isMasukAlpa = true;
-                } elseif ($todayAbsensi && (in_array(strtoupper((string) $todayAbsensi->status_masuk), ['ALPA', 'TIDAK MASUK']) || strtoupper((string) $todayAbsensi->status) === 'ALPA')) {
+                if ($windowInEnd) {
+                    if ($now->greaterThan($windowInEnd)) {
+                        $isMasukAlpa = true;
+                    }
+                } elseif ($isPastDate) {
                     $isMasukAlpa = true;
                 }
 
@@ -314,7 +338,11 @@ class PersonnelDashboardController extends Controller
                 ];
             } else {
                 $isPulangAlpa = false;
-                if ($windowOutEnd && $now->greaterThan($windowOutEnd)) {
+                if ($windowOutEnd) {
+                    if ($now->greaterThan($windowOutEnd)) {
+                        $isPulangAlpa = true;
+                    }
+                } elseif ($isPastDate) {
                     $isPulangAlpa = true;
                 }
 

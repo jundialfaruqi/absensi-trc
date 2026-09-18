@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Jadwal;
 use App\Models\Personnel;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -63,12 +64,14 @@ class PersonnelRiwayatController extends Controller
         $izinCount = 0;
         $liburCount = 0;
         $today = Carbon::today();
+        $selesaiOut = (int) Setting::get('absensi_pulang_selesai', 120);
 
         // Generate seluruh tanggal dari 1 sampai akhir bulan (1 kalender penuh)
         for ($d = 1; $d <= $daysInMonth; $d++) {
             $currentDate = Carbon::createFromDate($year, $month, $d)->startOfDay();
             $tglStr = $currentDate->format('Y-m-d');
             $isFuture = $currentDate->greaterThan($today);
+            $isToday = $currentDate->equalTo($today);
 
             $rec = $records->get($tglStr);
             $jadwal = $jadwals->get($tglStr);
@@ -93,7 +96,24 @@ class PersonnelRiwayatController extends Controller
                     $hadirCount++;
                 } elseif ($statusUpper === 'ALPA') {
                     if (!$isFuture) {
-                        $alpaCount++;
+                        if ($isToday) {
+                            $isTodayExpired = false;
+                            if ($shift && $shift->end_time) {
+                                $isNightShiftToday = Carbon::parse($shift->start_time)->format('H:i:s') >= Carbon::parse($shift->end_time)->format('H:i:s');
+                                $endDateToday = $isNightShiftToday ? Carbon::today()->addDay()->format('Y-m-d') : $tglStr;
+                                $endLimitToday = Carbon::parse($endDateToday)->setTimeFrom($shift->end_time)->addMinutes($selesaiOut);
+                                if (Carbon::now()->greaterThan($endLimitToday)) {
+                                    $isTodayExpired = true;
+                                }
+                            }
+                            if ($isTodayExpired) {
+                                $alpaCount++;
+                            } else {
+                                $itemStatus = '-';
+                            }
+                        } else {
+                            $alpaCount++;
+                        }
                     } else {
                         // Tanggal di masa depan (> hari ini) tidak dihitung Alpa, tampilkan '-'
                         $itemStatus = '-';
@@ -136,11 +156,11 @@ class PersonnelRiwayatController extends Controller
                     'shift_name' => $shiftName,
                     'shift_hours' => $shiftHours,
                     'jam_masuk' => $jamMasukStr,
-                    'status_masuk' => $isFuture && $statusUpper === 'ALPA' ? null : $rec->status_masuk,
+                    'status_masuk' => ($isFuture || ($isToday && $itemStatus === '-')) && $statusUpper === 'ALPA' ? null : $rec->status_masuk,
                     'foto_masuk' => $rec->foto_masuk ? asset('storage/' . $rec->foto_masuk) : null,
                     'jarak_masuk' => $rec->jarak_meter,
                     'jam_pulang' => $jamPulangStr,
-                    'status_pulang' => $isFuture && $statusUpper === 'ALPA' ? null : $rec->status_pulang,
+                    'status_pulang' => ($isFuture || ($isToday && $itemStatus === '-')) && $statusUpper === 'ALPA' ? null : $rec->status_pulang,
                     'foto_pulang' => $rec->foto_pulang ? asset('storage/' . $rec->foto_pulang) : null,
                     'jarak_pulang' => $rec->jarak_meter_pulang,
                     'kantor_name' => $kantorName,
