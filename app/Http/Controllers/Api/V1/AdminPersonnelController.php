@@ -39,11 +39,23 @@ class AdminPersonnelController extends Controller
     }
 
     /**
+     * Helper: Cek apakah user memiliki hak akses level Super Admin (lintas OPD).
+     */
+    protected function isSuperAdmin(User $user): bool
+    {
+        return $user->hasAnyRole(['super-admin', 'dev'])
+            || $user->can('lihat-personel-all-opd')
+            || $user->can('view-personel-all-opd')
+            || $user->can('create-personel-all-opd')
+            || $user->can('edit-personel-all-opd');
+    }
+
+    /**
      * Helper: Cek apakah user berhak mengelola data personel tertentu.
      */
     protected function canManagePersonnel(User $user, Personnel $personnel): bool
     {
-        if ($user->hasRole('super-admin') || $user->can('edit-personel-all-opd') || $user->can('delete-personel-all-opd')) {
+        if ($this->isSuperAdmin($user) || $user->can('edit-personel-all-opd') || $user->can('delete-personel-all-opd')) {
             return true;
         }
 
@@ -63,7 +75,7 @@ class AdminPersonnelController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin') || $user->can('view-personel-all-opd');
+        $isSuperAdmin = $this->isSuperAdmin($user);
         $userOpdId = $user->opds()->first()?->id;
 
         $query = Personnel::query()
@@ -75,14 +87,14 @@ class AdminPersonnelController extends Controller
             ]);
 
         // Filter OPD
-        if (!$isSuperAdmin) {
+        if (!$isSuperAdmin && !empty($userOpdId)) {
             $query->where('opd_id', $userOpdId);
-        } elseif ($request->filled('opd_id')) {
+        } elseif ($request->filled('opd_id') && $request->input('opd_id') !== 'null' && $request->input('opd_id') !== '') {
             $query->where('opd_id', $request->input('opd_id'));
         }
 
         // Filter Penugasan opsional
-        if ($request->filled('penugasan_id')) {
+        if ($request->filled('penugasan_id') && $request->input('penugasan_id') !== 'null' && $request->input('penugasan_id') !== '') {
             $query->where('penugasan_id', $request->input('penugasan_id'));
         }
 
@@ -144,14 +156,16 @@ class AdminPersonnelController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin') || $user->can('create-personel-all-opd');
+        $isSuperAdmin = $this->isSuperAdmin($user);
         $userOpdId = $user->opds()->first()?->id;
 
         // 1. OPDs
         if ($isSuperAdmin) {
             $opds = Opd::query()->orderBy('name', 'asc')->get(['id', 'name']);
         } else {
-            $opds = Opd::query()->where('id', $userOpdId)->get(['id', 'name']);
+            $opds = !empty($userOpdId)
+                ? Opd::query()->where('id', $userOpdId)->get(['id', 'name'])
+                : Opd::query()->orderBy('name', 'asc')->get(['id', 'name']);
         }
 
         // 2. Penugasans
@@ -159,7 +173,7 @@ class AdminPersonnelController extends Controller
 
         // 3. Kantors
         $kantorsQuery = Kantor::query()->orderBy('name', 'asc');
-        if (!$isSuperAdmin) {
+        if (!$isSuperAdmin && !empty($userOpdId)) {
             $kantorsQuery->where('opd_id', $userOpdId);
         }
         $kantors = $kantorsQuery->get(['id', 'name', 'opd_id', 'latitude', 'longitude', 'radius_meter']);
@@ -171,7 +185,7 @@ class AdminPersonnelController extends Controller
                 'penugasans' => $penugasans,
                 'kantors' => $kantors,
                 'is_super_admin' => $isSuperAdmin,
-                'default_opd_id' => $isSuperAdmin ? ($opds->first()?->id ?? null) : $userOpdId,
+                'default_opd_id' => $isSuperAdmin ? null : $userOpdId,
             ],
         ]);
     }
@@ -255,7 +269,7 @@ class AdminPersonnelController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin') || $user->can('create-personel-all-opd');
+        $isSuperAdmin = $this->isSuperAdmin($user);
         $userOpdId = $user->opds()->first()?->id;
 
         $validator = Validator::make($request->all(), [
@@ -450,7 +464,7 @@ class AdminPersonnelController extends Controller
             ], 422);
         }
 
-        $isSuperAdmin = $user->hasRole('super-admin') || $user->can('edit-personel-all-opd');
+        $isSuperAdmin = $this->isSuperAdmin($user);
         $opdId = (int)$request->input('opd_id');
         $userOpdId = $user->opds()->first()?->id;
 
