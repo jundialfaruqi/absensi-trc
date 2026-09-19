@@ -111,16 +111,14 @@
                             </div>
                             @if ($jadwalShiftName)
                                 <div class="text-right">
-                                    <div class="text-[10px] uppercase font-black opacity-40 tracking-widest">Jadwal
-                                        Shift</div>
-                                    <div
-                                        class="font-bold text-xs sm:text-sm text-primary flex items-center gap-1.5 justify-end">
-                                        <span>{{ $jadwalShiftName }}
-                                            @if ($jadwalJamMasuk && $jadwalJamPulang)
-                                                <span class="font-mono">{{ $jadwalJamMasuk }} -
-                                                    {{ $jadwalJamPulang }}</span>
-                                            @endif
-                                        </span>
+                                    <div class="text-[10px] uppercase font-black opacity-40 tracking-widest">Jadwal Shift</div>
+                                    <div class="font-bold text-xs sm:text-sm text-primary">
+                                        <div>{{ $jadwalShiftName }}</div>
+                                        @if ($jadwalJamMasuk && $jadwalJamPulang)
+                                            <div class="text-[11px] font-semibold text-base-content/70 font-mono">
+                                                {{ $jadwalJamMasuk }} - {{ $jadwalJamPulang }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endif
