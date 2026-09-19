@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\Cuti;
 use App\Models\Device;
 use App\Models\Jadwal;
 use App\Models\Personnel;
 use App\Models\Setting;
+use App\Models\Shift;
 use App\Models\User;
 use App\Services\AbsensiLokasiService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -1006,6 +1009,497 @@ class AdminAbsensiController extends Controller
             'status' => 'success',
             'message' => $result['message'],
             'data' => $result,
+        ]);
+    }
+
+    /**
+     * Helper: Memeriksa apakah admin memiliki izin untuk mengedit absensi personel.
+     */
+    public function canEditPersonnel(?Personnel $personnel, ?User $user): bool
+    {
+        if (!$personnel || !$user) {
+            return false;
+        }
+
+        // 1. Permission edit-absensi-all-opd atau role super-admin: bisa edit semua OPD
+        if ($user->can('edit-absensi-all-opd') || $user->hasRole('super-admin')) {
+            return true;
+        }
+
+        // 2. Permission edit-absensi-opd atau role admin-opd: hanya bisa edit OPD-nya sendiri
+        if ($user->can('edit-absensi-opd') || $user->hasRole('admin-opd')) {
+            $userOpd = $user->opds()->first();
+            $userOpdId = $userOpd?->id;
+
+            return !empty($userOpdId) && !empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
+        }
+
+        return false;
+    }
+
+    /**
+     * Mengambil detail absensi & jadwal untuk form Quick Edit di Admin Mobile.
+     */
+    public function getEditData(Request $request): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'personnel_id' => 'required|exists:personnels,id',
+            'tanggal' => 'required|date_format:Y-m-d',
+        ], [
+            'personnel_id.required' => 'ID personel wajib disertakan.',
+            'personnel_id.exists' => 'Data personel tidak ditemukan.',
+            'tanggal.required' => 'Tanggal absensi wajib disertakan.',
+            'tanggal.date_format' => 'Format tanggal harus YYYY-MM-DD.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $personnelId = (int) $request->input('personnel_id');
+        $tanggal = $request->input('tanggal');
+
+        $personnel = Personnel::with(['opd', 'kantor'])->find($personnelId);
+        if (!$personnel) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data personel tidak ditemukan.',
+            ], 404);
+        }
+
+        if (!$this->canEditPersonnel($personnel, $user)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
+            ], 403);
+        }
+
+        $absensi = Absensi::where('personnel_id', $personnelId)
+            ->whereDate('tanggal', $tanggal)
+            ->first();
+
+        // Cari jadwal untuk tanggal yang diedit
+        $jadwal = Jadwal::where('personnel_id', $personnelId)
+            ->whereDate('tanggal', $tanggal)
+            ->with('shift')
+            ->first();
+
+        if (!$jadwal && $absensi && $absensi->jadwal_id) {
+            $jadwal = Jadwal::with('shift')->find($absensi->jadwal_id);
+        }
+
+        $shift = $jadwal?->shift;
+        $jadwalShiftName = null;
+        $jadwalJamMasuk = null;
+        $jadwalJamPulang = null;
+
+        if ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
+            $jadwalShiftName = $shift->name . ($shift->keterangan ? ' (' . $shift->keterangan . ')' : '');
+            $jadwalJamMasuk = Carbon::parse($shift->start_time)->format('H:i');
+            $jadwalJamPulang = Carbon::parse($shift->end_time)->format('H:i');
+        } else {
+            // Fallback jadwal shift berjam terbaru
+            $recentJadwal = Jadwal::where('personnel_id', $personnelId)
+                ->whereHas('shift', function ($q) {
+                    $q->where('type', '!=', 'off')
+                        ->whereNotNull('start_time')
+                        ->whereNotNull('end_time');
+                })
+                ->with('shift')
+                ->orderByDesc('tanggal')
+                ->first();
+
+            if ($recentJadwal && $recentJadwal->shift) {
+                $jadwalShiftName = $recentJadwal->shift->name . ($recentJadwal->shift->keterangan ? ' (' . $recentJadwal->shift->keterangan . ')' : '');
+                $jadwalJamMasuk = Carbon::parse($recentJadwal->shift->start_time)->format('H:i');
+                $jadwalJamPulang = Carbon::parse($recentJadwal->shift->end_time)->format('H:i');
+            } else {
+                $defaultShift = Shift::where('type', '!=', 'off')
+                    ->whereNotNull('start_time')
+                    ->whereNotNull('end_time')
+                    ->first();
+
+                if ($defaultShift) {
+                    $jadwalShiftName = $defaultShift->name . ($defaultShift->keterangan ? ' (' . $defaultShift->keterangan . ')' : '');
+                    $jadwalJamMasuk = Carbon::parse($defaultShift->start_time)->format('H:i');
+                    $jadwalJamPulang = Carbon::parse($defaultShift->end_time)->format('H:i');
+                } else {
+                    $jadwalShiftName = null;
+                    $jadwalJamMasuk = '08:00';
+                    $jadwalJamPulang = '16:00';
+                }
+            }
+        }
+
+        // Resolusi Device
+        $resolveDevice = function ($uniqueDeviceId, $pId) {
+            if (!empty($uniqueDeviceId)) {
+                $device = is_numeric($uniqueDeviceId)
+                    ? Device::find($uniqueDeviceId)
+                    : Device::where('unique_device_id', $uniqueDeviceId)->first();
+
+                if ($device) {
+                    return $device;
+                }
+            }
+
+            if ($pId) {
+                return Device::where('personnel_id', $pId)->where('status', 'active')->latest()->first()
+                    ?? Device::where('personnel_id', $pId)->latest()->first();
+            }
+
+            return null;
+        };
+
+        $deviceMasuk = $absensi ? $resolveDevice($absensi->unique_device_id_masuk, $personnelId) : null;
+        $isOfficialDeviceMasuk = !is_null($deviceMasuk);
+        $officialDeviceNameMasuk = $deviceMasuk?->name;
+
+        $devicePulang = $absensi ? $resolveDevice($absensi->unique_device_id_pulang, $personnelId) : null;
+        $isOfficialDevicePulang = !is_null($devicePulang);
+        $officialDeviceNamePulang = $devicePulang?->name;
+
+        $isEdited = $absensi ? !is_null($absensi->original_status_masuk) : false;
+        $canResetAbsen = $user->can('reset-absen') || $user->hasRole('super-admin');
+
+        $cutis = Cuti::orderBy('name')->get(['id', 'name'])->map(fn($c) => [
+            'id' => $c->id,
+            'name' => $c->name,
+        ]);
+
+        $jamMasukFormatted = $absensi?->jam_masuk ? Carbon::parse($absensi->jam_masuk)->format('H:i') : null;
+        $jamPulangFormatted = $absensi?->jam_pulang ? Carbon::parse($absensi->jam_pulang)->format('H:i') : null;
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data edit absensi berhasil diambil.',
+            'data' => [
+                'personnel' => [
+                    'id' => (string) $personnel->id,
+                    'name' => $personnel->name,
+                    'nik' => $personnel->nik ?? '',
+                    'foto' => $personnel->foto ? url('storage/' . $personnel->foto) : null,
+                    'opd_id' => (string) $personnel->opd_id,
+                    'opd_name' => $personnel->opd?->name ?? '-',
+                    'attendance_type' => $personnel->attendance_type ?? 'SHIFT',
+                ],
+                'tanggal' => $tanggal,
+                'absensi_id' => $absensi?->id,
+                'jadwal' => [
+                    'shift_name' => $jadwalShiftName,
+                    'jam_masuk' => $jadwalJamMasuk,
+                    'jam_pulang' => $jadwalJamPulang,
+                ],
+                'current_values' => [
+                    'status_masuk' => $absensi?->status_masuk ?? '',
+                    'status_pulang' => $absensi?->status_pulang ?? '',
+                    'jam_masuk' => $jamMasukFormatted,
+                    'jam_pulang' => $jamPulangFormatted,
+                    'nomor_surat' => $absensi?->nomor_surat ?? '',
+                    'cuti_id' => $absensi?->cuti_id,
+                    'keterangan' => $absensi?->keterangan ?? '',
+                    'alasan_edit' => $absensi?->alasan_edit ?? '',
+                ],
+                'proof' => [
+                    'foto_masuk' => $absensi?->foto_masuk ? url('storage/' . $absensi->foto_masuk) : null,
+                    'foto_pulang' => $absensi?->foto_pulang ? url('storage/' . $absensi->foto_pulang) : null,
+                    'platform_masuk' => $absensi?->platform_masuk,
+                    'platform_pulang' => $absensi?->platform_pulang,
+                    'device_name_masuk' => $absensi?->device_name_masuk,
+                    'device_name_pulang' => $absensi?->device_name_pulang,
+                    'is_official_device_masuk' => $isOfficialDeviceMasuk,
+                    'is_official_device_pulang' => $isOfficialDevicePulang,
+                    'official_device_name_masuk' => $officialDeviceNameMasuk,
+                    'official_device_name_pulang' => $officialDeviceNamePulang,
+                ],
+                'is_edited' => $isEdited,
+                'can_reset_absen' => $canResetAbsen,
+                'cuti_options' => $cutis,
+            ],
+        ]);
+    }
+
+    /**
+     * Menyimpan perubahan data absensi (Quick Edit) dari Admin Mobile.
+     */
+    public function saveEditData(Request $request): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'personnel_id' => 'required|exists:personnels,id',
+            'tanggal' => 'required|date_format:Y-m-d',
+            'status_masuk' => 'required|string',
+            'status_pulang' => 'nullable|string',
+            'jam_masuk' => 'nullable|string',
+            'jam_pulang' => 'nullable|string',
+            'nomor_surat' => 'nullable|string',
+            'cuti_id' => 'nullable|exists:cutis,id',
+            'keterangan' => 'nullable|string',
+            'alasan_edit' => 'required|string|min:5',
+        ], [
+            'personnel_id.required' => 'ID personel wajib disertakan.',
+            'status_masuk.required' => 'Status masuk wajib dipilih.',
+            'alasan_edit.required' => 'Alasan perubahan data wajib diisi.',
+            'alasan_edit.min' => 'Alasan perubahan data minimal 5 karakter.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $personnelId = (int) $request->input('personnel_id');
+        $tanggal = $request->input('tanggal');
+
+        $personnel = Personnel::findOrFail($personnelId);
+
+        if (!$this->canEditPersonnel($personnel, $user)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
+            ], 403);
+        }
+
+        $statusMasuk = $request->input('status_masuk');
+        $statusPulang = $request->input('status_pulang');
+        $jamMasuk = $request->input('jam_masuk');
+        $jamPulang = $request->input('jam_pulang');
+        $alasanEdit = $request->input('alasan_edit');
+        $nomorSurat = $request->input('nomor_surat');
+        $cutiId = ($statusMasuk === 'CUTI' || $statusPulang === 'CUTI') ? $request->input('cuti_id') : null;
+        $keterangan = $request->input('keterangan');
+
+        $existing = Absensi::where('personnel_id', $personnelId)
+            ->whereDate('tanggal', $tanggal)
+            ->first();
+
+        // Capture original status ONLY if it's the first edit
+        $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
+        $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
+
+        // Tentukan status kehadiran utama (status):
+        $overallStatus = $statusMasuk;
+        if (in_array($statusMasuk, ['HADIR', 'TELAT']) || in_array($statusPulang, ['HADIR', 'PC'])) {
+            $overallStatus = 'HADIR';
+        } elseif (!empty($statusMasuk)) {
+            $overallStatus = $statusMasuk;
+        } elseif (!empty($statusPulang)) {
+            $overallStatus = $statusPulang;
+        } else {
+            $overallStatus = 'ALPA';
+        }
+
+        $attributes = [
+            'status' => $overallStatus,
+            'status_masuk' => $statusMasuk,
+            'status_pulang' => $statusPulang,
+            'jam_masuk' => !empty($jamMasuk) ? $jamMasuk : null,
+            'jam_pulang' => !empty($jamPulang) ? $jamPulang : null,
+            'alasan_edit' => $alasanEdit,
+            'nomor_surat' => $nomorSurat,
+            'cuti_id' => $cutiId,
+            'keterangan' => $keterangan,
+            'edited_by_user_id' => $user->id,
+            'edited_at' => now(),
+            'original_status_masuk' => $originalStatusMasuk,
+            'original_status_pulang' => $originalStatusPulang,
+        ];
+
+        if ($existing) {
+            $existing->update($attributes);
+            $saved = $existing;
+        } else {
+            $saved = Absensi::create(array_merge([
+                'personnel_id' => $personnelId,
+                'tanggal' => $tanggal,
+            ], $attributes));
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data absensi berhasil diperbarui.',
+            'data' => $saved,
+        ]);
+    }
+
+    /**
+     * Mengembalikan data absensi ke kondisi awal sebelum diedit admin (Reset to Original).
+     */
+    public function resetToOriginal(Request $request): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'absensi_id' => 'required|exists:absensis,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $absensi = Absensi::with('personnel')->findOrFail($request->input('absensi_id'));
+
+        if (!$this->canEditPersonnel($absensi->personnel, $user)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
+            ], 403);
+        }
+
+        if (is_null($absensi->original_status_masuk)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data absensi ini belum pernah diedit atau sudah berada dalam status asli.',
+            ], 422);
+        }
+
+        if ($absensi->original_status_masuk === 'ALPA' && $absensi->original_status_pulang === 'ALPA') {
+            $jadwal = $absensi->jadwal;
+            $placeholderStatus = ($jadwal && $jadwal->status === 'LIBUR') ? 'LIBUR' : 'ALPA';
+
+            $absensi->update([
+                'status' => $placeholderStatus,
+                'status_masuk' => null,
+                'status_pulang' => null,
+                'jam_masuk' => null,
+                'jam_pulang' => null,
+                'edited_by_user_id' => null,
+                'edited_at' => null,
+                'alasan_edit' => null,
+                'nomor_surat' => null,
+                'cuti_id' => null,
+                'keterangan' => null,
+                'original_status_masuk' => null,
+                'original_status_pulang' => null,
+            ]);
+        } else {
+            $origStatus = $absensi->original_status_masuk;
+            if (in_array($absensi->original_status_masuk, ['HADIR', 'TELAT']) || in_array($absensi->original_status_pulang, ['HADIR', 'PC'])) {
+                $origStatus = 'HADIR';
+            } elseif (!empty($absensi->original_status_masuk)) {
+                $origStatus = $absensi->original_status_masuk;
+            } elseif (!empty($absensi->original_status_pulang)) {
+                $origStatus = $absensi->original_status_pulang;
+            }
+
+            $absensi->update([
+                'status' => $origStatus,
+                'status_masuk' => $absensi->original_status_masuk,
+                'status_pulang' => $absensi->original_status_pulang,
+                'edited_by_user_id' => null,
+                'edited_at' => null,
+                'alasan_edit' => null,
+                'nomor_surat' => null,
+                'cuti_id' => null,
+                'keterangan' => null,
+                'original_status_masuk' => null,
+                'original_status_pulang' => null,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data absensi telah dikembalikan ke kondisi awal.',
+            'data' => $absensi,
+        ]);
+    }
+
+    /**
+     * Memindahkan data absensi ke kotak sampah (soft delete) & membuat ulang placeholder default.
+     */
+    public function resetAbsensi(Request $request): JsonResponse
+    {
+        if ($authError = $this->authorizeAdmin($request)) {
+            return $authError;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+
+        if (!$user->can('reset-absen') && !$user->hasRole('super-admin')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki izin untuk mereset absensi.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'absensi_id' => 'required|exists:absensis,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $absensi = Absensi::with('personnel')->findOrFail($request->input('absensi_id'));
+
+        if (!$this->canEditPersonnel($absensi->personnel, $user)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
+            ], 403);
+        }
+
+        $personnelId = $absensi->personnel_id;
+        $tanggal = $absensi->tanggal;
+
+        $absensi->update(['deleted_by_user_id' => $user->id]);
+        $absensi->delete();
+
+        // Buat ulang record absensi default berdasarkan jadwal jika ada
+        $jadwal = Jadwal::where('personnel_id', $personnelId)
+            ->where('tanggal', $tanggal)
+            ->first();
+
+        if ($jadwal) {
+            $shift = $jadwal->shift;
+            $isOff = $shift && $shift->type === 'off';
+            $defaultStatus = $isOff ? ($shift->keterangan ?? 'OFF') : 'ALPA';
+
+            Absensi::create([
+                'personnel_id' => $personnelId,
+                'tanggal' => $tanggal,
+                'jadwal_id' => $jadwal->id,
+                'status' => $defaultStatus,
+                'status_masuk' => $defaultStatus,
+                'status_pulang' => $defaultStatus,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data absensi dipindahkan ke kotak sampah.',
         ]);
     }
 }

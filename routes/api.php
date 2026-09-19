@@ -67,11 +67,15 @@ Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function 
         Route::post('/{id}/reject', [\App\Http\Controllers\Api\V1\AdminFaceVerificationController::class, 'reject']);
     });
 
-    // Fitur Absensi & Cek Absensi Khusus Admin Supervisor Lapangan
+    // Fitur Absensi, Cek Absensi & Quick Edit Khusus Admin Supervisor Lapangan
     Route::prefix('absensi')->group(function () {
         Route::get('/personnels', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'personnels']);
         Route::get('/check-status/{id}', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'checkStatus']);
         Route::post('/store', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'store']);
+        Route::get('/edit-data', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'getEditData']);
+        Route::post('/edit-data', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'saveEditData']);
+        Route::post('/reset-original', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'resetToOriginal']);
+        Route::post('/reset-absen', [\App\Http\Controllers\Api\V1\AdminAbsensiController::class, 'resetAbsensi']);
     });
 
     // Manajemen Personel Admin
