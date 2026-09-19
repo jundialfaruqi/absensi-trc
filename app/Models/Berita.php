@@ -31,8 +31,11 @@ class Berita extends Model
                     'id' => $b->id,
                     'judul' => $b->judul,
                     'deskripsi' => $b->deskripsi,
+                    'isi' => $b->isi,
+                    'kategori' => $b->kategori,
                     'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
                     'slug' => $b->slug,
+                    'created_at' => $b->created_at ? $b->created_at->toIso8601String() : null,
                 ];
             })->toArray();
 
@@ -47,8 +50,11 @@ class Berita extends Model
                         'id' => $b->id,
                         'judul' => $b->judul,
                         'deskripsi' => $b->deskripsi,
+                        'isi' => $b->isi,
+                        'kategori' => $b->kategori,
                         'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
                         'slug' => $b->slug,
+                        'created_at' => $b->created_at ? $b->created_at->toIso8601String() : null,
                     ];
                 })->toArray();
 

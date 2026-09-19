@@ -53,6 +53,7 @@ class PersonnelBannersApiTest extends TestCase
             'penugasan_id' => $penugasan->id,
             'name' => 'Ahmad Personel',
             'nik' => '1471012345670002',
+            'nomor_hp' => '08123456789',
             'email' => 'ahmad@example.com',
             'password' => bcrypt('password'),
         ]);
@@ -114,6 +115,43 @@ class PersonnelBannersApiTest extends TestCase
             ->assertJsonFragment([
                 'judul' => 'Pengumuman Apel Pagi Gabungan',
                 'slug' => 'pengumuman-apel-pagi-gabungan',
+                'isi' => 'Konten lengkap berita apel pagi...',
+                'kategori' => 'Pengumuman',
+            ]);
+    }
+
+    public function test_can_fetch_single_banner_detail(): void
+    {
+        $admin = User::factory()->create();
+
+        $berita = Berita::create([
+            'judul' => 'Detail Informasi Pelatihan TRC',
+            'slug' => 'detail-informasi-pelatihan-trc',
+            'deskripsi' => 'Ringkasan info pelatihan...',
+            'isi' => '<p>Ini adalah isi lengkap materi pelatihan TRC di lapangan.</p>',
+            'gambar' => 'berita/pelatihan.jpg',
+            'kategori' => 'Pelatihan',
+            'created_by' => $admin->id,
+            'is_banner_active' => true,
+        ]);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->accessToken,
+            'X-Device-Id' => $this->device->unique_device_id,
+        ])->getJson('/api/v1/personel/banners/' . $berita->id);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'message' => 'Detail artikel berhasil dimuat.',
+                'data' => [
+                    'id' => $berita->id,
+                    'judul' => 'Detail Informasi Pelatihan TRC',
+                    'slug' => 'detail-informasi-pelatihan-trc',
+                    'deskripsi' => 'Ringkasan info pelatihan...',
+                    'isi' => '<p>Ini adalah isi lengkap materi pelatihan TRC di lapangan.</p>',
+                    'kategori' => 'Pelatihan',
+                ],
             ]);
     }
 }

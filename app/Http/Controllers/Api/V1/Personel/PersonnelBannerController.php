@@ -22,8 +22,11 @@ class PersonnelBannerController extends Controller
                     'id' => $b->id,
                     'judul' => $b->judul,
                     'deskripsi' => $b->deskripsi,
+                    'isi' => $b->isi,
+                    'kategori' => $b->kategori,
                     'gambar' => $b->gambar ? asset('storage/'.$b->gambar) : null,
                     'slug' => $b->slug,
+                    'created_at' => $b->created_at ? $b->created_at->toIso8601String() : null,
                 ];
             });
 
@@ -33,4 +36,35 @@ class PersonnelBannerController extends Controller
             'data' => $banners,
         ]);
     }
+
+    /**
+     * Dapatkan detail artikel / pengumuman berdasarkan ID atau Slug.
+     */
+    public function show(Request $request, string $id): JsonResponse
+    {
+        $berita = Berita::where('id', $id)->orWhere('slug', $id)->first();
+
+        if (! $berita) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Detail artikel berhasil dimuat.',
+            'data' => [
+                'id' => $berita->id,
+                'judul' => $berita->judul,
+                'deskripsi' => $berita->deskripsi,
+                'isi' => $berita->isi,
+                'kategori' => $berita->kategori,
+                'gambar' => $berita->gambar ? asset('storage/'.$berita->gambar) : null,
+                'slug' => $berita->slug,
+                'created_at' => $berita->created_at ? $berita->created_at->toIso8601String() : null,
+            ],
+        ]);
+    }
 }
+

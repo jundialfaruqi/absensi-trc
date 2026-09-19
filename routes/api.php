@@ -20,6 +20,7 @@ Route::middleware(['mobile_auth', 'noindex'])->group(function () {
             Route::post('/device/location', [AttendanceController::class, 'updateLocation']);
             Route::post('/device/fcm-token', [AttendanceController::class, 'updateFcmToken']);
             Route::get('/banners', [AttendanceController::class, 'getBanners']);
+            Route::get('/banners/{id}', [AttendanceController::class, 'showBanner']);
             Route::get('/global/dashboard', [AttendanceController::class, 'globalDashboard']);
         });
 
@@ -149,6 +150,7 @@ Route::prefix('v1/personel')->middleware(['noindex', 'jwt.personel'])->group(fun
     Route::get('/jadwal', [\App\Http\Controllers\Api\V1\Personel\PersonnelJadwalController::class, 'index']);
     Route::get('/riwayat', [\App\Http\Controllers\Api\V1\Personel\PersonnelRiwayatController::class, 'index']);
     Route::get('/banners', [\App\Http\Controllers\Api\V1\Personel\PersonnelBannerController::class, 'index']);
+    Route::get('/banners/{id}', [\App\Http\Controllers\Api\V1\Personel\PersonnelBannerController::class, 'show']);
 
     // Real-Time Location Tracking & Push Notification FCM Token
     Route::post('/device/location', [\App\Http\Controllers\Api\V1\Personel\PersonnelLocationController::class, 'updateLocation']);
