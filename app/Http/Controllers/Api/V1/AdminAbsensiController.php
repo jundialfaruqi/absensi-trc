@@ -1104,7 +1104,11 @@ class AdminAbsensiController extends Controller
         $jadwalJamMasuk = null;
         $jadwalJamPulang = null;
 
-        if ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
+        if ($personnel->attendance_type === 'FLEXIBLE') {
+            $jadwalShiftName = $shift?->name ?? 'Fleksibel';
+            $jadwalJamMasuk = null;
+            $jadwalJamPulang = null;
+        } elseif ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
             $jadwalShiftName = $shift->name . ($shift->keterangan ? ' (' . $shift->keterangan . ')' : '');
             $jadwalJamMasuk = Carbon::parse($shift->start_time)->format('H:i');
             $jadwalJamPulang = Carbon::parse($shift->end_time)->format('H:i');

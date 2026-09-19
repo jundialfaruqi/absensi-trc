@@ -407,3 +407,44 @@ test('saving edit with statusMasuk TELAT sets overall status to HADIR', function
         ->and($saved->status)->toBe('HADIR');
 });
 
+test('absensi edit modal sets Fleksibel and null times without shift fallback for flexible personnel', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    // Create default shift that would normally be picked by fallback
+    Shift::create([
+        'name' => 'P1',
+        'type' => 'shift',
+        'keterangan' => 'PAGI',
+        'start_time' => '08:00',
+        'end_time' => '20:00',
+        'color' => '#22c55e',
+    ]);
+
+    $opd = Opd::create(['name' => 'Dinkes', 'code' => 'DINKES']);
+    $personnel = Personnel::create([
+        'name' => 'Dokter Maya',
+        'nik' => '9999888877771234',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'email' => 'maya@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'FLEXIBLE',
+    ]);
+
+    $date = '2026-08-25';
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertSet('editingPersonnelId', $personnel->id)
+        ->assertSet('jadwalShiftName', 'Fleksibel')
+        ->assertSet('jadwalJamMasuk', null)
+        ->assertSet('jadwalJamPulang', null)
+        ->assertSee('Fleksibel')
+        ->assertDontSee('P1 (PAGI)')
+        ->assertDontSee('Jadwal: 08:00')
+        ->assertDontSee('Jadwal: 20:00');
+});
+

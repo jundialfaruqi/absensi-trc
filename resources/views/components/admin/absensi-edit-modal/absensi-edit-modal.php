@@ -112,7 +112,11 @@ new class extends Component
 
         $shift = $jadwal?->shift;
 
-        if ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
+        if ($personnel->attendance_type === 'FLEXIBLE') {
+            $this->jadwalShiftName = $shift?->name ?? 'Fleksibel';
+            $this->jadwalJamMasuk = null;
+            $this->jadwalJamPulang = null;
+        } elseif ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
             $this->jadwalShiftName = $shift->name . ($shift->keterangan ? ' (' . $shift->keterangan . ')' : '');
             $this->jadwalJamMasuk = Carbon::parse($shift->start_time)->format('H:i');
             $this->jadwalJamPulang = Carbon::parse($shift->end_time)->format('H:i');

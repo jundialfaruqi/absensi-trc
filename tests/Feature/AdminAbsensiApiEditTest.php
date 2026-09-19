@@ -219,4 +219,45 @@ class AdminAbsensiApiEditTest extends TestCase
 
         $this->assertSoftDeleted('absensis', ['id' => $absensi->id]);
     }
+
+    public function test_get_edit_data_returns_flexible_schedule_without_shift_time_fallback(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('super-admin');
+
+        // Create default shift that would normally be picked by fallback
+        Shift::create([
+            'name' => 'P1',
+            'type' => 'shift',
+            'keterangan' => 'PAGI',
+            'start_time' => '08:00',
+            'end_time' => '20:00',
+            'color' => '#22c55e',
+        ]);
+
+        $opd = Opd::create(['name' => 'Dinkes', 'code' => 'DINKES']);
+        $personnel = Personnel::create([
+            'name' => 'Dokter Andi',
+            'nik' => '9999888877776666',
+            'opd_id' => $opd->id,
+            'penugasan_id' => 1,
+            'email' => 'andi@example.com',
+            'password' => bcrypt('password'),
+            'pin' => '123456',
+            'attendance_type' => 'FLEXIBLE',
+        ]);
+
+        $date = '2026-08-20';
+        $token = app(\App\Services\JwtService::class)->generateAccessToken($user);
+
+        $response = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson("/api/v1/admin/absensi/edit-data?personnel_id={$personnel->id}&tanggal={$date}");
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.personnel.attendance_type', 'FLEXIBLE')
+            ->assertJsonPath('data.jadwal.shift_name', 'Fleksibel')
+            ->assertJsonPath('data.jadwal.jam_masuk', null)
+            ->assertJsonPath('data.jadwal.jam_pulang', null);
+    }
 }
