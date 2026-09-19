@@ -344,6 +344,14 @@ class AdminPersonnelController extends Controller
             $fotoPath = $request->file('foto')->store('personnel-fotos', 'public');
         }
 
+        $faceDescriptor = $request->input('face_descriptor');
+        $faceDescriptorMobile = $request->input('face_descriptor_mobile');
+        if (is_array($faceDescriptorMobile)) {
+            $faceDescriptorMobile = json_encode($faceDescriptorMobile);
+        }
+
+        $hasBiometrics = !empty($faceDescriptorMobile) || !empty($faceDescriptor);
+
         $personnel = Personnel::create([
             'name' => $name,
             'nik' => $request->input('nik'),
@@ -356,8 +364,12 @@ class AdminPersonnelController extends Controller
             'pin' => $pin,
             'attendance_type' => $request->input('attendance_type', 'SCHEDULED'),
             'wajib_absen_di_lokasi' => $request->boolean('wajib_absen_di_lokasi', false),
-            'face_recognition' => false,
+            'face_recognition' => $hasBiometrics,
+            'face_verification_status' => !empty($faceDescriptorMobile) ? 'APPROVED' : 'PENDING',
+            'face_verified_at' => !empty($faceDescriptorMobile) ? now() : null,
             'foto' => $fotoPath,
+            'face_descriptor' => $faceDescriptor ?: null,
+            'face_descriptor_mobile' => $faceDescriptorMobile ?: null,
         ]);
 
         if ($fotoPath) {
@@ -515,7 +527,24 @@ class AdminPersonnelController extends Controller
                 Storage::disk('public')->delete($personnel->foto);
             }
             $updateData['foto'] = $newPath;
-            $updateData['face_descriptor_mobile'] = null; // Reset deskriptor agar sinkron dengan foto baru
+            $updateData['face_descriptor_mobile'] = null; // Reset deskriptor agar sinkron dengan foto baru jika tidak dikirim
+        }
+
+        if ($request->has('face_descriptor')) {
+            $updateData['face_descriptor'] = $request->input('face_descriptor') ?: null;
+        }
+
+        if ($request->has('face_descriptor_mobile')) {
+            $descMobile = $request->input('face_descriptor_mobile');
+            if (is_array($descMobile)) {
+                $descMobile = json_encode($descMobile);
+            }
+            $updateData['face_descriptor_mobile'] = $descMobile ?: null;
+            if (!empty($descMobile)) {
+                $updateData['face_recognition'] = true;
+                $updateData['face_verification_status'] = 'APPROVED';
+                $updateData['face_verified_at'] = now();
+            }
         }
 
         $personnel->update($updateData);
