@@ -25,6 +25,7 @@ class AdminAuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string',
             'device_name' => 'nullable|string',
+            'fcm_token' => 'nullable|string',
         ], [
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
@@ -57,6 +58,11 @@ class AdminAuthController extends Controller
                 'status' => 'error',
                 'message' => 'Akses ditolak. Aplikasi ini khusus untuk Admin OPD dan Super Admin.',
             ], 403);
+        }
+
+        if ($request->filled('fcm_token')) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
         }
 
         $accessToken = $this->jwtService->generateAccessToken($user);
@@ -242,6 +248,26 @@ class AdminAuthController extends Controller
                     'alamat' => $opd->alamat,
                 ] : null,
             ],
+        ]);
+    }
+
+    /**
+     * Memperbarui FCM Token milik Admin untuk menerima Push Notification.
+     */
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        /** @var User $user */
+        $user = $request->user();
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'FCM Token admin berhasil diperbarui.',
         ]);
     }
 }

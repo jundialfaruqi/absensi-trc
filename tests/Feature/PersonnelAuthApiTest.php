@@ -196,13 +196,15 @@ class PersonnelAuthApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('has_192d', true)
-            ->assertJsonPath('face_recognition_enabled', true);
+            ->assertJsonPath('face_recognition_enabled', false)
+            ->assertJsonPath('face_verification_status', 'PENDING');
 
-        // Model Personnel utama harus terisi pose FRONT
+        // Model Personnel utama harus terisi pose FRONT dan status PENDING
         $freshPersonnel = $this->personnel->fresh();
         $this->assertNotNull($freshPersonnel->face_descriptor_mobile);
         $this->assertCount(192, json_decode($freshPersonnel->face_descriptor_mobile, true));
-        $this->assertTrue((bool)$freshPersonnel->face_recognition);
+        $this->assertEquals('PENDING', $freshPersonnel->face_verification_status);
+        $this->assertFalse((bool)$freshPersonnel->face_recognition);
 
         // Tabel personnel_face_embeddings harus memiliki 4 pose
         $this->assertEquals(4, PersonnelFaceEmbedding::where('personnel_id', $this->personnel->id)->count());

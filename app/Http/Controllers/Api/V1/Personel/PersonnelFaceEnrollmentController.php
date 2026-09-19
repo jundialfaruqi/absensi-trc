@@ -121,23 +121,65 @@ class PersonnelFaceEnrollmentController extends Controller
             if (!$personnel->face_descriptor && $frontDescriptorWeb) {
                 $personnel->face_descriptor = $frontDescriptorWeb;
             }
-            $personnel->face_recognition = true;
-            $personnel->save();
+        }
 
-            \App\Events\PersonnelVectorUpdated::dispatch(
-                $personnel->id,
-                $personnel->opd_id,
-                'ready'
-            );
+        // Set status verifikasi ke PENDING (belum bisa digunakan untuk absensi sebelum diverifikasi admin)
+        $personnel->face_verification_status = 'PENDING';
+        $personnel->face_verification_notes = null;
+        $personnel->face_recognition = false;
+        $personnel->save();
+
+        // 1. Dispatch Real-Time Reverb WebSocket Event
+        \App\Events\FaceEnrollmentSubmitted::dispatch(
+            $personnel->id,
+            $personnel->opd_id,
+            $personnel->opd?->name ?? 'OPD TRC',
+            $personnel->name,
+            $personnel->nik,
+            $personnel->foto ? asset('storage/' . $personnel->foto) : null
+        );
+
+        // 2. Kirim Push Notification FCM ke Admin yang berhak (Super Admin + Admin OPD ini)
+        try {
+            $targetAdminTokens = \App\Models\User::query()
+                ->whereNotNull('fcm_token')
+                ->where(function ($q) use ($personnel) {
+                    $q->whereHas('roles', fn($r) => $r->where('name', 'super-admin'))
+                      ->orWhere(function ($opdQ) use ($personnel) {
+                          $opdQ->whereHas('roles', fn($r) => $r->where('name', 'admin-opd'))
+                               ->whereHas('opds', fn($o) => $o->where('opds.id', $personnel->opd_id));
+                      });
+                })
+                ->pluck('fcm_token')
+                ->unique()
+                ->filter()
+                ->values()
+                ->all();
+
+            foreach ($targetAdminTokens as $token) {
+                \App\Jobs\SendFcmNotificationJob::dispatch(
+                    $token,
+                    'Verifikasi Wajah Personel',
+                    "{$personnel->name} ({$personnel->opd?->name}) meminta verifikasi perekaman wajah biometrik.",
+                    [
+                        'type' => 'face_verification',
+                        'personnel_id' => (string)$personnel->id,
+                        'opd_id' => (string)$personnel->opd_id,
+                    ]
+                );
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal mengirim FCM admin untuk verifikasi wajah: ' . $e->getMessage());
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Perekaman wajah 3D berhasil disimpan ke server.',
+            'message' => 'Perekaman wajah 3D berhasil disimpan ke server. Menunggu verifikasi admin.',
             'personnel_id' => $personnel->id,
             'saved_poses' => $savedPoses,
             'has_192d' => !empty($personnel->face_descriptor_mobile),
-            'face_recognition_enabled' => (bool)$personnel->face_recognition,
+            'face_recognition_enabled' => false,
+            'face_verification_status' => $personnel->face_verification_status,
         ]);
     }
 

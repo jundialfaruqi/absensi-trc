@@ -146,7 +146,31 @@
                         $isSuperAdmin = $user->hasRole('super-admin');
                         $opdId = $user->opd()?->id;
 
-                        $dashboardNotifications = \App\Models\LeaveRequest::query()
+                        // 1. Notifikasi Verifikasi Wajah Biometrik (PENDING)
+                        $faceVerifications = \App\Models\Personnel::query()
+                            ->with('opd')
+                            ->where('face_verification_status', 'PENDING')
+                            ->when(!$isSuperAdmin, function ($q) use ($opdId) {
+                                $q->where('opd_id', $opdId);
+                            })
+                            ->orderBy('updated_at', 'desc')
+                            ->take(10)
+                            ->get()
+                            ->map(function ($p) {
+                                return [
+                                    'url' => route('personnel-edit', $p->id),
+                                    'color' => 'error',
+                                    'icon' => 'face',
+                                    'category' => 'VERIFIKASI WAJAH',
+                                    'type' => 'PENDING',
+                                    'title' => $p->name,
+                                    'message' => 'Meminta verifikasi rekaman wajah 3D (' . ($p->opd?->name ?? 'TRC') . ')',
+                                    'created_at' => $p->updated_at,
+                                ];
+                            });
+
+                        // 2. Notifikasi Pengajuan Cuti (PENDING)
+                        $leaveNotifications = \App\Models\LeaveRequest::query()
                             ->with(['personnel', 'cuti'])
                             ->where('status', 'PENDING')
                             ->when(!$isSuperAdmin, function ($q) use ($opdId) {
@@ -171,8 +195,13 @@
                                         ' (' .
                                         \Carbon\Carbon::parse($req->tanggal_mulai)->format('d/m/Y') .
                                         ')',
+                                    'created_at' => $req->created_at,
                                 ];
                             });
+
+                        $dashboardNotifications = $faceVerifications->concat($leaveNotifications)
+                            ->sortByDesc('created_at')
+                            ->take(15);
                     @endphp
                     <div class="dropdown dropdown-end">
                         <button tabindex="0" class="btn btn-secondary btn-circle">
@@ -205,7 +234,14 @@
                                             class="flex items-start gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors border border-transparent hover:border-base-300 group">
                                             <div
                                                 class="w-8 h-8 rounded-full bg-{{ $notif['color'] }}/10 flex items-center justify-center shrink-0 group-hover:bg-{{ $notif['color'] }}/20">
-                                                @if ($notif['icon'] === 'calendar')
+                                                @if ($notif['icon'] === 'face')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="w-4 h-4 text-{{ $notif['color'] }}">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                                                    </svg>
+                                                @elseif ($notif['icon'] === 'calendar')
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                         class="w-4 h-4 text-{{ $notif['color'] }}">

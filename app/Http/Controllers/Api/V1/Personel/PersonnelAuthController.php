@@ -114,6 +114,8 @@ class PersonnelAuthController extends Controller
             'face_status' => [
                 'has_192d' => $has192D,
                 'pose_count' => $poseCount,
+                'verification_status' => $personnel->face_verification_status ?? 'UNREGISTERED',
+                'verification_notes' => $personnel->face_verification_notes,
             ],
             'personnel' => [
                 'id' => $personnel->id,
@@ -126,6 +128,8 @@ class PersonnelAuthController extends Controller
                 'kantor_name' => $personnel->kantor?->name ?? $personnel->kantor?->nama_kantor,
                 'penugasan_id' => $personnel->penugasan_id,
                 'penugasan_name' => $personnel->penugasan?->name,
+                'face_verification_status' => $personnel->face_verification_status ?? 'UNREGISTERED',
+                'face_verification_notes' => $personnel->face_verification_notes,
             ],
             'device' => [
                 'id' => $device->id,
@@ -218,10 +222,15 @@ class PersonnelAuthController extends Controller
                 'nomor_hp' => $personnel->nomor_hp,
                 'wajib_absen_di_lokasi' => (bool)$personnel->wajib_absen_di_lokasi,
                 'face_recognition' => (bool)$personnel->face_recognition,
+                'face_verification_status' => $personnel->face_verification_status ?? 'UNREGISTERED',
+                'face_verification_notes' => $personnel->face_verification_notes,
+                'face_verified_at' => $personnel->face_verified_at?->toISOString(),
                 'needs_face_enrollment' => $needsFaceEnrollment,
                 'face_status' => [
                     'has_192d' => $has192D,
                     'pose_count' => $poseCount,
+                    'verification_status' => $personnel->face_verification_status ?? 'UNREGISTERED',
+                    'verification_notes' => $personnel->face_verification_notes,
                 ],
             ],
         ]);

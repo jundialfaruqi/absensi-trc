@@ -51,12 +51,21 @@ Route::prefix('v1/admin/auth')->middleware('noindex')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'logout']);
         Route::get('/me', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'me']);
         Route::get('/my-profile', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'myProfile']);
+        Route::post('/update-fcm-token', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'updateFcmToken']);
     });
 });
 
 Route::prefix('v1/admin')->middleware(['noindex', 'jwt.admin'])->group(function () {
     Route::get('/my-profile', [\App\Http\Controllers\Api\V1\AdminAuthController::class, 'myProfile']);
     Route::get('/jadwal', [\App\Http\Controllers\Api\V1\AdminJadwalController::class, 'index']);
+
+    // Verifikasi Biometrika Wajah Personel (Real-Time Admin Oversight)
+    Route::prefix('face-verifications')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\AdminFaceVerificationController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\AdminFaceVerificationController::class, 'show']);
+        Route::post('/{id}/approve', [\App\Http\Controllers\Api\V1\AdminFaceVerificationController::class, 'approve']);
+        Route::post('/{id}/reject', [\App\Http\Controllers\Api\V1\AdminFaceVerificationController::class, 'reject']);
+    });
 
     // Fitur Absensi & Cek Absensi Khusus Admin Supervisor Lapangan
     Route::prefix('absensi')->group(function () {
