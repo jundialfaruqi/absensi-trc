@@ -17,9 +17,139 @@
                 </svg>
                 <span x-text="loading ? 'Memuat...' : 'Kembali'"></span>
             </a>
-        </div>
-
         @if ($readyToLoad)
+            {{-- Banner Status Verifikasi Biometrik Wajah 3D --}}
+            @if ($face_verification_status === 'PENDING')
+                <div class="mb-6 rounded-2xl border-2 border-warning/40 bg-warning/10 p-4 sm:p-5 shadow-sm">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2.5 bg-warning text-warning-content rounded-xl shadow-xs shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-bold text-base text-base-content">Permintaan Verifikasi Wajah 3D</h4>
+                                    <span class="badge badge-warning font-semibold text-xs animate-pulse">Menunggu Persetujuan Admin</span>
+                                </div>
+                                <p class="text-xs text-base-content/70 mt-1 max-w-2xl">
+                                    Personel ini telah merekam biometrik 4 pose wajah 3D melalui aplikasi mobile TRC. Silakan periksa foto pose di panel kanan, lalu klik <strong>Setujui Verifikasi</strong> agar personel dapat melakukan absensi Face Recognition.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+                            <button type="button" @click="$wire.set('showRejectModal', true)"
+                                class="btn btn-error btn-sm btn-outline gap-1.5 flex-1 sm:flex-initial">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Tolak</span>
+                            </button>
+                            <button type="button" wire:click="approveFaceVerification" wire:loading.attr="disabled"
+                                class="btn btn-success btn-sm text-white gap-1.5 shadow-sm flex-1 sm:flex-initial">
+                                <span wire:loading wire:target="approveFaceVerification" class="loading loading-spinner loading-xs"></span>
+                                <svg wire:loading.remove wire:target="approveFaceVerification" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Setujui Verifikasi</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @elseif ($face_verification_status === 'APPROVED')
+                <div class="mb-6 rounded-2xl border border-success/30 bg-success/10 p-4 shadow-xs">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-success text-success-content rounded-xl shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-bold text-sm text-base-content">Biometrik Wajah 3D Terverifikasi & Aktif</span>
+                                    <span class="badge badge-success text-white badge-xs font-semibold">APPROVED</span>
+                                </div>
+                                <p class="text-xs text-base-content/60 mt-0.5">
+                                    Disetujui pada <span class="font-medium">{{ $face_verified_at ?? '-' }}</span> oleh <span class="font-medium">{{ $face_verified_by_name ?? 'Admin' }}</span>. Personel dapat melakukan absensi dengan Face Recognition.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @elseif ($face_verification_status === 'REJECTED')
+                <div class="mb-6 rounded-2xl border-2 border-error/40 bg-error/10 p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-error text-error-content rounded-xl shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-bold text-sm text-error">Verifikasi Wajah Ditolak</span>
+                                    <span class="badge badge-error text-white badge-xs font-semibold">REJECTED</span>
+                                </div>
+                                <p class="text-xs text-base-content/80 mt-1 font-medium">
+                                    Catatan Penolakan: <span class="italic text-error">{{ $face_verification_notes ?? 'Perekaman wajah tidak memenuhi kriteria.' }}</span>
+                                </p>
+                                <p class="text-[11px] text-base-content/60 mt-0.5">
+                                    Ditolak pada {{ $face_verified_at ?? '-' }} oleh {{ $face_verified_by_name ?? 'Admin' }}.
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="approveFaceVerification" wire:loading.attr="disabled"
+                            class="btn btn-sm btn-success text-white shrink-0 self-end sm:self-center">
+                            <span wire:loading wire:target="approveFaceVerification" class="loading loading-spinner loading-xs"></span>
+                            <span>Setujui Ulang</span>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Modal Penolakan Verifikasi Wajah --}}
+            @if ($showRejectModal)
+                <div class="modal modal-open">
+                    <div class="modal-box max-w-md">
+                        <h3 class="font-bold text-lg flex items-center gap-2 text-error">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Tolak Verifikasi Wajah
+                        </h3>
+                        <p class="text-xs text-base-content/70 mt-2">
+                            Berikan alasan penolakan agar personel dapat mengetahui kekurangan dan melakukan perekaman ulang wajah dengan benar di aplikasi mobile.
+                        </p>
+
+                        <div class="form-control mt-4">
+                            <label class="label mb-1">
+                                <span class="label-text font-semibold text-xs">Alasan Penolakan <span class="text-error">*</span></span>
+                            </label>
+                            <textarea wire:model="reject_reason" rows="3"
+                                class="textarea textarea-bordered focus:textarea-error w-full text-sm @error('reject_reason') textarea-error @enderror"
+                                placeholder="Cth: Foto pose samping kurang jelas / buram, pencahayaan terlalu gelap, dsb."></textarea>
+                            @error('reject_reason')
+                                <span class="text-error text-xs mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="modal-action">
+                            <button type="button" @click="$wire.set('showRejectModal', false)" class="btn btn-ghost btn-sm">
+                                Batal
+                            </button>
+                            <button type="button" wire:click="rejectFaceVerification" wire:loading.attr="disabled"
+                                class="btn btn-error btn-sm text-white">
+                                <span wire:loading wire:target="rejectFaceVerification" class="loading loading-spinner loading-xs"></span>
+                                <span wire:loading.remove wire:target="rejectFaceVerification">Konfirmasi Tolak</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-backdrop bg-black/40" @click="$wire.set('showRejectModal', false)"></div>
+                </div>
+            @endif
+
             <form wire:submit="save" autocomplete="off">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 

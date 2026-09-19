@@ -20,6 +20,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Events\PersonnelPhotoUpdated;
 use App\Events\PersonnelVectorUpdated;
+use App\Events\FaceVerificationProcessed;
 
 new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -66,6 +67,13 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
     public array $existing_3d_photos = [];
     public int $total_adaptations = 0;
     public bool $has_adaptive_biometrics = false;
+
+    public string $face_verification_status = 'UNREGISTERED';
+    public ?string $face_verification_notes = null;
+    public ?string $face_verified_at = null;
+    public ?string $face_verified_by_name = null;
+    public string $reject_reason = '';
+    public bool $showRejectModal = false;
 
     public string $kantor_id = '';
 
@@ -216,6 +224,11 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->wajib_absen_di_lokasi = (bool) $item->wajib_absen_di_lokasi;
         $this->face_recognition = (bool) $item->face_recognition;
         $this->attendance_type = (string) $item->attendance_type;
+
+        $this->face_verification_status = $item->face_verification_status ?? 'UNREGISTERED';
+        $this->face_verification_notes = $item->face_verification_notes;
+        $this->face_verified_at = $item->face_verified_at ? $item->face_verified_at->format('d/m/Y H:i') : null;
+        $this->face_verified_by_name = $item->verifier?->name;
 
         $device = Device::where('personnel_id', $item->id)->first();
         if ($device) {
@@ -511,6 +524,10 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'face_descriptor' => null,
             'face_descriptor_mobile' => null,
             'face_recognition' => false,
+            'face_verification_status' => 'UNREGISTERED',
+            'face_verification_notes' => null,
+            'face_verified_at' => null,
+            'face_verified_by' => null,
         ]);
 
         // 4. Reset properti Livewire
@@ -532,6 +549,10 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->total_adaptations = 0;
         $this->has_adaptive_biometrics = false;
         $this->face_recognition = false;
+        $this->face_verification_status = 'UNREGISTERED';
+        $this->face_verification_notes = null;
+        $this->face_verified_at = null;
+        $this->face_verified_by_name = null;
 
         // 5. Broadcast event real-time sinkronisasi
         PersonnelVectorUpdated::dispatch(
@@ -546,6 +567,100 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'type' => 'success',
             'title' => 'Data Wajah Dihapus',
             'message' => 'Seluruh data biometrik wajah (128D, 192D, 3D poses) dan foto personel berhasil dihapus.',
+        ]);
+    }
+
+    public function approveFaceVerification(): void
+    {
+        $personnel = Personnel::findOrFail($this->personnelId);
+
+        if (! $this->canEditPersonnel($personnel)) {
+            abort(403, 'Anda tidak memiliki izin untuk memverifikasi data personel ini.');
+        }
+
+        /** @var User|null $user */
+        $user = $this->user();
+
+        $personnel->face_verification_status = 'APPROVED';
+        $personnel->face_verification_notes = null;
+        $personnel->face_recognition = true;
+        $personnel->face_verified_at = now();
+        $personnel->face_verified_by = $user?->id;
+        $personnel->save();
+
+        $this->face_verification_status = 'APPROVED';
+        $this->face_verification_notes = null;
+        $this->face_recognition = true;
+        $this->face_verified_at = $personnel->face_verified_at->format('d/m/Y H:i');
+        $this->face_verified_by_name = $user?->name;
+
+        // Broadcast Real-Time Reverb
+        FaceVerificationProcessed::dispatch(
+            $personnel->id,
+            'APPROVED',
+            null,
+            $personnel->face_verified_at->toISOString()
+        );
+        PersonnelVectorUpdated::dispatch(
+            $personnel->id,
+            $personnel->opd_id,
+            'ready'
+        );
+
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'title' => 'Verifikasi Wajah Disetujui',
+            'message' => "Verifikasi wajah {$personnel->name} telah berhasil disetujui. Personel sekarang dapat melakukan absensi di aplikasi mobile.",
+        ]);
+    }
+
+    public function rejectFaceVerification(): void
+    {
+        $personnel = Personnel::findOrFail($this->personnelId);
+
+        if (! $this->canEditPersonnel($personnel)) {
+            abort(403, 'Anda tidak memiliki izin untuk memverifikasi data personel ini.');
+        }
+
+        $this->validate([
+            'reject_reason' => 'required|string|min:3|max:500',
+        ], [
+            'reject_reason.required' => 'Alasan penolakan wajib diisi.',
+            'reject_reason.min' => 'Alasan penolakan minimal 3 karakter.',
+            'reject_reason.max' => 'Alasan penolakan maksimal 500 karakter.',
+        ]);
+
+        /** @var User|null $user */
+        $user = $this->user();
+        $reason = trim($this->reject_reason);
+
+        $personnel->face_verification_status = 'REJECTED';
+        $personnel->face_verification_notes = $reason;
+        $personnel->face_recognition = false;
+        $personnel->face_verified_at = now();
+        $personnel->face_verified_by = $user?->id;
+        $personnel->save();
+
+        $this->face_verification_status = 'REJECTED';
+        $this->face_verification_notes = $reason;
+        $this->face_recognition = false;
+        $this->face_verified_at = $personnel->face_verified_at->format('d/m/Y H:i');
+        $this->face_verified_by_name = $user?->name;
+        $this->showRejectModal = false;
+        $this->reject_reason = '';
+
+        // Broadcast Real-Time Reverb
+        FaceVerificationProcessed::dispatch(
+            $personnel->id,
+            'REJECTED',
+            $reason,
+            $personnel->face_verified_at->toISOString()
+        );
+
+        $this->dispatch('toast', [
+            'type' => 'warning',
+            'title' => 'Verifikasi Wajah Ditolak',
+            'message' => "Verifikasi biometrik wajah {$personnel->name} ditolak. Personel diminta untuk mengulangi perekaman wajah.",
         ]);
     }
 
