@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Personnel;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -35,6 +36,13 @@ new #[Title('Manajemen Personnel')] #[Layout('layouts::admin.app')] class extend
     public function load()
     {
         $this->readyToLoad = true;
+    }
+
+    #[On('face-enrollment-submitted')]
+    #[On('face-verification-processed')]
+    public function refreshPersonnels(): void
+    {
+        // Triggers re-computation of personnels
     }
 
     #[Computed]

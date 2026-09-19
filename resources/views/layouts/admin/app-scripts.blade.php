@@ -247,20 +247,28 @@
                             return;
                         }
 
-                        var echo = window.EchoInstance || window.CustomEcho;
+                        var echo = window.EchoInstance || window.CustomEcho || window.Echo;
                         if (!echo && typeof EchoConstructor === 'function') {
                             try {
+                                var reverbHost = '{{ env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')) }}';
+                                var wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
+                                    window.location.hostname : reverbHost;
+                                var wsPort = {{ env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)) }};
+                                var forceTLS = {{ env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')) === 'https' ? 'true' : 'false' }};
+
                                 echo = new EchoConstructor({
                                     broadcaster: 'reverb',
-                                    key: '{{ config('reverb.apps.apps.0.key', env('REVERB_APP_KEY', 'zv7x8huegls10mbb45sk')) }}',
-                                    wsHost: window.location.hostname,
-                                    wsPort: {{ config('reverb.apps.apps.0.options.port', env('REVERB_PORT', 8080)) }},
-                                    wssPort: {{ config('reverb.apps.apps.0.options.port', env('REVERB_PORT', 443)) }},
-                                    forceTLS: window.location.protocol === 'https:',
+                                    key: '{{ env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY', 'zv7x8huegls10mbb45sk')) }}',
+                                    wsHost: wsHost,
+                                    wsPort: wsPort,
+                                    wssPort: wsPort,
+                                    forceTLS: forceTLS,
                                     enabledTransports: ['ws', 'wss'],
                                     disableStats: true,
                                 });
                                 window.EchoInstance = echo;
+                                window.CustomEcho = echo;
+                                window.Echo = echo;
                             } catch (e) {
                                 console.warn('[RealtimeNotif] Gagal init Echo:', e);
                             }
@@ -303,6 +311,14 @@
                                     message: name + ' (' + opdName + ') meminta verifikasi biometrik wajah 3D.'
                                 });
                             }
+
+                            // Kirim event ke seluruh komponen aktif (Alpine & Livewire)
+                            try {
+                                window.dispatchEvent(new CustomEvent('face-enrollment-submitted', { detail: data }));
+                                if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                                    window.Livewire.dispatch('face-enrollment-submitted', data);
+                                }
+                            } catch (e) {}
                         };
 
                         var handleProcessed = function(data) {
@@ -310,6 +326,14 @@
                             self.items = self.items.filter(function(item) {
                                 return !(item.category === 'VERIFIKASI WAJAH' && item.url.indexOf('/' + personnelId + '/edit') !== -1);
                             });
+
+                            // Kirim event ke seluruh komponen aktif (Alpine & Livewire)
+                            try {
+                                window.dispatchEvent(new CustomEvent('face-verification-processed', { detail: data }));
+                                if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                                    window.Livewire.dispatch('face-verification-processed', data);
+                                }
+                            } catch (e) {}
                         };
 
                         try {

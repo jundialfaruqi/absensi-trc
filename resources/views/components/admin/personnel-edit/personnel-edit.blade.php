@@ -2114,20 +2114,25 @@
                                 const EchoConstructor = window._EchoHandler || window.Echo;
                                 if (typeof EchoConstructor === 'function' && !window.Echo) {
                                     try {
-                                        const reverbHost = '{{ env('REVERB_HOST') }}';
+                                        const reverbHost = '{{ env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')) }}';
                                         const wsHost = (reverbHost === '127.0.0.1' || reverbHost ===
                                                 'localhost' || !reverbHost) ?
                                             window.location.hostname : reverbHost;
-                                        const isSecure = window.location.protocol === 'https:';
-                                        window.Echo = new EchoConstructor({
+                                        const wsPort = {{ env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)) }};
+                                        const forceTLS = {{ env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')) === 'https' ? 'true' : 'false' }};
+                                        const echo = new EchoConstructor({
                                             broadcaster: 'reverb',
-                                            key: '{{ env('REVERB_APP_KEY') }}',
+                                            key: '{{ env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY', 'zv7x8huegls10mbb45sk')) }}',
                                             wsHost: wsHost,
-                                            wsPort: window.location.port || (isSecure ? 443 : 80),
-                                            wssPort: window.location.port || (isSecure ? 443 : 80),
-                                            forceTLS: isSecure,
+                                            wsPort: wsPort,
+                                            wssPort: wsPort,
+                                            forceTLS: forceTLS,
                                             enabledTransports: ['ws', 'wss'],
+                                            disableStats: true,
                                         });
+                                        window.EchoInstance = echo;
+                                        window.CustomEcho = echo;
+                                        window.Echo = echo;
                                     } catch (e) {
                                         console.warn("Could not init Echo in personnel-edit: ", e);
                                     }

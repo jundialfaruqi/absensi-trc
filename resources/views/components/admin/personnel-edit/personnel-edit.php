@@ -239,6 +239,15 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         }
     }
 
+    #[\Livewire\Attributes\On('face-enrollment-submitted')]
+    public function onFaceEnrollmentSubmitted($data = []): void
+    {
+        $personnelId = is_array($data) ? ($data['personnel_id'] ?? null) : null;
+        if ($personnelId && (int)$personnelId === $this->personnelId) {
+            $this->loadPersonnelData($this->personnelId);
+        }
+    }
+
     public function regeneratePin(): void
     {
         $this->pin = $this->generateUniquePin();
