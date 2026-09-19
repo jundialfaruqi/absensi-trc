@@ -115,7 +115,7 @@ class AdminJadwalController extends Controller
             ->join('personnels', 'absensis.personnel_id', '=', 'personnels.id')
             ->leftJoin('opds', 'personnels.opd_id', '=', 'opds.id')
             ->select('absensis.*')
-            ->with(['personnel.opd', 'personnel.penugasan', 'jadwal.shift']);
+            ->with(['personnel.opd', 'personnel.penugasan', 'jadwal.shift', 'kantor']);
 
         if ($isSuperAdmin) {
             $activitiesQuery->orderBy('opds.singkatan')->orderBy('personnels.name');
@@ -166,6 +166,8 @@ class AdminJadwalController extends Controller
                     'id' => $log->id,
                     'tanggal' => $log->tanggal instanceof Carbon ? $log->tanggal->format('Y-m-d') : substr((string) $log->tanggal, 0, 10),
                     'status' => $log->status,
+                    'keterangan' => $log->keterangan,
+                    'kantor_name' => $log->kantor?->name,
                     'personnel' => [
                         'id' => $personnel?->id,
                         'name' => $personnel?->name ?? 'Tidak Diketahui',
@@ -186,12 +188,16 @@ class AdminJadwalController extends Controller
                     'masuk' => [
                         'status_masuk' => $log->status_masuk,
                         'jam_masuk' => $jamMasuk,
+                        'foto' => $log->foto_masuk ? asset('storage/' . $log->foto_masuk) : null,
+                        'foto_masuk' => $log->foto_masuk ? asset('storage/' . $log->foto_masuk) : null,
                         'is_within_radius' => $log->is_within_radius !== null ? (bool) $log->is_within_radius : null,
                         'jarak_meter' => $log->jarak_meter !== null ? (int) $log->jarak_meter : null,
                     ],
                     'pulang' => [
                         'status_pulang' => $log->status_pulang,
                         'jam_pulang' => $jamPulang,
+                        'foto' => $log->foto_pulang ? asset('storage/' . $log->foto_pulang) : null,
+                        'foto_pulang' => $log->foto_pulang ? asset('storage/' . $log->foto_pulang) : null,
                         'is_within_radius_pulang' => $log->is_within_radius_pulang !== null ? (bool) $log->is_within_radius_pulang : null,
                         'jarak_meter_pulang' => $log->jarak_meter_pulang !== null ? (int) $log->jarak_meter_pulang : null,
                     ],
