@@ -158,7 +158,7 @@
                             ->get()
                             ->map(function ($p) {
                                 return [
-                                    'url' => route('personnel-edit', $p->id),
+                                    'url' => route('personnel.edit', $p->id),
                                     'color' => 'error',
                                     'icon' => 'face',
                                     'category' => 'VERIFIKASI WAJAH',
