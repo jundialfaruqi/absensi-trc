@@ -225,10 +225,12 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
         $this->face_recognition = (bool) $item->face_recognition;
         $this->attendance_type = (string) $item->attendance_type;
 
-        $this->face_verification_status = $item->face_verification_status ?? 'UNREGISTERED';
+        $this->face_verification_status = $this->has_3d_faces
+            ? ($item->face_verification_status ?? 'UNREGISTERED')
+            : ($item->face_verification_status === 'PENDING' ? 'PENDING' : 'UNREGISTERED');
         $this->face_verification_notes = $item->face_verification_notes;
-        $this->face_verified_at = $item->face_verified_at ? $item->face_verified_at->format('d/m/Y H:i') : null;
-        $this->face_verified_by_name = $item->verifier?->name;
+        $this->face_verified_at = ($this->has_3d_faces && $item->face_verified_at) ? $item->face_verified_at->format('d/m/Y H:i') : null;
+        $this->face_verified_by_name = $this->has_3d_faces ? $item->verifier?->name : null;
 
         $device = Device::where('personnel_id', $item->id)->first();
         if ($device) {

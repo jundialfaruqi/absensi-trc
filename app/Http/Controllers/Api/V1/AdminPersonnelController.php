@@ -365,8 +365,8 @@ class AdminPersonnelController extends Controller
             'attendance_type' => $request->input('attendance_type', 'SCHEDULED'),
             'wajib_absen_di_lokasi' => $request->boolean('wajib_absen_di_lokasi', false),
             'face_recognition' => $hasBiometrics,
-            'face_verification_status' => !empty($faceDescriptorMobile) ? 'APPROVED' : 'PENDING',
-            'face_verified_at' => !empty($faceDescriptorMobile) ? now() : null,
+            'face_verification_status' => 'UNREGISTERED',
+            'face_verified_at' => null,
             'foto' => $fotoPath,
             'face_descriptor' => $faceDescriptor ?: null,
             'face_descriptor_mobile' => $faceDescriptorMobile ?: null,
@@ -542,8 +542,6 @@ class AdminPersonnelController extends Controller
             $updateData['face_descriptor_mobile'] = $descMobile ?: null;
             if (!empty($descMobile)) {
                 $updateData['face_recognition'] = true;
-                $updateData['face_verification_status'] = 'APPROVED';
-                $updateData['face_verified_at'] = now();
             }
         }
 

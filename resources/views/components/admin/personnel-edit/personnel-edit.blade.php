@@ -59,7 +59,7 @@
                         </div>
                     </div>
                 </div>
-            @elseif ($face_verification_status === 'APPROVED')
+            @elseif ($face_verification_status === 'APPROVED' && $has_3d_faces)
                 <div class="mb-6 rounded-2xl border border-success/30 bg-success/10 p-4 shadow-xs">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
@@ -107,6 +107,25 @@
                             <span wire:loading wire:target="approveFaceVerification" class="loading loading-spinner loading-xs"></span>
                             <span>Setujui Ulang</span>
                         </button>
+                    </div>
+                </div>
+            @elseif (!$has_3d_faces)
+                <div class="mb-6 rounded-2xl border border-base-300 bg-base-200/40 p-4 shadow-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-base-300 text-base-content/70 rounded-xl shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-bold text-sm text-base-content">Perekaman Wajah 3D Belum Dilakukan</span>
+                                <span class="badge badge-ghost text-xs font-semibold">BELUM ADA 3D</span>
+                            </div>
+                            <p class="text-xs text-base-content/60 mt-0.5">
+                                Personel ini belum merekam 4 pose biometrik wajah 3D di aplikasi mobile personel TRC. Perekaman 3D akan diminta otomatis saat personel pertama kali memasukkan lisensi di aplikasi mobile.
+                            </p>
+                        </div>
                     </div>
                 </div>
             @endif
