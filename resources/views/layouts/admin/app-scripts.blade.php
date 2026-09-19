@@ -250,15 +250,15 @@
                         var echo = window.EchoInstance || window.CustomEcho || window.Echo;
                         if (!echo && typeof EchoConstructor === 'function') {
                             try {
-                                var reverbHost = '{{ env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')) }}';
+                                var reverbHost = '{{ config('broadcasting.connections.reverb.options.host') }}';
                                 var wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
                                     window.location.hostname : reverbHost;
-                                var wsPort = {{ env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)) }};
-                                var forceTLS = {{ env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')) === 'https' ? 'true' : 'false' }};
+                                var wsPort = {{ config('broadcasting.connections.reverb.options.port', 8080) }};
+                                var forceTLS = {{ config('broadcasting.connections.reverb.options.useTLS') ? 'true' : 'false' }};
 
                                 echo = new EchoConstructor({
                                     broadcaster: 'reverb',
-                                    key: '{{ env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY', 'zv7x8huegls10mbb45sk')) }}',
+                                    key: '{{ config('broadcasting.connections.reverb.key') }}',
                                     wsHost: wsHost,
                                     wsPort: wsPort,
                                     wssPort: wsPort,
