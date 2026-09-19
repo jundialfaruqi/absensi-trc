@@ -17,6 +17,8 @@
                 </svg>
                 <span x-text="loading ? 'Memuat...' : 'Kembali'"></span>
             </a>
+        </div>
+
         @if ($readyToLoad)
             {{-- Banner Status Verifikasi Biometrik Wajah 3D --}}
             @if ($face_verification_status === 'PENDING')
@@ -3351,3 +3353,4 @@
             })();
         </script>
     </div>
+</div>
