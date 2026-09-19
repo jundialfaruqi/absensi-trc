@@ -219,6 +219,123 @@
                 }
             } catch (_) {}
         }
+
+        function registerNotificationManager() {
+            if (!window.Alpine) return;
+            if (window._adminNotifMgrRegistered) return;
+            window._adminNotifMgrRegistered = true;
+
+            Alpine.data('adminNotificationManager', function(config) {
+                return {
+                    items: config.initialItems || [],
+                    isSuperAdmin: config.isSuperAdmin,
+                    userOpdId: config.userOpdId,
+
+                    get count() {
+                        return this.items.length;
+                    },
+
+                    init() {
+                        this.initEcho();
+                    },
+
+                    initEcho() {
+                        var self = this;
+                        var EchoConstructor = window._EchoHandler || window.Echo;
+                        if (!EchoConstructor) {
+                            setTimeout(function() { self.initEcho(); }, 1000);
+                            return;
+                        }
+
+                        var echo = window.EchoInstance || window.CustomEcho;
+                        if (!echo && typeof EchoConstructor === 'function') {
+                            try {
+                                echo = new EchoConstructor({
+                                    broadcaster: 'reverb',
+                                    key: '{{ config('reverb.apps.apps.0.key', env('REVERB_APP_KEY', 'zv7x8huegls10mbb45sk')) }}',
+                                    wsHost: window.location.hostname,
+                                    wsPort: {{ config('reverb.apps.apps.0.options.port', env('REVERB_PORT', 8080)) }},
+                                    wssPort: {{ config('reverb.apps.apps.0.options.port', env('REVERB_PORT', 443)) }},
+                                    forceTLS: window.location.protocol === 'https:',
+                                    enabledTransports: ['ws', 'wss'],
+                                    disableStats: true,
+                                });
+                                window.EchoInstance = echo;
+                            } catch (e) {
+                                console.warn('[RealtimeNotif] Gagal init Echo:', e);
+                            }
+                        }
+
+                        if (!echo) return;
+
+                        var handleEnrollment = function(data) {
+                            var personnelId = data.personnel_id;
+                            var opdId = data.opd_id;
+                            var name = data.name || 'Personel TRC';
+                            var opdName = data.opd_name || 'OPD TRC';
+
+                            // Validasi wewenang OPD
+                            if (!self.isSuperAdmin && self.userOpdId && opdId && parseInt(self.userOpdId) !== parseInt(opdId)) {
+                                return;
+                            }
+
+                            // Cek duplikasi
+                            var exists = self.items.some(function(item) {
+                                return item.category === 'VERIFIKASI WAJAH' && item.url.indexOf('/' + personnelId + '/edit') !== -1;
+                            });
+
+                            if (!exists) {
+                                self.items.unshift({
+                                    url: '/page/personnel/' + personnelId + '/edit',
+                                    color: 'error',
+                                    icon: 'face',
+                                    category: 'VERIFIKASI WAJAH',
+                                    type: 'PENDING',
+                                    title: name,
+                                    message: 'Meminta verifikasi rekaman wajah 3D (' + opdName + ')',
+                                    created_at: new Date().toISOString()
+                                });
+
+                                // Tampilkan Toast popup di Web
+                                showToast({
+                                    type: 'info',
+                                    title: 'Verifikasi Wajah Masuk',
+                                    message: name + ' (' + opdName + ') meminta verifikasi biometrik wajah 3D.'
+                                });
+                            }
+                        };
+
+                        var handleProcessed = function(data) {
+                            var personnelId = data.personnel_id;
+                            self.items = self.items.filter(function(item) {
+                                return !(item.category === 'VERIFIKASI WAJAH' && item.url.indexOf('/' + personnelId + '/edit') !== -1);
+                            });
+                        };
+
+                        try {
+                            echo.channel('admin-notifications')
+                                .listen('.FaceEnrollmentSubmitted', handleEnrollment)
+                                .listen('FaceEnrollmentSubmitted', handleEnrollment)
+                                .listen('.FaceVerificationProcessed', handleProcessed)
+                                .listen('FaceVerificationProcessed', handleProcessed);
+
+                            echo.channel('personnel-biometrics')
+                                .listen('.FaceEnrollmentSubmitted', handleEnrollment)
+                                .listen('FaceEnrollmentSubmitted', handleEnrollment);
+                        } catch (err) {
+                            console.warn('[RealtimeNotif] Error binding:', err);
+                        }
+                    }
+                };
+            });
+        }
+
+        if (window.Alpine) {
+            registerNotificationManager();
+        } else {
+            document.addEventListener('alpine:init', registerNotificationManager);
+        }
+
         document.addEventListener('DOMContentLoaded', bindToast);
         document.addEventListener('livewire:navigated', function() {
             checkPendingToast();

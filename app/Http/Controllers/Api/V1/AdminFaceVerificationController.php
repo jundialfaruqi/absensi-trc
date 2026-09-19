@@ -14,6 +14,17 @@ use Illuminate\Support\Facades\Validator;
 class AdminFaceVerificationController extends Controller
 {
     /**
+     * Cek apakah user memiliki hak akses menyeluruh (super-admin, dev, atau edit-personel-all-opd).
+     */
+    private function isSuperAdminUser(User $user): bool
+    {
+        return $user->hasRole('super-admin')
+            || $user->hasRole('dev')
+            || $user->can('edit-personel-all-opd')
+            || $user->can('lihat-personel-all-opd');
+    }
+
+    /**
      * Daftar antrean verifikasi biometrika wajah personel (status = PENDING).
      * Terfilter otomatis berdasarkan OPD (kecuali super-admin).
      */
@@ -21,7 +32,7 @@ class AdminFaceVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $this->isSuperAdminUser($user);
         $userOpdId = $user->opd()?->id;
 
         $status = $request->query('status', 'PENDING');
@@ -32,7 +43,9 @@ class AdminFaceVerificationController extends Controller
                 $q->where('face_verification_status', $status);
             })
             ->when(!$isSuperAdmin, function ($q) use ($userOpdId) {
-                $q->where('opd_id', $userOpdId);
+                if ($userOpdId) {
+                    $q->where('opd_id', $userOpdId);
+                }
             })
             ->when($isSuperAdmin && $request->filled('opd_id'), function ($q) use ($request) {
                 $q->where('opd_id', $request->opd_id);
@@ -79,7 +92,7 @@ class AdminFaceVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $this->isSuperAdminUser($user);
         $userOpdId = $user->opd()?->id;
 
         $personnel = Personnel::with(['opd', 'kantor', 'penugasan', 'faceEmbeddings', 'verifier'])
@@ -93,7 +106,7 @@ class AdminFaceVerificationController extends Controller
         }
 
         // Penyekatan Hak Akses OPD
-        if (!$isSuperAdmin && (int)$personnel->opd_id !== (int)$userOpdId) {
+        if (!$isSuperAdmin && $userOpdId && (int)$personnel->opd_id !== (int)$userOpdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Personel ini bukan bagian dari OPD Anda.',
@@ -151,7 +164,7 @@ class AdminFaceVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $this->isSuperAdminUser($user);
         $userOpdId = $user->opd()?->id;
 
         $personnel = Personnel::find($id);
@@ -164,7 +177,7 @@ class AdminFaceVerificationController extends Controller
         }
 
         // Penyekatan Hak Akses OPD
-        if (!$isSuperAdmin && (int)$personnel->opd_id !== (int)$userOpdId) {
+        if (!$isSuperAdmin && $userOpdId && (int)$personnel->opd_id !== (int)$userOpdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Anda tidak berhak memverifikasi personel di luar OPD Anda.',
@@ -201,7 +214,7 @@ class AdminFaceVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $this->isSuperAdminUser($user);
         $userOpdId = $user->opd()?->id;
 
         $validator = Validator::make($request->all(), [
@@ -230,7 +243,7 @@ class AdminFaceVerificationController extends Controller
         }
 
         // Penyekatan Hak Akses OPD
-        if (!$isSuperAdmin && (int)$personnel->opd_id !== (int)$userOpdId) {
+        if (!$isSuperAdmin && $userOpdId && (int)$personnel->opd_id !== (int)$userOpdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Anda tidak berhak menolak personel di luar OPD Anda.',
