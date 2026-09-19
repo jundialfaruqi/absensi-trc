@@ -607,6 +607,20 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             'ready'
         );
 
+        // Kirim Push Notifikasi FCM ke HP Personel
+        if (!empty($personnel->fcm_token)) {
+            \App\Jobs\SendFcmNotificationJob::dispatch(
+                $personnel->fcm_token,
+                'Verifikasi Wajah Disetujui',
+                'Selamat! Perekaman wajah biometrik Anda telah disetujui. Anda sekarang dapat melakukan absensi.',
+                [
+                    'type' => 'face_verification_processed',
+                    'status' => 'APPROVED',
+                    'personnel_id' => (string)$personnel->id,
+                ]
+            );
+        }
+
         $this->dispatch('toast', [
             'type' => 'success',
             'title' => 'Verifikasi Wajah Disetujui',
@@ -656,6 +670,21 @@ new #[Title('Edit Personnel')] #[Layout('layouts::admin.app')] class extends Com
             $reason,
             $personnel->face_verified_at->toISOString()
         );
+
+        // Kirim Push Notifikasi FCM ke HP Personel
+        if (!empty($personnel->fcm_token)) {
+            \App\Jobs\SendFcmNotificationJob::dispatch(
+                $personnel->fcm_token,
+                'Verifikasi Wajah Ditolak',
+                "Perekaman wajah Anda ditolak oleh admin. Alasan: {$reason}",
+                [
+                    'type' => 'face_verification_processed',
+                    'status' => 'REJECTED',
+                    'notes' => $reason,
+                    'personnel_id' => (string)$personnel->id,
+                ]
+            );
+        }
 
         $this->dispatch('toast', [
             'type' => 'warning',
