@@ -1168,18 +1168,29 @@ class AdminAbsensiController extends Controller
         }
 
         // Resolusi Device
-        $resolveDevice = function ($uniqueDeviceId, $pId) {
+        $resolveDevice = function ($uniqueDeviceId, $pId, $platform = null) {
+            // Jika platform bukan mobile (misal: 'web'), tidak ada resolusi device HP resmi
+            if ($platform && !in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
+                return null;
+            }
+
             if (!empty($uniqueDeviceId)) {
                 $device = is_numeric($uniqueDeviceId)
                     ? Device::find($uniqueDeviceId)
                     : Device::where('unique_device_id', $uniqueDeviceId)->first();
 
                 if ($device) {
-                    return $device;
+                    if (!$pId || $device->personnel_id == $pId) {
+                        return $device;
+                    }
                 }
+
+                // Jika uniqueDeviceId ada tapi tidak cocok dengan device personil, berarti bukan device resmi
+                return null;
             }
 
-            if ($pId) {
+            // Fallback untuk record legacy mobile yang belum mencatat unique_device_id
+            if ($pId && $platform && in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
                 return Device::where('personnel_id', $pId)->where('status', 'active')->latest()->first()
                     ?? Device::where('personnel_id', $pId)->latest()->first();
             }
@@ -1187,11 +1198,11 @@ class AdminAbsensiController extends Controller
             return null;
         };
 
-        $deviceMasuk = $absensi ? $resolveDevice($absensi->unique_device_id_masuk, $personnelId) : null;
+        $deviceMasuk = $absensi ? $resolveDevice($absensi->unique_device_id_masuk, $personnelId, $absensi->platform_masuk) : null;
         $isOfficialDeviceMasuk = !is_null($deviceMasuk);
         $officialDeviceNameMasuk = $deviceMasuk?->name;
 
-        $devicePulang = $absensi ? $resolveDevice($absensi->unique_device_id_pulang, $personnelId) : null;
+        $devicePulang = $absensi ? $resolveDevice($absensi->unique_device_id_pulang, $personnelId, $absensi->platform_pulang) : null;
         $isOfficialDevicePulang = !is_null($devicePulang);
         $officialDeviceNamePulang = $devicePulang?->name;
 

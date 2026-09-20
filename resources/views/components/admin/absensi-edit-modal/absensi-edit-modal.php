@@ -173,18 +173,24 @@ new class extends Component
             $this->uniqueDeviceIdMasuk = $absensi->unique_device_id_masuk;
             $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
 
-            $resolveDevice = function ($uniqueDeviceId, $personnelId) {
+            $resolveDevice = function ($uniqueDeviceId, $personnelId, $platform = null) {
+                if ($platform && !in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
+                    return null;
+                }
+
                 if (! empty($uniqueDeviceId)) {
                     $device = is_numeric($uniqueDeviceId)
                         ? Device::find($uniqueDeviceId)
                         : Device::where('unique_device_id', $uniqueDeviceId)->first();
 
-                    if ($device) {
+                    if ($device && (! $personnelId || $device->personnel_id == $personnelId)) {
                         return $device;
                     }
+
+                    return null;
                 }
 
-                if ($personnelId) {
+                if ($personnelId && $platform && in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
                     return Device::where('personnel_id', $personnelId)->where('status', 'active')->latest()->first()
                         ?? Device::where('personnel_id', $personnelId)->latest()->first();
                 }
@@ -192,11 +198,11 @@ new class extends Component
                 return null;
             };
 
-            $deviceMasuk = $resolveDevice($this->uniqueDeviceIdMasuk, $absensi->personnel_id);
+            $deviceMasuk = $resolveDevice($this->uniqueDeviceIdMasuk, $absensi->personnel_id, $this->platformMasuk);
             $this->isOfficialDeviceMasuk = ! is_null($deviceMasuk);
             $this->officialDeviceNameMasuk = $deviceMasuk?->name;
 
-            $devicePulang = $resolveDevice($this->uniqueDeviceIdPulang, $absensi->personnel_id);
+            $devicePulang = $resolveDevice($this->uniqueDeviceIdPulang, $absensi->personnel_id, $this->platformPulang);
             $this->isOfficialDevicePulang = ! is_null($devicePulang);
             $this->officialDeviceNamePulang = $devicePulang?->name;
 

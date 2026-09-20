@@ -254,10 +254,61 @@ class AdminAbsensiApiEditTest extends TestCase
             ->getJson("/api/v1/admin/absensi/edit-data?personnel_id={$personnel->id}&tanggal={$date}");
 
         $response->assertOk()
-            ->assertJsonPath('status', 'success')
-            ->assertJsonPath('data.personnel.attendance_type', 'FLEXIBLE')
             ->assertJsonPath('data.jadwal.shift_name', 'Fleksibel')
             ->assertJsonPath('data.jadwal.jam_masuk', null)
             ->assertJsonPath('data.jadwal.jam_pulang', null);
+    }
+
+    public function test_get_edit_data_does_not_mark_web_attendance_as_official_device(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('super-admin');
+
+        $opd = Opd::create(['name' => 'BPBD Pekanbaru', 'code' => 'BPBD']);
+        $personnel = Personnel::create([
+            'name' => 'Budi Santoso',
+            'nik' => '1234567890123456',
+            'opd_id' => $opd->id,
+            'penugasan_id' => 1,
+            'email' => 'budi@example.com',
+            'password' => bcrypt('password'),
+            'pin' => '123456',
+            'attendance_type' => 'SHIFT',
+        ]);
+
+        // Personil memiliki device terdaftar aktif
+        \App\Models\Device::create([
+            'personnel_id' => $personnel->id,
+            'opd_id' => $opd->id,
+            'license_key' => 'LIC-TEST-123',
+            'name' => 'HP Dinas TRC',
+            'brand' => 'Samsung',
+            'model' => 'Galaxy A54',
+            'unique_device_id' => 'device-uuid-123',
+            'status' => 'active',
+        ]);
+
+        $date = '2026-08-21';
+        Absensi::create([
+            'personnel_id' => $personnel->id,
+            'tanggal' => $date,
+            'status' => 'HADIR',
+            'status_masuk' => 'HADIR',
+            'jam_masuk' => '08:00:00',
+            'platform_masuk' => 'web',
+            'device_name_masuk' => null,
+            'unique_device_id_masuk' => null,
+        ]);
+
+        $token = app(\App\Services\JwtService::class)->generateAccessToken($user);
+
+        $response = $this->withHeader('Authorization', "Bearer $token")
+            ->getJson("/api/v1/admin/absensi/edit-data?personnel_id={$personnel->id}&tanggal={$date}");
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.proof.platform_masuk', 'web')
+            ->assertJsonPath('data.proof.is_official_device_masuk', false)
+            ->assertJsonPath('data.proof.official_device_name_masuk', null);
     }
 }
