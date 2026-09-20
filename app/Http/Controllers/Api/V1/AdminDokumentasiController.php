@@ -24,7 +24,7 @@ class AdminDokumentasiController extends Controller
         }
 
         return in_array($user->role, ['SUPER_ADMIN', 'SUPERADMIN', 'super-admin'])
-            || (method_exists($user, 'hasRole') && $user->hasRole('super-admin'));
+            || (method_exists($user, 'hasRole') && ($user->hasRole('super-admin') || $user->hasRole('dev') || $user->hasRole('kordinator')));
     }
 
     /**
@@ -99,6 +99,14 @@ class AdminDokumentasiController extends Controller
     public function check(Request $request): JsonResponse
     {
         try {
+            $user = $request->user();
+            if ($user && $user->hasRole('admin-absen')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Akses ditolak. Role Admin Absen tidak memiliki izin mengakses dokumentasi konsumsi.',
+                ], 403);
+            }
+
             $tanggal = $request->query('tanggal', Carbon::now()->format('Y-m-d'));
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
                 $tanggal = Carbon::now()->format('Y-m-d');
@@ -153,6 +161,13 @@ class AdminDokumentasiController extends Controller
     {
         try {
             $user = $request->user();
+            if ($user && $user->hasRole('admin-absen')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Akses ditolak. Role Admin Absen tidak memiliki izin mengakses dokumentasi konsumsi.',
+                ], 403);
+            }
+
             $opdId = $this->getUserOpdId($request);
 
             $validator = Validator::make($request->all(), [

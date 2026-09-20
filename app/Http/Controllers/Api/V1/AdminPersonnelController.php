@@ -29,21 +29,21 @@ class AdminPersonnelController extends Controller
     {
         /** @var User|null $user */
         $user = $request->user();
-        if (!$user || !$user->hasAnyRole(['admin-opd', 'super-admin'])) {
+        if (!$user || !$user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'dev'])) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Akses ditolak. Endpoint ini khusus untuk Admin OPD dan Super Admin.',
+                'message' => 'Akses ditolak. Anda tidak memiliki izin mengakses data personel.',
             ], 403);
         }
         return null;
     }
 
     /**
-     * Helper: Cek apakah user memiliki hak akses level Super Admin (lintas OPD).
+     * Helper: Cek apakah user memiliki hak akses level Super Admin / Kordinator (lintas OPD).
      */
     protected function isSuperAdmin(User $user): bool
     {
-        return $user->hasAnyRole(['super-admin', 'dev'])
+        return $user->hasAnyRole(['super-admin', 'dev', 'kordinator'])
             || $user->can('lihat-personel-all-opd')
             || $user->can('view-personel-all-opd')
             || $user->can('create-personel-all-opd')

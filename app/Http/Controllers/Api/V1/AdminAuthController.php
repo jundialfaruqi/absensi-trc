@@ -52,8 +52,8 @@ class AdminAuthController extends Controller
             ], 401);
         }
 
-        // Cek Role: Hanya admin-opd dan super-admin yang diizinkan
-        if (!$user->hasAnyRole(['admin-opd', 'super-admin'])) {
+        // Cek Role: Hanya admin-opd, super-admin, kordinator, dan admin-absen yang diizinkan
+        if (!$user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'admin-absen'])) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Aplikasi ini khusus untuk Admin OPD dan Super Admin.',
@@ -74,6 +74,20 @@ class AdminAuthController extends Controller
 
         $opd = $user->opd();
 
+        $isSuperAdmin = $user->hasRole('super-admin') || $user->hasRole('dev');
+        $roleCode = 'admin-opd';
+        $roleName = 'Admin OPD';
+        if ($isSuperAdmin) {
+            $roleCode = 'super-admin';
+            $roleName = 'Super Admin';
+        } elseif ($user->hasRole('kordinator')) {
+            $roleCode = 'kordinator';
+            $roleName = 'Kordinator';
+        } elseif ($user->hasRole('admin-absen')) {
+            $roleCode = 'admin-absen';
+            $roleName = 'Admin Absen';
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => "Login berhasil. Selamat datang, {$user->name}!",
@@ -89,7 +103,9 @@ class AdminAuthController extends Controller
                     'foto' => $user->foto ? url('storage/' . $user->foto) : null,
                     'nomor_hp' => $user->nomor_hp,
                     'roles' => $user->getRoleNames()->values(),
-                    'is_super_admin' => $user->hasRole('super-admin'),
+                    'role' => $roleName,
+                    'role_code' => $roleCode,
+                    'is_super_admin' => $isSuperAdmin,
                     'opd' => $opd ? [
                         'id' => $opd->id,
                         'name' => $opd->name,
@@ -214,7 +230,7 @@ class AdminAuthController extends Controller
         $user = $request->user();
 
         // Validasi ketat role admin
-        if (!$user->hasAnyRole(['admin-opd', 'super-admin'])) {
+        if (!$user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'admin-absen'])) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Endpoint ini khusus untuk Admin OPD dan Super Admin.',
@@ -226,7 +242,19 @@ class AdminAuthController extends Controller
             ->select(['opds.id', 'opds.name', 'opds.singkatan', 'opds.alamat'])
             ->first();
 
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $user->hasRole('super-admin') || $user->hasRole('dev');
+        $roleCode = 'admin-opd';
+        $roleName = 'Admin OPD';
+        if ($isSuperAdmin) {
+            $roleCode = 'super-admin';
+            $roleName = 'Super Admin';
+        } elseif ($user->hasRole('kordinator')) {
+            $roleCode = 'kordinator';
+            $roleName = 'Kordinator';
+        } elseif ($user->hasRole('admin-absen')) {
+            $roleCode = 'admin-absen';
+            $roleName = 'Admin Absen';
+        }
 
         return response()->json([
             'status' => 'success',
@@ -238,8 +266,8 @@ class AdminAuthController extends Controller
                 'nomor_hp' => $user->nomor_hp,
                 'foto' => $user->foto ? url('storage/' . $user->foto) : null,
                 'roles' => $user->getRoleNames()->values(),
-                'role' => $isSuperAdmin ? 'Super Admin' : 'Admin OPD',
-                'role_code' => $isSuperAdmin ? 'super-admin' : 'admin-opd',
+                'role' => $roleName,
+                'role_code' => $roleCode,
                 'is_super_admin' => $isSuperAdmin,
                 'opd' => $opd ? [
                     'id' => $opd->id,

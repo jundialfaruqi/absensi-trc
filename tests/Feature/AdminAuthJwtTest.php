@@ -17,6 +17,8 @@ class AdminAuthJwtTest extends TestCase
     protected Role $adminOpdRole;
     protected Role $superAdminRole;
     protected Role $devRole;
+    protected Role $kordinatorRole;
+    protected Role $adminAbsenRole;
     protected Opd $opd;
 
     protected function setUp(): void
@@ -26,11 +28,54 @@ class AdminAuthJwtTest extends TestCase
         $this->adminOpdRole = Role::create(['name' => 'admin-opd']);
         $this->superAdminRole = Role::create(['name' => 'super-admin']);
         $this->devRole = Role::create(['name' => 'dev']);
+        $this->kordinatorRole = Role::create(['name' => 'kordinator']);
+        $this->adminAbsenRole = Role::create(['name' => 'admin-absen']);
 
         $this->opd = Opd::create([
             'name' => 'Badan Penanggulangan Bencana Daerah',
             'singkatan' => 'BPBD',
         ]);
+    }
+
+    public function test_kordinator_can_login_successfully(): void
+    {
+        $user = User::create([
+            'name' => 'Kordinator TRC',
+            'email' => 'kordinator@pekanbaru.go.id',
+            'password' => Hash::make('secret123'),
+        ]);
+        $user->assignRole($this->kordinatorRole);
+
+        $response = $this->postJson('/api/v1/admin/auth/login', [
+            'email' => 'kordinator@pekanbaru.go.id',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.user.role', 'Kordinator')
+            ->assertJsonPath('data.user.role_code', 'kordinator');
+    }
+
+    public function test_admin_absen_can_login_successfully(): void
+    {
+        $user = User::create([
+            'name' => 'Admin Absen BPBD',
+            'email' => 'adminabsen@pekanbaru.go.id',
+            'password' => Hash::make('secret123'),
+        ]);
+        $user->assignRole($this->adminAbsenRole);
+        $user->opds()->attach($this->opd->id);
+
+        $response = $this->postJson('/api/v1/admin/auth/login', [
+            'email' => 'adminabsen@pekanbaru.go.id',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.user.role', 'Admin Absen')
+            ->assertJsonPath('data.user.role_code', 'admin-absen');
     }
 
     public function test_admin_opd_can_login_and_receive_jwt_and_refresh_token(): void

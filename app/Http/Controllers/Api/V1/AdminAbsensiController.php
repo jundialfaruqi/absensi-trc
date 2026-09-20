@@ -32,13 +32,29 @@ class AdminAbsensiController extends Controller
     {
         /** @var User|null $user */
         $user = $request->user();
-        if (!$user || !$user->hasAnyRole(['admin-opd', 'super-admin'])) {
+        if (!$user || !$user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'admin-absen', 'dev'])) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Akses ditolak. Endpoint ini khusus untuk Admin OPD dan Super Admin.',
+                'message' => 'Akses ditolak. Endpoint ini khusus untuk Administrator.',
             ], 403);
         }
         return null;
+    }
+
+    /**
+     * Cek apakah user memiliki hak akses presensi lintas seluruh OPD.
+     */
+    protected function isGlobalAbsensiUser(User $user): bool
+    {
+        if ($user->hasRole('super-admin') || $user->hasRole('dev') || $user->hasRole('kordinator')) {
+            return true;
+        }
+
+        if ($user->hasRole('admin-absen') && empty($user->opds()->first()?->id)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -53,13 +69,13 @@ class AdminAbsensiController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isGlobal = $this->isGlobalAbsensiUser($user);
         $opd = $user->opds()->first();
         $opdId = $opd?->id;
 
         // Base query OPD (untuk kalkulasi stats global seluruh personil)
         $baseQuery = Personnel::query();
-        if (!$isSuperAdmin) {
+        if (!$isGlobal) {
             $baseQuery->where('opd_id', $opdId);
         }
 
@@ -192,7 +208,7 @@ class AdminAbsensiController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isGlobal = $this->isGlobalAbsensiUser($user);
         $opd = $user->opds()->first();
         $opdId = $opd?->id;
 
@@ -204,7 +220,7 @@ class AdminAbsensiController extends Controller
             ], 404);
         }
 
-        if (!$isSuperAdmin && $personnel->opd_id != $opdId) {
+        if (!$isGlobal && $personnel->opd_id != $opdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Personel ini tidak berada di bawah wewenang OPD Anda.',
@@ -504,7 +520,7 @@ class AdminAbsensiController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isGlobal = $this->isGlobalAbsensiUser($user);
         $opd = $user->opds()->first();
         $opdId = $opd?->id;
 
@@ -531,7 +547,7 @@ class AdminAbsensiController extends Controller
         }
 
         $personnel = Personnel::with(['kantor', 'opd'])->find($request->personnel_id);
-        if (!$isSuperAdmin && $personnel->opd_id != $opdId) {
+        if (!$isGlobal && $personnel->opd_id != $opdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Personel ini tidak berada di bawah wewenang OPD Anda.',
@@ -1021,9 +1037,14 @@ class AdminAbsensiController extends Controller
             return false;
         }
 
-        // 1. Permission edit-absensi-all-opd atau role super-admin: bisa edit semua OPD
-        if ($user->can('edit-absensi-all-opd') || $user->hasRole('super-admin')) {
+        // 1. Permission edit-absensi-all-opd atau role super-admin / kordinator: bisa edit semua OPD
+        if ($user->can('edit-absensi-all-opd') || $user->hasRole('super-admin') || $user->hasRole('dev') || $user->hasRole('kordinator')) {
             return true;
+        }
+
+        // Role admin-absen tidak diizinkan mengedit absensi
+        if ($user->hasRole('admin-absen')) {
+            return false;
         }
 
         // 2. Permission edit-absensi-opd atau role admin-opd: hanya bisa edit OPD-nya sendiri

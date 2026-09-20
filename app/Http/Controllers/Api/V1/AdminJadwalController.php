@@ -27,14 +27,14 @@ class AdminJadwalController extends Controller
         $user = $request->user();
 
         // Validasi role admin
-        if (!$user->hasAnyRole(['admin-opd', 'super-admin'])) {
+        if (!$user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'dev'])) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Akses ditolak. Endpoint ini khusus untuk Admin OPD dan Super Admin.',
+                'message' => 'Akses ditolak. Anda tidak memiliki izin mengakses data jadwal & log absensi.',
             ], 403);
         }
 
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $user->hasRole('super-admin') || $user->hasRole('dev') || $user->hasRole('kordinator');
         $opd = $user->opds()->first();
         $opdId = $opd?->id;
 
