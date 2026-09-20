@@ -14,6 +14,23 @@ use Illuminate\Support\Facades\Validator;
 class AdminFaceVerificationController extends Controller
 {
     /**
+     * Otorisasi: Role kordinator dan admin-absen tidak memiliki hak akses ke verifikasi biometrika wajah.
+     */
+    private function authorizeVerificationRole(Request $request): ?JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        if ($user && ($user->hasRole('kordinator') || $user->hasRole('admin-absen'))) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Akses ditolak. Role ini tidak memiliki hak akses ke verifikasi biometrika wajah.',
+            ], 403);
+        }
+
+        return null;
+    }
+
+    /**
      * Cek apakah user memiliki hak akses menyeluruh (super-admin, dev, atau edit-personel-all-opd).
      */
     private function isSuperAdminUser(User $user): bool
@@ -30,6 +47,10 @@ class AdminFaceVerificationController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        if ($authError = $this->authorizeVerificationRole($request)) {
+            return $authError;
+        }
+
         /** @var User $user */
         $user = $request->user();
         $isSuperAdmin = $this->isSuperAdminUser($user);
@@ -90,6 +111,10 @@ class AdminFaceVerificationController extends Controller
      */
     public function show(Request $request, int|string $id): JsonResponse
     {
+        if ($authError = $this->authorizeVerificationRole($request)) {
+            return $authError;
+        }
+
         /** @var User $user */
         $user = $request->user();
         $isSuperAdmin = $this->isSuperAdminUser($user);
@@ -162,6 +187,10 @@ class AdminFaceVerificationController extends Controller
      */
     public function approve(Request $request, int|string $id): JsonResponse
     {
+        if ($authError = $this->authorizeVerificationRole($request)) {
+            return $authError;
+        }
+
         /** @var User $user */
         $user = $request->user();
         $isSuperAdmin = $this->isSuperAdminUser($user);
@@ -226,6 +255,10 @@ class AdminFaceVerificationController extends Controller
      */
     public function reject(Request $request, int|string $id): JsonResponse
     {
+        if ($authError = $this->authorizeVerificationRole($request)) {
+            return $authError;
+        }
+
         /** @var User $user */
         $user = $request->user();
         $isSuperAdmin = $this->isSuperAdminUser($user);

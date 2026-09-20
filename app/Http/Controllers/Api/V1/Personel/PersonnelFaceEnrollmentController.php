@@ -143,6 +143,7 @@ class PersonnelFaceEnrollmentController extends Controller
         try {
             $targetAdminTokens = \App\Models\User::query()
                 ->whereNotNull('fcm_token')
+                ->whereDoesntHave('roles', fn($r) => $r->whereIn('name', ['kordinator', 'admin-absen']))
                 ->where(function ($q) use ($personnel) {
                     $q->whereHas('roles', fn($r) => $r->whereIn('name', ['super-admin', 'dev']))
                       ->orWhereHas('permissions', fn($p) => $p->whereIn('name', ['edit-personel-all-opd', 'manajemen-personel']))

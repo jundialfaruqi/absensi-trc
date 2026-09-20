@@ -185,4 +185,46 @@ class AdminFaceVerificationApiTest extends TestCase
         $this->assertEquals('Foto wajah tidak jelas dan posisi miring. Harap ulangi perekaman.', $fresh->face_verification_notes);
         $this->assertFalse((bool)$fresh->face_recognition);
     }
+
+    public function test_kordinator_and_admin_absen_are_rejected_with_403(): void
+    {
+        Role::firstOrCreate(['name' => 'kordinator']);
+        Role::firstOrCreate(['name' => 'admin-absen']);
+
+        $kordinator = User::create([
+            'name' => 'Kordinator User',
+            'email' => 'kordinator.test@example.com',
+            'password' => bcrypt('password123'),
+        ]);
+        $kordinator->assignRole('kordinator');
+
+        $adminAbsen = User::create([
+            'name' => 'Admin Absen User',
+            'email' => 'adminabsen.test@example.com',
+            'password' => bcrypt('password123'),
+        ]);
+        $adminAbsen->assignRole('admin-absen');
+
+        $tokenKordinator = $this->jwtService->generateAccessToken($kordinator);
+        $tokenAdminAbsen = $this->jwtService->generateAccessToken($adminAbsen);
+
+        // Test index endpoint
+        $this->withHeader('Authorization', "Bearer $tokenKordinator")
+            ->getJson('/api/v1/admin/face-verifications')
+            ->assertStatus(403);
+
+        $this->withHeader('Authorization', "Bearer $tokenAdminAbsen")
+            ->getJson('/api/v1/admin/face-verifications')
+            ->assertStatus(403);
+
+        // Test show endpoint
+        $this->withHeader('Authorization', "Bearer $tokenKordinator")
+            ->getJson('/api/v1/admin/face-verifications/' . $this->personnelOpd1->id)
+            ->assertStatus(403);
+
+        // Test approve endpoint
+        $this->withHeader('Authorization', "Bearer $tokenAdminAbsen")
+            ->postJson('/api/v1/admin/face-verifications/' . $this->personnelOpd1->id . '/approve')
+            ->assertStatus(403);
+    }
 }
