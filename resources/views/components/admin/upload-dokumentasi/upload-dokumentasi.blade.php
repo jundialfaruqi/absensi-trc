@@ -260,7 +260,7 @@
                                         class="w-full flex items-center justify-between">
                                         @if ($shift)
                                             <span class="text-[11px] text-base-content/60">
-                                                Kalkulasi dari absensi hadir dan jadwal shift
+                                                Kalkulasi otomatis dari absensi kehadiran (shift & fleksibel) untuk makan
                                                 {{ $shift === 'siang' ? 'siang' : 'malam' }}.
                                             </span>
                                         @else
