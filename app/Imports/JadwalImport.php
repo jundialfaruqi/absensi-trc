@@ -126,8 +126,7 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
                 'percentage' => $percentage,
             ];
 
-            Cache::put("import_progress_{$this->importId}", $progress, 3600);
-            ImportProgressUpdated::dispatch($this->importId, $progress);
+            $this->dispatchProgress($progress);
         }
 
         foreach ($rows as $row) {
@@ -322,8 +321,7 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
                         'status' => 'processing',
                         'percentage' => 0,
                     ];
-                    Cache::put("import_progress_{$this->importId}", $progress, 3600);
-                    ImportProgressUpdated::dispatch($this->importId, $progress);
+                    $this->dispatchProgress($progress);
                 }
             },
             AfterImport::class => function (AfterImport $event) {
@@ -335,8 +333,7 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
                         'status' => 'completed',
                         'percentage' => 100,
                     ];
-                    Cache::put("import_progress_{$this->importId}", $progress, 3600);
-                    ImportProgressUpdated::dispatch($this->importId, $progress);
+                    $this->dispatchProgress($progress);
                 }
             },
             ImportFailed::class => function (ImportFailed $event) {
@@ -348,10 +345,24 @@ class JadwalImport implements ShouldQueue, ToCollection, WithChunkReading, WithE
                         'percentage' => 0,
                         'error' => $event->getException()->getMessage(),
                     ];
-                    Cache::put("import_progress_{$this->importId}", $progress, 3600);
-                    ImportProgressUpdated::dispatch($this->importId, $progress);
+                    $this->dispatchProgress($progress);
                 }
             },
         ];
+    }
+
+    protected function dispatchProgress(array $progress)
+    {
+        if (! $this->importId) {
+            return;
+        }
+
+        Cache::put("import_progress_{$this->importId}", $progress, 3600);
+
+        try {
+            ImportProgressUpdated::dispatch($this->importId, $progress);
+        } catch (\Throwable $e) {
+            Log::warning("JadwalImport: Gagal broadcast websocket untuk {$this->importId}: ".$e->getMessage());
+        }
     }
 }

@@ -1,40 +1,70 @@
 <div x-data="{
     importId: @entangle('importId'),
     progress: { total: 0, processed: 0, status: 'processing', percentage: 0, error: '' },
+    pollInterval: null,
     listen() {
         if (this.importId) {
             this.progress = { total: 0, processed: 0, status: 'processing', percentage: 0, error: '' };
             
             // Inisialisasi Echo secara lazy jika belum ada
-            const EchoConstructor = window._EchoHandler || window.Echo;
-            if (!window.Echo && typeof EchoConstructor === 'function') {
-                const reverbHost = '{{ config('broadcasting.connections.reverb.options.host') }}';
-                const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
-                    window.location.hostname : reverbHost;
-                const wsPort = {{ config('broadcasting.connections.reverb.options.port', 8080) }};
-                const forceTLS = {{ config('broadcasting.connections.reverb.options.useTLS') ? 'true' : 'false' }};
-                
-                const echo = new EchoConstructor({
-                    broadcaster: 'reverb',
-                    key: '{{ config('broadcasting.connections.reverb.key') }}',
-                    wsHost: wsHost,
-                    wsPort: wsPort,
-                    wssPort: wsPort,
-                    forceTLS: forceTLS,
-                    enabledTransports: ['ws', 'wss'],
-                    disableStats: true,
-                });
-                window.Echo = echo;
-                window.EchoInstance = echo;
+            try {
+                const EchoConstructor = window._EchoHandler || window.Echo;
+                if (!window.Echo && typeof EchoConstructor === 'function') {
+                    const reverbHost = '{{ config('broadcasting.connections.reverb.options.host') }}';
+                    const wsHost = (reverbHost === '127.0.0.1' || reverbHost === 'localhost' || !reverbHost) ?
+                        window.location.hostname : reverbHost;
+                    const wsPort = {{ config('broadcasting.connections.reverb.options.port', 8080) }};
+                    const forceTLS = {{ config('broadcasting.connections.reverb.options.useTLS') ? 'true' : 'false' }};
+                    
+                    const echo = new EchoConstructor({
+                        broadcaster: 'reverb',
+                        key: '{{ config('broadcasting.connections.reverb.key') }}',
+                        wsHost: wsHost,
+                        wsPort: wsPort,
+                        wssPort: wsPort,
+                        forceTLS: forceTLS,
+                        enabledTransports: ['ws', 'wss'],
+                        disableStats: true,
+                    });
+                    window.Echo = echo;
+                    window.EchoInstance = echo;
+                }
+
+                if (window.Echo) {
+                    window.Echo.channel('import-channel.' + this.importId)
+                        .listen('ImportProgressUpdated', (e) => {
+                            if (e && e.progress) {
+                                this.progress = e.progress;
+                            }
+                        });
+                }
+            } catch (err) {
+                console.warn('WebSocket init notice:', err);
             }
 
-            if (window.Echo) {
-                window.Echo.channel('import-channel.' + this.importId)
-                    .listen('ImportProgressUpdated', (e) => {
-                        this.progress = e.progress;
-                    });
-            } else {
-                console.error('WebSocket (Echo) tidak dapat diinisialisasi.');
+            // Polling Fallback (setiap 800ms) untuk mengantisipasi race condition atau jika WebSocket offline
+            if (this.pollInterval) clearInterval(this.pollInterval);
+            this.pollInterval = setInterval(async () => {
+                if (!this.importId || (this.progress && (this.progress.status === 'completed' || this.progress.status === 'failed'))) {
+                    clearInterval(this.pollInterval);
+                    return;
+                }
+                try {
+                    const latest = await this.$wire.getImportProgress();
+                    if (latest) {
+                        this.progress = latest;
+                        if (latest.status === 'completed' || latest.status === 'failed') {
+                            clearInterval(this.pollInterval);
+                        }
+                    }
+                } catch (e) {
+                    // Ignore transient network errors
+                }
+            }, 800);
+        } else {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+                this.pollInterval = null;
             }
         }
     }
@@ -139,18 +169,44 @@
                         @enderror
 
                         @if ($file && !$errors->has('file'))
-                            <div
-                                class="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20 flex gap-3 items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-primary shrink-0">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                </svg>
-                                <div class="truncate flex-1">
-                                    <div class="font-medium text-sm text-primary">{{ $file->getClientOriginalName() }}
+                            <div class="mt-4 p-4 bg-base-200/60 rounded-xl border border-base-300 space-y-3">
+                                <div class="flex gap-3 items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-primary shrink-0">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                    </svg>
+                                    <div class="truncate flex-1">
+                                        <div class="font-medium text-sm text-base-content truncate">{{ $file->getClientOriginalName() }}</div>
+                                        <div class="text-xs text-base-content/60">File siap diproses</div>
                                     </div>
-                                    <div class="text-xs text-primary/70">Siap diproses</div>
                                 </div>
+
+                                @if ($detectedPeriod)
+                                    <div class="p-3 bg-success/10 border border-success/30 rounded-lg text-success flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-2.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <div>
+                                                <div class="text-[10px] font-bold uppercase tracking-wider opacity-75">Target Periode Impor</div>
+                                                <div class="text-sm font-black">{{ $detectedPeriod }}</div>
+                                                <div class="text-[11px] opacity-80">{{ $detectedDays }} Hari Kalender @if($detectedSheets) • {{ $detectedSheets }} OPD Sheet @endif</div>
+                                            </div>
+                                        </div>
+                                        <span class="badge badge-success badge-sm font-semibold shrink-0">Terdeteksi Otomatis</span>
+                                    </div>
+                                @else
+                                    <div class="p-3 bg-warning/10 border border-warning/30 rounded-lg text-warning-content flex items-center gap-2.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <div class="text-xs">
+                                            <span class="font-bold">Periode dalam file tidak terdeteksi otomatis.</span><br>
+                                            Menggunakan target: <b>{{ \Carbon\Carbon::create()->month((int) $month)->translatedFormat('F') }} {{ $year }}</b>.
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         @else
                             <div
@@ -173,7 +229,9 @@
                         <button type="submit" class="btn btn-neutral flex-1" wire:loading.attr="disabled"
                             {{ !$file ? 'disabled' : '' }}>
                             <span wire:loading wire:target="import" class="loading loading-spinner loading-xs"></span>
-                            <span wire:loading.remove wire:target="import">Proses Import</span>
+                            <span wire:loading.remove wire:target="import">
+                                Proses Import ke {{ \Carbon\Carbon::create()->month((int) $month)->translatedFormat('F') }} {{ $year }}
+                            </span>
                         </button>
                         <a wire:navigate href="{{ route('jadwal') }}" class="btn btn-ghost">Kembali</a>
                     </div>
@@ -183,7 +241,7 @@
     </div>
     {{-- Modal Konfirmasi Reset --}}
     @if ($showConfirmModal)
-        <div class="modal modal-open backdrop-blur-sm">
+        <div class="modal modal-open bg-black/60 backdrop-blur-md z-[99999]" style="z-index: 99999;">
             <div class="modal-box shadow-2xl border border-error/20 max-w-md">
                 <div class="flex items-center gap-4 text-error mb-4">
                     <div class="p-3 bg-error/10 rounded-full">
@@ -239,7 +297,7 @@
 
     {{-- Progress Modal Overlay --}}
     <template x-if="importId">
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-base-300/60 backdrop-blur-sm transition-all duration-300">
+        <div class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300" style="z-index: 99999;">
             <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200 p-6 mx-4">
                 <div class="flex flex-col items-center text-center">
                     
