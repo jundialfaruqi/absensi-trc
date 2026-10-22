@@ -789,6 +789,11 @@ test('absensi PDF renders time_display options correctly for masuk, pulang, and 
     $dateHadir = '2026-05-01';
     $dateAlpa = '2026-05-02';
 
+    $dateIzin = '2026-05-03';
+    $dateSakit = '2026-05-04';
+    $dateCuti = '2026-05-05';
+    $dateLibur = '2026-05-06';
+
     $personnel->absensi_map = collect([
         $dateHadir => (object) [
             'status' => 'HADIR',
@@ -804,16 +809,50 @@ test('absensi PDF renders time_display options correctly for masuk, pulang, and 
             'jam_masuk' => null,
             'jam_pulang' => null,
         ],
+        $dateIzin => (object) [
+            'status' => 'IZIN',
+            'status_masuk' => 'IZIN',
+            'status_pulang' => 'IZIN',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateSakit => (object) [
+            'status' => 'SAKIT',
+            'status_masuk' => 'SAKIT',
+            'status_pulang' => 'SAKIT',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateCuti => (object) [
+            'status' => 'CUTI',
+            'status_masuk' => 'CUTI',
+            'status_pulang' => 'CUTI',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateLibur => (object) [
+            'status' => 'LIBUR',
+            'status_masuk' => 'LIBUR',
+            'status_pulang' => 'LIBUR',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
     ]);
     $personnel->jadwal_map = collect([
         $dateHadir => (object) ['status' => 'SHIFT'],
         $dateAlpa => (object) ['status' => 'SHIFT'],
+        $dateIzin => (object) ['status' => 'SHIFT'],
+        $dateSakit => (object) ['status' => 'SHIFT'],
+        $dateCuti => (object) ['status' => 'SHIFT'],
+        $dateLibur => (object) ['status' => 'LIBUR'],
     ]);
+
+    $allDates = [$dateHadir, $dateAlpa, $dateIzin, $dateSakit, $dateCuti, $dateLibur];
 
     // 1. Test 'none' (default)
     $htmlNone = view('reports.absensi-pdf', [
         'personnels' => collect([$personnel]),
-        'dates' => [$dateHadir, $dateAlpa],
+        'dates' => $allDates,
         'month' => 5,
         'year' => 2026,
         'monthName' => 'Mei',
@@ -823,11 +862,15 @@ test('absensi PDF renders time_display options correctly for masuk, pulang, and 
 
     expect($htmlNone)->toContain('>H<');
     expect($htmlNone)->toContain('>A<');
+    expect($htmlNone)->toContain('>I<');
+    expect($htmlNone)->toContain('>S<');
+    expect($htmlNone)->toContain('>C<');
+    expect($htmlNone)->toContain('>L<');
 
     // 2. Test 'masuk'
     $htmlMasuk = view('reports.absensi-pdf', [
         'personnels' => collect([$personnel]),
-        'dates' => [$dateHadir, $dateAlpa],
+        'dates' => $allDates,
         'month' => 5,
         'year' => 2026,
         'monthName' => 'Mei',
@@ -837,11 +880,20 @@ test('absensi PDF renders time_display options correctly for masuk, pulang, and 
 
     expect($htmlMasuk)->toContain('08:00/H');
     expect($htmlMasuk)->toContain('--:--/A');
+    // I, S, C, L must NOT contain '--:--'
+    expect($htmlMasuk)->toContain('>I<');
+    expect($htmlMasuk)->toContain('>S<');
+    expect($htmlMasuk)->toContain('>C<');
+    expect($htmlMasuk)->toContain('>L<');
+    expect($htmlMasuk)->not->toContain('--:--/I');
+    expect($htmlMasuk)->not->toContain('--:--/S');
+    expect($htmlMasuk)->not->toContain('--:--/C');
+    expect($htmlMasuk)->not->toContain('--:--/L');
 
     // 3. Test 'pulang'
     $htmlPulang = view('reports.absensi-pdf', [
         'personnels' => collect([$personnel]),
-        'dates' => [$dateHadir, $dateAlpa],
+        'dates' => $allDates,
         'month' => 5,
         'year' => 2026,
         'monthName' => 'Mei',
@@ -851,11 +903,16 @@ test('absensi PDF renders time_display options correctly for masuk, pulang, and 
 
     expect($htmlPulang)->toContain('16:30/H');
     expect($htmlPulang)->toContain('--:--/A');
+    expect($htmlPulang)->toContain('>I<');
+    expect($htmlPulang)->toContain('>S<');
+    expect($htmlPulang)->toContain('>C<');
+    expect($htmlPulang)->toContain('>L<');
+    expect($htmlPulang)->not->toContain('--:--/I');
 
     // 4. Test 'masuk_pulang'
     $htmlBoth = view('reports.absensi-pdf', [
         'personnels' => collect([$personnel]),
-        'dates' => [$dateHadir, $dateAlpa],
+        'dates' => $allDates,
         'month' => 5,
         'year' => 2026,
         'monthName' => 'Mei',
@@ -865,6 +922,11 @@ test('absensi PDF renders time_display options correctly for masuk, pulang, and 
 
     expect($htmlBoth)->toContain('08:00/H<br>16:30/H');
     expect($htmlBoth)->toContain('--:--/A<br>--:--/A');
+    expect($htmlBoth)->toContain('>I<');
+    expect($htmlBoth)->toContain('>S<');
+    expect($htmlBoth)->toContain('>C<');
+    expect($htmlBoth)->toContain('>L<');
+    expect($htmlBoth)->not->toContain('--:--/I');
 
     // 5. Test controller endpoint with time_display
     $response = $this->actingAs($user)->get(route('absensi.export-pdf', [

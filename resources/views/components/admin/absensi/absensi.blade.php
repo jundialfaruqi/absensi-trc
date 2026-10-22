@@ -154,28 +154,21 @@
 
             <div class="flex flex-wrap gap-2 justify-end">
 
-                <div class="join">
-                    <select wire:model.live="paperSize" class="select select-bordered select-sm md:select-md join-item">
-                        <option value="a4">Kertas A4</option>
-                        <option value="f4">Kertas F4 / Folio</option>
-                        <option value="legal">Kertas Legal</option>
-                    </select>
-                    <button type="button" @click="openExportModal('pdf')"
-                        class="btn btn-sm md:btn-md btn-neutral join-item gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                            <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
-                            <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" />
-                            <path d="M17 18h2" />
-                            <path d="M20 15h-3v6" />
-                            <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" />
-                        </svg>
-                        Export PDF
-                    </button>
-                </div>
+                <button type="button" @click="openExportModal('pdf')"
+                    class="btn btn-sm md:btn-md btn-neutral gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                        <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
+                        <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" />
+                        <path d="M17 18h2" />
+                        <path d="M20 15h-3v6" />
+                        <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" />
+                    </svg>
+                    Export PDF
+                </button>
 
                 <button type="button" @click="openExportModal('excel')"
                     class="btn btn-sm md:btn-md btn-neutral text-white gap-2 shadow-sm">
@@ -888,7 +881,7 @@
                                 </label>
                             </div>
                             <p class="text-[11px] text-base-content/50 italic">
-                                Format: [jam masuk]/[status masuk] & [jam pulang]/[status pulang] (contoh: 08:00/H, --:--/A).
+                                Format: [jam masuk]/[status masuk] & [jam pulang]/[status pulang] (contoh: 08:00/H, --:--/A). Status I, S, C, L, D tetap ditampilkan inisial tanpa jam.
                             </p>
                         </div>
                     </template>

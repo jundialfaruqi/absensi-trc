@@ -288,7 +288,7 @@
                                             $display = substr($a->status, 0, 1);
                                         }
 
-                                        if (($timeDisplay ?? 'none') !== 'none') {
+                                        if (($timeDisplay ?? 'none') !== 'none' && !in_array($a->status, ['IZIN', 'SAKIT', 'CUTI', 'LIBUR', 'DINAS'])) {
                                             $jamMasuk = !empty($a->jam_masuk) ? \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') : '--:--';
                                             $jamPulang = !empty($a->jam_pulang) ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '--:--';
 
