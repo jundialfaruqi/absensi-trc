@@ -29,6 +29,10 @@ class ReportController extends Controller
             $year = (int) $request->get('year', date('Y'));
             $search = $request->get('search');
             $paperSize = $request->get('paperSize', 'a4');
+            $timeDisplay = $request->get('time_display', 'none');
+            if (!in_array($timeDisplay, ['none', 'masuk', 'pulang', 'masuk_pulang'])) {
+                $timeDisplay = 'none';
+            }
 
             $opdId = Auth::user()->hasRole('super-admin') ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
 
@@ -86,6 +90,7 @@ class ReportController extends Controller
                 'monthName' => $monthName,
                 'opdName' => $opdName,
                 'excludedShiftIds' => $excludedShiftIds,
+                'timeDisplay' => $timeDisplay,
             ];
 
             // Define paper dimensions (landscape)

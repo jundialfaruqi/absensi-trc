@@ -770,3 +770,112 @@ test('konsumsi PDF rincian correctly counts and renders flexible personnel consu
     expect($html)->toContain('>S+M<');
 });
 
+test('absensi PDF renders time_display options correctly for masuk, pulang, and masuk_pulang', function () {
+    $opd = Opd::create(['name' => 'Dishub TRC']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $personnel = Personnel::create([
+        'name' => 'Budi Santoso',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'SCHEDULED',
+        'foto' => 'budi.jpg',
+        'email' => 'budi_time@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '112233',
+    ]);
+
+    $dateHadir = '2026-05-01';
+    $dateAlpa = '2026-05-02';
+
+    $personnel->absensi_map = collect([
+        $dateHadir => (object) [
+            'status' => 'HADIR',
+            'status_masuk' => 'HADIR',
+            'status_pulang' => 'HADIR',
+            'jam_masuk' => '2026-05-01 08:00:00',
+            'jam_pulang' => '2026-05-01 16:30:00',
+        ],
+        $dateAlpa => (object) [
+            'status' => 'ALPA',
+            'status_masuk' => 'ALPA',
+            'status_pulang' => 'ALPA',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+    ]);
+    $personnel->jadwal_map = collect([
+        $dateHadir => (object) ['status' => 'SHIFT'],
+        $dateAlpa => (object) ['status' => 'SHIFT'],
+    ]);
+
+    // 1. Test 'none' (default)
+    $htmlNone = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => [$dateHadir, $dateAlpa],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+        'timeDisplay' => 'none',
+    ])->render();
+
+    expect($htmlNone)->toContain('>H<');
+    expect($htmlNone)->toContain('>A<');
+
+    // 2. Test 'masuk'
+    $htmlMasuk = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => [$dateHadir, $dateAlpa],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+        'timeDisplay' => 'masuk',
+    ])->render();
+
+    expect($htmlMasuk)->toContain('08:00/H');
+    expect($htmlMasuk)->toContain('--:--/A');
+
+    // 3. Test 'pulang'
+    $htmlPulang = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => [$dateHadir, $dateAlpa],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+        'timeDisplay' => 'pulang',
+    ])->render();
+
+    expect($htmlPulang)->toContain('16:30/H');
+    expect($htmlPulang)->toContain('--:--/A');
+
+    // 4. Test 'masuk_pulang'
+    $htmlBoth = view('reports.absensi-pdf', [
+        'personnels' => collect([$personnel]),
+        'dates' => [$dateHadir, $dateAlpa],
+        'month' => 5,
+        'year' => 2026,
+        'monthName' => 'Mei',
+        'opdName' => $opd->name,
+        'timeDisplay' => 'masuk_pulang',
+    ])->render();
+
+    expect($htmlBoth)->toContain('08:00/H<br>16:30/H');
+    expect($htmlBoth)->toContain('--:--/A<br>--:--/A');
+
+    // 5. Test controller endpoint with time_display
+    $response = $this->actingAs($user)->get(route('absensi.export-pdf', [
+        'startDate' => '2026-05-01',
+        'endDate' => '2026-05-02',
+        'paperSize' => 'a4',
+        'time_display' => 'masuk_pulang',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+});
+
+

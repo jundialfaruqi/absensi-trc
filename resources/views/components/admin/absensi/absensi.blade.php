@@ -855,6 +855,44 @@
                         </p>
                     </div>
 
+                    {{-- Opsi Tampilan Jam Absensi (Khusus PDF) --}}
+                    <template x-if="exportType === 'pdf'">
+                        <div class="space-y-2 pt-1">
+                            <label class="block text-xs font-bold text-base-content/70">
+                                Tampilan Jam Absensi di Grid PDF
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-base-200 bg-base-100 cursor-pointer hover:bg-base-200/40 transition-colors"
+                                    :class="{ 'border-primary bg-primary/5 ring-1 ring-primary/20': exportTimeDisplay === 'none' }">
+                                    <input type="radio" name="exportTimeDisplay" value="none" x-model="exportTimeDisplay"
+                                        class="radio radio-xs radio-primary" />
+                                    <span class="font-medium text-base-content">Default (Tanpa Jam)</span>
+                                </label>
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-base-200 bg-base-100 cursor-pointer hover:bg-base-200/40 transition-colors"
+                                    :class="{ 'border-primary bg-primary/5 ring-1 ring-primary/20': exportTimeDisplay === 'masuk' }">
+                                    <input type="radio" name="exportTimeDisplay" value="masuk" x-model="exportTimeDisplay"
+                                        class="radio radio-xs radio-primary" />
+                                    <span class="font-medium text-base-content">Jam Masuk Saja</span>
+                                </label>
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-base-200 bg-base-100 cursor-pointer hover:bg-base-200/40 transition-colors"
+                                    :class="{ 'border-primary bg-primary/5 ring-1 ring-primary/20': exportTimeDisplay === 'pulang' }">
+                                    <input type="radio" name="exportTimeDisplay" value="pulang" x-model="exportTimeDisplay"
+                                        class="radio radio-xs radio-primary" />
+                                    <span class="font-medium text-base-content">Jam Pulang Saja</span>
+                                </label>
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-base-200 bg-base-100 cursor-pointer hover:bg-base-200/40 transition-colors"
+                                    :class="{ 'border-primary bg-primary/5 ring-1 ring-primary/20': exportTimeDisplay === 'masuk_pulang' }">
+                                    <input type="radio" name="exportTimeDisplay" value="masuk_pulang" x-model="exportTimeDisplay"
+                                        class="radio radio-xs radio-primary" />
+                                    <span class="font-medium text-base-content">Jam Masuk dan Jam Pulang</span>
+                                </label>
+                            </div>
+                            <p class="text-[11px] text-base-content/50 italic">
+                                Format: [jam masuk]/[status masuk] & [jam pulang]/[status pulang] (contoh: 08:00/H, --:--/A).
+                            </p>
+                        </div>
+                    </template>
+
                     {{-- Opsi Ukuran Kertas (Khusus PDF) --}}
                     <template x-if="exportType === 'pdf'">
                         <div class="space-y-1.5 pt-1">
@@ -1050,6 +1088,7 @@
                 exportPaperSize: '{{ $paperSize }}',
                 exportOpdId: '{{ $selectedOpd }}',
                 selectedShifts: [],
+                exportTimeDisplay: 'none',
                 exportStatus: 'idle',
                 exportProgress: 0,
                 exportStatusText: '',
@@ -1064,6 +1103,7 @@
                     this.exportPaperSize = (wire && wire.get('paperSize')) || '{{ $paperSize }}';
                     this.exportOpdId = (wire && wire.get('selectedOpd')) || '';
                     this.selectedShifts = [];
+                    this.exportTimeDisplay = 'none';
                     this.exportStatus = 'idle';
                     this.exportProgress = 0;
                     this.exportStatusText = '';
@@ -1198,6 +1238,9 @@
                     params.append('endDate', this.exportEndDate);
                     if (this.exportType === 'pdf') {
                         params.append('paperSize', this.exportPaperSize);
+                        if (this.exportTimeDisplay && this.exportTimeDisplay !== 'none') {
+                            params.append('time_display', this.exportTimeDisplay);
+                        }
                     }
                     if (this.selectedShifts.length > 0) {
                         this.selectedShifts.forEach(id => {

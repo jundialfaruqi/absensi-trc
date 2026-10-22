@@ -104,6 +104,13 @@
             color: #6b7280;
         }
 
+        .cell-with-time {
+            font-size: 5px !important;
+            padding: 2px 1px !important;
+            line-height: 1.15 !important;
+            letter-spacing: -0.2px;
+        }
+
         .footer {
             margin-top: 20px;
             text-align: right;
@@ -280,6 +287,44 @@
                                         } else {
                                             $display = substr($a->status, 0, 1);
                                         }
+
+                                        if (($timeDisplay ?? 'none') !== 'none') {
+                                            $jamMasuk = !empty($a->jam_masuk) ? \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') : '--:--';
+                                            $jamPulang = !empty($a->jam_pulang) ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '--:--';
+
+                                            if ($isShiftExcluded && in_array($a->status, ['HADIR', 'TELAT'])) {
+                                                $statusMasukInitial = '*<u>H</u>';
+                                            } elseif (!empty($a->status_masuk)) {
+                                                $statusMasukInitial = substr($a->status_masuk, 0, 1);
+                                            } elseif (in_array($a->status, ['HADIR', 'TELAT'])) {
+                                                $statusMasukInitial = 'H';
+                                            } else {
+                                                $statusMasukInitial = substr($a->status, 0, 1);
+                                            }
+
+                                            if (!empty($a->status_pulang)) {
+                                                $statusPulangInitial = substr($a->status_pulang, 0, 1);
+                                            } elseif (!empty($a->jam_pulang)) {
+                                                $statusPulangInitial = 'H';
+                                            } elseif (in_array($a->status, ['HADIR', 'TELAT'])) {
+                                                $statusPulangInitial = 'A';
+                                            } else {
+                                                $statusPulangInitial = substr($a->status, 0, 1);
+                                            }
+
+                                            $masukText = $jamMasuk . '/' . $statusMasukInitial;
+                                            $pulangText = $jamPulang . '/' . $statusPulangInitial;
+
+                                            if ($timeDisplay === 'masuk') {
+                                                $display = $masukText;
+                                            } elseif ($timeDisplay === 'pulang') {
+                                                $display = $pulangText;
+                                            } elseif ($timeDisplay === 'masuk_pulang') {
+                                                $display = $masukText . '<br>' . $pulangText;
+                                            }
+
+                                            $class .= ' cell-with-time';
+                                        }
                                     } elseif ($j) {
                                         $display = '.';
                                     } else {
@@ -319,6 +364,16 @@
     <div class="summary-info">
         <strong>Keterangan:</strong> H: Hadir @if (!empty($excludedShiftIds))| *<u>H</u>: Hadir (Shift Dikecualikan) @endif| HSK: Hadir Shift Dikecualikan | A: Alpa | S: Sakit | I: Izin | C: Cuti | D: Dinas | L: Libur/Lepas
         Jadwal
+        @if (($timeDisplay ?? 'none') !== 'none')
+            | <strong>Format Jam:</strong> [Jam]/[Status 1 Karakter]
+            @if (($timeDisplay ?? 'none') === 'masuk_pulang')
+                (Baris 1: Masuk, Baris 2: Pulang)
+            @elseif (($timeDisplay ?? 'none') === 'masuk')
+                (Jam Masuk)
+            @elseif (($timeDisplay ?? 'none') === 'pulang')
+                (Jam Pulang)
+            @endif
+        @endif
         <br>
         Dokumen ini dibuat melalui aplikasi absensitrc.pekanbaru.go.id
     </div>
