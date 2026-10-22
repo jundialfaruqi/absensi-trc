@@ -635,3 +635,138 @@ test('exportKonsumsiPdf controller populates dailySummary solely from Dokumentas
     $response->assertSuccessful();
     $response->assertHeader('content-type', 'application/pdf');
 });
+
+test('konsumsi PDF rincian correctly counts and renders flexible personnel consumption', function () {
+    $opd = Opd::create(['name' => 'Dishub']);
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    // Personel Flexible 1: Siang
+    $pSiang = Personnel::create([
+        'name' => 'Budi Siang',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'FLEXIBLE',
+        'foto' => 'budi.jpg',
+        'email' => 'budi@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123451',
+    ]);
+
+    // Personel Flexible 2: Malam
+    $pMalam = Personnel::create([
+        'name' => 'Joko Malam',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'FLEXIBLE',
+        'foto' => 'joko.jpg',
+        'email' => 'joko@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123452',
+    ]);
+
+    // Personel Flexible 3: Lembur (S+M)
+    $pBoth = Personnel::create([
+        'name' => 'Agus Lembur',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'attendance_type' => 'FLEXIBLE',
+        'foto' => 'agus.jpg',
+        'email' => 'agus@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123453',
+    ]);
+
+    $date = '2026-09-01';
+
+    // Absensi Siang (08:00 - 15:00)
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $pSiang->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '08:00:00',
+        'jam_pulang' => '15:00:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Absensi Malam (19:00 - 02:00)
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $pMalam->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '19:00:00',
+        'jam_pulang' => '02:00:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Absensi Lembur (08:00 - 21:00, 13 jam)
+    \Illuminate\Support\Facades\DB::table('absensis')->insert([
+        'personnel_id' => $pBoth->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '08:00:00',
+        'jam_pulang' => '21:00:00',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Test direct export endpoint
+    $response = $this->actingAs($user)->get(route('dokumentasi-konsumsi.export-pdf', [
+        'startDate' => '2026-09-01',
+        'endDate' => '2026-09-01',
+        'opd_id' => $opd->id,
+        'include_rekap' => 0,
+        'include_rincian' => 1,
+        'include_dokumentasi' => 0,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-type', 'application/pdf');
+
+    // Also test view rendering with the loaded models
+    $personnels = Personnel::with(['absensis' => fn($q) => $q->where('tanggal', $date), 'jadwals'])
+        ->where('opd_id', $opd->id)
+        ->get();
+
+    foreach ($personnels as $p) {
+        $p->absensi_map = $p->absensis->keyBy(fn ($a) => $a->tanggal->format('Y-m-d'));
+        $p->jadwal_map = $p->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
+        $cell = \App\Services\KonsumsiService::resolveCellKonsumsi(
+            $p->absensi_map->get($date),
+            $p->jadwal_map->get($date),
+            $p->attendance_type
+        );
+        $p->total_siang = $cell['has_siang'] ? 1 : 0;
+        $p->total_malam = $cell['has_malam'] ? 1 : 0;
+        $p->konsumsi_cells = [$date => $cell];
+    }
+
+    $html = view('reports.konsumsi-pdf', [
+        'personnels' => $personnels,
+        'dates' => [$date],
+        'dailySummary' => [$date => ['siang' => 0, 'malam' => 0, 'total' => 0]],
+        'totalSiangAll' => 0,
+        'totalMalamAll' => 0,
+        'grandTotalAll' => 0,
+        'month' => 9,
+        'year' => 2026,
+        'monthName' => 'September',
+        'opdName' => $opd->name,
+        'includeRekap' => false,
+        'includeRincian' => true,
+    ])->render();
+
+    // Verify badges and symbols in the rendered HTML
+    expect($html)->toContain('badge-siang');
+    expect($html)->toContain('>S<');
+    expect($html)->toContain('badge-malam');
+    expect($html)->toContain('>M<');
+    expect($html)->toContain('badge-both');
+    expect($html)->toContain('>S+M<');
+});
+

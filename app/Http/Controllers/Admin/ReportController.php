@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DokumentasiKonsumsi;
+use App\Services\KonsumsiService;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AbsensiExport;
 
@@ -248,31 +249,23 @@ class ReportController extends Controller
 
                 $p->total_siang = 0;
                 $p->total_malam = 0;
+                $cells = [];
 
                 foreach ($dates as $d) {
                     $abs = $p->absensi_map->get($d);
                     $jadwal = $p->jadwal_map->get($d);
 
-                    $isHadir = $abs &&
-                        !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
-                        ($abs->status === 'HADIR' ||
-                            $abs->status === 'TELAT' ||
-                            $abs->status_masuk === 'HADIR' ||
-                            $abs->status_masuk === 'TELAT' ||
-                            !empty($abs->jam_masuk) ||
-                            !empty($abs->jam_pulang));
+                    $cell = KonsumsiService::resolveCellKonsumsi($abs, $jadwal, $p->attendance_type);
+                    $cells[$d] = $cell;
 
-                    if ($isHadir && $jadwal && $jadwal->shift) {
-                        $konsumsis = $jadwal->shift->konsumsis->pluck('nama')->map(fn ($k) => strtolower(trim($k)))->toArray();
-
-                        if (in_array('siang', $konsumsis)) {
-                            $p->total_siang++;
-                        }
-                        if (in_array('malam', $konsumsis)) {
-                            $p->total_malam++;
-                        }
+                    if ($cell['has_siang']) {
+                        $p->total_siang++;
+                    }
+                    if ($cell['has_malam']) {
+                        $p->total_malam++;
                     }
                 }
+                $p->konsumsi_cells = $cells;
             }
 
             // Nilai SIANG/MALAM HANYA diambil dari tabel dokumentasi_konsumsis (jika belum ada atau NULL, bernilai 0)

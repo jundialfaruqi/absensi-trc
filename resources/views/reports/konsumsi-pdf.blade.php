@@ -370,47 +370,19 @@
                         <td>{{ $personnel->regu ?? '-' }}</td>
                         @foreach ($dates as $date)
                             @php
-                                $abs = $personnel->absensi_map->get($date);
-                                $jadwal = $personnel->jadwal_map->get($date);
-
-                                $isHadir =
-                                    $abs &&
-                                    !in_array($abs->status, ['IZIN', 'SAKIT', 'CUTI', 'ALPA', 'LIBUR']) &&
-                                    ($abs->status === 'HADIR' ||
-                                        $abs->status === 'TELAT' ||
-                                        $abs->status_masuk === 'HADIR' ||
-                                        $abs->status_masuk === 'TELAT' ||
-                                        !empty($abs->jam_masuk) ||
-                                        !empty($abs->jam_pulang));
-
-                                $cellText = '-';
-                                $cellClass = '';
-
-                                if ($isHadir && $jadwal && $jadwal->shift) {
-                                    $konsumsis = $jadwal->shift->konsumsis
-                                        ->pluck('nama')
-                                        ->map(fn($k) => strtolower(trim($k)))
-                                        ->toArray();
-                                    $hasSiang = in_array('siang', $konsumsis);
-                                    $hasMalam = in_array('malam', $konsumsis);
-
-                                    if ($hasSiang && $hasMalam) {
-                                        $cellText = 'S+M';
-                                        $cellClass = 'badge-both';
-                                    } elseif ($hasSiang) {
-                                        $cellText = 'S';
-                                        $cellClass = 'badge-siang';
-                                    } elseif ($hasMalam) {
-                                        $cellText = 'M';
-                                        $cellClass = 'badge-malam';
-                                    } else {
-                                        $cellText = 'H';
-                                    }
-                                } elseif ($abs && in_array($abs->status, ['ALPA', 'IZIN', 'SAKIT', 'CUTI'])) {
-                                    $cellText = substr($abs->status, 0, 1);
+                                if (!empty($personnel->konsumsi_cells) && isset($personnel->konsumsi_cells[$date])) {
+                                    $cell = $personnel->konsumsi_cells[$date];
+                                } else {
+                                    $abs = $personnel->absensi_map?->get($date);
+                                    $jadwal = $personnel->jadwal_map?->get($date);
+                                    $cell = \App\Services\KonsumsiService::resolveCellKonsumsi(
+                                        $abs,
+                                        $jadwal,
+                                        $personnel->attendance_type ?? null
+                                    );
                                 }
                             @endphp
-                            <td class="date-column {{ $cellClass }}">{{ $cellText }}</td>
+                            <td class="date-column {{ $cell['class'] }}">{{ $cell['text'] }}</td>
                         @endforeach
                         <td class="summary-column">{{ $personnel->total_siang }}</td>
                         <td class="summary-column">{{ $personnel->total_malam }}</td>
