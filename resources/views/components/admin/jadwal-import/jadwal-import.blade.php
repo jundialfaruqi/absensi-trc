@@ -204,8 +204,7 @@ $watch('importId', value => listen())">
                                                 </div>
                                             </div>
                                         </div>
-                                        <span class="badge badge-success badge-sm font-semibold shrink-0">Terdeteksi
-                                            Otomatis</span>
+                                        <span class="badge badge-success badge-sm font-semibold shrink-0">Terdeteksi Otomatis</span>
                                     </div>
                                 @else
                                     <div

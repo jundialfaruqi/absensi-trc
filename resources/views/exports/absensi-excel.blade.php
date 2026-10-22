@@ -192,6 +192,44 @@
                                 } else {
                                     $display = substr($a->status, 0, 1);
                                 }
+
+                                if (($timeDisplay ?? 'none') !== 'none' && !in_array($a->status, ['IZIN', 'SAKIT', 'CUTI', 'LIBUR', 'DINAS'])) {
+                                    $jamMasuk = !empty($a->jam_masuk) ? \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') : '--:--';
+                                    $jamPulang = !empty($a->jam_pulang) ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '--:--';
+
+                                    if ($isShiftExcluded && in_array($a->status, ['HADIR', 'TELAT'])) {
+                                        $statusMasukInitial = '*<u>H</u>';
+                                    } elseif (!empty($a->status_masuk)) {
+                                        $statusMasukInitial = substr($a->status_masuk, 0, 1);
+                                    } elseif (in_array($a->status, ['HADIR', 'TELAT'])) {
+                                        $statusMasukInitial = 'H';
+                                    } else {
+                                        $statusMasukInitial = substr($a->status, 0, 1);
+                                    }
+
+                                    if (!empty($a->status_pulang)) {
+                                        $statusPulangInitial = substr($a->status_pulang, 0, 1);
+                                    } elseif (!empty($a->jam_pulang)) {
+                                        $statusPulangInitial = 'H';
+                                    } elseif (in_array($a->status, ['HADIR', 'TELAT'])) {
+                                        $statusPulangInitial = 'A';
+                                    } else {
+                                        $statusPulangInitial = substr($a->status, 0, 1);
+                                    }
+
+                                    $masukText = $jamMasuk . '/' . $statusMasukInitial;
+                                    $pulangText = $jamPulang . '/' . $statusPulangInitial;
+
+                                    if ($timeDisplay === 'masuk') {
+                                        $display = $masukText;
+                                    } elseif ($timeDisplay === 'pulang') {
+                                        $display = $pulangText;
+                                    } elseif ($timeDisplay === 'masuk_pulang') {
+                                        $display = $masukText . '<br>' . $pulangText;
+                                    }
+
+                                    $cellStyle .= ' font-size: 8pt; vertical-align: middle;';
+                                }
                             } elseif ($j) {
                                 $display = '.';
                                 $cellStyle = 'text-align: center; color: #999999;';
@@ -200,9 +238,7 @@
                                 $cellStyle = 'text-align: center; color: #cccccc;';
                             }
                         @endphp
-                        <td style="border: 1px solid #999999; {{ $cellStyle }}">
-                            {!! $display !!}
-                        </td>
+                        <td style="border: 1px solid #999999; {{ $cellStyle }}">{!! $display !!}</td>
                     @endforeach
 
                     @php
@@ -274,6 +310,16 @@
             @endif| HSK: Hadir Shift Dikecualikan | A: Alpa | S: Sakit | I: Izin | C: Cuti | D:
             Dinas | L: Libur /
             Lepas Jadwal
+            @if (($timeDisplay ?? 'none') !== 'none')
+                | <strong>Format Jam:</strong> [Jam]/[Status 1 Karakter]
+                @if (($timeDisplay ?? 'none') === 'masuk_pulang')
+                    (Baris 1: Masuk, Baris 2: Pulang)
+                @elseif (($timeDisplay ?? 'none') === 'masuk')
+                    (Jam Masuk)
+                @elseif (($timeDisplay ?? 'none') === 'pulang')
+                    (Jam Pulang)
+                @endif
+            @endif
         </td>
         <td colspan="{{ $sigCols }}" style="font-size: 10pt; text-align: center;">
             Mengetahui,

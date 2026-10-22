@@ -124,6 +124,21 @@ test('export modal initiates download via startExport with progress and file pat
         ->assertSee('Unduh Ulang');
 });
 
+test('export modal displays time display radio options for both PDF and Excel', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi')
+        ->assertSee('Tampilan Jam Absensi di Grid (PDF & Excel)', false)
+        ->assertSee('name="exportTimeDisplay"', false)
+        ->assertSee('value="none"', false)
+        ->assertSee('value="masuk"', false)
+        ->assertSee('value="pulang"', false)
+        ->assertSee('value="masuk_pulang"', false)
+        ->assertDontSee("x-if=\"exportType === 'pdf'\">\n                        <div class=\"space-y-2 pt-1\">\n                            <label class=\"block text-xs font-bold text-base-content/70\">\n                                Tampilan Jam Absensi di Grid PDF", false);
+});
+
 test('admin absensi component renders navigation tabs for Rekap Absensi and Rekap Dokumentasi Konsumsi with active border and primary text', function () {
     $user = User::factory()->create();
     $role = Role::firstOrCreate(['name' => 'super-admin', 'color' => '#ef4444']);

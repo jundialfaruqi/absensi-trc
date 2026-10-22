@@ -665,4 +665,161 @@ test('personnel with flexible attendance type has JML equal to Hadir in Excel ex
     }
 });
 
+test('absensi Excel renders time_display options correctly for masuk, pulang, and masuk_pulang', function () {
+    $opd = Opd::create(['name' => 'Dinas Perhubungan']);
+    $personnel = Personnel::create([
+        'name' => 'Bambang Jam',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'foto' => 'bambang.jpg',
+        'email' => 'bambangjam@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '998877',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $dateHadir = '2026-05-01';
+    $dateAlpa = '2026-05-02';
+    $dateIzin = '2026-05-03';
+    $dateSakit = '2026-05-04';
+    $dateCuti = '2026-05-05';
+    $dateLibur = '2026-05-06';
+
+    $personnel->absensi_map = collect([
+        $dateHadir => (object) [
+            'status' => 'HADIR',
+            'status_masuk' => 'HADIR',
+            'status_pulang' => 'HADIR',
+            'jam_masuk' => '2026-05-01 08:00:00',
+            'jam_pulang' => '2026-05-01 16:30:00',
+        ],
+        $dateAlpa => (object) [
+            'status' => 'ALPA',
+            'status_masuk' => 'ALPA',
+            'status_pulang' => 'ALPA',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateIzin => (object) [
+            'status' => 'IZIN',
+            'status_masuk' => 'IZIN',
+            'status_pulang' => 'IZIN',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateSakit => (object) [
+            'status' => 'SAKIT',
+            'status_masuk' => 'SAKIT',
+            'status_pulang' => 'SAKIT',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateCuti => (object) [
+            'status' => 'CUTI',
+            'status_masuk' => 'CUTI',
+            'status_pulang' => 'CUTI',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+        $dateLibur => (object) [
+            'status' => 'LIBUR',
+            'status_masuk' => 'LIBUR',
+            'status_pulang' => 'LIBUR',
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+        ],
+    ]);
+    $personnel->jadwal_map = collect([
+        $dateHadir => (object) ['status' => 'SHIFT'],
+        $dateAlpa => (object) ['status' => 'SHIFT'],
+        $dateIzin => (object) ['status' => 'SHIFT'],
+        $dateSakit => (object) ['status' => 'SHIFT'],
+        $dateCuti => (object) ['status' => 'SHIFT'],
+        $dateLibur => (object) ['status' => 'LIBUR'],
+    ]);
+
+    $allDates = [$dateHadir, $dateAlpa, $dateIzin, $dateSakit, $dateCuti, $dateLibur];
+
+    // 1. Test 'none' (default)
+    $htmlNone = view('exports.absensi-excel', [
+        'personnels' => collect([$personnel]),
+        'dates' => $allDates,
+        'opdName' => $opd->name,
+        'timeDisplay' => 'none',
+    ])->render();
+
+    expect($htmlNone)->toContain('>H<');
+    expect($htmlNone)->toContain('>A<');
+    expect($htmlNone)->toContain('>I<');
+    expect($htmlNone)->toContain('>S<');
+    expect($htmlNone)->toContain('>C<');
+    expect($htmlNone)->toContain('>L<');
+
+    // 2. Test 'masuk'
+    $htmlMasuk = view('exports.absensi-excel', [
+        'personnels' => collect([$personnel]),
+        'dates' => $allDates,
+        'opdName' => $opd->name,
+        'timeDisplay' => 'masuk',
+    ])->render();
+
+    expect($htmlMasuk)->toContain('08:00/H');
+    expect($htmlMasuk)->toContain('--:--/A');
+    // I, S, C, L must NOT contain '--:--'
+    expect($htmlMasuk)->toContain('>I<');
+    expect($htmlMasuk)->toContain('>S<');
+    expect($htmlMasuk)->toContain('>C<');
+    expect($htmlMasuk)->toContain('>L<');
+    expect($htmlMasuk)->not->toContain('--:--/I');
+    expect($htmlMasuk)->not->toContain('--:--/S');
+    expect($htmlMasuk)->not->toContain('--:--/C');
+    expect($htmlMasuk)->not->toContain('--:--/L');
+
+    // 3. Test 'pulang'
+    $htmlPulang = view('exports.absensi-excel', [
+        'personnels' => collect([$personnel]),
+        'dates' => $allDates,
+        'opdName' => $opd->name,
+        'timeDisplay' => 'pulang',
+    ])->render();
+
+    expect($htmlPulang)->toContain('16:30/H');
+    expect($htmlPulang)->toContain('--:--/A');
+    expect($htmlPulang)->toContain('>I<');
+    expect($htmlPulang)->toContain('>S<');
+    expect($htmlPulang)->toContain('>C<');
+    expect($htmlPulang)->toContain('>L<');
+    expect($htmlPulang)->not->toContain('--:--/I');
+
+    // 4. Test 'masuk_pulang'
+    $htmlBoth = view('exports.absensi-excel', [
+        'personnels' => collect([$personnel]),
+        'dates' => $allDates,
+        'opdName' => $opd->name,
+        'timeDisplay' => 'masuk_pulang',
+    ])->render();
+
+    expect($htmlBoth)->toContain('08:00/H<br>16:30/H');
+    expect($htmlBoth)->toContain('--:--/A<br>--:--/A');
+    expect($htmlBoth)->toContain('>I<');
+    expect($htmlBoth)->toContain('>S<');
+    expect($htmlBoth)->toContain('>C<');
+    expect($htmlBoth)->toContain('>L<');
+    expect($htmlBoth)->not->toContain('--:--/I');
+
+    // 5. Test controller endpoint with time_display
+    $response = $this->actingAs($user)->get(route('absensi.export-excel', [
+        'startDate' => '2026-05-01',
+        'endDate' => '2026-05-02',
+        'time_display' => 'masuk_pulang',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertHeader('content-disposition');
+});
+
+
 

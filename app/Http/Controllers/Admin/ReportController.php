@@ -137,10 +137,15 @@ class ReportController extends Controller
             $excludedShiftIds = is_array($excludedShifts) ? $excludedShifts : explode(',', (string) $excludedShifts);
             $excludedShiftIds = array_map('intval', array_filter($excludedShiftIds));
 
+            $timeDisplay = $request->get('time_display', 'none');
+            if (!in_array($timeDisplay, ['none', 'masuk', 'pulang', 'masuk_pulang'])) {
+                $timeDisplay = 'none';
+            }
+
             $filename = $this->generateExportFilename($request, 'xlsx');
 
             $response = Excel::download(
-                new AbsensiExport($startDate, $endDate, $search, $opdId, $excludedShiftIds),
+                new AbsensiExport($startDate, $endDate, $search, $opdId, $excludedShiftIds, $timeDisplay),
                 $filename
             );
 
