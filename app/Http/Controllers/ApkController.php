@@ -66,6 +66,11 @@ class ApkController extends Controller
             abort(404, 'File aplikasi tidak ditemukan di server.');
         }
 
+        // Hindari timeout PHP jika kecepatan download dibatasi jaringan
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(0);
+        }
+
         return response()->download($filePath, $this->getDynamicFilename(), [
             'Content-Type' => 'application/vnd.android.package-archive',
         ]);
