@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="mb-10 text-center md:text-left hidden md:block">
-                        <h2 class="text-3xl font-black text-white italic tracking-tighter uppercase mb-2">OTENTIKASI
+                        <h2 class="text-3xl font-black text-white uppercase mb-2">LOGIN
                         </h2>
                         <p class="text-slate-400 text-xs font-semibold uppercase tracking-widest">Akses Portal
                             Pengelolaan TRC</p>
@@ -124,8 +124,7 @@
                         @endif
 
                         <div class="space-y-2">
-                            <label
-                                class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Kredensial
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
                                 Email</label>
                             <div class="relative group">
                                 <span
@@ -146,8 +145,8 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Kunci
-                                Keamanan</label>
+                            <label
+                                class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Password</label>
                             <div class="relative group">
                                 <span
                                     class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">
