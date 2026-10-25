@@ -48,7 +48,7 @@
 
                     @if (!app()->isLocal())
                         <div class="flex justify-center min-h-78px bg-transparent" wire:ignore>
-                            <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
+                            <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"
                                 data-callback="onRecaptchaSuccess"></div>
                         </div>
 

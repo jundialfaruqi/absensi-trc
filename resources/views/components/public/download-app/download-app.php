@@ -36,7 +36,7 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
             }
 
             $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-                'secret' => env('RECAPTCHA_SECRET_KEY'),
+                'secret' => config('services.recaptcha.secret_key'),
                 'response' => $this->recaptchaToken,
                 'remoteip' => request()->ip(),
             ]);
