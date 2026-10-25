@@ -95,77 +95,90 @@
     @if ($showOptionModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
             x-data x-trap.noscroll="true">
-            <div class="w-full max-w-lg glass-panel p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden bg-slate-950/95">
+            <div
+                class="w-full max-w-lg glass-panel p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden bg-slate-950/95">
                 <!-- Background Accent Glow -->
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none"></div>
+                <div
+                    class="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none">
+                </div>
+                <div
+                    class="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none">
+                </div>
 
                 <div class="relative z-10 space-y-6">
                     <!-- Modal Header -->
                     <div class="flex items-start justify-between">
                         <div class="flex items-center gap-3.5">
-                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
                             <div>
-                                <span class="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">PIN Terverifikasi</span>
-                                <h3 class="text-xl font-black text-white tracking-tight uppercase">Pilih Jalur Unduhan</h3>
+                                <span class="text-[10px] font-black uppercase text-emerald-400">PIN
+                                    Terverifikasi</span>
+                                <h3 class="text-xl font-black text-white tracking-tight uppercase">Pilih Jalur Unduhan
+                                </h3>
                             </div>
                         </div>
 
                         <button type="button" wire:click="closeOptionModal"
                             class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
                     @if ($personnelName)
                         <div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-2.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400 shrink-0"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            <span class="text-xs text-slate-300 font-medium truncate">Personil: <strong class="text-white font-bold">{{ $personnelName }}</strong></span>
+                            <span class="text-xs text-slate-300 font-medium truncate">Personil: <strong
+                                    class="text-white font-bold">{{ $personnelName }}</strong></span>
                         </div>
                     @endif
 
                     <p class="text-slate-400 text-xs leading-relaxed">
-                        Silakan pilih jalur unduhan APK berikut. Disarankan menggunakan <strong>Google Drive</strong> untuk kecepatan unduh maksimal di jaringan seluler/HP:
+                        Silakan pilih jalur unduhan APK berikut. Disarankan menggunakan <strong>Google Drive</strong>
+                        untuk kecepatan unduh maksimal di jaringan seluler/HP:
                     </p>
 
                     <!-- Options List -->
                     <div class="space-y-3">
                         <!-- Option 1: Google Drive (Recommended) -->
                         <a href="{{ $gdriveUrl }}" target="_blank" rel="noopener noreferrer"
-                            class="group block p-4.5 rounded-2xl bg-linear-to-r from-blue-600/20 via-blue-500/10 to-transparent hover:from-blue-600/30 hover:via-blue-500/20 border-2 border-blue-500/40 hover:border-blue-400 transition-all duration-300 relative overflow-hidden shadow-lg shadow-blue-500/10">
+                            class="group block p-4.5 rounded-full bg-linear-to-r from-blue-600/20 via-blue-500/10 to-transparent hover:from-blue-600/30 hover:via-blue-500/20 border-2 border-blue-500/40 hover:border-blue-400 transition-all duration-300 relative overflow-hidden shadow-lg shadow-blue-500/10">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-3.5">
-                                    <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                                         <!-- Cloud/Drive Rocket Icon -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                                         </svg>
                                     </div>
                                     <div class="text-left">
                                         <div class="flex items-center gap-2">
-                                            <h4 class="text-sm font-black text-white uppercase tracking-tight group-hover:text-blue-300 transition-colors">
+                                            <h4
+                                                class="text-sm font-black text-white uppercase tracking-tight group-hover:text-blue-300 transition-colors">
                                                 Download via Google Drive
                                             </h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-500 text-white shadow-xs">
-                                                Cepat • Rekomendasi
-                                            </span>
                                         </div>
                                         <p class="text-[11px] text-slate-400 font-medium mt-0.5">
-                                            Kecepatan tinggi tanpa limitasi server (selesai dalam hitungan detik)
+                                            Kecepatan tinggi (selesai dalam hitungan detik)
                                         </p>
                                     </div>
                                 </div>
-                                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:translate-x-1 transition-transform shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                <div
+                                    class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:translate-x-1 transition-transform shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                     </svg>
                                 </div>
                             </div>
@@ -173,12 +186,17 @@
 
                         <!-- Option 2: Direct Server Web -->
                         <button type="button" wire:click="triggerDirectDownload"
-                            class="w-full group p-4.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300 text-left relative overflow-hidden cursor-pointer">
+                            class="w-full group p-4.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300 text-left relative overflow-hidden cursor-pointer">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-3.5">
-                                    <div class="w-12 h-12 rounded-xl bg-white/5 text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-white/5 text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="w-6 h-6 text-slate-400 group-hover:text-white transition-colors"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                                         </svg>
                                     </div>
                                     <div class="text-left">
@@ -186,18 +204,18 @@
                                             <h4 class="text-sm font-black text-white uppercase tracking-tight">
                                                 Download Langsung (Server Web)
                                             </h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-white/5">
-                                                Lokal
-                                            </span>
                                         </div>
                                         <p class="text-[11px] text-slate-400 font-medium mt-0.5">
                                             Unduh langsung dari server lokal TRC Pekanbaru
                                         </p>
                                     </div>
                                 </div>
-                                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-transform shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                <div
+                                    class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-transform shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
                                 </div>
                             </div>
