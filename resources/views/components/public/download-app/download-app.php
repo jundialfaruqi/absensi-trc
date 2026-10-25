@@ -15,6 +15,14 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
     public ?string $recaptchaToken = null;
 
+    public bool $showOptionModal = false;
+
+    public ?string $personnelName = null;
+
+    public ?string $directDownloadUrl = null;
+
+    public string $gdriveUrl = '';
+
     public function download()
     {
         $this->resetErrorBag();
@@ -63,27 +71,35 @@ new #[Title('Download Aplikasi TRC')] #[Layout('layouts::public.app')] class ext
 
         if ($personnel) {
             RateLimiter::clear($throttleKey);
-            $filePath = storage_path('app/protected-downloads/app-arm64-v8a-release.apk');
-
-            if (! file_exists($filePath)) {
-                $this->addError('pin', 'Maaf, file aplikasi tidak ditemukan di server.');
-                $this->dispatch('reset-captcha');
-
-                return;
-            }
 
             session()->put('apk_download_allowed', [
                 'pin' => $this->pin,
                 'expired_at' => now()->addMinutes(15)->timestamp,
             ]);
 
-            $this->dispatch('trigger-download', url: route('apk.download.direct', ['pin' => $this->pin]));
+            $this->personnelName = $personnel->name;
+            $this->directDownloadUrl = route('apk.download.direct', ['pin' => $this->pin]);
+            $this->gdriveUrl = config('services.apk.gdrive_url', 'https://drive.google.com/drive/folders/1m1QFHXHM5yuhwcVIDntJaVH4EePc29QK?usp=sharing');
+            $this->showOptionModal = true;
 
             return;
         }
 
         RateLimiter::hit($throttleKey, 60);
         $this->addError('pin', 'PIN yang Anda masukkan tidak terdaftar atau salah.');
+        $this->dispatch('reset-captcha');
+    }
+
+    public function triggerDirectDownload()
+    {
+        if ($this->directDownloadUrl) {
+            $this->dispatch('trigger-download', url: $this->directDownloadUrl);
+        }
+    }
+
+    public function closeOptionModal()
+    {
+        $this->showOptionModal = false;
         $this->dispatch('reset-captcha');
     }
 

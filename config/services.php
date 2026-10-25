@@ -40,4 +40,8 @@ return [
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],
 
+    'apk' => [
+        'gdrive_url' => env('APK_GDRIVE_URL', 'https://drive.google.com/drive/folders/1m1QFHXHM5yuhwcVIDntJaVH4EePc29QK?usp=sharing'),
+    ],
+
 ];
