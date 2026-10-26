@@ -34,7 +34,7 @@
                     </h3>
                 </div>
                 <button type="button" class="btn btn-ghost btn-sm btn-circle"
-                    wire:click="closeModal">✕</button>
+                    @click="$el.closest('dialog').close()">✕</button>
             </div>
 
             {{-- Modal Body - Scrollable --}}
@@ -467,7 +467,8 @@
                                 @endcan
                             </div>
                             <div class="flex gap-1.5 justify-end">
-                                <button type="button" class="btn btn-ghost btn-sm" wire:click="closeModal">Batal</button>
+                                <button type="button" class="btn btn-ghost btn-sm"
+                                    @click="$el.closest('dialog').close()">Batal</button>
                                 <button type="submit" class="btn btn-primary btn-sm px-6"
                                     wire:loading.attr="disabled">
                                     <span wire:loading wire:target="saveEdit"
@@ -481,7 +482,7 @@
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
-            <button wire:click="closeModal">close</button>
+            <button>close</button>
         </form>
     </dialog>
 </div>
