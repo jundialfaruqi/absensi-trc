@@ -136,14 +136,25 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             });
 
         // Detailed Stats
-        $totalRequired = (clone $absensiBase)->count();
-        $totalHadir = (clone $absensiBase)->where('status', 'HADIR')->count();
-        $totalAlpa = (clone $absensiBase)->where('status', 'ALPA')->count();
-        $totalIzin = (clone $absensiBase)->whereIn('status', ['CUTI', 'IZIN', 'SAKIT'])->count();
+        $statsSummary = (clone $absensiBase)
+            ->selectRaw("
+                COUNT(*) as total_required,
+                COUNT(CASE WHEN absensis.status = 'HADIR' THEN 1 END) as total_hadir,
+                COUNT(CASE WHEN absensis.status = 'ALPA' THEN 1 END) as total_alpa,
+                COUNT(CASE WHEN absensis.status IN ('CUTI', 'IZIN', 'SAKIT') THEN 1 END) as total_izin,
+                COUNT(CASE WHEN absensis.jam_masuk IS NOT NULL THEN 1 END) as total_masuk,
+                COUNT(CASE WHEN absensis.jam_pulang IS NOT NULL THEN 1 END) as total_pulang,
+                COUNT(CASE WHEN absensis.status_masuk = 'TELAT' THEN 1 END) as total_telat
+            ")
+            ->first();
 
-        $totalMasuk = (clone $absensiBase)->whereNotNull('jam_masuk')->count();
-        $totalPulang = (clone $absensiBase)->whereNotNull('jam_pulang')->count();
-        $totalTelat = (clone $absensiBase)->where('status_masuk', 'TELAT')->count();
+        $totalRequired = (int) ($statsSummary->total_required ?? 0);
+        $totalHadir = (int) ($statsSummary->total_hadir ?? 0);
+        $totalAlpa = (int) ($statsSummary->total_alpa ?? 0);
+        $totalIzin = (int) ($statsSummary->total_izin ?? 0);
+        $totalMasuk = (int) ($statsSummary->total_masuk ?? 0);
+        $totalPulang = (int) ($statsSummary->total_pulang ?? 0);
+        $totalTelat = (int) ($statsSummary->total_telat ?? 0);
 
         $hadirPercentage = $totalRequired > 0
             ? round((($totalHadir + $totalIzin) / $totalRequired) * 100)
@@ -154,7 +165,7 @@ new #[Title('Dashboard')] #[Layout('layouts::admin.app')] class extends Componen
             ->join('personnels', 'absensis.personnel_id', '=', 'personnels.id')
             ->join('opds', 'personnels.opd_id', '=', 'opds.id')
             ->select('absensis.*')
-            ->with(['personnel.opd', 'jadwal.shift'])
+            ->with(['personnel.opd', 'personnel.penugasan', 'jadwal.shift'])
             ->orderBy('opds.singkatan')
             ->latest('absensis.updated_at')
             ->get();

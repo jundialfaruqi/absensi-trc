@@ -290,7 +290,7 @@
                                                         <span
                                                             class="text-xs font-bold text-base-content tracking-tight">{{ $log->personnel->name }}</span>
                                                         <span
-                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->penugasan->name }}</span>
+                                                            class="text-[9px] font-bold text-base-content/40 uppercase">{{ $log->personnel->penugasan?->name ?? '-' }}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -555,10 +555,11 @@
                                 <div class="avatar">
                                     <div class="mask mask-squircle w-12 h-12">
                                         @if ($late->personnel->foto)
-                                            <img src="{{ asset('storage/' . $late->personnel->foto) }}" />
+                                            <img src="{{ asset('storage/' . $late->personnel->foto) }}" alt="{{ $late->personnel->name }}" class="w-full h-full object-cover" />
                                         @else
-                                            <img
-                                                src="https://ui-avatars.com/api/?name={{ urlencode($late->personnel->name) }}&background=fef3c7&color=d97706" />
+                                            <div class="w-full h-full bg-warning/20 text-warning flex items-center justify-center font-black text-xs uppercase select-none">
+                                                {{ strtoupper(substr(trim($late->personnel->name ?? 'TR'), 0, 2)) }}
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -607,10 +608,11 @@
                                 <div class="avatar">
                                     <div class="mask mask-squircle w-12 h-12">
                                         @if ($absent->personnel->foto)
-                                            <img src="{{ asset('storage/' . $absent->personnel->foto) }}" />
+                                            <img src="{{ asset('storage/' . $absent->personnel->foto) }}" alt="{{ $absent->personnel->name }}" class="w-full h-full object-cover" />
                                         @else
-                                            <img
-                                                src="https://ui-avatars.com/api/?name={{ urlencode($absent->personnel->name) }} &background=fee2e2&color=ef4444" />
+                                            <div class="w-full h-full bg-error/20 text-error flex items-center justify-center font-black text-xs uppercase select-none">
+                                                {{ strtoupper(substr(trim($absent->personnel->name ?? 'TR'), 0, 2)) }}
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
