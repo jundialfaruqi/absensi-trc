@@ -1585,21 +1585,17 @@
                                         <span class="size-2 rounded-full bg-warning"></span>
                                         Siang
                                     </span>
-                                    <template x-if="processedPreviewSiang">
-                                        <span
-                                            class="badge badge-warning badge-xs rounded-none font-bold text-[10px] shadow-2xs">Foto
-                                            Baru</span>
-                                    </template>
-                                    <template x-if="!processedPreviewSiang">
-                                        <span>
-                                            @if ($existingFotoSiang)
-                                                <span
-                                                    class="badge badge-warning badge-xs rounded-none font-semibold text-[10px]">Tersimpan</span>
-                                            @else
-                                                <span class="text-[10px] text-base-content/50">Belum Ada</span>
-                                            @endif
-                                        </span>
-                                    </template>
+                                    <span x-show="processedPreviewSiang"
+                                        class="badge badge-warning badge-xs rounded-none font-bold text-[10px] shadow-2xs">Foto
+                                        Baru</span>
+                                    <span x-show="!processedPreviewSiang">
+                                        @if ($existingFotoSiang)
+                                            <span
+                                                class="badge badge-warning badge-xs rounded-none font-semibold text-[10px]">Tersimpan</span>
+                                        @else
+                                            <span class="text-[10px] text-base-content/50">Belum Ada</span>
+                                        @endif
+                                    </span>
                                 </div>
 
                                 {{-- Card Foto Siang --}}
@@ -1608,158 +1604,155 @@
                                         '{{ $existingFotoSiang ? 'border-warning/40 bg-neutral-900' : 'border-dashed border-base-300 hover:border-warning/70 bg-base-100/60 hover:bg-warning/5' }}'">
 
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
-                                    <template x-if="processedPreviewSiang">
-                                        <div
-                                            class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                            {{-- Ratio Review Container --}}
-                                            <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                :class="{
-                                                    'w-full': cropRatioSiang === 'original' ||
-                                                        cropRatioSiang === '16:9',
-                                                    'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
-                                                }">
-                                                <img :src="processedPreviewSiang" alt="Preview Foto Siang"
-                                                    class="w-full h-full"
-                                                    :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'"
-                                                    :style="getTransformStyle('fotoSiang')" />
-                                            </div>
-
-                                            {{-- Badge Info Ukuran & Ratio --}}
-                                            <div
-                                                class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                <span
-                                                    class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
-                                                    WebP • <span x-text="processedSizeSiang"></span>
-                                                </span>
-                                                <span
-                                                    class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                    <span x-text="getBadgeRatioText('fotoSiang')"></span>
-                                                </span>
-                                            </div>
-
-                                            {{-- Overlay saat hover --}}
-                                            <div
-                                                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                <button type="button" @click.stop="pickFile('siang', false)"
-                                                    class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                        stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                    </svg>
-                                                    Ubah Foto
-                                                </button>
-                                                <button type="button" @click.stop="clearPhoto('fotoSiang')"
-                                                    class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                        stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                    Batal
-                                                </button>
-                                            </div>
+                                    <div x-show="processedPreviewSiang"
+                                        class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                        {{-- Ratio Review Container --}}
+                                        <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                            :class="{
+                                                'w-full': cropRatioSiang === 'original' ||
+                                                    cropRatioSiang === '16:9',
+                                                'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
+                                            }">
+                                            <img :src="processedPreviewSiang" alt="Preview Foto Siang"
+                                                class="w-full h-full"
+                                                :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'"
+                                                :style="getTransformStyle('fotoSiang')" />
                                         </div>
-                                    </template>
+
+                                        {{-- Badge Info Ukuran & Ratio --}}
+                                        <div
+                                            class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                            <span
+                                                class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                WebP • <span x-text="processedSizeSiang"></span>
+                                            </span>
+                                            <span
+                                                class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                <span x-text="getBadgeRatioText('fotoSiang')"></span>
+                                            </span>
+                                        </div>
+
+                                        {{-- Overlay saat hover --}}
+                                        <div
+                                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                            <button type="button" @click.stop="pickFile('siang', false)"
+                                                class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                </svg>
+                                                Ubah Foto
+                                            </button>
+                                            <button type="button" @click.stop="clearPhoto('fotoSiang')"
+                                                class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </div>
 
                                     {{-- 2. State: Tidak ada foto baru, cek apakah ada foto tersimpan atau belum ada --}}
-                                    <template x-if="!processedPreviewSiang">
-                                        <div class="w-full h-full relative">
-                                            @if ($existingFotoSiang)
+                                    <div x-show="!processedPreviewSiang" class="w-full h-full relative">
+                                        @if ($existingFotoSiang)
+                                            <div wire:key="existing-siang-{{ $uploadTanggal }}"
+                                                class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                {{-- Ratio Review Container --}}
+                                                <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                    :class="{
+                                                        'w-full': cropRatioSiang === 'original' ||
+                                                            cropRatioSiang === '16:9',
+                                                        'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
+                                                    }">
+                                                    <img src="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                        alt="Foto Konsumsi Siang"
+                                                        class="w-full h-full"
+                                                        :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'"
+                                                        :style="getTransformStyle('fotoSiang')" />
+                                                </div>
+                                                {{-- Badge Info Tersimpan & Ratio --}}
                                                 <div
-                                                    class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                    {{-- Ratio Review Container --}}
-                                                    <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                        :class="{
-                                                            'w-full': cropRatioSiang === 'original' ||
-                                                                cropRatioSiang === '16:9',
-                                                            'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang === '4:3'
-                                                        }">
-                                                        <img src="{{ asset('storage/' . $existingFotoSiang) }}"
-                                                            alt="Foto Konsumsi Siang"
-                                                            class="w-full h-full"
-                                                            :class="cropRatioSiang === 'original' ? 'object-contain' : 'object-cover'"
-                                                            :style="getTransformStyle('fotoSiang')" />
-                                                    </div>
-                                                    {{-- Badge Info Tersimpan & Ratio --}}
-                                                    <div
-                                                        class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                        <span
-                                                            class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
-                                                            <span class="size-1.5 rounded-full bg-success"></span>
-                                                            Tersimpan
-                                                        </span>
-                                                        <span
-                                                            class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                            <span x-text="getBadgeRatioText('fotoSiang')"></span>
-                                                        </span>
-                                                    </div>
-                                                    {{-- Overlay saat hover --}}
-                                                    <div
-                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                        <a href="{{ asset('storage/' . $existingFotoSiang) }}"
-                                                            target="_blank"
-                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                            </svg>
-                                                            Lihat
-                                                        </a>
-                                                        <button type="button" @click.stop="pickFile('siang', true)"
-                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                            Ubah Foto
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div @click="pickFile('siang', false)"
-                                                    class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                    <div
-                                                        class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="1.8">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M12 4v16m8-8H4" />
-                                                        </svg>
-                                                    </div>
+                                                    class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                     <span
-                                                        class="text-[11px] font-semibold text-base-content/70 group-hover:text-warning-content transition-colors">Upload
-                                                        Foto Siang</span>
-                                                    <span class="text-[9px] text-base-content/40">Klik atau arahkan
-                                                        kursor</span>
-
-                                                    {{-- Overlay saat hover --}}
-                                                    <div
-                                                        class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
-                                                        <button type="button" @click.stop="pickFile('siang', false)"
-                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                            </svg>
-                                                            Upload Foto
-                                                        </button>
-                                                    </div>
+                                                        class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                        <span class="size-1.5 rounded-full bg-success"></span>
+                                                        Tersimpan
+                                                    </span>
+                                                    <span
+                                                        class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                        <span x-text="getBadgeRatioText('fotoSiang')"></span>
+                                                    </span>
                                                 </div>
-                                            @endif
-                                        </div>
-                                    </template>
+                                                {{-- Overlay saat hover --}}
+                                                <div
+                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                    <a href="{{ asset('storage/' . $existingFotoSiang) }}"
+                                                        target="_blank"
+                                                        class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                        Lihat
+                                                    </a>
+                                                    <button type="button" @click.stop="pickFile('siang', true)"
+                                                        class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        Ubah Foto
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div wire:key="empty-siang-{{ $uploadTanggal }}"
+                                                @click="pickFile('siang', false)"
+                                                class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                <div
+                                                    class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                        stroke-width="1.8">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-[11px] font-semibold text-base-content/70 group-hover:text-warning-content transition-colors">Upload
+                                                    Foto Siang</span>
+                                                <span class="text-[9px] text-base-content/40">Klik atau arahkan
+                                                    kursor</span>
+
+                                                {{-- Overlay saat hover --}}
+                                                <div
+                                                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
+                                                    <button type="button" @click.stop="pickFile('siang', false)"
+                                                        class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                        </svg>
+                                                        Upload Foto
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
 
                                     {{-- Loading / Processing Spinner Overlay --}}
                                     <div x-show="currentProcessingTarget === 'fotoSiang'"
@@ -1897,123 +1890,116 @@
                                             <span class="size-1.5 rounded-full bg-warning opacity-60"></span>
                                             Foto 2 <span class="text-base-content/40 font-normal">(opsional)</span>
                                         </span>
-                                        <template x-if="processedPreviewSiang2">
-                                            <span
-                                                class="badge badge-warning badge-xs rounded-none font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
-                                        </template>
-                                        <template x-if="!processedPreviewSiang2">
-                                            <span>
-                                                @if ($existingFotoSiang2)
-                                                    <span
-                                                        class="badge badge-warning badge-xs rounded-none font-semibold text-[10px] opacity-80">Tersimpan</span>
-                                                @else
-                                                    <span class="text-[10px] text-base-content/40">–</span>
-                                                @endif
-                                            </span>
-                                        </template>
+                                        <span x-show="processedPreviewSiang2"
+                                            class="badge badge-warning badge-xs rounded-none font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                        <span x-show="!processedPreviewSiang2">
+                                            @if ($existingFotoSiang2)
+                                                <span
+                                                    class="badge badge-warning badge-xs rounded-none font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                            @else
+                                                <span class="text-[10px] text-base-content/40">–</span>
+                                            @endif
+                                        </span>
                                     </div>
                                     <div class="relative overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewSiang2 ?
                                             'border-warning/70 ring-1 ring-warning/30 bg-neutral-900' :
                                             '{{ $existingFotoSiang2 ? 'border-warning/30 bg-neutral-900' : 'border-dashed border-base-300 hover:border-warning/50 bg-base-100/60 hover:bg-warning/5' }}'">
-                                        <template x-if="processedPreviewSiang2">
+                                        <div x-show="processedPreviewSiang2"
+                                            class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                            <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                :class="{
+                                                    'w-full': cropRatioSiang2 === 'original' ||
+                                                        cropRatioSiang2 === '16:9',
+                                                    'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
+                                                }">
+                                                <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
+                                                    class="w-full h-full"
+                                                    :class="cropRatioSiang2 === 'original' ? 'object-contain' :
+                                                        'object-cover'"
+                                                    :style="getTransformStyle('fotoSiang2')" />
+                                            </div>
+
                                             <div
-                                                class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                    :class="{
-                                                        'w-full': cropRatioSiang2 === 'original' ||
-                                                            cropRatioSiang2 === '16:9',
-                                                        'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
-                                                    }">
-                                                    <img :src="processedPreviewSiang2" alt="Preview Foto Siang 2"
-                                                        class="w-full h-full"
-                                                        :class="cropRatioSiang2 === 'original' ? 'object-contain' :
-                                                            'object-cover'"
-                                                        :style="getTransformStyle('fotoSiang2')" />
-                                                </div>
-
-                                                <div
-                                                    class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                    <span
-                                                        class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
-                                                        WebP • <span x-text="processedSizeSiang2"></span>
-                                                    </span>
-                                                    <span
-                                                        class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                        <span x-text="getBadgeRatioText('fotoSiang2')"></span>
-                                                    </span>
-                                                </div>
-
-                                                <div
-                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                    <button type="button" @click.stop="pickFile('siang2', false)"
-                                                        class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
-                                                    <button type="button" @click.stop="clearPhoto('fotoSiang2')"
-                                                        class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">Batal</button>
-                                                </div>
+                                                class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                                <span
+                                                    class="badge bg-warning text-warning-content border-0 badge-xs font-bold shadow-sm text-[9px] py-1 px-2">
+                                                    WebP • <span x-text="processedSizeSiang2"></span>
+                                                </span>
+                                                <span
+                                                    class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                    <span x-text="getBadgeRatioText('fotoSiang2')"></span>
+                                                </span>
                                             </div>
-                                        </template>
-                                        <template x-if="!processedPreviewSiang2">
-                                            <div class="w-full h-full relative">
-                                                @if ($existingFotoSiang2)
+
+                                            <div
+                                                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                <button type="button" @click.stop="pickFile('siang2', false)"
+                                                    class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
+                                                <button type="button" @click.stop="clearPhoto('fotoSiang2')"
+                                                    class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">Batal</button>
+                                            </div>
+                                        </div>
+                                        <div x-show="!processedPreviewSiang2" class="w-full h-full relative">
+                                            @if ($existingFotoSiang2)
+                                                <div wire:key="existing-siang2-{{ $uploadTanggal }}"
+                                                    class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                    {{-- Ratio Review Container --}}
+                                                    <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                        :class="{
+                                                            'w-full': cropRatioSiang2 === 'original' ||
+                                                                cropRatioSiang2 === '16:9',
+                                                            'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
+                                                        }">
+                                                        <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                            alt="Foto Siang 2"
+                                                            class="w-full h-full"
+                                                            :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'"
+                                                            :style="getTransformStyle('fotoSiang2')" />
+                                                    </div>
+                                                    {{-- Badge Info Tersimpan & Ratio --}}
                                                     <div
-                                                        class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                        {{-- Ratio Review Container --}}
-                                                        <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                            :class="{
-                                                                'w-full': cropRatioSiang2 === 'original' ||
-                                                                    cropRatioSiang2 === '16:9',
-                                                                'aspect-4/3 w-auto border-x-2 border-dashed border-warning/70 shadow-2xl': cropRatioSiang2 === '4:3'
-                                                            }">
-                                                            <img src="{{ asset('storage/' . $existingFotoSiang2) }}"
-                                                                alt="Foto Siang 2"
-                                                                class="w-full h-full"
-                                                                :class="cropRatioSiang2 === 'original' ? 'object-contain' : 'object-cover'"
-                                                                :style="getTransformStyle('fotoSiang2')" />
-                                                        </div>
-                                                        {{-- Badge Info Tersimpan & Ratio --}}
-                                                        <div
-                                                            class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                            <span
-                                                                class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
-                                                                <span class="size-1.5 rounded-full bg-success"></span>
-                                                                Tersimpan
-                                                            </span>
-                                                            <span
-                                                                class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                                <span x-text="getBadgeRatioText('fotoSiang2')"></span>
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                            <a href="{{ asset('storage/' . $existingFotoSiang2) }}"
-                                                                target="_blank"
-                                                                class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
-                                                            <button type="button"
-                                                                @click.stop="pickFile('siang2', true)"
-                                                                class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <div @click="pickFile('siang2', false)"
-                                                        class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                        <div
-                                                            class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="1.8">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M12 4v16m8-8H4" />
-                                                            </svg>
-                                                        </div>
+                                                        class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                         <span
-                                                            class="text-[10px] text-base-content/50 group-hover:text-warning-content transition-colors">Tambah
-                                                            Foto 2</span>
+                                                            class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                            <span class="size-1.5 rounded-full bg-success"></span>
+                                                            Tersimpan
+                                                        </span>
+                                                        <span
+                                                            class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                            <span x-text="getBadgeRatioText('fotoSiang2')"></span>
+                                                        </span>
                                                     </div>
-                                                @endif
-                                            </div>
-                                        </template>
+                                                    <div
+                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoSiang2) }}"
+                                                            target="_blank"
+                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
+                                                        <button type="button"
+                                                            @click.stop="pickFile('siang2', true)"
+                                                            class="btn btn-xs btn-warning text-warning-content font-bold shadow-md gap-1">Ubah</button>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div wire:key="empty-siang2-{{ $uploadTanggal }}"
+                                                    @click="pickFile('siang2', false)"
+                                                    class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                    <div
+                                                        class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-warning/20 group-hover:text-warning-content transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </div>
+                                                    <span
+                                                        class="text-[10px] text-base-content/50 group-hover:text-warning-content transition-colors">Tambah
+                                                        Foto 2</span>
+                                                </div>
+                                            @endif
+                                        </div>
                                         <div x-show="currentProcessingTarget === 'fotoSiang2'"
                                             class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
                                             <span class="loading loading-spinner loading-xs text-warning mb-1"></span>
@@ -2153,21 +2139,17 @@
                                         <span class="size-2 rounded-full bg-neutral-900"></span>
                                         Malam
                                     </span>
-                                    <template x-if="processedPreviewMalam">
-                                        <span
-                                            class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[10px] shadow-2xs">Foto
-                                            Baru</span>
-                                    </template>
-                                    <template x-if="!processedPreviewMalam">
-                                        <span>
-                                            @if ($existingFotoMalam)
-                                                <span
-                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-semibold text-[10px]">Tersimpan</span>
-                                            @else
-                                                <span class="text-[10px] text-base-content/50">Belum Ada</span>
-                                            @endif
-                                        </span>
-                                    </template>
+                                    <span x-show="processedPreviewMalam"
+                                        class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[10px] shadow-2xs">Foto
+                                        Baru</span>
+                                    <span x-show="!processedPreviewMalam">
+                                        @if ($existingFotoMalam)
+                                            <span
+                                                class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-semibold text-[10px]">Tersimpan</span>
+                                        @else
+                                            <span class="text-[10px] text-base-content/50">Belum Ada</span>
+                                        @endif
+                                    </span>
                                 </div>
 
                                 {{-- Card Foto Malam --}}
@@ -2177,157 +2159,154 @@
                                         '{{ $existingFotoMalam ? 'border-neutral-900/40 bg-neutral-900' : 'border-dashed border-base-300 hover:border-neutral-900/70 bg-base-100/60 hover:bg-neutral-900/5' }}'">
 
                                     {{-- 1. State: Ada Foto Baru yang di-upload / diproses --}}
-                                    <template x-if="processedPreviewMalam">
-                                        <div
-                                            class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                            <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                :class="{
-                                                    'w-full': cropRatioMalam === 'original' ||
-                                                        cropRatioMalam === '16:9',
-                                                    'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam === '4:3'
-                                                }">
-                                                <img :src="processedPreviewMalam" alt="Preview Foto Malam"
-                                                    class="w-full h-full"
-                                                    :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'"
-                                                    :style="getTransformStyle('fotoMalam')" />
-                                            </div>
-
-                                            <div
-                                                class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                <span
-                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
-                                                    WebP • <span x-text="processedSizeMalam"></span>
-                                                </span>
-                                                <span
-                                                    class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                    <span x-text="getBadgeRatioText('fotoMalam')"></span>
-                                                </span>
-                                            </div>
-
-                                            {{-- Overlay saat hover --}}
-                                            <div
-                                                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                <button type="button" @click.stop="pickFile('malam', false)"
-                                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                        stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                    </svg>
-                                                    Ubah Foto
-                                                </button>
-                                                <button type="button" @click.stop="clearPhoto('fotoMalam')"
-                                                    class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                        stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                    Batal
-                                                </button>
-                                            </div>
+                                    <div x-show="processedPreviewMalam"
+                                        class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                        <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                            :class="{
+                                                'w-full': cropRatioMalam === 'original' ||
+                                                    cropRatioMalam === '16:9',
+                                                'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam === '4:3'
+                                            }">
+                                            <img :src="processedPreviewMalam" alt="Preview Foto Malam"
+                                                class="w-full h-full"
+                                                :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'"
+                                                :style="getTransformStyle('fotoMalam')" />
                                         </div>
-                                    </template>
+
+                                        <div
+                                            class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                            <span
+                                                class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
+                                                WebP • <span x-text="processedSizeMalam"></span>
+                                            </span>
+                                            <span
+                                                class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                <span x-text="getBadgeRatioText('fotoMalam')"></span>
+                                            </span>
+                                        </div>
+
+                                        {{-- Overlay saat hover --}}
+                                        <div
+                                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                            <button type="button" @click.stop="pickFile('malam', false)"
+                                                class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                </svg>
+                                                Ubah Foto
+                                            </button>
+                                            <button type="button" @click.stop="clearPhoto('fotoMalam')"
+                                                class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </div>
 
                                     {{-- 2. State: Tidak ada foto baru, cek apakah ada foto tersimpan atau belum ada --}}
-                                    <template x-if="!processedPreviewMalam">
-                                        <div class="w-full h-full relative">
-                                            @if ($existingFotoMalam)
+                                    <div x-show="!processedPreviewMalam" class="w-full h-full relative">
+                                        @if ($existingFotoMalam)
+                                            <div wire:key="existing-malam-{{ $uploadTanggal }}"
+                                                class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                {{-- Ratio Review Container --}}
+                                                <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                    :class="{
+                                                        'w-full': cropRatioMalam === 'original' ||
+                                                            cropRatioMalam === '16:9',
+                                                        'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400 shadow-2xl': cropRatioMalam === '4:3'
+                                                    }">
+                                                    <img src="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                        alt="Foto Konsumsi Malam"
+                                                        class="w-full h-full"
+                                                        :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'"
+                                                        :style="getTransformStyle('fotoMalam')" />
+                                                </div>
+                                                {{-- Badge Info Tersimpan & Ratio --}}
                                                 <div
-                                                    class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                    {{-- Ratio Review Container --}}
-                                                    <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                        :class="{
-                                                            'w-full': cropRatioMalam === 'original' ||
-                                                                cropRatioMalam === '16:9',
-                                                            'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400 shadow-2xl': cropRatioMalam === '4:3'
-                                                        }">
-                                                        <img src="{{ asset('storage/' . $existingFotoMalam) }}"
-                                                            alt="Foto Konsumsi Malam"
-                                                            class="w-full h-full"
-                                                            :class="cropRatioMalam === 'original' ? 'object-contain' : 'object-cover'"
-                                                            :style="getTransformStyle('fotoMalam')" />
-                                                    </div>
-                                                    {{-- Badge Info Tersimpan & Ratio --}}
-                                                    <div
-                                                        class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                        <span
-                                                            class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
-                                                            <span class="size-1.5 rounded-full bg-success"></span>
-                                                            Tersimpan
-                                                        </span>
-                                                        <span
-                                                            class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                            <span x-text="getBadgeRatioText('fotoMalam')"></span>
-                                                        </span>
-                                                    </div>
-                                                    {{-- Overlay saat hover --}}
-                                                    <div
-                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                        <a href="{{ asset('storage/' . $existingFotoMalam) }}"
-                                                            target="_blank"
-                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                            </svg>
-                                                            Lihat
-                                                        </a>
-                                                        <button type="button" @click.stop="pickFile('malam', true)"
-                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                            Ubah Foto
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div @click="pickFile('malam', false)"
-                                                    class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                    <div
-                                                        class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4"
-                                                            fill="none" viewBox="0 0 24 24"
-                                                            stroke="currentColor" stroke-width="1.8">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M12 4v16m8-8H4" />
-                                                        </svg>
-                                                    </div>
+                                                    class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                     <span
-                                                        class="text-[11px] font-semibold text-base-content/70 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Upload
-                                                        Foto Malam</span>
-                                                    <span class="text-[9px] text-base-content/40">Klik atau arahkan
-                                                        kursor</span>
-
-                                                    {{-- Overlay saat hover --}}
-                                                    <div
-                                                        class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
-                                                        <button type="button"
-                                                            @click.stop="pickFile('malam', false)"
-                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                            </svg>
-                                                            Upload Foto
-                                                        </button>
-                                                    </div>
+                                                        class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                        <span class="size-1.5 rounded-full bg-success"></span>
+                                                        Tersimpan
+                                                    </span>
+                                                    <span
+                                                        class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                        <span x-text="getBadgeRatioText('fotoMalam')"></span>
+                                                    </span>
                                                 </div>
-                                            @endif
-                                        </div>
-                                    </template>
+                                                {{-- Overlay saat hover --}}
+                                                <div
+                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                    <a href="{{ asset('storage/' . $existingFotoMalam) }}"
+                                                        target="_blank"
+                                                        class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                        Lihat
+                                                    </a>
+                                                    <button type="button" @click.stop="pickFile('malam', true)"
+                                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        Ubah Foto
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div wire:key="empty-malam-{{ $uploadTanggal }}"
+                                                @click="pickFile('malam', false)"
+                                                class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                <div
+                                                    class="size-8 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/50 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4"
+                                                        fill="none" viewBox="0 0 24 24"
+                                                        stroke="currentColor" stroke-width="1.8">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-[11px] font-semibold text-base-content/70 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Upload
+                                                    Foto Malam</span>
+                                                <span class="text-[9px] text-base-content/40">Klik atau arahkan
+                                                    kursor</span>
+
+                                                {{-- Overlay saat hover --}}
+                                                <div
+                                                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2 backdrop-blur-[1px] z-10">
+                                                    <button type="button"
+                                                        @click.stop="pickFile('malam', false)"
+                                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                        </svg>
+                                                        Upload Foto
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
 
                                     {{-- Loading / Processing Spinner Overlay --}}
                                     <div x-show="currentProcessingTarget === 'fotoMalam'"
@@ -2466,123 +2445,116 @@
                                             <span class="size-1.5 rounded-full bg-neutral-900 opacity-60"></span>
                                             Foto 2 <span class="text-base-content/40 font-normal">(opsional)</span>
                                         </span>
-                                        <template x-if="processedPreviewMalam2">
-                                            <span
-                                                class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
-                                        </template>
-                                        <template x-if="!processedPreviewMalam2">
-                                            <span>
-                                                @if ($existingFotoMalam2)
-                                                    <span
-                                                        class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-semibold text-[10px] opacity-80">Tersimpan</span>
-                                                @else
-                                                    <span class="text-[10px] text-base-content/40">–</span>
-                                                @endif
-                                            </span>
-                                        </template>
+                                        <span x-show="processedPreviewMalam2"
+                                            class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold text-[10px] shadow-2xs opacity-80">Baru</span>
+                                        <span x-show="!processedPreviewMalam2">
+                                            @if ($existingFotoMalam2)
+                                                <span
+                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-semibold text-[10px] opacity-80">Tersimpan</span>
+                                            @else
+                                                <span class="text-[10px] text-base-content/40">–</span>
+                                            @endif
+                                        </span>
                                     </div>
                                     <div class="relative overflow-hidden shadow-xs border transition-all duration-200 group"
                                         style="aspect-ratio:16/9"
                                         :class="processedPreviewMalam2 ?
                                             'border-neutral-900/70 ring-1 ring-neutral-900/30 bg-neutral-900' :
                                             '{{ $existingFotoMalam2 ? 'border-neutral-900/30 bg-neutral-900' : 'border-dashed border-base-300 hover:border-neutral-900/50 bg-base-100/60 hover:bg-neutral-900/5' }}'">
-                                        <template x-if="processedPreviewMalam2">
+                                        <div x-show="processedPreviewMalam2"
+                                            class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                            <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                :class="{
+                                                    'w-full': cropRatioMalam2 === 'original' ||
+                                                        cropRatioMalam2 === '16:9',
+                                                    'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam2 === '4:3'
+                                                }">
+                                                <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
+                                                    class="w-full h-full"
+                                                    :class="cropRatioMalam2 === 'original' ? 'object-contain' :
+                                                        'object-cover'"
+                                                    :style="getTransformStyle('fotoMalam2')" />
+                                            </div>
+
                                             <div
-                                                class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                    :class="{
-                                                        'w-full': cropRatioMalam2 === 'original' ||
-                                                            cropRatioMalam2 === '16:9',
-                                                        'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400/70 shadow-2xl': cropRatioMalam2 === '4:3'
-                                                    }">
-                                                    <img :src="processedPreviewMalam2" alt="Preview Foto Malam 2"
-                                                        class="w-full h-full"
-                                                        :class="cropRatioMalam2 === 'original' ? 'object-contain' :
-                                                            'object-cover'"
-                                                        :style="getTransformStyle('fotoMalam2')" />
-                                                </div>
-
-                                                <div
-                                                    class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                    <span
-                                                        class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
-                                                        WebP • <span x-text="processedSizeMalam2"></span>
-                                                    </span>
-                                                    <span
-                                                        class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                        <span x-text="getBadgeRatioText('fotoMalam2')"></span>
-                                                    </span>
-                                                </div>
-
-                                                <div
-                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                    <button type="button" @click.stop="pickFile('malam2', false)"
-                                                        class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
-                                                    <button type="button" @click.stop="clearPhoto('fotoMalam2')"
-                                                        class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">Batal</button>
-                                                </div>
+                                                class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
+                                                <span
+                                                    class="badge bg-neutral-900 text-white border-0 badge-xs rounded-none font-bold shadow-sm text-[9px] py-1 px-2">
+                                                    WebP • <span x-text="processedSizeMalam2"></span>
+                                                </span>
+                                                <span
+                                                    class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                    <span x-text="getBadgeRatioText('fotoMalam2')"></span>
+                                                </span>
                                             </div>
-                                        </template>
-                                        <template x-if="!processedPreviewMalam2">
-                                            <div class="w-full h-full relative">
-                                                @if ($existingFotoMalam2)
+
+                                            <div
+                                                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                <button type="button" @click.stop="pickFile('malam2', false)"
+                                                    class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
+                                                <button type="button" @click.stop="clearPhoto('fotoMalam2')"
+                                                    class="btn btn-xs btn-error text-white font-bold shadow-md gap-1">Batal</button>
+                                            </div>
+                                        </div>
+                                        <div x-show="!processedPreviewMalam2" class="w-full h-full relative">
+                                            @if ($existingFotoMalam2)
+                                                <div wire:key="existing-malam2-{{ $uploadTanggal }}"
+                                                    class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
+                                                    {{-- Ratio Review Container --}}
+                                                    <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                                                        :class="{
+                                                            'w-full': cropRatioMalam2 === 'original' ||
+                                                                cropRatioMalam2 === '16:9',
+                                                            'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400 shadow-2xl': cropRatioMalam2 === '4:3'
+                                                        }">
+                                                        <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                            alt="Foto Malam 2"
+                                                            class="w-full h-full"
+                                                            :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'"
+                                                            :style="getTransformStyle('fotoMalam2')" />
+                                                    </div>
+                                                    {{-- Badge Info Tersimpan & Ratio --}}
                                                     <div
-                                                        class="w-full h-full relative flex items-center justify-center bg-neutral-900 overflow-hidden">
-                                                        {{-- Ratio Review Container --}}
-                                                        <div class="h-full flex items-center justify-center transition-all duration-300 overflow-hidden"
-                                                            :class="{
-                                                                'w-full': cropRatioMalam2 === 'original' ||
-                                                                    cropRatioMalam2 === '16:9',
-                                                                'aspect-4/3 w-auto border-x-2 border-dashed border-neutral-400 shadow-2xl': cropRatioMalam2 === '4:3'
-                                                            }">
-                                                            <img src="{{ asset('storage/' . $existingFotoMalam2) }}"
-                                                                alt="Foto Malam 2"
-                                                                class="w-full h-full"
-                                                                :class="cropRatioMalam2 === 'original' ? 'object-contain' : 'object-cover'"
-                                                                :style="getTransformStyle('fotoMalam2')" />
-                                                        </div>
-                                                        {{-- Badge Info Tersimpan & Ratio --}}
-                                                        <div
-                                                            class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
-                                                            <span
-                                                                class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
-                                                                <span class="size-1.5 rounded-full bg-success"></span>
-                                                                Tersimpan
-                                                            </span>
-                                                            <span
-                                                                class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
-                                                                <span x-text="getBadgeRatioText('fotoMalam2')"></span>
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
-                                                            <a href="{{ asset('storage/' . $existingFotoMalam2) }}"
-                                                                target="_blank"
-                                                                class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
-                                                            <button type="button"
-                                                                @click.stop="pickFile('malam2', true)"
-                                                                class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <div @click="pickFile('malam2', false)"
-                                                        class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
-                                                        <div
-                                                            class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor" stroke-width="1.8">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    d="M12 4v16m8-8H4" />
-                                                            </svg>
-                                                        </div>
+                                                        class="absolute top-2 left-2 z-10 flex items-center gap-1.5 pointer-events-none">
                                                         <span
-                                                            class="text-[10px] text-base-content/50 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Tambah
-                                                            Foto 2</span>
+                                                            class="badge bg-black/75 text-white border-0 badge-xs rounded-none text-[9px] font-semibold shadow-sm backdrop-blur-xs py-1 px-2 gap-1">
+                                                            <span class="size-1.5 rounded-full bg-success"></span>
+                                                            Tersimpan
+                                                        </span>
+                                                        <span
+                                                            class="badge bg-black/75 text-white border-0 badge-xs font-semibold text-[9px] py-1 px-2">
+                                                            <span x-text="getBadgeRatioText('fotoMalam2')"></span>
+                                                        </span>
                                                     </div>
-                                                @endif
-                                            </div>
-                                        </template>
+                                                    <div
+                                                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-2 backdrop-blur-[2px] z-10">
+                                                        <a href="{{ asset('storage/' . $existingFotoMalam2) }}"
+                                                            target="_blank"
+                                                            class="btn btn-xs btn-ghost text-white border border-white/40 hover:bg-white/20 font-medium shadow-md gap-1">Lihat</a>
+                                                        <button type="button"
+                                                            @click.stop="pickFile('malam2', true)"
+                                                            class="btn btn-xs btn-neutral bg-neutral-900 hover:bg-black text-white font-bold shadow-md gap-1">Ubah</button>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div wire:key="empty-malam2-{{ $uploadTanggal }}"
+                                                    @click="pickFile('malam2', false)"
+                                                    class="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none">
+                                                    <div
+                                                        class="size-6 rounded-full bg-base-200/80 flex items-center justify-center mb-1 text-base-content/40 group-hover:bg-neutral-900/20 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5"
+                                                            fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </div>
+                                                    <span
+                                                        class="text-[10px] text-base-content/50 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Tambah
+                                                        Foto 2</span>
+                                                </div>
+                                            @endif
+                                        </div>
                                         <div x-show="currentProcessingTarget === 'fotoMalam2'"
                                             class="absolute inset-0 bg-base-300/90 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center z-20">
                                             <span
