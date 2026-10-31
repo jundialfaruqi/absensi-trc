@@ -76,6 +76,11 @@ test('uploading excel file auto-detects target period and updates month and year
         ->assertSee('Target Periode Impor')
         ->assertSee('November 2026')
         ->assertSee('Terdeteksi Otomatis');
+
+    $html = $component->html();
+    preg_match('/<button type="submit"[^>]*>/s', $html, $m);
+    // Button must NOT have the HTML attribute "disabled"
+    expect(str_contains($m[0], ' disabled'))->toBeFalse();
 });
 
 test('safety guard blocks import if period was manually mismatched', function () {

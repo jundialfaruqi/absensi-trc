@@ -264,8 +264,10 @@ $watch('importId', value => listen())">
                     </div>
 
                     <div class="flex gap-3">
-                        <button type="submit" class="btn btn-neutral flex-1" wire:loading.attr="disabled"
-                            {{ !$file ? 'disabled' : '' }}>
+                        <button type="submit" class="btn btn-primary flex-1 shadow-md"
+                            wire:target="import"
+                            wire:loading.attr="disabled"
+                            @disabled(!$file)>
                             <span wire:loading wire:target="import" class="loading loading-spinner loading-xs"></span>
                             <span wire:loading.remove wire:target="import">
                                 Proses Import ke
