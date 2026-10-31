@@ -46,13 +46,15 @@ test('uploading excel file auto-detects target period and updates month and year
     $user = User::factory()->create();
     $user->assignRole('super-admin');
 
-    $excelPath = '/Users/macprom4/Herd/absensi-trc/template_jadwal_2026_10.xlsx';
+    $excelPath = file_exists('/Users/macprom4/Herd/absensi-trc/template_jadwal_2026_11 OK.xlsx')
+        ? '/Users/macprom4/Herd/absensi-trc/template_jadwal_2026_11 OK.xlsx'
+        : '/Users/macprom4/Herd/absensi-trc/template_jadwal_2026_10.xlsx';
     if (! file_exists($excelPath)) {
         $this->markTestSkipped('Sample template excel file not found');
     }
 
     $file = UploadedFile::fake()->createWithContent(
-        'template_jadwal_2026_10.xlsx',
+        basename($excelPath),
         file_get_contents($excelPath)
     );
 
@@ -64,15 +66,15 @@ test('uploading excel file auto-detects target period and updates month and year
         ->assertSet('year', '2026')
         ->set('file', $file);
 
-    // After uploading October file, month must automatically switch to 10
-    $component->assertSet('month', '10')
+    // After uploading November file, month must automatically switch to 11
+    $component->assertSet('month', '11')
         ->assertSet('year', '2026')
-        ->assertSet('detectedMonth', '10')
+        ->assertSet('detectedMonth', '11')
         ->assertSet('detectedYear', '2026')
-        ->assertSet('detectedPeriod', 'Oktober 2026')
-        ->assertSet('detectedDays', 31)
+        ->assertSet('detectedPeriod', 'November 2026')
+        ->assertSet('detectedDays', 30)
         ->assertSee('Target Periode Impor')
-        ->assertSee('Oktober 2026')
+        ->assertSee('November 2026')
         ->assertSee('Terdeteksi Otomatis');
 });
 

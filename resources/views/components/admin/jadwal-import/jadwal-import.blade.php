@@ -157,7 +157,13 @@ $watch('importId', value => listen())">
             <div class="card-body p-6">
                 <h3 class="font-bold text-lg mb-4">Upload File Excel</h3>
                 <form wire:submit="import">
-                    <div class="form-control w-full mb-6">
+                    <div class="form-control w-full mb-6"
+                        x-data="{ uploading: false, uploadProgress: 0, uploadError: null }"
+                        x-on:livewire-upload-start="uploading = true; uploadProgress = 0; uploadError = null"
+                        x-on:livewire-upload-finish="uploading = false"
+                        x-on:livewire-upload-cancel="uploading = false"
+                        x-on:livewire-upload-error="uploading = false; uploadError = 'Upload gagal ke server. Periksa izin folder storage/app/livewire-tmp atau batasan ukuran file di VPS Anda.'"
+                        x-on:livewire-upload-progress="uploadProgress = $event.detail.progress">
                         <label class="label">
                             <span class="label-text font-medium text-base-content mb-2">Pilih File (.xlsx, .xls) <span
                                     class="text-error">*</span></span>
@@ -168,6 +174,23 @@ $watch('importId', value => listen())">
                         @error('file')
                             <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                         @enderror
+
+                        <div x-show="uploadError" x-cloak class="mt-2 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-xs flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span x-text="uploadError"></span>
+                        </div>
+
+                        <div x-show="uploading" x-cloak class="mt-2 space-y-1">
+                            <div class="flex justify-between text-xs text-info font-medium">
+                                <span>Mengunggah file ke server...</span>
+                                <span x-text="uploadProgress + '%'"></span>
+                            </div>
+                            <div class="w-full bg-base-200 rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-info h-full transition-all duration-200" :style="'width: ' + uploadProgress + '%'"></div>
+                            </div>
+                        </div>
 
                         @if ($file && !$errors->has('file'))
                             <div class="mt-4 p-4 bg-base-200/60 rounded-xl border border-base-300 space-y-3">
@@ -238,8 +261,6 @@ $watch('importId', value => listen())">
                             </div>
                         @endif
 
-                        <div wire:loading wire:target="file" class="mt-2 text-xs text-info font-medium italic">
-                            Mengunggah file...</div>
                     </div>
 
                     <div class="flex gap-3">

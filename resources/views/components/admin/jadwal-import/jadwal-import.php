@@ -12,6 +12,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
 
 new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Component
 {
@@ -48,7 +50,17 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
     public function rules()
     {
         return [
-            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (! in_array($ext, ['xlsx', 'xls', 'csv'])) {
+                        $fail('Format file tidak didukung! Harap gunakan file .xlsx, .xls, atau .csv');
+                    }
+                },
+            ],
             'month' => 'required',
             'year' => 'required',
         ];
@@ -64,6 +76,9 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
 
         if ($this->file) {
             try {
+                $ext = strtolower($this->file->getClientOriginalExtension());
+                $allowedExtensions = ['xlsx', 'xls', 'csv'];
+
                 $mimeType = $this->file->getMimeType();
                 $allowedMimes = [
                     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -74,9 +89,13 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
                     'application/excel',
                     'application/vnd.ms-excel',
                     'application/vnd.msexcel',
+                    'application/zip',
+                    'application/x-zip',
+                    'application/x-zip-compressed',
+                    'application/octet-stream',
                 ];
 
-                if (! in_array($mimeType, $allowedMimes)) {
+                if (! in_array($ext, $allowedExtensions) && ! in_array($mimeType, $allowedMimes)) {
                     $this->reset('file');
                     $this->addError('file', 'File yang diunggah bukan merupakan dokumen Excel atau CSV yang valid.');
 
@@ -98,7 +117,7 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
                     $this->detectedDays = Carbon::create((int) $this->year, (int) $this->month, 1)->daysInMonth;
                     $this->detectedSheets = $detected['sheets'] ?? 1;
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $this->reset('file');
                 $this->addError('file', 'File tidak dapat dibaca atau rusak: '.$e->getMessage());
 
@@ -130,11 +149,13 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
         $sheetCount = 1;
 
         try {
-            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($filePath);
+            $reader = IOFactory::createReaderForFile($filePath);
             $reader->setReadDataOnly(true);
 
-            $filter = new class implements \PhpOffice\PhpSpreadsheet\Reader\IReadFilter {
-                public function readCell($columnAddress, $row, $worksheetName = '') {
+            $filter = new class implements IReadFilter
+            {
+                public function readCell($columnAddress, $row, $worksheetName = '')
+                {
                     return $row <= 3;
                 }
             };
@@ -147,7 +168,7 @@ new #[Title('Import Jadwal')] #[Layout('layouts::admin.app')] class extends Comp
             $cellsToCheck[] = (string) $sheet->getCell('A2')->getValue();
             $cellsToCheck[] = (string) $sheet->getCell('B1')->getValue();
             $cellsToCheck[] = (string) $sheet->getCell('A1')->getValue();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Jika bukan format excel standar, lewati pembacaan sel
         }
 
