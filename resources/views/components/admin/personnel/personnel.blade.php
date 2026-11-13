@@ -68,8 +68,18 @@
                 @endif
             </div>
         </div>
-        @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('create-personel-all-opd') || auth()->user()->can('create-personel-opd'))
-            <div class="flex gap-2">
+        <div class="flex gap-2">
+            <button type="button" class="btn btn-neutral gap-2"
+                x-on:click="window.dispatchEvent(new CustomEvent('open-personnel-download-modal'))">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download
+            </button>
+
+            @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('create-personel-all-opd') || auth()->user()->can('create-personel-opd'))
                 <button wire:click="goToAdd" class="btn btn-neutral gap-2" wire:loading.attr="disabled">
                     <span wire:loading wire:target="goToAdd" class="loading loading-spinner loading-xs"></span>
                     <svg wire:loading.remove wire:target="goToAdd" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -78,8 +88,8 @@
                     </svg>
                     Tambah Personnel
                 </button>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     {{-- ─── Table ─────────────────────────────────────────────────────── --}}
@@ -335,6 +345,148 @@
             </div>
         </div>
     </div>
+    {{-- ─── Modal: Download Personnel (Client-Side UX) ─────────────────────── --}}
+    <dialog id="personnel-download-modal" class="modal"
+        x-data="personnelDownloadModal({
+            excelUrl: '{{ route('personnel.export-excel') }}',
+            pdfUrl: '{{ route('personnel.export-pdf') }}',
+            canSelectAllOpd: {{ auth()->user()->hasRole('super-admin') || auth()->user()->can('lihat-personel-all-opd') ? 'true' : 'false' }},
+            defaultOpdId: '{{ auth()->user()->hasRole('super-admin') || auth()->user()->can('lihat-personel-all-opd') ? '' : (auth()->user()->opd()?->id ?? '') }}'
+        })"
+        x-on:open-personnel-download-modal.window="openModal($el)"
+        x-on:close="resetValidation()">
+        <div class="modal-box max-w-lg bg-base-100 border border-base-300">
+            <div class="flex items-center justify-between pb-3 border-b border-base-200">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5 text-base-content">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <h3 class="font-bold text-lg text-base-content">Download Data Personnel</h3>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm btn-square" x-on:click="closeModal($el)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form x-on:submit.prevent="submitDownload($el)" class="mt-4 space-y-4">
+                {{-- Filter OPD --}}
+                <div class="form-control">
+                    <label class="label pt-0">
+                        <span class="label-text font-medium text-base-content">Filter OPD</span>
+                    </label>
+                    @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('lihat-personel-all-opd'))
+                        <select x-model="opdId" class="select select-bordered w-full bg-base-100">
+                            <option value="">Semua OPD</option>
+                            @foreach ($this->opds as $opd)
+                                <option value="{{ $opd->id }}">{{ $opd->name }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        <input type="text" readonly
+                            value="{{ auth()->user()->opd()?->name ?? 'OPD Anda' }}"
+                            class="input input-bordered w-full bg-base-200/60 text-base-content/70 cursor-not-allowed" />
+                    @endif
+                </div>
+
+                {{-- Pilihan Jenis Download --}}
+                <div class="form-control">
+                    <label class="label pt-0">
+                        <span class="label-text font-medium text-base-content">Pilih Format Download</span>
+                    </label>
+                    <div class="space-y-2">
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg border border-base-300 cursor-pointer hover:bg-base-200/40 transition-colors"
+                            :class="downloadType === 'raw' ? 'border-base-content bg-base-200/40' : ''">
+                            <input type="radio" name="download_type" value="raw" x-model="downloadType"
+                                class="radio radio-sm mt-0.5" />
+                            <div class="text-sm">
+                                <div class="font-semibold text-base-content">Download Data Raw Personel (Excel)</div>
+                                <div class="text-xs text-base-content/60 mt-0.5">
+                                    Berisi nama, email, mode absen, kontak, penugasan, kantor lokasi, dan OPD induk.
+                                </div>
+                            </div>
+                        </label>
+
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg border border-base-300 cursor-pointer hover:bg-base-200/40 transition-colors"
+                            :class="downloadType === 'blank_columns' ? 'border-base-content bg-base-200/40' : ''">
+                            <input type="radio" name="download_type" value="blank_columns" x-model="downloadType"
+                                class="radio radio-sm mt-0.5" />
+                            <div class="text-sm">
+                                <div class="font-semibold text-base-content">Tambahkan Kolom Kosong (PDF)</div>
+                                <div class="text-xs text-base-content/60 mt-0.5">
+                                    Berisi nomor dan nama personel dikelompokkan per OPD beserta kolom tambahan kosong.
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Konfigurasi Kolom Kosong --}}
+                <div x-show="downloadType === 'blank_columns'" x-cloak
+                    class="space-y-3 pt-2 border-t border-base-200">
+                    <div class="form-control">
+                        <label class="label pt-0">
+                            <span class="label-text font-medium text-base-content">Jumlah Kolom Tambahan</span>
+                            <span class="label-text-alt text-base-content/60">Maksimal 5 kolom</span>
+                        </label>
+                        <input type="number" min="1" max="5" x-model.number="columnCount"
+                            x-on:input="syncColumns()"
+                            class="input input-bordered w-full bg-base-100"
+                            placeholder="Masukkan angka 1 - 5" />
+                    </div>
+
+                    <div class="space-y-2">
+                        <template x-for="(col, index) in columns" :key="index">
+                            <div class="form-control">
+                                <label class="label py-1">
+                                    <span class="label-text text-xs font-medium text-base-content"
+                                        x-text="'Judul Kolom ' + (index + 1) + ' *'"></span>
+                                </label>
+                                <input type="text" x-model="columns[index]" maxlength="100"
+                                    class="input input-bordered input-sm w-full bg-base-100"
+                                    :placeholder="index === 0 ? 'Contoh: Setuju' : (index === 1 ? 'Contoh: Tidak Setuju' : 'Masukkan judul kolom')" />
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Pesan Error Client / Server --}}
+                <div x-show="errorMessage" x-cloak
+                    class="p-3 rounded-lg border border-base-300 bg-base-200/60 text-xs text-error flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-4 h-4 shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <span x-text="errorMessage"></span>
+                </div>
+
+                <div class="modal-action pt-2">
+                    <button type="button" class="btn" x-on:click="closeModal($el)"
+                        x-bind:disabled="isDownloading">Batal</button>
+                    <button type="submit" class="btn btn-neutral gap-2" x-bind:disabled="isDownloading">
+                        <span x-show="isDownloading" class="loading loading-spinner loading-xs"></span>
+                        <svg x-show="!isDownloading" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        <span x-text="isDownloading ? 'Memproses...' : 'Download'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
     {{-- ─── Modal: Delete Confirmation ─────────────────────────────────────── --}}
     <dialog id="personnel-delete-modal" class="modal"
         x-on:open-modal.window="$event.detail.id === 'personnel-delete-modal' && $el.showModal()"
@@ -356,5 +508,131 @@
             </div>
         </div>
     </dialog>
+
+    <script>
+        window.personnelDownloadModal = function(config) {
+            return {
+                excelUrl: config.excelUrl,
+                pdfUrl: config.pdfUrl,
+                canSelectAllOpd: config.canSelectAllOpd,
+                opdId: config.defaultOpdId || '',
+                downloadType: 'raw',
+                columnCount: 2,
+                columns: ['', ''],
+                errorMessage: '',
+                isDownloading: false,
+
+                openModal(dialogEl) {
+                    this.errorMessage = '';
+                    this.isDownloading = false;
+                    this.syncColumns();
+                    if (dialogEl && typeof dialogEl.showModal === 'function') {
+                        dialogEl.showModal();
+                    }
+                },
+
+                closeModal(el) {
+                    const dialog = el ? el.closest('dialog') : document.getElementById('personnel-download-modal');
+                    if (dialog && typeof dialog.close === 'function') {
+                        dialog.close();
+                    }
+                },
+
+                resetValidation() {
+                    this.errorMessage = '';
+                },
+
+                syncColumns() {
+                    let count = parseInt(this.columnCount, 10);
+                    if (isNaN(count) || count < 1) {
+                        count = 1;
+                    } else if (count > 5) {
+                        count = 5;
+                        this.columnCount = 5;
+                    }
+
+                    const updated = [];
+                    for (let i = 0; i < count; i++) {
+                        updated.push(this.columns[i] ?? '');
+                    }
+                    this.columns = updated;
+                },
+
+                async submitDownload(formEl) {
+                    this.errorMessage = '';
+
+                    const params = new URLSearchParams();
+                    if (this.canSelectAllOpd && this.opdId) {
+                        params.append('opd_id', this.opdId);
+                    }
+
+                    let targetUrl = this.excelUrl;
+                    let fallbackFilename = 'data_raw_personnel.xlsx';
+
+                    if (this.downloadType === 'blank_columns') {
+                        const count = parseInt(this.columnCount, 10);
+                        if (isNaN(count) || count < 1 || count > 5) {
+                            this.errorMessage = 'Jumlah kolom tambahan harus antara 1 sampai 5 kolom.';
+                            return;
+                        }
+
+                        this.syncColumns();
+                        const trimmedColumns = this.columns.map(col => (col || '').trim());
+                        const emptyIndex = trimmedColumns.findIndex(col => col === '');
+                        if (emptyIndex !== -1) {
+                            this.errorMessage = `Judul Kolom ${emptyIndex + 1} wajib diisi.`;
+                            return;
+                        }
+
+                        trimmedColumns.forEach(col => params.append('columns[]', col));
+                        targetUrl = this.pdfUrl;
+                        fallbackFilename = 'daftar_personnel.pdf';
+                    }
+
+                    this.isDownloading = true;
+
+                    try {
+                        const response = await fetch(`${targetUrl}?${params.toString()}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json, application/pdf, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            let message = 'Gagal mengunduh file.';
+                            try {
+                                const errJson = await response.json();
+                                message = errJson.message || message;
+                            } catch (_) {
+                                // Ignore non-JSON error responses
+                            }
+                            throw new Error(message);
+                        }
+
+                        const blob = await response.blob();
+                        const headerFilename = response.headers.get('X-Filename');
+                        const filename = headerFilename || fallbackFilename;
+
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(blobUrl);
+
+                        this.closeModal(formEl);
+                    } catch (err) {
+                        this.errorMessage = err.message || 'Terjadi kesalahan saat mengunduh file.';
+                    } finally {
+                        this.isDownloading = false;
+                    }
+                },
+            };
+        };
+    </script>
 
 </div>

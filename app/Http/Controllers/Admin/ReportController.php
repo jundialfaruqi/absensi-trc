@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\AbsensiExport;
+use App\Exports\PersonnelRawExport;
 use App\Http\Controllers\Controller;
+use App\Models\DokumentasiKonsumsi;
 use App\Models\Opd;
 use App\Models\Personnel;
+use App\Services\KonsumsiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\DokumentasiKonsumsi;
-use App\Services\KonsumsiService;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AbsensiExport;
 
 class ReportController extends Controller
 {
@@ -497,6 +499,132 @@ class ReportController extends Controller
             return 'data:image/jpeg;base64,' . base64_encode($jpegData);
         } catch (\Throwable $e) {
             return $fullPath;
+        }
+    }
+
+    /**
+     * Resolve authorized OPD scope for personnel export based on user role/permissions.
+     */
+    private function resolvePersonnelExportScope(Request $request): ?int
+    {
+        $user = Auth::user();
+        $canSeeAll = $user && ($user->hasRole('super-admin') || $user->can('lihat-personel-all-opd'));
+        $canSeeOpd = $user && $user->can('lihat-personel-opd');
+
+        if (! $canSeeAll && ! $canSeeOpd) {
+            abort(403, 'Anda tidak memiliki izin untuk mengunduh data personel.');
+        }
+
+        if ($canSeeAll) {
+            return $request->filled('opd_id') ? (int) $request->get('opd_id') : null;
+        }
+
+        $userOpdId = $user->opd()?->id;
+        if (! $userOpdId) {
+            abort(403, 'OPD pengguna tidak ditemukan.');
+        }
+
+        return (int) $userOpdId;
+    }
+
+    /**
+     * Build a safe export filename suffix for selected OPD.
+     */
+    private function buildPersonnelFilename(?int $opdId, string $prefix, string $extension): string
+    {
+        $opdSlug = 'semua_opd';
+        if ($opdId) {
+            $opd = Opd::find($opdId);
+            $opdSlug = Str::slug($opd?->singkatan ?: ($opd?->name ?: 'opd'), '_');
+        }
+
+        return "{$prefix}_{$opdSlug}_" . date('Ymd_His') . ".{$extension}";
+    }
+
+    public function exportPersonnelExcel(Request $request)
+    {
+        $opdId = $this->resolvePersonnelExportScope($request);
+
+        try {
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
+
+            $filename = $this->buildPersonnelFilename($opdId, 'data_raw_personnel', 'xlsx');
+
+            $response = Excel::download(new PersonnelRawExport($opdId), $filename);
+            $response->headers->set('Access-Control-Expose-Headers', 'X-Filename, Content-Disposition');
+            $response->headers->set('X-Filename', $filename);
+
+            return $response;
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function exportPersonnelPdf(Request $request)
+    {
+        $opdId = $this->resolvePersonnelExportScope($request);
+
+        $validated = $request->validate([
+            'columns' => 'required|array|min:1|max:5',
+            'columns.*' => 'required|string|max:100',
+        ], [
+            'columns.required' => 'Minimal harus ada 1 kolom tambahan.',
+            'columns.max' => 'Maksimal hanya diperbolehkan 5 kolom tambahan.',
+            'columns.*.required' => 'Setiap judul kolom tambahan wajib diisi.',
+        ]);
+
+        $columns = array_values(array_map('trim', $validated['columns']));
+        foreach ($columns as $col) {
+            if ($col === '') {
+                return response()->json([
+                    'message' => 'Setiap judul kolom tambahan wajib diisi.',
+                ], 422);
+            }
+        }
+
+        try {
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
+
+            $personnels = Personnel::query()
+                ->with('opd')
+                ->leftJoin('opds', 'personnels.opd_id', '=', 'opds.id')
+                ->select(['personnels.*'])
+                ->when($opdId, fn ($q) => $q->where('personnels.opd_id', $opdId))
+                ->orderBy('opds.name', 'asc')
+                ->orderBy('personnels.name', 'asc')
+                ->orderBy('personnels.id', 'asc')
+                ->get();
+
+            $groupedPersonnels = $personnels->groupBy(function ($personnel) {
+                return $personnel->opd?->name ?: ($personnel->opd?->singkatan ?: 'Tanpa OPD');
+            });
+
+            $opdName = $opdId ? (Opd::find($opdId)?->name ?? 'OPD Terpilih') : 'Semua OPD';
+
+            $orientation = count($columns) >= 4 ? 'landscape' : 'portrait';
+            $pdf = Pdf::loadView('reports.personnel-custom-pdf', [
+                'groupedPersonnels' => $groupedPersonnels,
+                'columns' => $columns,
+                'opdName' => $opdName,
+                'printedAt' => Carbon::now()->translatedFormat('d F Y H:i'),
+            ])->setPaper('a4', $orientation);
+
+            $filename = $this->buildPersonnelFilename($opdId, 'daftar_personnel', 'pdf');
+
+            return $pdf->download($filename)->withHeaders([
+                'Access-Control-Expose-Headers' => 'X-Filename, Content-Disposition',
+                'X-Filename' => $filename,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

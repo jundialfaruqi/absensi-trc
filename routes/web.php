@@ -74,6 +74,14 @@ Route::group([
         ->middleware('role_or_permission:super-admin|edit-personel-all-opd|edit-personel-opd')
         ->name('personnel.edit');
 
+    Route::get('/personnel/export-excel', [App\Http\Controllers\Admin\ReportController::class, 'exportPersonnelExcel'])
+        ->middleware('permission:manajemen-personel')
+        ->name('personnel.export-excel');
+
+    Route::get('/personnel/export-pdf', [App\Http\Controllers\Admin\ReportController::class, 'exportPersonnelPdf'])
+        ->middleware('permission:manajemen-personel')
+        ->name('personnel.export-pdf');
+
     // Manajemen Kantor
 
     Route::livewire('/kantor', 'admin::kantors')
