@@ -482,9 +482,6 @@
                 </div>
             </form>
         </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
     </dialog>
 
     {{-- ─── Modal: Delete Confirmation ─────────────────────────────────────── --}}
