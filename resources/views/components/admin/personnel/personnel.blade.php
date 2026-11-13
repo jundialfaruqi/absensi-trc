@@ -354,7 +354,7 @@
             defaultOpdId: '{{ auth()->user()->hasRole('super-admin') || auth()->user()->can('lihat-personel-all-opd') ? '' : (auth()->user()->opd()?->id ?? '') }}'
         })"
         x-on:open-personnel-download-modal.window="openModal($el)"
-        x-on:close="resetValidation()">
+        x-on:close="resetModal()">
         <div class="modal-box max-w-lg bg-base-100 border border-base-300">
             <div class="flex items-center justify-between pb-3 border-b border-base-200">
                 <div class="flex items-center gap-2">
@@ -515,6 +515,7 @@
                 excelUrl: config.excelUrl,
                 pdfUrl: config.pdfUrl,
                 canSelectAllOpd: config.canSelectAllOpd,
+                defaultOpdId: config.defaultOpdId || '',
                 opdId: config.defaultOpdId || '',
                 downloadType: 'raw',
                 columnCount: 2,
@@ -523,9 +524,7 @@
                 isDownloading: false,
 
                 openModal(dialogEl) {
-                    this.errorMessage = '';
-                    this.isDownloading = false;
-                    this.syncColumns();
+                    this.resetModal();
                     if (dialogEl && typeof dialogEl.showModal === 'function') {
                         dialogEl.showModal();
                     }
@@ -536,10 +535,16 @@
                     if (dialog && typeof dialog.close === 'function') {
                         dialog.close();
                     }
+                    this.resetModal();
                 },
 
-                resetValidation() {
+                resetModal() {
+                    this.opdId = this.defaultOpdId;
+                    this.downloadType = 'raw';
+                    this.columnCount = 2;
+                    this.columns = ['', ''];
                     this.errorMessage = '';
+                    this.isDownloading = false;
                 },
 
                 syncColumns() {
