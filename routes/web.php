@@ -148,6 +148,10 @@ Route::group([
         ->middleware('permission:manajemen-kotak-sampah-absensi')
         ->name('absensi.trash');
 
+    Route::livewire('/absensi/input', 'admin::absensi-input')
+        ->middleware('permission:absensi-input')
+        ->name('absensi.input');
+
     Route::livewire('/berita', 'admin::berita')
         ->middleware('permission:manajemen-berita')
         ->name('berita');
