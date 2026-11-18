@@ -806,6 +806,25 @@
                             </li>
                         @endcan
 
+                        @can('absensi-input')
+                            <li>
+                                <a @if (\Illuminate\Support\Facades\Route::has('absensi.input')) wire:navigate href="{{ route('absensi.input') }}" @else href="#" @endif
+                                    class="{{ request()->routeIs('absensi.input*') ? 'active bg-base-300 text-base-content font-medium' : '' }} flex flex-col items-start gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="size-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span>Input Absen</span>
+                                    </div>
+                                    <span class="text-[8px] text-base-content opacity-50 ml-7">
+                                        Input Data Absensi
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+
                         @can('manajemen-perangkat')
                             <li>
                                 <a wire:navigate href="{{ route('perangkat') }}"
