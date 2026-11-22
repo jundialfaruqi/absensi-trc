@@ -1,46 +1,91 @@
 <div wire:init="load" x-data="{ showPassword: false }"
-    class="min-h-screen flex items-center justify-center bg-[#0a192f] p-4 md:p-8 relative overflow-hidden font-sans antialiased">
-
-    {{-- ─── Background Decoration Layers ────────────────────────────────────── --}}
-    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {{-- Base Gradient --}}
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#1a3a8a_0%,#0a192f_70%)]"></div>
-
-
-    </div>
+    class="login-page-root min-h-screen flex items-center justify-center bg-white p-4 md:p-8 relative overflow-hidden font-sans antialiased">
 
     <style>
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .login-page-root {
+            background-color: #ffffff;
         }
 
-        .neon-glow-red {
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), 0 0 40px rgba(220, 38, 38, 0.1);
+        .login-card {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
         }
 
-        .input-tech {
-            background: rgba(15, 23, 42, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+        .login-form-panel {
+            padding: 0.5rem 0.25rem;
         }
 
-        .input-tech:focus {
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-            background: rgba(15, 23, 42, 0.6);
+        @media (min-width: 768px) {
+            .login-card {
+                background-color: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 2.5rem;
+                box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
+                min-height: 37.5rem;
+            }
+
+            .login-form-panel {
+                padding: 4rem 5rem;
+            }
+        }
+
+        .login-brand-left {
+            background-color: #0a192f;
+        }
+
+        .login-title-dark {
+            color: #0f172a;
+        }
+
+        .login-label-light {
+            color: #475569;
+        }
+
+        .login-input-light {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #0f172a;
+            transition: all 0.2s ease;
+        }
+
+        .login-input-light::placeholder {
+            color: #94a3b8;
+        }
+
+        .login-input-light:focus {
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .login-error-box {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .login-error-text {
+            color: #dc2626;
+        }
+
+        .login-submit-btn {
+            background-color: #dc2626;
+            border-radius: 9999px;
+            box-shadow: none;
+        }
+
+        .login-submit-btn:hover {
+            background-color: #b91c1c;
         }
     </style>
 
     @if ($ready)
-        <div
-            class="relative z-10 w-full max-w-6xl glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-150">
+        <div class="login-card relative z-10 w-full max-w-6xl overflow-hidden flex flex-col md:flex-row">
 
-            {{-- Left Side: Illustration & Branding --}}
-            <div
-                class="hidden md:flex md:w-1/2 p-16 flex-col justify-between relative overflow-hidden border-r border-white/5">
+            {{-- Left Side: Illustration & Branding (Desktop Only) --}}
+            <div class="login-brand-left hidden md:flex md:w-1/2 p-16 flex-col justify-between relative overflow-hidden">
 
                 <div class="relative z-10 space-y-12">
                     <div class="flex items-center gap-1">
@@ -86,7 +131,7 @@
                 </div>
 
                 <div class="relative z-10">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
                         &copy; {{ date('Y') }} DISKOMINFO Kota Pekanbaru <br />
                         Dinas Komunikasi, Informatika & Statistik
                     </p>
@@ -94,26 +139,27 @@
             </div>
 
             {{-- Right Side: Login Form --}}
-            <div class="w-full md:w-1/2 p-8 md:p-20 flex flex-col justify-center relative">
+            <div class="login-form-panel w-full md:w-1/2 flex flex-col justify-center relative">
                 <div class="max-w-md mx-auto w-full relative z-10">
                     {{-- Mobile Branding --}}
-                    <div class="md:hidden flex flex-col items-center mb-12 text-center">
+                    <div class="md:hidden flex flex-col items-center mb-10 text-center">
                         <img src="{{ asset('assets/logo/trc-logo.webp') }}" alt="Logo" class="h-16 w-16 mb-4">
-                        <h3 class="text-2xl font-black tracking-tighter text-white uppercase italic">TRC PEKANBARU</h3>
-                        <span class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">AMAN 112</span>
+                        <h3 class="login-title-dark text-2xl font-black tracking-tighter uppercase italic">TRC
+                            PEKANBARU</h3>
+                        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">AMAN 112</span>
                     </div>
 
                     <div class="mb-10 text-center md:text-left hidden md:block">
-                        <h2 class="text-3xl font-black text-white uppercase mb-2">LOGIN
+                        <h2 class="login-title-dark text-3xl font-black uppercase mb-2">LOGIN
                         </h2>
-                        <p class="text-slate-400 text-xs font-semibold uppercase tracking-widest">Akses Portal
+                        <p class="text-slate-500 text-xs font-semibold uppercase tracking-widest">Akses Portal
                             Pengelolaan TRC</p>
                     </div>
 
                     <form class="space-y-6" wire:submit.prevent="authenticate">
                         @if ($errors->has('loginError'))
                             <div
-                                class="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-[11px] font-black text-red-500 uppercase tracking-wider">
+                                class="login-error-box flex items-center gap-3 p-4 rounded-2xl text-[11px] font-black uppercase tracking-wider">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -124,44 +170,42 @@
                         @endif
 
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
-                                Email</label>
-                            <div class="relative group">
-                                <span
-                                    class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                                        <path d="m3 7 9 6 9-6" />
-                                    </svg>
-                                </span>
+                            <label
+                                class="login-label-light flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                    <path d="m3 7 9 6 9-6" />
+                                </svg>
+                                <span>Email</span>
+                            </label>
+                            <div>
                                 <input type="text" wire:model="email" placeholder="nama@trcpekanbaru.go.id"
-                                    class="input-tech w-full h-14 pl-12 pr-4 rounded-2xl text-sm font-medium text-white placeholder-slate-600 outline-none" />
+                                    class="login-input-light w-full h-14 px-4 rounded-2xl text-sm font-medium outline-none" />
                             </div>
                             @error('email')
                                 <span
-                                    class="text-[10px] font-bold text-red-500 italic ml-1 uppercase">{{ $message }}</span>
+                                    class="login-error-text text-[10px] font-bold italic ml-1 uppercase">{{ $message }}</span>
                             @enderror
                         </div>
 
                         <div class="space-y-2">
                             <label
-                                class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Password</label>
+                                class="login-label-light flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                    <circle cx="12" cy="16" r="1" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                                <span>Password</span>
+                            </label>
                             <div class="relative group">
-                                <span
-                                    class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" />
-                                        <circle cx="12" cy="16" r="1" />
-                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                    </svg>
-                                </span>
                                 <input :type="showPassword ? 'text' : 'password'" wire:model="password"
                                     placeholder="••••••••••••"
-                                    class="input-tech w-full h-14 pl-12 pr-12 rounded-2xl text-sm font-medium text-white placeholder-slate-600 outline-none" />
+                                    class="login-input-light w-full h-14 pl-4 pr-12 rounded-2xl text-sm font-medium outline-none" />
                                 <button type="button" @click="showPassword = !showPassword"
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
                                     <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -178,30 +222,27 @@
                             </div>
                             @error('password')
                                 <span
-                                    class="text-[10px] font-bold text-red-500 italic ml-1 uppercase">{{ $message }}</span>
+                                    class="login-error-text text-[10px] font-bold italic ml-1 uppercase">{{ $message }}</span>
                             @enderror
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" wire:model="remember"
-                                    class="w-4 h-4 rounded-md border-white/10 bg-slate-900 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all cursor-pointer" />
+                                    class="w-4 h-4 rounded-md border-slate-200 bg-white text-blue-600 focus:ring-blue-500 transition-all cursor-pointer" />
                                 <span
-                                    class="text-[10px] font-bold text-slate-400 group-hover:text-slate-300 transition-colors uppercase tracking-widest">Ingat
+                                    class="text-[10px] font-bold text-slate-500 group-hover:text-slate-700 transition-colors uppercase tracking-widest">Ingat
                                     Akses Saya</span>
                             </label>
-                            <a href="#"
-                                class="text-[10px] font-black text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">Bantuan
-                                Kunci?</a>
                         </div>
 
                         <button type="submit" wire:loading.attr="disabled"
-                            class="relative w-full h-14 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl transition-all transform hover:scale-[1.01] active:scale-[0.98] neon-glow-red grid place-items-center overflow-hidden group">
+                            class="login-submit-btn relative w-full h-14 text-white font-black uppercase tracking-[0.2em] rounded-full transition-all transform hover:scale-[1.01] active:scale-[0.98] grid place-items-center overflow-hidden group">
                             <div
                                 class="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                             </div>
 
-                            <span wire:loading.remove class="col-start-1 row-start-1">Masuk Sekarang</span>
+                            <span wire:loading.remove class="col-start-1 row-start-1">Masuk</span>
 
                             <span wire:loading.flex
                                 class="col-start-1 row-start-1 flex items-center justify-center gap-2">
@@ -217,22 +258,11 @@
                             </span>
                         </button>
 
-                        <div class="mt-4">
-                            <a href="/"
-                                class="btn btn-ghost btn-xs btn-block text-white/30 font-bold uppercase tracking-widest rounded-xl hover:bg-transparent hover:text-white/30 hover:shadow-none hover:border-none">Kembali</a>
-                        </div>
-
-                        <div class="pt-4 text-center">
-                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
-                                Dengan melanjutkan, kamu menerima dan menyetujui<br />
-                                <a href="#" class="text-blue-400 hover:text-blue-300 transition-colors">Syarat &
-                                    Ketentuan</a>
-                            </p>
-                        </div>
+                        <div class="pt-4 h-[45px]" aria-hidden="true"></div>
                     </form>
 
                     <div
-                        class="mt-12 flex items-center justify-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+                        class="mt-12 flex items-center justify-center gap-6 opacity-80 grayscale hover:grayscale-0 transition-all duration-700">
                         <img src="{{ asset('assets/logo/aman.webp') }}" alt="AMAN" class="h-6">
                         <img src="{{ asset('assets/logo/bangun-negeri.webp') }}" alt="Bangun Negeri" class="h-6">
                         <img src="{{ asset('assets/logo/logo-diskominfo-pekanbaru.webp') }}" alt="Diskominfo"
