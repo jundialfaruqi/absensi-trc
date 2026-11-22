@@ -1,40 +1,64 @@
 <?php
 
-use Livewire\Component;
+use App\Models\ApkRelease;
+use App\Models\Setting;
+use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use App\Models\Setting;
+use Livewire\Component;
 use Livewire\WithPagination;
 
-new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends Component {
+new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends Component
+{
     use WithPagination;
+
     public $registrationEnabled;
+
     public $webAbsensiActive;
+
     public $masukMulai;
+
     public $masukSelesai;
+
+    public $masukToleransi;
+
     public $pulangMulai;
+
     public $pulangSelesai;
+
     public $pinMaxAttempts;
+
     public $pinLock5;
+
     public $pinLock10;
 
     // Konsumsi Flexible Settings
     public $konsumsiSiangMulai;
+
     public $konsumsiSiangSelesai;
+
     public $konsumsiMalamMulai;
+
     public $konsumsiMalamSelesai;
-    
+
     // APK Information Settings
     public $apkVersion;
+
     public $apkReleaseDate;
+
     public $apkDescription;
-    public $apkWhatsNew = []; 
+
+    public $apkWhatsNew = [];
+
     public $apkOptionalMessage;
 
     // Storage Cleanup Settings
     public $hapusDariTanggal;
+
     public $hapusSampaiTanggal;
+
     public $ukuranTerhitung;
+
     public $confirmHapusText;
 
     protected $messages = [
@@ -44,7 +68,6 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         'hapusSampaiTanggal.date' => 'Format tanggal tidak valid.',
         'hapusSampaiTanggal.after_or_equal' => 'Tanggal akhir harus sama atau setelah tanggal awal.',
     ];
-
 
     public function addWhatsNewPoint()
     {
@@ -63,12 +86,13 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
         $this->webAbsensiActive = Setting::get('web_absensi_active', true);
         $this->masukMulai = Setting::get('absensi_masuk_mulai', 30);
         $this->masukSelesai = Setting::get('absensi_masuk_selesai', 120);
+        $this->masukToleransi = Setting::get('absensi_masuk_toleransi', 30);
         $this->pulangMulai = Setting::get('absensi_pulang_mulai', 30);
         $this->pulangSelesai = Setting::get('absensi_pulang_selesai', 120);
         $this->pinMaxAttempts = Setting::get('pin_max_attempts', 5);
         $this->pinLock5 = Setting::get('pin_lock_duration_5', 5);
         $this->pinLock10 = Setting::get('pin_lock_duration_10', 15);
-        
+
         $this->konsumsiSiangMulai = Setting::get('konsumsi_siang_mulai', '06:00');
         $this->konsumsiSiangSelesai = Setting::get('konsumsi_siang_selesai', '15:59');
         $this->konsumsiMalamMulai = Setting::get('konsumsi_malam_mulai', '16:00');
@@ -79,8 +103,8 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
 
     public function loadApkSettings()
     {
-        $latest = \App\Models\ApkRelease::latestRelease();
-        
+        $latest = ApkRelease::latestRelease();
+
         if ($latest) {
             $this->apkVersion = $latest->version;
             $this->apkReleaseDate = $latest->release_date?->format('Y-m-d');
@@ -92,7 +116,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
             $this->apkVersion = Setting::get('apk_version', 'v1.2.0');
             $this->apkReleaseDate = now()->format('Y-m-d');
             $this->apkDescription = Setting::get('apk_description', 'Rilis terbaru dengan penguatan sistem keamanan perangkat.');
-            
+
             $whatsNew = Setting::get('apk_whats_new');
             if ($whatsNew) {
                 $this->apkWhatsNew = is_array(json_decode($whatsNew, true)) ? json_decode($whatsNew, true) : [$whatsNew];
@@ -101,7 +125,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
                     'Keamanan Berlapis: Autentikasi digital (Enkripsi Kunci Dinamis) yang diperbarui otomatis setiap 30 hari.',
                     'Blokir Real-time: Perangkat yang dihapus/suspend otomatis terkunci dari akses sistem.',
                     'Bebas PIN: Menghapus modul PIN yang tidak terpakai untuk mempercepat performa.',
-                    'Monitoring Aktivitas: Pelacakan waktu aktif terakhir perangkat (Last Seen) di database.'
+                    'Monitoring Aktivitas: Pelacakan waktu aktif terakhir perangkat (Last Seen) di database.',
                 ];
             }
             $this->apkOptionalMessage = Setting::get('apk_optional_message', '');
@@ -132,10 +156,24 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
 
     public function saveTimeSettings()
     {
-        Setting::set('absensi_masuk_mulai', $this->masukMulai, 'integer');
-        Setting::set('absensi_masuk_selesai', $this->masukSelesai, 'integer');
-        Setting::set('absensi_pulang_mulai', $this->pulangMulai, 'integer');
-        Setting::set('absensi_pulang_selesai', $this->pulangSelesai, 'integer');
+        $this->validate([
+            'masukMulai' => 'required|integer|min:0',
+            'masukSelesai' => 'required|integer|min:0',
+            'masukToleransi' => 'required|integer|min:0|max:60',
+            'pulangMulai' => 'required|integer|min:0',
+            'pulangSelesai' => 'required|integer|min:0',
+        ], [
+            'masukToleransi.required' => 'Toleransi telat wajib diisi.',
+            'masukToleransi.integer' => 'Toleransi telat harus berupa angka bulat.',
+            'masukToleransi.min' => 'Toleransi telat minimal 0 menit.',
+            'masukToleransi.max' => 'Toleransi telat maksimal 60 menit.',
+        ]);
+
+        Setting::set('absensi_masuk_mulai', (int) $this->masukMulai, 'integer');
+        Setting::set('absensi_masuk_selesai', (int) $this->masukSelesai, 'integer');
+        Setting::set('absensi_masuk_toleransi', (int) $this->masukToleransi, 'integer');
+        Setting::set('absensi_pulang_mulai', (int) $this->pulangMulai, 'integer');
+        Setting::set('absensi_pulang_selesai', (int) $this->pulangSelesai, 'integer');
 
         $this->dispatch('toast', type: 'success', message: 'Batasan waktu absensi berhasil disimpan.');
     }
@@ -173,7 +211,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
             'apkReleaseDate' => 'required|date',
         ]);
 
-        \App\Models\ApkRelease::create([
+        ApkRelease::create([
             'version' => $this->apkVersion,
             'release_date' => $this->apkReleaseDate,
             'description' => $this->apkDescription,
@@ -192,15 +230,15 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
             'hapusSampaiTanggal' => 'required|date|after_or_equal:hapusDariTanggal',
         ]);
 
-        $start = \Carbon\Carbon::parse($this->hapusDariTanggal);
-        $end = \Carbon\Carbon::parse($this->hapusSampaiTanggal);
-        
+        $start = Carbon::parse($this->hapusDariTanggal);
+        $end = Carbon::parse($this->hapusSampaiTanggal);
+
         $totalSize = 0;
-        
+
         // Iterate through dates
         $current = $start->copy();
         while ($current->lte($end)) {
-            $folderName = 'absensi/' . $current->format('Y-m-d');
+            $folderName = 'absensi/'.$current->format('Y-m-d');
             if (Storage::disk('public')->exists($folderName)) {
                 $files = Storage::disk('public')->allFiles($folderName);
                 foreach ($files as $file) {
@@ -212,13 +250,13 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
 
         // Format size
         if ($totalSize >= 1073741824) {
-            $this->ukuranTerhitung = number_format($totalSize / 1073741824, 2) . ' GB';
+            $this->ukuranTerhitung = number_format($totalSize / 1073741824, 2).' GB';
         } elseif ($totalSize >= 1048576) {
-            $this->ukuranTerhitung = number_format($totalSize / 1048576, 2) . ' MB';
+            $this->ukuranTerhitung = number_format($totalSize / 1048576, 2).' MB';
         } elseif ($totalSize >= 1024) {
-            $this->ukuranTerhitung = number_format($totalSize / 1024, 2) . ' KB';
+            $this->ukuranTerhitung = number_format($totalSize / 1024, 2).' KB';
         } else {
-            $this->ukuranTerhitung = $totalSize . ' bytes';
+            $this->ukuranTerhitung = $totalSize.' bytes';
         }
     }
 
@@ -228,7 +266,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
             'hapusDariTanggal' => 'required|date',
             'hapusSampaiTanggal' => 'required|date|after_or_equal:hapusDariTanggal',
         ]);
-        
+
         $this->confirmHapusText = '';
         $this->dispatch('open-modal', id: 'delete-photo-modal');
     }
@@ -237,6 +275,7 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     {
         if ($this->confirmHapusText !== 'HAPUS') {
             $this->dispatch('toast', type: 'error', message: 'Konfirmasi teks tidak valid.');
+
             return;
         }
 
@@ -245,15 +284,15 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
             'hapusSampaiTanggal' => 'required|date|after_or_equal:hapusDariTanggal',
         ]);
 
-        $start = \Carbon\Carbon::parse($this->hapusDariTanggal);
-        $end = \Carbon\Carbon::parse($this->hapusSampaiTanggal);
-        
+        $start = Carbon::parse($this->hapusDariTanggal);
+        $end = Carbon::parse($this->hapusSampaiTanggal);
+
         $deletedCount = 0;
-        
+
         // Iterate through dates
         $current = $start->copy();
         while ($current->lte($end)) {
-            $folderName = 'absensi/' . $current->format('Y-m-d');
+            $folderName = 'absensi/'.$current->format('Y-m-d');
             if (Storage::disk('public')->exists($folderName)) {
                 Storage::disk('public')->deleteDirectory($folderName);
                 $deletedCount++;
@@ -270,9 +309,9 @@ new #[Layout('layouts::admin.app')] #[Title('Pengaturan Sistem')] class extends 
     public function with()
     {
         return [
-            'apkReleases' => \App\Models\ApkRelease::orderByDesc('release_date')
+            'apkReleases' => ApkRelease::orderByDesc('release_date')
                 ->orderByDesc('id')
-                ->paginate(10)
+                ->paginate(10),
         ];
     }
 };

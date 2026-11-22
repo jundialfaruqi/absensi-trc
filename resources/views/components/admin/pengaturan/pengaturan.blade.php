@@ -159,6 +159,68 @@
                             </p>
                         </div>
                     </div>
+
+                    {{-- Toleransi Keterlambatan Masuk (Global) --}}
+                    <div class="md:col-span-2"
+                        x-data="{
+                            toleransi: @entangle('masukToleransi'),
+                            shortcuts: [0, 10, 15, 20, 30, 45, 60],
+                            selectShortcut(val) {
+                                this.toleransi = val;
+                            },
+                            clampInput(e) {
+                                const raw = e.target.value;
+                                if (raw === '') return;
+                                let num = parseInt(raw, 10);
+                                if (isNaN(num)) num = 0;
+                                if (num < 0) num = 0;
+                                if (num > 60) num = 60;
+                                this.toleransi = num;
+                                e.target.value = num;
+                            },
+                            handleBlur() {
+                                if (this.toleransi === '' || this.toleransi === null || isNaN(parseInt(this.toleransi, 10))) {
+                                    this.toleransi = 30;
+                                }
+                            }
+                        }">
+                        <div class="p-4 rounded-xl bg-base-200/50 border border-base-200 space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <span class="text-[10px] font-black uppercase">Toleransi Keterlambatan Absen Masuk (Global)</span>
+                                <span class="text-[10px] text-base-content/60 font-medium">Default 30 menit · Maksimal 60 menit</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                                <div class="md:col-span-4 form-control w-full">
+                                    <label class="label pt-0">
+                                        <span class="text-[9px] font-bold uppercase opacity-50">Toleransi (Menit)</span>
+                                    </label>
+                                    <input type="number" min="0" max="60" x-model="toleransi"
+                                        @input="clampInput($event)" @blur="handleBlur()"
+                                        class="input input-sm input-bordered focus:input-primary font-bold text-xs w-full @error('masukToleransi') input-error @enderror" />
+                                    @error('masukToleransi')
+                                        <span class="text-error text-[10px] mt-1 font-medium">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="md:col-span-8">
+                                    <div class="text-[9px] font-bold uppercase opacity-50 mb-1.5">Pilihan Cepat</div>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <template x-for="item in shortcuts" :key="item">
+                                            <button type="button" @click="selectShortcut(item)"
+                                                :class="Number(toleransi) === item ? 'btn-neutral font-bold' : 'btn-outline border-base-300 text-base-content/80 font-medium'"
+                                                class="btn btn-xs transition-none"
+                                                x-text="item + ' Menit'"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-[9px] text-base-content/40 font-medium uppercase leading-relaxed italic">
+                                * Contoh: 30 menit artinya jadwal masuk 08:00 tetap dihitung HADIR hingga 08:30:59, dan tercatat TELAT mulai 08:31:00.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-actions justify-end mt-6 pt-6 border-t border-base-200">

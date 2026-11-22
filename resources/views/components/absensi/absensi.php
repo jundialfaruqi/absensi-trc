@@ -511,8 +511,9 @@ new #[Layout('layouts.absensi.app')] class extends Component
                     // Hitung waktu mulai shift sebagai datetime lengkap (tanggal + jam)
                     $shiftStartDatetime = Carbon::parse($this->activeDate)->setTimeFrom($this->activeJadwal->shift->start_time);
 
-                    // Toleransi: 30 menit setelah jam masuk shift (sampai akhir menit ke-30)
-                    $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinutes(30)->endOfMinute();
+                    // Toleransi dinamis global (default 30 menit, hingga akhir menit toleransi)
+                    $toleransi = (int) ($this->activeJadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 30));
+                    $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinutes($toleransi)->endOfMinute();
 
                     // Jika absen masuk SETELAH akhir menit toleransi → TELAT
                     if ($now->greaterThan($shiftStartWithBuffer)) {
