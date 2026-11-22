@@ -319,7 +319,6 @@ class AttendanceController extends Controller
         ]);
     }
 
-
     public function checkStatus(Request $request, $id)
     {
         $now = Carbon::now();
@@ -925,10 +924,10 @@ class AttendanceController extends Controller
                 // Hitung waktu mulai shift sebagai datetime lengkap (tanggal + jam)
                 $shiftStartDatetime = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
 
-                // Toleransi: 30 menit setelah jam masuk shift
-                $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinutes(30);
+                // Toleransi: 30 menit setelah jam masuk shift (sampai akhir menit ke-30)
+                $shiftStartWithBuffer = $shiftStartDatetime->copy()->addMinutes(30)->endOfMinute();
 
-                // Jika absen masuk SETELAH jam masuk + 30 menit toleransi → TELAT
+                // Jika absen masuk SETELAH akhir menit toleransi → TELAT
                 if ($now->greaterThan($shiftStartWithBuffer)) {
                     $status_masuk = 'TELAT';
                 }

@@ -277,8 +277,8 @@ class PersonnelAbsensiApiTest extends TestCase
             'status' => 'SHIFT',
         ]);
 
-        // 20:23 (<= 20:30) -> HADIR
-        Carbon::setTestNow(Carbon::parse('2026-09-20 20:23:00'));
+        // 20:30:59 (masih menit ke-30) -> HADIR
+        Carbon::setTestNow(Carbon::parse('2026-09-20 20:30:59'));
         $respNight = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->postJson('/api/v1/personel/absensi/store', [
                 'lat' => 0.507068,
@@ -289,7 +289,7 @@ class PersonnelAbsensiApiTest extends TestCase
         $respNight->assertStatus(200)
             ->assertJsonPath('data.status_masuk', 'HADIR');
 
-        // 08:31 (> 08:30) -> TELAT (pakai tanggal terpisah setelah shift malam selesai)
+        // 08:31:00 (> 08:30:59) -> TELAT (pakai tanggal terpisah setelah shift malam selesai)
         Jadwal::create([
             'personnel_id' => $this->personnel->id,
             'shift_id' => $morningShift->id,

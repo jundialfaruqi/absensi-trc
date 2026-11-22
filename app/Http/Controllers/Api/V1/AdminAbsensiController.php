@@ -779,7 +779,7 @@ class AdminAbsensiController extends Controller
             if ($jadwal && $jadwal->shift && $jadwal->shift->start_time) {
                 $shiftStart = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
                 $toleransi = (int) ($jadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 30));
-                $batasToleransi = $shiftStart->copy()->addMinutes($toleransi);
+                $batasToleransi = $shiftStart->copy()->addMinutes($toleransi)->endOfMinute();
                 if ($now->greaterThan($batasToleransi)) {
                     $statusMasuk = 'TELAT';
                 }
