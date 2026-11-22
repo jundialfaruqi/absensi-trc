@@ -117,7 +117,7 @@ new class extends Component
             $this->jadwalJamMasuk = null;
             $this->jadwalJamPulang = null;
         } elseif ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
-            $this->jadwalShiftName = $shift->name . ($shift->keterangan ? ' (' . $shift->keterangan . ')' : '');
+            $this->jadwalShiftName = $shift->name.($shift->keterangan ? ' ('.$shift->keterangan.')' : '');
             $this->jadwalJamMasuk = Carbon::parse($shift->start_time)->format('H:i');
             $this->jadwalJamPulang = Carbon::parse($shift->end_time)->format('H:i');
         } else {
@@ -133,7 +133,7 @@ new class extends Component
                 ->first();
 
             if ($recentJadwal && $recentJadwal->shift) {
-                $this->jadwalShiftName = $recentJadwal->shift->name . ($recentJadwal->shift->keterangan ? ' (' . $recentJadwal->shift->keterangan . ')' : '');
+                $this->jadwalShiftName = $recentJadwal->shift->name.($recentJadwal->shift->keterangan ? ' ('.$recentJadwal->shift->keterangan.')' : '');
                 $this->jadwalJamMasuk = Carbon::parse($recentJadwal->shift->start_time)->format('H:i');
                 $this->jadwalJamPulang = Carbon::parse($recentJadwal->shift->end_time)->format('H:i');
             } else {
@@ -143,7 +143,7 @@ new class extends Component
                     ->first();
 
                 if ($defaultShift) {
-                    $this->jadwalShiftName = $defaultShift->name . ($defaultShift->keterangan ? ' (' . $defaultShift->keterangan . ')' : '');
+                    $this->jadwalShiftName = $defaultShift->name.($defaultShift->keterangan ? ' ('.$defaultShift->keterangan.')' : '');
                     $this->jadwalJamMasuk = Carbon::parse($defaultShift->start_time)->format('H:i');
                     $this->jadwalJamPulang = Carbon::parse($defaultShift->end_time)->format('H:i');
                 } else {
@@ -174,7 +174,7 @@ new class extends Component
             $this->uniqueDeviceIdPulang = $absensi->unique_device_id_pulang;
 
             $resolveDevice = function ($uniqueDeviceId, $personnelId, $platform = null) {
-                if ($platform && !in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
+                if ($platform && ! in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
                     return null;
                 }
 
@@ -257,10 +257,16 @@ new class extends Component
 
     public function saveEdit()
     {
-        $this->validate([
+        $isDev = Auth::user()?->hasRole('dev') ?? false;
+
+        $rules = [
             'statusMasuk' => 'required',
-            'alasanEdit' => 'required|min:5',
-        ], [
+        ];
+        if (! $isDev) {
+            $rules['alasanEdit'] = 'required|min:5';
+        }
+
+        $this->validate($rules, [
             'statusMasuk.required' => 'Status masuk wajib dipilih.',
             'alasanEdit.required' => 'Alasan perubahan data wajib diisi.',
             'alasanEdit.min' => 'Alasan perubahan data minimal :min karakter.',
@@ -279,10 +285,6 @@ new class extends Component
         $existing = Absensi::where('personnel_id', $this->editingPersonnelId)
             ->whereDate('tanggal', $this->editingTanggal)
             ->first();
-
-        // Capture original status ONLY if it's the first edit
-        $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
-        $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
 
         // Tentukan status kehadiran utama (status):
         // Jika status masuk TELAT/HADIR atau status pulang PC/HADIR, maka status kehadiran utama adalah HADIR.
@@ -303,23 +305,53 @@ new class extends Component
             'status_pulang' => $this->statusPulang,
             'jam_masuk' => ! empty($this->jamMasuk) ? $this->jamMasuk : null,
             'jam_pulang' => ! empty($this->jamPulang) ? $this->jamPulang : null,
-            'alasan_edit' => $this->alasanEdit,
             'nomor_surat' => $this->nomorSurat,
             'cuti_id' => ($this->statusMasuk === 'CUTI' || $this->statusPulang === 'CUTI') ? $this->cutiId : null,
             'keterangan' => $this->keterangan,
-            'edited_by_user_id' => Auth::id(),
-            'edited_at' => now(),
-            'original_status_masuk' => $originalStatusMasuk,
-            'original_status_pulang' => $originalStatusPulang,
         ];
 
-        if ($existing) {
-            $existing->update($attributes);
+        if ($isDev) {
+            // Role dev: bersihkan total seluruh jejak edit & jangan ubah timestamps
+            $attributes = array_merge($attributes, [
+                'alasan_edit' => null,
+                'edited_by_user_id' => null,
+                'edited_at' => null,
+                'original_status_masuk' => null,
+                'original_status_pulang' => null,
+            ]);
+
+            if ($existing) {
+                $existing->timestamps = false;
+                $existing->update($attributes);
+            } else {
+                $absensi = new Absensi(array_merge([
+                    'personnel_id' => $this->editingPersonnelId,
+                    'tanggal' => $this->editingTanggal,
+                ], $attributes));
+                $absensi->timestamps = false;
+                $absensi->save();
+            }
         } else {
-            Absensi::create(array_merge([
-                'personnel_id' => $this->editingPersonnelId,
-                'tanggal' => $this->editingTanggal,
-            ], $attributes));
+            // Capture original status ONLY if it's the first edit
+            $originalStatusMasuk = $existing ? ($existing->original_status_masuk ?? $existing->status_masuk) : 'ALPA';
+            $originalStatusPulang = $existing ? ($existing->original_status_pulang ?? $existing->status_pulang) : 'ALPA';
+
+            $attributes = array_merge($attributes, [
+                'alasan_edit' => $this->alasanEdit,
+                'edited_by_user_id' => Auth::id(),
+                'edited_at' => now(),
+                'original_status_masuk' => $originalStatusMasuk,
+                'original_status_pulang' => $originalStatusPulang,
+            ]);
+
+            if ($existing) {
+                $existing->update($attributes);
+            } else {
+                Absensi::create(array_merge([
+                    'personnel_id' => $this->editingPersonnelId,
+                    'tanggal' => $this->editingTanggal,
+                ], $attributes));
+            }
         }
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
@@ -341,6 +373,10 @@ new class extends Component
             $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mengedit absensi ini.', type: 'error');
 
             return;
+        }
+
+        if (Auth::user()?->hasRole('dev')) {
+            $absensi->timestamps = false;
         }
 
         if ($absensi->original_status_masuk === 'ALPA' && $absensi->original_status_pulang === 'ALPA') {
@@ -400,8 +436,11 @@ new class extends Component
             return;
         }
 
+        $user = Auth::user();
+        $isDev = $user?->hasRole('dev') ?? false;
+
         // Permission check
-        if (! Auth::user()->can('reset-absen')) {
+        if (! $isDev && ! $user?->can('reset-absen')) {
             $this->dispatch('toast', message: 'Anda tidak memiliki izin untuk mereset absensi.', type: 'error');
 
             return;
@@ -420,9 +459,16 @@ new class extends Component
         $personnelId = $absensi->personnel_id;
         $tanggal = $absensi->tanggal;
 
-        // Catat siapa yang menghapus, lalu soft delete
-        $absensi->update(['deleted_by_user_id' => Auth::id()]);
-        $absensi->delete();
+        if ($isDev) {
+            // Role dev: matikan timestamps dan kosongkan deleted_by_user_id agar tanpa jejak
+            $absensi->timestamps = false;
+            $absensi->update(['deleted_by_user_id' => null]);
+            $absensi->delete();
+        } else {
+            // Catat siapa yang menghapus, lalu soft delete
+            $absensi->update(['deleted_by_user_id' => Auth::id()]);
+            $absensi->delete();
+        }
 
         // Buat ulang record absensi default berdasarkan jadwal
         $jadwal = Jadwal::where('personnel_id', $personnelId)
@@ -434,7 +480,7 @@ new class extends Component
             $isOff = $shift && $shift->type === 'off';
             $defaultStatus = $isOff ? ($shift->keterangan ?? 'OFF') : 'ALPA';
 
-            Absensi::create([
+            $placeholder = new Absensi([
                 'personnel_id' => $personnelId,
                 'tanggal' => $tanggal,
                 'jadwal_id' => $jadwal->id,
@@ -442,6 +488,10 @@ new class extends Component
                 'status_masuk' => $defaultStatus,
                 'status_pulang' => $defaultStatus,
             ]);
+            if ($isDev) {
+                $placeholder->timestamps = false;
+            }
+            $placeholder->save();
         }
 
         $this->dispatch('close-modal', id: 'edit-absensi-modal');
@@ -457,7 +507,7 @@ new class extends Component
 
     /**
      * Cek hak akses untuk mengedit absensi personel:
-     * 1. Jika permission = edit-absensi-all-opd (atau role super-admin), bisa mengedit absensi seluruh personel OPD.
+     * 1. Jika permission = edit-absensi-all-opd (atau role super-admin / dev), bisa mengedit absensi seluruh personel OPD.
      * 2. Jika permission = edit-absensi-opd, hanya bisa mengedit absensi personel OPD-nya sendiri.
      */
     private function canEditPersonnel(?Personnel $personnel): bool
@@ -472,8 +522,8 @@ new class extends Component
             return false;
         }
 
-        // 1. Permission edit-absensi-all-opd atau role super-admin: bisa edit semua OPD
-        if ($user->can('edit-absensi-all-opd') || $user->hasRole('super-admin')) {
+        // 1. Permission edit-absensi-all-opd atau role super-admin / dev: bisa edit semua OPD
+        if ($user->can('edit-absensi-all-opd') || $user->hasAnyRole(['super-admin', 'dev'])) {
             return true;
         }
 

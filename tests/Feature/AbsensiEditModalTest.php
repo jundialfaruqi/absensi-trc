@@ -448,3 +448,132 @@ test('absensi edit modal sets Fleksibel and null times without shift fallback fo
         ->assertDontSee('Jadwal: 20:00');
 });
 
+test('dev role can edit any OPD absensi without alasanEdit, clears all edit traces, and preserves updated_at', function () {
+    $devRole = Role::firstOrCreate(['name' => 'dev', 'color' => '#8b5cf6']);
+    $otherAdmin = User::factory()->create();
+    $devUser = User::factory()->create();
+    $devUser->assignRole($devRole);
+
+    $opd = Opd::create(['name' => 'Dishub', 'code' => 'DISHUB']);
+    $personnel = Personnel::create([
+        'name' => 'Eko Prasetyo',
+        'nik' => '1471000011112222',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'email' => 'eko@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $date = '2026-08-26';
+    $originalUpdatedAt = Carbon::parse('2026-08-26 08:05:00');
+
+    $existing = new Absensi([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'TELAT',
+        'jam_masuk' => '08:40:00',
+        'edited_by_user_id' => $otherAdmin->id,
+        'edited_at' => Carbon::parse('2026-08-26 09:00:00'),
+        'alasan_edit' => 'Edit admin sebelumnya',
+        'original_status_masuk' => 'ALPA',
+        'original_status_pulang' => 'ALPA',
+    ]);
+    $existing->timestamps = false;
+    $existing->created_at = Carbon::parse('2026-08-26 08:05:00');
+    $existing->updated_at = $originalUpdatedAt;
+    $existing->save();
+
+    Carbon::setTestNow(Carbon::parse('2026-11-22 14:55:00'));
+
+    Livewire::actingAs($devUser)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertDontSee('Alasan Perubahan / Keterangan')
+        ->set('statusMasuk', 'HADIR')
+        ->set('jamMasuk', '07:55')
+        ->set('statusPulang', 'HADIR')
+        ->set('jamPulang', '16:00')
+        ->set('alasanEdit', '')
+        ->call('saveEdit')
+        ->assertHasNoErrors()
+        ->assertDispatched('toast', message: 'Data absensi berhasil diperbarui', type: 'success');
+
+    $saved = Absensi::find($existing->id);
+    expect($saved->status)->toBe('HADIR')
+        ->and($saved->status_masuk)->toBe('HADIR')
+        ->and($saved->status_pulang)->toBe('HADIR')
+        ->and($saved->edited_by_user_id)->toBeNull()
+        ->and($saved->edited_at)->toBeNull()
+        ->and($saved->alasan_edit)->toBeNull()
+        ->and($saved->original_status_masuk)->toBeNull()
+        ->and($saved->original_status_pulang)->toBeNull()
+        ->and($saved->updated_at->format('Y-m-d H:i:s'))->toBe($originalUpdatedAt->format('Y-m-d H:i:s'));
+
+    Carbon::setTestNow();
+});
+
+test('dev role can soft-delete absensi to trash with null deleted_by_user_id and untouched updated_at', function () {
+    $devRole = Role::firstOrCreate(['name' => 'dev', 'color' => '#8b5cf6']);
+    $devUser = User::factory()->create();
+    $devUser->assignRole($devRole);
+
+    $opd = Opd::create(['name' => 'Disdik', 'code' => 'DISDIK']);
+    $personnel = Personnel::create([
+        'name' => 'Fajar Nugroho',
+        'nik' => '1471000011113333',
+        'opd_id' => $opd->id,
+        'penugasan_id' => 1,
+        'email' => 'fajar@example.com',
+        'password' => bcrypt('password'),
+        'pin' => '123456',
+        'attendance_type' => 'SCHEDULED',
+    ]);
+
+    $shift = Shift::create([
+        'name' => 'P1',
+        'type' => 'shift',
+        'start_time' => '08:00',
+        'end_time' => '16:00',
+    ]);
+
+    $date = '2026-08-27';
+    Jadwal::create([
+        'personnel_id' => $personnel->id,
+        'shift_id' => $shift->id,
+        'tanggal' => $date,
+        'status' => 'SHIFT',
+    ]);
+
+    $originalUpdatedAt = Carbon::parse('2026-08-27 08:00:00');
+    $absensi = new Absensi([
+        'personnel_id' => $personnel->id,
+        'tanggal' => $date,
+        'status' => 'HADIR',
+        'status_masuk' => 'HADIR',
+        'jam_masuk' => '07:55:00',
+    ]);
+    $absensi->timestamps = false;
+    $absensi->created_at = Carbon::parse('2026-08-27 08:00:00');
+    $absensi->updated_at = $originalUpdatedAt;
+    $absensi->save();
+
+    Carbon::setTestNow(Carbon::parse('2026-11-22 14:58:00'));
+
+    Livewire::actingAs($devUser)
+        ->test('admin::absensi-edit-modal')
+        ->call('open', $personnel->id, $date)
+        ->assertSee('Hapus')
+        ->call('resetAbsensi')
+        ->assertDispatched('toast', message: 'Data absensi dipindahkan ke kotak sampah', type: 'success');
+
+    $trashed = Absensi::onlyTrashed()->find($absensi->id);
+    expect($trashed)->not->toBeNull()
+        ->and($trashed->deleted_by_user_id)->toBeNull()
+        ->and($trashed->deleted_at)->not->toBeNull()
+        ->and($trashed->updated_at->format('Y-m-d H:i:s'))->toBe($originalUpdatedAt->format('Y-m-d H:i:s'));
+
+    Carbon::setTestNow();
+});

@@ -427,19 +427,21 @@
                             @endif
                         </div>
 
-                        {{-- Alasan Edit --}}
-                        <div class="form-control w-full">
-                            <label class="label py-1.5"><span
-                                    class="label-text text-sm font-medium text-base-content">
-                                    Alasan Perubahan / Keterangan
-                                </span></label>
-                            <textarea wire:model="alasanEdit"
-                                class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 transition-all placeholder:text-base-content/70"
-                                placeholder="Jelaskan alasan pengeditan data secara detail untuk justifikasi perubahan data"></textarea>
-                            @error('alasanEdit')
-                                <span class="text-error text-[10px] mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
+                        {{-- Alasan Edit (disembunyikan untuk role dev) --}}
+                        @if (! auth()->user()?->hasRole('dev'))
+                            <div class="form-control w-full">
+                                <label class="label py-1.5"><span
+                                        class="label-text text-sm font-medium text-base-content">
+                                        Alasan Perubahan / Keterangan
+                                    </span></label>
+                                <textarea wire:model="alasanEdit"
+                                    class="textarea textarea-bordered w-full h-32 bg-base-50 focus:border-primary border-base-300 transition-all placeholder:text-base-content/70"
+                                    placeholder="Jelaskan alasan pengeditan data secara detail untuk justifikasi perubahan data"></textarea>
+                                @error('alasanEdit')
+                                    <span class="text-error text-[10px] mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        @endif
 
                         <div
                             class="modal-action flex flex-row items-center justify-between gap-2 pt-4 border-t border-base-200">
@@ -451,7 +453,7 @@
                                         Reset
                                     </button>
                                 @endif
-                                @can('reset-absen')
+                                @if (auth()->user()?->hasRole('dev') || auth()->user()?->can('reset-absen'))
                                     @if ($editingAbsensiId && ($jamMasuk || $jamPulang || $editingFotoMasuk || $editingFotoPulang))
                                         <button type="button" wire:click="resetAbsensi"
                                             wire:confirm="Data absensi akan dipindahkan ke Kotak Sampah. Lanjutkan?"
@@ -464,7 +466,7 @@
                                             Hapus
                                         </button>
                                     @endif
-                                @endcan
+                                @endif
                             </div>
                             <div class="flex gap-1.5 justify-end">
                                 <button type="button" class="btn btn-ghost btn-sm"
