@@ -19,7 +19,7 @@
     </div>
 
     {{-- Settings Content --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 gap-6">
         {{-- Pendaftaran Personnel --}}
         <div class="card bg-base-100 border border-base-200 overflow-hidden">
             <div class="card-body p-6">

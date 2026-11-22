@@ -36,7 +36,8 @@ test('pengaturan sistem defaults masukToleransi to 30 and renders client-side sh
         ->assertSee('Toleransi Keterlambatan Absen Masuk (Global)')
         ->assertSee('shortcuts: [0, 10, 15, 20, 30, 45, 60]', false)
         ->assertSee('selectShortcut(item)', false)
-        ->assertSee('max="60"', false);
+        ->assertSee('max="60"', false)
+        ->assertDontSee('grid-cols-1 lg:grid-cols-2 gap-6', false);
 });
 
 test('pengaturan sistem validates masukToleransi max 60 and saves valid setting', function () {
