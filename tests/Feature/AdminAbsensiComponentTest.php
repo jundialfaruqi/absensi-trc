@@ -1,12 +1,14 @@
 <?php
 
-use App\Models\User;
 use App\Models\Opd;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Livewire\Livewire;
+use App\Models\Penugasan;
+use App\Models\Personnel;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -170,3 +172,40 @@ test('admin absensi component hides Rekap Dokumentasi Konsumsi tab for user with
         ->assertDontSee('Rekap Dokumentasi Konsumsi');
 });
 
+test('dev role sees personnel from all OPDs and OPD filter on rekap absensi', function () {
+    $opd1 = Opd::create(['name' => 'Dinas Kesehatan', 'singkatan' => 'Dinkes']);
+    $opd2 = Opd::create(['name' => 'Dinas Perhubungan', 'singkatan' => 'Dishub']);
+    $penugasan = Penugasan::create(['name' => 'Staf']);
+
+    Personnel::create([
+        'name' => 'Personel Dinkes',
+        'nik' => '1471000000000001',
+        'email' => 'dinkes@example.com',
+        'password' => bcrypt('password'),
+        'foto' => 'sample.jpg',
+        'opd_id' => $opd1->id,
+        'penugasan_id' => $penugasan->id,
+    ]);
+    Personnel::create([
+        'name' => 'Personel Dishub',
+        'nik' => '1471000000000002',
+        'email' => 'dishub@example.com',
+        'password' => bcrypt('password'),
+        'foto' => 'sample.jpg',
+        'opd_id' => $opd2->id,
+        'penugasan_id' => $penugasan->id,
+    ]);
+
+    $devRole = Role::firstOrCreate(['name' => 'dev', 'color' => '#8b5cf6']);
+    $devRole->givePermissionTo('manajemen-absensi');
+    $devUser = User::factory()->create();
+    $devUser->assignRole('dev');
+
+    Livewire::actingAs($devUser)
+        ->test('admin::absensi')
+        ->call('load')
+        ->assertSee('Semua OPD (Filter)')
+        ->assertSee('x-model="exportOpdId"', false)
+        ->assertSee('Personel Dinkes')
+        ->assertSee('Personel Dishub');
+});

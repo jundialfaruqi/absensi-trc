@@ -89,7 +89,7 @@
                     </select>
                 </div>
 
-                @if (auth()->user()->hasRole('super-admin'))
+                @if (auth()->user()->hasAnyRole(['super-admin', 'dev']))
                     <div class="w-full sm:w-auto">
                         <select wire:model.live="selectedOpd"
                             class="select select-bordered select-sm md:select-md w-full sm:w-64 bg-base-100">
@@ -254,7 +254,7 @@
                         @if ($readyToLoad)
                             @php
                                 $currentOpd = null;
-                                $isSuperAdmin = auth()->user()->hasRole('super-admin');
+                                $isSuperAdmin = auth()->user()->hasAnyRole(['super-admin', 'dev']);
                             @endphp
                             @forelse ($this->personnels as $p)
                                 @if ($isSuperAdmin && $currentOpd !== $p->opd_id)
@@ -733,7 +733,7 @@
                     </div>
 
                     {{-- Target OPD --}}
-                    @if (auth()->user()->hasRole('super-admin'))
+                    @if (auth()->user()->hasAnyRole(['super-admin', 'dev']))
                         <div class="space-y-1.5">
                             <label class="block text-xs font-bold text-base-content/70">
                                 Target OPD

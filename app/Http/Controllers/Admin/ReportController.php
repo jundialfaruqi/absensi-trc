@@ -32,11 +32,11 @@ class ReportController extends Controller
             $search = $request->get('search');
             $paperSize = $request->get('paperSize', 'a4');
             $timeDisplay = $request->get('time_display', 'none');
-            if (!in_array($timeDisplay, ['none', 'masuk', 'pulang', 'masuk_pulang'])) {
+            if (! in_array($timeDisplay, ['none', 'masuk', 'pulang', 'masuk_pulang'])) {
                 $timeDisplay = 'none';
             }
 
-            $opdId = Auth::user()->hasRole('super-admin') ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
+            $opdId = Auth::user()->hasAnyRole(['super-admin', 'dev']) ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
 
             $dates = [];
             if ($startDate && $endDate) {
@@ -140,7 +140,7 @@ class ReportController extends Controller
             $excludedShiftIds = array_map('intval', array_filter($excludedShiftIds));
 
             $timeDisplay = $request->get('time_display', 'none');
-            if (!in_array($timeDisplay, ['none', 'masuk', 'pulang', 'masuk_pulang'])) {
+            if (! in_array($timeDisplay, ['none', 'masuk', 'pulang', 'masuk_pulang'])) {
                 $timeDisplay = 'none';
             }
 
@@ -183,11 +183,11 @@ class ReportController extends Controller
             $includeDokumentasi = $request->has('include_dokumentasi') ? $request->boolean('include_dokumentasi') : false;
 
             // Pastikan minimal salah satu aktif
-            if (!$includeRekap && !$includeRincian && !$includeDokumentasi) {
+            if (! $includeRekap && ! $includeRincian && ! $includeDokumentasi) {
                 $includeRekap = true;
             }
 
-            $opdId = Auth::user()->hasRole('super-admin') ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
+            $opdId = Auth::user()->hasAnyRole(['super-admin', 'dev']) ? ($request->get('opd_id') ?: null) : Auth::user()->opd()?->id;
 
             $dates = [];
             if ($startDate && $endDate) {
@@ -237,7 +237,7 @@ class ReportController extends Controller
                     $q->where('opd_id', $opdId);
                 })
                 ->when($search, function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
+                    $q->where('name', 'like', '%'.$search.'%');
                 })
                 ->orderBy('name')
                 ->get();
@@ -281,11 +281,11 @@ class ReportController extends Controller
             }
 
             // Nilai SIANG/MALAM HANYA diambil dari tabel dokumentasi_konsumsis (jika belum ada atau NULL, bernilai 0)
-            $searchDates = array_unique(array_merge($dates, array_map(fn ($d) => $d . ' 00:00:00', $dates)));
+            $searchDates = array_unique(array_merge($dates, array_map(fn ($d) => $d.' 00:00:00', $dates)));
             $dokRecords = DokumentasiKonsumsi::whereIn('tanggal', $searchDates)
                 ->when($opdId, fn ($q) => $q->where('opd_id', $opdId))
                 ->get()
-                ->keyBy(fn ($item) => \Carbon\Carbon::parse($item->tanggal)->format('Y-m-d'));
+                ->keyBy(fn ($item) => Carbon::parse($item->tanggal)->format('Y-m-d'));
 
             foreach ($dates as $d) {
                 $dok = $dokRecords->get($d);
@@ -312,7 +312,7 @@ class ReportController extends Controller
                     ->get();
 
                 foreach ($dokForPages as $record) {
-                    $hasPhoto = !empty($record->foto_siang) || !empty($record->foto_siang_2) || !empty($record->foto_malam) || !empty($record->foto_malam_2);
+                    $hasPhoto = ! empty($record->foto_siang) || ! empty($record->foto_siang_2) || ! empty($record->foto_malam) || ! empty($record->foto_malam_2);
                     $hasPorsi = ($record->jumlah_siang !== null && $record->jumlah_siang > 0) || ($record->jumlah_malam !== null && $record->jumlah_malam > 0);
 
                     if ($hasPhoto || $hasPorsi) {
@@ -384,17 +384,17 @@ class ReportController extends Controller
         $includeDokumentasi = $request->has('include_dokumentasi') ? $request->boolean('include_dokumentasi') : false;
 
         $prefix = 'rekap_konsumsi';
-        if ($includeDokumentasi && !$includeRekap && !$includeRincian) {
+        if ($includeDokumentasi && ! $includeRekap && ! $includeRincian) {
             $prefix = 'dokumentasi_foto_konsumsi';
-        } elseif (!$includeRekap && $includeRincian && !$includeDokumentasi) {
+        } elseif (! $includeRekap && $includeRincian && ! $includeDokumentasi) {
             $prefix = 'rincian_konsumsi_personel';
         } elseif ($includeRekap && $includeRincian && $includeDokumentasi) {
             $prefix = 'laporan_lengkap_konsumsi';
-        } elseif ($includeRekap && $includeDokumentasi && !$includeRincian) {
+        } elseif ($includeRekap && $includeDokumentasi && ! $includeRincian) {
             $prefix = 'rekap_dan_dokumentasi_konsumsi';
-        } elseif ($includeRincian && $includeDokumentasi && !$includeRekap) {
+        } elseif ($includeRincian && $includeDokumentasi && ! $includeRekap) {
             $prefix = 'rincian_dan_dokumentasi_konsumsi';
-        } elseif ($includeRekap && $includeRincian && !$includeDokumentasi) {
+        } elseif ($includeRekap && $includeRincian && ! $includeDokumentasi) {
             $prefix = 'rekap_dan_rincian_konsumsi';
         }
 
@@ -456,23 +456,23 @@ class ReportController extends Controller
      */
     private function prepareImageForPdf(?string $relativePath): ?string
     {
-        if (!$relativePath) {
+        if (! $relativePath) {
             return null;
         }
 
-        $fullPath = public_path('storage/' . $relativePath);
-        if (!file_exists($fullPath)) {
+        $fullPath = public_path('storage/'.$relativePath);
+        if (! file_exists($fullPath)) {
             return null;
         }
 
         try {
             $content = file_get_contents($fullPath);
-            if (!$content) {
+            if (! $content) {
                 return $fullPath;
             }
 
             $img = @imagecreatefromstring($content);
-            if (!$img) {
+            if (! $img) {
                 return $fullPath;
             }
 
@@ -496,7 +496,7 @@ class ReportController extends Controller
             $jpegData = ob_get_clean();
             imagedestroy($img);
 
-            return 'data:image/jpeg;base64,' . base64_encode($jpegData);
+            return 'data:image/jpeg;base64,'.base64_encode($jpegData);
         } catch (\Throwable $e) {
             return $fullPath;
         }
@@ -538,7 +538,7 @@ class ReportController extends Controller
             $opdSlug = Str::slug($opd?->singkatan ?: ($opd?->name ?: 'opd'), '_');
         }
 
-        return "{$prefix}_{$opdSlug}_" . date('Ymd_His') . ".{$extension}";
+        return "{$prefix}_{$opdSlug}_".date('Ymd_His').".{$extension}";
     }
 
     public function exportPersonnelExcel(Request $request)

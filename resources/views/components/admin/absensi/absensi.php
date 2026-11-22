@@ -1,21 +1,23 @@
 <?php
 
+use App\Models\Opd;
+use App\Models\Personnel;
+use App\Models\Shift;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Personnel;
-use App\Models\Absensi;
-use App\Models\Cuti;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends Component
 {
     use WithPagination;
+
     public bool $readyToLoad = false;
 
     #[Url]
@@ -40,17 +42,17 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public string $paperSize = 'a4';
 
     protected $listeners = [
-        'refreshAbsensi' => '$refresh'
+        'refreshAbsensi' => '$refresh',
     ];
 
     public function mount(): void
     {
         // Set default rentang tanggal: dari kemarin sampai 10 hari ke depan
-        if (!$this->startDate) {
+        if (! $this->startDate) {
             $this->startDate = Carbon::yesterday()->format('Y-m-d');
         }
 
-        if (!$this->endDate) {
+        if (! $this->endDate) {
             $this->endDate = Carbon::yesterday()->addDays(10)->format('Y-m-d');
         }
 
@@ -88,6 +90,7 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
                 $dates[] = $start->format('Y-m-d');
                 $start->addDay();
             }
+
             return $dates;
         }
 
@@ -102,41 +105,42 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             $dates[] = $start->format('Y-m-d');
             $start->addDay();
         }
+
         return $dates;
     }
 
     #[Computed]
     public function personnels()
     {
-        if (!$this->readyToLoad) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+        if (! $this->readyToLoad) {
+            return new LengthAwarePaginator([], 0, $this->perPage);
         }
 
         $opdId = Auth::user()->opd()?->id;
 
         $paginator = Personnel::with(['absensis' => function ($query) {
-                if ($this->startDate && $this->endDate) {
-                    $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
-                } elseif ($this->startDate) {
-                    $query->whereDate('tanggal', $this->startDate);
-                }
-                $query->with('kantor');
-            }, 'jadwals' => function ($query) {
-                if ($this->startDate && $this->endDate) {
-                    $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
-                } elseif ($this->startDate) {
-                    $query->whereDate('tanggal', $this->startDate);
-                }
-                $query->with('shift');
-            }, 'penugasan'])
-            ->when(!Auth::user()->hasRole('super-admin'), function ($q) use ($opdId) {
+            if ($this->startDate && $this->endDate) {
+                $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
+            } elseif ($this->startDate) {
+                $query->whereDate('tanggal', $this->startDate);
+            }
+            $query->with('kantor');
+        }, 'jadwals' => function ($query) {
+            if ($this->startDate && $this->endDate) {
+                $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
+            } elseif ($this->startDate) {
+                $query->whereDate('tanggal', $this->startDate);
+            }
+            $query->with('shift');
+        }, 'penugasan'])
+            ->when(! Auth::user()->hasAnyRole(['super-admin', 'dev']), function ($q) use ($opdId) {
                 $q->where('personnels.opd_id', $opdId);
             })
-            ->when(Auth::user()->hasRole('super-admin') && $this->selectedOpd, function ($q) {
+            ->when(Auth::user()->hasAnyRole(['super-admin', 'dev']) && $this->selectedOpd, function ($q) {
                 $q->where('personnels.opd_id', $this->selectedOpd);
             })
             ->when($this->search, function ($q) {
-                $q->where('personnels.name', 'like', '%' . $this->search . '%');
+                $q->where('personnels.name', 'like', '%'.$this->search.'%');
             })
             ->join('opds', 'personnels.opd_id', '=', 'opds.id')
             ->select([
@@ -154,8 +158,9 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
             ->paginate($this->perPage);
 
         $paginator->getCollection()->transform(function ($personnel) {
-            $personnel->absensi_map = $personnel->absensis->keyBy(fn($a) => $a->tanggal->format('Y-m-d'));
-            $personnel->jadwal_map = $personnel->jadwals->keyBy(fn($j) => $j->tanggal->format('Y-m-d'));
+            $personnel->absensi_map = $personnel->absensis->keyBy(fn ($a) => $a->tanggal->format('Y-m-d'));
+            $personnel->jadwal_map = $personnel->jadwals->keyBy(fn ($j) => $j->tanggal->format('Y-m-d'));
+
             return $personnel;
         });
 
@@ -164,9 +169,9 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
 
     public function applyFilter(): void
     {
-        if (!$this->filterStartDate && $this->filterEndDate) {
+        if (! $this->filterStartDate && $this->filterEndDate) {
             $this->filterStartDate = $this->filterEndDate;
-        } elseif ($this->filterStartDate && !$this->filterEndDate) {
+        } elseif ($this->filterStartDate && ! $this->filterEndDate) {
             $this->filterEndDate = $this->filterStartDate;
         }
 
@@ -222,13 +227,13 @@ new #[Title('Monitoring Absensi')] #[Layout('layouts::admin.app')] class extends
     public function opds()
     {
         // Perbaikan Poin 5: Optimasi select tabel referensi
-        return \App\Models\Opd::select('id', 'name')->orderBy('name')->get();
+        return Opd::select('id', 'name')->orderBy('name')->get();
     }
 
     #[Computed]
     public function shifts()
     {
-        return \App\Models\Shift::where('type', '!=', 'off')
+        return Shift::where('type', '!=', 'off')
             ->with('konsumsis')
             ->orderBy('name')
             ->get();
