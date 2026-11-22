@@ -324,3 +324,12 @@ test('non super-admin cannot input absensi for personnel from another opd', func
         ->call('save')
         ->assertHasErrors(['personnelId']);
 });
+
+test('absensi input component defaults late tolerance to 30 minutes', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin-input');
+
+    Livewire::actingAs($user)
+        ->test('admin::absensi-input')
+        ->assertSet('toleransiMenit', 30);
+});

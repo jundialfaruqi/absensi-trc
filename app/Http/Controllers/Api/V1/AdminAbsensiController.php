@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\PersonnelVectorUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Cuti;
@@ -12,16 +13,14 @@ use App\Models\Setting;
 use App\Models\Shift;
 use App\Models\User;
 use App\Services\AbsensiLokasiService;
+use App\Services\AdaptiveFaceLearningService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use App\Events\PersonnelVectorUpdated;
-use App\Services\AdaptiveFaceLearningService;
-use Illuminate\Support\Facades\Log;
 
 class AdminAbsensiController extends Controller
 {
@@ -32,12 +31,13 @@ class AdminAbsensiController extends Controller
     {
         /** @var User|null $user */
         $user = $request->user();
-        if (!$user || !$user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'admin-absen', 'dev'])) {
+        if (! $user || ! $user->hasAnyRole(['admin-opd', 'super-admin', 'kordinator', 'admin-absen', 'dev'])) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Endpoint ini khusus untuk Administrator.',
             ], 403);
         }
+
         return null;
     }
 
@@ -75,7 +75,7 @@ class AdminAbsensiController extends Controller
 
         // Base query OPD (untuk kalkulasi stats global seluruh personil)
         $baseQuery = Personnel::query();
-        if (!$isGlobal) {
+        if (! $isGlobal) {
             $baseQuery->where('opd_id', $opdId);
         }
 
@@ -94,11 +94,11 @@ class AdminAbsensiController extends Controller
             'kantor:id,name,latitude,longitude,radius_meter',
             'faceEmbeddings:id,personnel_id,pose_type,face_descriptor_mobile,adaptive_descriptor_mobile,adaptation_count,last_adapted_at,foto',
         ])
-        ->select([
-            'id', 'name', 'nik', 'foto', 'face_descriptor_mobile',
-            'face_recognition', 'opd_id', 'kantor_id',
-            'wajib_absen_di_lokasi', 'attendance_type',
-        ]);
+            ->select([
+                'id', 'name', 'nik', 'foto', 'face_descriptor_mobile',
+                'face_recognition', 'opd_id', 'kantor_id',
+                'wajib_absen_di_lokasi', 'attendance_type',
+            ]);
 
         // Filter status biometrik jika diminta
         if ($request->filled('filter')) {
@@ -118,7 +118,7 @@ class AdminAbsensiController extends Controller
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('nik', 'like', "%{$search}%");
+                        ->orWhere('nik', 'like', "%{$search}%");
                 });
             }
         }
@@ -133,7 +133,7 @@ class AdminAbsensiController extends Controller
                     'adaptive_descriptor_mobile' => $fe->adaptive_descriptor_mobile,
                     'adaptation_count' => (int) ($fe->adaptation_count ?? 0),
                     'last_adapted_at' => $fe->last_adapted_at ? $fe->last_adapted_at->toIso8601String() : null,
-                    'foto' => $fe->foto ? url('storage/' . $fe->foto) : null,
+                    'foto' => $fe->foto ? url('storage/'.$fe->foto) : null,
                 ];
             })->values()->all() ?? [];
 
@@ -141,10 +141,10 @@ class AdminAbsensiController extends Controller
                 'id' => (string) $p->id,
                 'name' => $p->name,
                 'nik' => $p->nik ?? '',
-                'foto' => $p->foto ? url('storage/' . $p->foto) : null,
+                'foto' => $p->foto ? url('storage/'.$p->foto) : null,
                 'face_descriptor_mobile' => $p->face_descriptor_mobile,
                 'multi_face_descriptors' => $multiFaceDescriptors,
-                'has_adaptive' => $p->faceEmbeddings?->contains(fn($fe) => !empty($fe->adaptive_descriptor_mobile)) ?? false,
+                'has_adaptive' => $p->faceEmbeddings?->contains(fn ($fe) => ! empty($fe->adaptive_descriptor_mobile)) ?? false,
                 'total_adaptations' => (int) ($p->faceEmbeddings?->sum('adaptation_count') ?? 0),
                 'face_recognition' => (bool) $p->face_recognition,
                 'wajib_absen_di_lokasi' => (bool) $p->wajib_absen_di_lokasi,
@@ -213,14 +213,14 @@ class AdminAbsensiController extends Controller
         $opdId = $opd?->id;
 
         $personnel = Personnel::with(['opd', 'kantor'])->find($id);
-        if (!$personnel) {
+        if (! $personnel) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data personil tidak ditemukan.',
             ], 404);
         }
 
-        if (!$isGlobal && $personnel->opd_id != $opdId) {
+        if (! $isGlobal && $personnel->opd_id != $opdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Personel ini tidak berada di bawah wewenang OPD Anda.',
@@ -255,7 +255,7 @@ class AdminAbsensiController extends Controller
                         ->whereDate('tanggal', $yesterday)
                         ->first();
                     // DIRECT CHECK-OUT: Selama belum absen pulang kemarin, gunakan jadwal shift kemarin
-                    if (!$existingYest || !$existingYest->jam_pulang) {
+                    if (! $existingYest || ! $existingYest->jam_pulang) {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
@@ -263,7 +263,7 @@ class AdminAbsensiController extends Controller
             }
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             $jadwal = Jadwal::where('personnel_id', $id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
@@ -277,14 +277,14 @@ class AdminAbsensiController extends Controller
             ->first();
 
         // 1. Jika mode flexible atau tidak ada jadwal
-        if (!$jadwal) {
+        if (! $jadwal) {
             if ($personnel->attendance_type === 'FLEXIBLE') {
                 if ($absensi && $absensi->jam_pulang) {
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
                         'action_type' => 'selesai',
-                        'message' => 'Personel sudah menyelesaikan absen' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' hari ini.',
+                        'message' => 'Personel sudah menyelesaikan absen'.($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang').' hari ini.',
                         'data' => [
                             'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
                             'absensi' => $absensi,
@@ -293,6 +293,7 @@ class AdminAbsensiController extends Controller
                 }
 
                 $nextAction = ($absensi && $absensi->jam_masuk) ? 'pulang' : 'masuk';
+
                 return response()->json([
                     'status' => 'success',
                     'can_attend' => true,
@@ -337,7 +338,7 @@ class AdminAbsensiController extends Controller
                 'status' => 'info',
                 'can_attend' => false,
                 'action_type' => 'selesai',
-                'message' => 'Personel sudah menyelesaikan absen' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' untuk jadwal ini.',
+                'message' => 'Personel sudah menyelesaikan absen'.($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang').' untuk jadwal ini.',
                 'data' => [
                     'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
                     'absensi' => $absensi,
@@ -379,13 +380,14 @@ class AdminAbsensiController extends Controller
             $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
             $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
-            if (!$absensi || !$absensi->jam_masuk) {
+            if (! $absensi || ! $absensi->jam_masuk) {
                 // Skenario: Belum Absen Masuk
                 if ($now->between($windowOutStart, $windowOutEnd)) {
                     // DIRECT CHECK-OUT: Berada di rentang waktu pulang, langsung diizinkan absen pulang
                     $isDirectCheckOut = true;
                 } elseif ($now->lessThan($windowInStart)) {
                     $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
@@ -404,6 +406,7 @@ class AdminAbsensiController extends Controller
                     ]);
                 } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
@@ -442,6 +445,7 @@ class AdminAbsensiController extends Controller
                 // Skenario: Sudah Masuk, Mau Absen Pulang
                 if ($now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
@@ -547,7 +551,7 @@ class AdminAbsensiController extends Controller
         }
 
         $personnel = Personnel::with(['kantor', 'opd'])->find($request->personnel_id);
-        if (!$isGlobal && $personnel->opd_id != $opdId) {
+        if (! $isGlobal && $personnel->opd_id != $opdId) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Personel ini tidak berada di bawah wewenang OPD Anda.',
@@ -556,7 +560,7 @@ class AdminAbsensiController extends Controller
 
         // 1. Validasi Geofencing
         $hasilLokasi = $lokasiService->validasiLokasi($personnel, (float) $request->lat, (float) $request->lng);
-        if (!$hasilLokasi['boleh']) {
+        if (! $hasilLokasi['boleh']) {
             return response()->json([
                 'status' => 'error',
                 'message' => $hasilLokasi['pesan'] ?: 'Lokasi Anda berada di luar radius kantor yang diizinkan.',
@@ -569,7 +573,7 @@ class AdminAbsensiController extends Controller
 
         // 2. Pemrosesan & Sanitasi Gambar Base64 via GD Library (Anti-Polyglot / Anti-XSS)
         $rawImage = base64_decode($request->foto);
-        if (!$rawImage || strlen($rawImage) > 2 * 1024 * 1024) {
+        if (! $rawImage || strlen($rawImage) > 2 * 1024 * 1024) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Foto bukti absensi tidak valid atau melebihi 2 MB.',
@@ -577,7 +581,7 @@ class AdminAbsensiController extends Controller
         }
 
         $gdImg = @imagecreatefromstring($rawImage);
-        if (!$gdImg) {
+        if (! $gdImg) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Format file yang diunggah bukan gambar yang valid.',
@@ -616,7 +620,7 @@ class AdminAbsensiController extends Controller
                         ->whereDate('tanggal', $yesterday)
                         ->first();
                     // DIRECT CHECK-OUT: Selama belum absen pulang kemarin, gunakan jadwal shift kemarin
-                    if (!$existingYest || !$existingYest->jam_pulang) {
+                    if (! $existingYest || ! $existingYest->jam_pulang) {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
@@ -624,7 +628,7 @@ class AdminAbsensiController extends Controller
             }
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             $jadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
@@ -637,7 +641,7 @@ class AdminAbsensiController extends Controller
             ->whereDate('tanggal', $activeDate)
             ->first();
 
-        if (!$absensi) {
+        if (! $absensi) {
             $absensi = new Absensi([
                 'personnel_id' => $personnel->id,
                 'tanggal' => $activeDate,
@@ -657,7 +661,7 @@ class AdminAbsensiController extends Controller
 
         $platform = $request->platform ?: 'android';
         $deviceName = $request->device_name ?: "Admin Supervisor ({$user->name})";
-        $uniqueId = $registeredDevice?->id ?? ($request->unique_device_id ?: 'admin-' . $user->id);
+        $uniqueId = $registeredDevice?->id ?? ($request->unique_device_id ?: 'admin-'.$user->id);
 
         // 3b. Validasi Jendela Waktu Jadwal Shift (Time Window Validation)
         $isDirectCheckOut = false;
@@ -680,19 +684,21 @@ class AdminAbsensiController extends Controller
             $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
             $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
-            if (!$absensi->exists || !$absensi->jam_masuk) {
+            if (! $absensi->exists || ! $absensi->jam_masuk) {
                 // Skenario: Belum Absen Masuk
                 if ($now->between($windowOutStart, $windowOutEnd)) {
                     // DIRECT CHECK-OUT: Diizinkan langsung absen pulang jika berada di jendela pulang
                     $isDirectCheckOut = true;
                 } elseif ($now->lessThan($windowInStart)) {
                     $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Masuk. Jadwal shift {$shift->name} masuk pukul {$startTime->format('H:i')} WIB (dibuka mulai {$windowInStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
                     ], 422);
                 } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB). Silakan kembali $diff lagi untuk Absen Pulang.",
@@ -707,6 +713,7 @@ class AdminAbsensiController extends Controller
                 // Skenario: Mencoba Absen Pulang (Sudah Masuk)
                 if ($now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Pulang. Jadwal shift {$shift->name} pulang pukul {$endTime->format('H:i')} WIB (dibuka mulai {$windowOutStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
@@ -723,9 +730,9 @@ class AdminAbsensiController extends Controller
         }
 
         // 4. LOGIKA ABSEN MASUK VS PULANG (Simpan ke Sub-folder per tanggal: absensi/YYYY-MM-DD/)
-        $folderPath = 'absensi/' . $activeDate;
+        $folderPath = 'absensi/'.$activeDate;
 
-        if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && !$absensi->jam_pulang)) {
+        if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && ! $absensi->jam_pulang)) {
             // --- ABSEN PULANG (Normal atau Direct Check-Out) ---
             $statusPulang = 'HADIR';
             if ($jadwal && $jadwal->shift && $jadwal->shift->end_time) {
@@ -739,7 +746,7 @@ class AdminAbsensiController extends Controller
                 }
             }
 
-            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
+            $fileName = $folderPath.'/out_'.$personnel->id.'_'.time().'_'.Str::random(8).'.jpg';
             Storage::disk('public')->put($fileName, $cleanJpeg);
 
             $absensi->jadwal_id = $jadwal?->id;
@@ -764,21 +771,21 @@ class AdminAbsensiController extends Controller
             $absensi->edited_by_user_id = $user->id; // Tercatat diawasi oleh admin
             $absensi->save();
 
-            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat untuk {$personnel->name}." . ($isDirectCheckOut ? " (Masuk: ALPA)" : "");
+            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat untuk {$personnel->name}.".($isDirectCheckOut ? ' (Masuk: ALPA)' : '');
             $actionType = 'pulang';
-        } elseif (!$absensi->exists || !$absensi->jam_masuk) {
+        } elseif (! $absensi->exists || ! $absensi->jam_masuk) {
             // --- ABSEN MASUK ---
             $statusMasuk = 'HADIR';
             if ($jadwal && $jadwal->shift && $jadwal->shift->start_time) {
                 $shiftStart = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
-                $toleransi = (int) ($jadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 15));
+                $toleransi = (int) ($jadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 30));
                 $batasToleransi = $shiftStart->copy()->addMinutes($toleransi);
                 if ($now->greaterThan($batasToleransi)) {
                     $statusMasuk = 'TELAT';
                 }
             }
 
-            $fileName = $folderPath . '/in_' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
+            $fileName = $folderPath.'/in_'.$personnel->id.'_'.time().'_'.Str::random(8).'.jpg';
             Storage::disk('public')->put($fileName, $cleanJpeg);
 
             $absensi->jadwal_id = $jadwal?->id;
@@ -817,11 +824,11 @@ class AdminAbsensiController extends Controller
                     confidenceScore: (float) $request->input('confidence_score'),
                     poseType: $request->input('pose_type', 'FRONT'),
                     absensiId: $absensi->id,
-                    deviceInfo: $deviceName . ' (' . $platform . ')',
+                    deviceInfo: $deviceName.' ('.$platform.')',
                     eulerAngles: $request->input('euler_angles')
                 );
             } catch (\Throwable $e) {
-                Log::error("Error executing biometric adaptation: " . $e->getMessage());
+                Log::error('Error executing biometric adaptation: '.$e->getMessage());
             }
         }
 
@@ -840,12 +847,11 @@ class AdminAbsensiController extends Controller
                 'status_pulang' => $absensi->status_pulang,
                 'jarak_meter' => $hasilLokasi['jarak_meter'],
                 'kantor_name' => $hasilLokasi['kantor_name'],
-                'foto_url' => url('storage/' . $fileName),
+                'foto_url' => url('storage/'.$fileName),
                 'adaptation' => $adaptationResult,
             ],
         ]);
     }
-
 
     /**
      * Memperbarui atau menyimpan face_descriptor_mobile (192-D) untuk personil tertentu.
@@ -860,7 +866,7 @@ class AdminAbsensiController extends Controller
         $user = $request->user();
         $isSuperAdmin = $user->hasRole('super-admin');
 
-        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
+        if (! $isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak berwenang memperbarui data biometrik personil di luar OPD Anda.',
@@ -873,11 +879,11 @@ class AdminAbsensiController extends Controller
                 'string',
                 function ($attribute, $value, $fail) {
                     $decoded = json_decode($value, true);
-                    if (!is_array($decoded) || count($decoded) !== 192) {
+                    if (! is_array($decoded) || count($decoded) !== 192) {
                         return $fail('face_descriptor_mobile harus berupa string JSON array berisi tepat 192 elemen numerik.');
                     }
                     foreach ($decoded as $val) {
-                        if (!is_numeric($val) || is_nan((float)$val) || is_infinite((float)$val)) {
+                        if (! is_numeric($val) || is_nan((float) $val) || is_infinite((float) $val)) {
                             return $fail('Semua elemen dalam face_descriptor_mobile harus berupa angka float yang valid.');
                         }
                     }
@@ -927,7 +933,7 @@ class AdminAbsensiController extends Controller
         $user = $request->user();
         $isSuperAdmin = $user->hasRole('super-admin');
 
-        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
+        if (! $isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak berwenang memperbarui data biometrik personil di luar OPD Anda.',
@@ -942,11 +948,11 @@ class AdminAbsensiController extends Controller
                 'string',
                 function ($attribute, $value, $fail) {
                     $decoded = json_decode($value, true);
-                    if (!is_array($decoded) || count($decoded) !== 192) {
+                    if (! is_array($decoded) || count($decoded) !== 192) {
                         return $fail('face_descriptor_mobile harus berupa string JSON array berisi tepat 192 elemen numerik.');
                     }
                     foreach ($decoded as $val) {
-                        if (!is_numeric($val) || is_nan((float)$val) || is_infinite((float)$val)) {
+                        if (! is_numeric($val) || is_nan((float) $val) || is_infinite((float) $val)) {
                             return $fail('Semua elemen dalam face_descriptor_mobile harus berupa angka float yang valid.');
                         }
                     }
@@ -1011,7 +1017,7 @@ class AdminAbsensiController extends Controller
         $user = $request->user();
         $isSuperAdmin = $user->hasRole('super-admin');
 
-        if (!$isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
+        if (! $isSuperAdmin && $user->opds()->where('opds.id', $personnel->opd_id)->doesntExist()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak berwenang mereset data biometrik personil di luar OPD Anda.',
@@ -1033,7 +1039,7 @@ class AdminAbsensiController extends Controller
      */
     public function canEditPersonnel(?Personnel $personnel, ?User $user): bool
     {
-        if (!$personnel || !$user) {
+        if (! $personnel || ! $user) {
             return false;
         }
 
@@ -1052,7 +1058,7 @@ class AdminAbsensiController extends Controller
             $userOpd = $user->opds()->first();
             $userOpdId = $userOpd?->id;
 
-            return !empty($userOpdId) && !empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
+            return ! empty($userOpdId) && ! empty($personnel->opd_id) && (int) $personnel->opd_id === (int) $userOpdId;
         }
 
         return false;
@@ -1092,14 +1098,14 @@ class AdminAbsensiController extends Controller
         $tanggal = $request->input('tanggal');
 
         $personnel = Personnel::with(['opd', 'kantor'])->find($personnelId);
-        if (!$personnel) {
+        if (! $personnel) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data personel tidak ditemukan.',
             ], 404);
         }
 
-        if (!$this->canEditPersonnel($personnel, $user)) {
+        if (! $this->canEditPersonnel($personnel, $user)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
@@ -1116,7 +1122,7 @@ class AdminAbsensiController extends Controller
             ->with('shift')
             ->first();
 
-        if (!$jadwal && $absensi && $absensi->jadwal_id) {
+        if (! $jadwal && $absensi && $absensi->jadwal_id) {
             $jadwal = Jadwal::with('shift')->find($absensi->jadwal_id);
         }
 
@@ -1130,7 +1136,7 @@ class AdminAbsensiController extends Controller
             $jadwalJamMasuk = null;
             $jadwalJamPulang = null;
         } elseif ($shift && $shift->type !== 'off' && $shift->start_time && $shift->end_time) {
-            $jadwalShiftName = $shift->name . ($shift->keterangan ? ' (' . $shift->keterangan . ')' : '');
+            $jadwalShiftName = $shift->name.($shift->keterangan ? ' ('.$shift->keterangan.')' : '');
             $jadwalJamMasuk = Carbon::parse($shift->start_time)->format('H:i');
             $jadwalJamPulang = Carbon::parse($shift->end_time)->format('H:i');
         } else {
@@ -1146,7 +1152,7 @@ class AdminAbsensiController extends Controller
                 ->first();
 
             if ($recentJadwal && $recentJadwal->shift) {
-                $jadwalShiftName = $recentJadwal->shift->name . ($recentJadwal->shift->keterangan ? ' (' . $recentJadwal->shift->keterangan . ')' : '');
+                $jadwalShiftName = $recentJadwal->shift->name.($recentJadwal->shift->keterangan ? ' ('.$recentJadwal->shift->keterangan.')' : '');
                 $jadwalJamMasuk = Carbon::parse($recentJadwal->shift->start_time)->format('H:i');
                 $jadwalJamPulang = Carbon::parse($recentJadwal->shift->end_time)->format('H:i');
             } else {
@@ -1156,7 +1162,7 @@ class AdminAbsensiController extends Controller
                     ->first();
 
                 if ($defaultShift) {
-                    $jadwalShiftName = $defaultShift->name . ($defaultShift->keterangan ? ' (' . $defaultShift->keterangan . ')' : '');
+                    $jadwalShiftName = $defaultShift->name.($defaultShift->keterangan ? ' ('.$defaultShift->keterangan.')' : '');
                     $jadwalJamMasuk = Carbon::parse($defaultShift->start_time)->format('H:i');
                     $jadwalJamPulang = Carbon::parse($defaultShift->end_time)->format('H:i');
                 } else {
@@ -1170,17 +1176,17 @@ class AdminAbsensiController extends Controller
         // Resolusi Device
         $resolveDevice = function ($uniqueDeviceId, $pId, $platform = null) {
             // Jika platform bukan mobile (misal: 'web'), tidak ada resolusi device HP resmi
-            if ($platform && !in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
+            if ($platform && ! in_array(strtolower($platform), ['android', 'ios', 'mobile'])) {
                 return null;
             }
 
-            if (!empty($uniqueDeviceId)) {
+            if (! empty($uniqueDeviceId)) {
                 $device = is_numeric($uniqueDeviceId)
                     ? Device::find($uniqueDeviceId)
                     : Device::where('unique_device_id', $uniqueDeviceId)->first();
 
                 if ($device) {
-                    if (!$pId || $device->personnel_id == $pId) {
+                    if (! $pId || $device->personnel_id == $pId) {
                         return $device;
                     }
                 }
@@ -1199,17 +1205,17 @@ class AdminAbsensiController extends Controller
         };
 
         $deviceMasuk = $absensi ? $resolveDevice($absensi->unique_device_id_masuk, $personnelId, $absensi->platform_masuk) : null;
-        $isOfficialDeviceMasuk = !is_null($deviceMasuk);
+        $isOfficialDeviceMasuk = ! is_null($deviceMasuk);
         $officialDeviceNameMasuk = $deviceMasuk?->name;
 
         $devicePulang = $absensi ? $resolveDevice($absensi->unique_device_id_pulang, $personnelId, $absensi->platform_pulang) : null;
-        $isOfficialDevicePulang = !is_null($devicePulang);
+        $isOfficialDevicePulang = ! is_null($devicePulang);
         $officialDeviceNamePulang = $devicePulang?->name;
 
-        $isEdited = $absensi ? !is_null($absensi->original_status_masuk) : false;
+        $isEdited = $absensi ? ! is_null($absensi->original_status_masuk) : false;
         $canResetAbsen = $user->can('reset-absen') || $user->hasRole('super-admin');
 
-        $cutis = Cuti::orderBy('name')->get(['id', 'name'])->map(fn($c) => [
+        $cutis = Cuti::orderBy('name')->get(['id', 'name'])->map(fn ($c) => [
             'id' => $c->id,
             'name' => $c->name,
         ]);
@@ -1225,7 +1231,7 @@ class AdminAbsensiController extends Controller
                     'id' => (string) $personnel->id,
                     'name' => $personnel->name,
                     'nik' => $personnel->nik ?? '',
-                    'foto' => $personnel->foto ? url('storage/' . $personnel->foto) : null,
+                    'foto' => $personnel->foto ? url('storage/'.$personnel->foto) : null,
                     'opd_id' => (string) $personnel->opd_id,
                     'opd_name' => $personnel->opd?->name ?? '-',
                     'attendance_type' => $personnel->attendance_type ?? 'SHIFT',
@@ -1248,8 +1254,8 @@ class AdminAbsensiController extends Controller
                     'alasan_edit' => $absensi?->alasan_edit ?? '',
                 ],
                 'proof' => [
-                    'foto_masuk' => $absensi?->foto_masuk ? url('storage/' . $absensi->foto_masuk) : null,
-                    'foto_pulang' => $absensi?->foto_pulang ? url('storage/' . $absensi->foto_pulang) : null,
+                    'foto_masuk' => $absensi?->foto_masuk ? url('storage/'.$absensi->foto_masuk) : null,
+                    'foto_pulang' => $absensi?->foto_pulang ? url('storage/'.$absensi->foto_pulang) : null,
                     'platform_masuk' => $absensi?->platform_masuk,
                     'platform_pulang' => $absensi?->platform_pulang,
                     'device_name_masuk' => $absensi?->device_name_masuk,
@@ -1309,7 +1315,7 @@ class AdminAbsensiController extends Controller
 
         $personnel = Personnel::findOrFail($personnelId);
 
-        if (!$this->canEditPersonnel($personnel, $user)) {
+        if (! $this->canEditPersonnel($personnel, $user)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
@@ -1337,9 +1343,9 @@ class AdminAbsensiController extends Controller
         $overallStatus = $statusMasuk;
         if (in_array($statusMasuk, ['HADIR', 'TELAT']) || in_array($statusPulang, ['HADIR', 'PC'])) {
             $overallStatus = 'HADIR';
-        } elseif (!empty($statusMasuk)) {
+        } elseif (! empty($statusMasuk)) {
             $overallStatus = $statusMasuk;
-        } elseif (!empty($statusPulang)) {
+        } elseif (! empty($statusPulang)) {
             $overallStatus = $statusPulang;
         } else {
             $overallStatus = 'ALPA';
@@ -1349,8 +1355,8 @@ class AdminAbsensiController extends Controller
             'status' => $overallStatus,
             'status_masuk' => $statusMasuk,
             'status_pulang' => $statusPulang,
-            'jam_masuk' => !empty($jamMasuk) ? $jamMasuk : null,
-            'jam_pulang' => !empty($jamPulang) ? $jamPulang : null,
+            'jam_masuk' => ! empty($jamMasuk) ? $jamMasuk : null,
+            'jam_pulang' => ! empty($jamPulang) ? $jamPulang : null,
             'alasan_edit' => $alasanEdit,
             'nomor_surat' => $nomorSurat,
             'cuti_id' => $cutiId,
@@ -1403,7 +1409,7 @@ class AdminAbsensiController extends Controller
 
         $absensi = Absensi::with('personnel')->findOrFail($request->input('absensi_id'));
 
-        if (!$this->canEditPersonnel($absensi->personnel, $user)) {
+        if (! $this->canEditPersonnel($absensi->personnel, $user)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
@@ -1440,9 +1446,9 @@ class AdminAbsensiController extends Controller
             $origStatus = $absensi->original_status_masuk;
             if (in_array($absensi->original_status_masuk, ['HADIR', 'TELAT']) || in_array($absensi->original_status_pulang, ['HADIR', 'PC'])) {
                 $origStatus = 'HADIR';
-            } elseif (!empty($absensi->original_status_masuk)) {
+            } elseif (! empty($absensi->original_status_masuk)) {
                 $origStatus = $absensi->original_status_masuk;
-            } elseif (!empty($absensi->original_status_pulang)) {
+            } elseif (! empty($absensi->original_status_pulang)) {
                 $origStatus = $absensi->original_status_pulang;
             }
 
@@ -1480,7 +1486,7 @@ class AdminAbsensiController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if (!$user->can('reset-absen') && !$user->hasRole('super-admin')) {
+        if (! $user->can('reset-absen') && ! $user->hasRole('super-admin')) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki izin untuk mereset absensi.',
@@ -1500,7 +1506,7 @@ class AdminAbsensiController extends Controller
 
         $absensi = Absensi::with('personnel')->findOrFail($request->input('absensi_id'));
 
-        if (!$this->canEditPersonnel($absensi->personnel, $user)) {
+        if (! $this->canEditPersonnel($absensi->personnel, $user)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki izin untuk mengedit absensi ini.',
@@ -1539,5 +1545,3 @@ class AdminAbsensiController extends Controller
         ]);
     }
 }
-
-

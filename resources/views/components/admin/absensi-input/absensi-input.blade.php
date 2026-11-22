@@ -599,7 +599,7 @@
                         personnels: config.personnels || [],
                         shifts: config.shifts || [],
                         kantors: config.kantors || [],
-                        toleransiMenit: Number(config.toleransiMenit || 15),
+                        toleransiMenit: Number(config.toleransiMenit || 30),
 
                         searchQuery: '',
                         dropdownOpen: false,

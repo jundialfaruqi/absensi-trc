@@ -30,7 +30,7 @@ class PersonnelAbsensiController extends Controller
         $personnel->load(['opd', 'kantor', 'penugasan', 'faceEmbeddings']);
 
         $master192 = null;
-        if (!empty($personnel->face_descriptor_mobile)) {
+        if (! empty($personnel->face_descriptor_mobile)) {
             $master192 = is_array($personnel->face_descriptor_mobile)
                 ? $personnel->face_descriptor_mobile
                 : json_decode($personnel->face_descriptor_mobile, true);
@@ -40,14 +40,14 @@ class PersonnelAbsensiController extends Controller
         if ($personnel->faceEmbeddings) {
             foreach ($personnel->faceEmbeddings as $fe) {
                 $emb192 = null;
-                if (!empty($fe->face_descriptor_mobile)) {
+                if (! empty($fe->face_descriptor_mobile)) {
                     $emb192 = is_array($fe->face_descriptor_mobile)
                         ? $fe->face_descriptor_mobile
                         : json_decode($fe->face_descriptor_mobile, true);
                 }
 
                 $adaptive192 = null;
-                if (!empty($fe->adaptive_descriptor_mobile)) {
+                if (! empty($fe->adaptive_descriptor_mobile)) {
                     $adaptive192 = is_array($fe->adaptive_descriptor_mobile)
                         ? $fe->adaptive_descriptor_mobile
                         : json_decode($fe->adaptive_descriptor_mobile, true);
@@ -60,7 +60,7 @@ class PersonnelAbsensiController extends Controller
                     'adaptive_descriptor_mobile' => $adaptive192,
                     'adaptation_count' => (int) $fe->adaptation_count,
                     'last_adapted_at' => $fe->last_adapted_at?->toIso8601String(),
-                    'foto' => $fe->foto ? asset('storage/' . $fe->foto) : null,
+                    'foto' => $fe->foto ? asset('storage/'.$fe->foto) : null,
                 ];
             }
         }
@@ -84,7 +84,7 @@ class PersonnelAbsensiController extends Controller
                 'id' => $personnel->id,
                 'name' => $personnel->name,
                 'nik' => $personnel->nik,
-                'foto' => $personnel->foto ? asset('storage/' . $personnel->foto) : null,
+                'foto' => $personnel->foto ? asset('storage/'.$personnel->foto) : null,
                 'face_descriptor_mobile' => $master192,
                 'multi_embeddings_192' => $poses,
                 'face_recognition' => (bool) $personnel->face_recognition,
@@ -133,7 +133,7 @@ class PersonnelAbsensiController extends Controller
                     $existingYest = Absensi::where('personnel_id', $id)
                         ->whereDate('tanggal', $yesterday)
                         ->first();
-                    if (!$existingYest || !$existingYest->jam_pulang) {
+                    if (! $existingYest || ! $existingYest->jam_pulang) {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
@@ -141,7 +141,7 @@ class PersonnelAbsensiController extends Controller
             }
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             $jadwal = Jadwal::where('personnel_id', $id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
@@ -154,14 +154,14 @@ class PersonnelAbsensiController extends Controller
             ->first();
 
         // 1. Cek apakah tidak ada jadwal
-        if (!$jadwal) {
+        if (! $jadwal) {
             if ($personnel->attendance_type === 'FLEXIBLE') {
                 if ($absensi && $absensi->jam_pulang) {
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
                         'action_type' => 'selesai',
-                        'message' => 'Anda telah menyelesaikan presensi' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' hari ini (Mode Fleksibel).',
+                        'message' => 'Anda telah menyelesaikan presensi'.($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang').' hari ini (Mode Fleksibel).',
                         'data' => [
                             'personnel' => [
                                 'id' => (string) $personnel->id,
@@ -175,6 +175,7 @@ class PersonnelAbsensiController extends Controller
                 }
 
                 $nextAction = ($absensi && $absensi->jam_masuk) ? 'pulang' : 'masuk';
+
                 return response()->json([
                     'status' => 'success',
                     'can_attend' => true,
@@ -213,7 +214,7 @@ class PersonnelAbsensiController extends Controller
                         'status' => 'info',
                         'can_attend' => false,
                         'action_type' => 'selesai',
-                        'message' => 'Anda telah menyelesaikan presensi' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' hari ini (Mode Fleksibel).',
+                        'message' => 'Anda telah menyelesaikan presensi'.($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang').' hari ini (Mode Fleksibel).',
                         'data' => [
                             'personnel' => [
                                 'id' => (string) $personnel->id,
@@ -227,6 +228,7 @@ class PersonnelAbsensiController extends Controller
                 }
 
                 $nextAction = ($absensi && $absensi->jam_masuk) ? 'pulang' : 'masuk';
+
                 return response()->json([
                     'status' => 'success',
                     'can_attend' => true,
@@ -275,7 +277,7 @@ class PersonnelAbsensiController extends Controller
                 'status' => 'info',
                 'can_attend' => false,
                 'action_type' => 'selesai',
-                'message' => 'Anda telah menyelesaikan presensi' . ($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang') . ' untuk jadwal hari ini.',
+                'message' => 'Anda telah menyelesaikan presensi'.($absensi->jam_masuk ? ' masuk dan pulang' : ' pulang').' untuk jadwal hari ini.',
                 'data' => [
                     'personnel' => ['id' => (string) $personnel->id, 'name' => $personnel->name],
                     'shift' => $shiftData,
@@ -312,14 +314,15 @@ class PersonnelAbsensiController extends Controller
             $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
             // DIRECT CHECK-OUT: Jika belum absen masuk & belum absen pulang dan waktu sekarang sudah masuk/melewati window pulang
-            if ((!$absensi || !$absensi->jam_masuk) && (!$absensi || !$absensi->jam_pulang) && $now->greaterThanOrEqualTo($windowOutStart)) {
+            if ((! $absensi || ! $absensi->jam_masuk) && (! $absensi || ! $absensi->jam_pulang) && $now->greaterThanOrEqualTo($windowOutStart)) {
                 $isDirectCheckOut = true;
             }
 
-            if (!$isDirectCheckOut && (!$absensi || !$absensi->jam_masuk)) {
+            if (! $isDirectCheckOut && (! $absensi || ! $absensi->jam_masuk)) {
                 // Skenario: Belum Absen Masuk
                 if ($now->lessThan($windowInStart)) {
                     $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
@@ -338,6 +341,7 @@ class PersonnelAbsensiController extends Controller
                     ]);
                 } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
@@ -376,6 +380,7 @@ class PersonnelAbsensiController extends Controller
                 // Skenario: Sudah Masuk, Mau Absen Pulang
                 if ($now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'info',
                         'can_attend' => false,
@@ -487,7 +492,7 @@ class PersonnelAbsensiController extends Controller
 
         // 2. Validasi Geofencing
         $hasilLokasi = $lokasiService->validasiLokasi($personnel, (float) $request->lat, (float) $request->lng);
-        if (!$hasilLokasi['boleh']) {
+        if (! $hasilLokasi['boleh']) {
             return response()->json([
                 'status' => 'error',
                 'message' => $hasilLokasi['pesan'] ?: 'Lokasi Anda berada di luar radius kantor yang diizinkan.',
@@ -500,7 +505,7 @@ class PersonnelAbsensiController extends Controller
 
         // 3. Pemrosesan & Sanitasi Gambar Base64 via GD Library (Anti-Polyglot / Anti-XSS)
         $rawImage = base64_decode($request->foto);
-        if (!$rawImage || strlen($rawImage) > 2 * 1024 * 1024) {
+        if (! $rawImage || strlen($rawImage) > 2 * 1024 * 1024) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Foto bukti absensi tidak valid atau melebihi 2 MB.',
@@ -508,7 +513,7 @@ class PersonnelAbsensiController extends Controller
         }
 
         $gdImg = @imagecreatefromstring($rawImage);
-        if (!$gdImg) {
+        if (! $gdImg) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Format file yang diunggah bukan gambar yang valid.',
@@ -546,7 +551,7 @@ class PersonnelAbsensiController extends Controller
                     $existingYest = Absensi::where('personnel_id', $personnel->id)
                         ->whereDate('tanggal', $yesterday)
                         ->first();
-                    if (!$existingYest || !$existingYest->jam_pulang) {
+                    if (! $existingYest || ! $existingYest->jam_pulang) {
                         $jadwal = $yesterdayJadwal;
                         $activeDate = $yesterday;
                     }
@@ -554,14 +559,14 @@ class PersonnelAbsensiController extends Controller
             }
         }
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             $jadwal = Jadwal::where('personnel_id', $personnel->id)
                 ->whereDate('tanggal', $today)
                 ->with('shift')
                 ->first();
         }
 
-        if ((!$jadwal || !$jadwal->shift || $jadwal->shift->type === 'off') && $personnel->attendance_type !== 'FLEXIBLE') {
+        if ((! $jadwal || ! $jadwal->shift || $jadwal->shift->type === 'off') && $personnel->attendance_type !== 'FLEXIBLE') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tidak dapat melakukan presensi karena tidak ada jadwal dinas aktif hari ini.',
@@ -573,7 +578,7 @@ class PersonnelAbsensiController extends Controller
             ->whereDate('tanggal', $activeDate)
             ->first();
 
-        if (!$absensi) {
+        if (! $absensi) {
             $absensi = new Absensi([
                 'personnel_id' => $personnel->id,
                 'tanggal' => $activeDate,
@@ -594,7 +599,7 @@ class PersonnelAbsensiController extends Controller
         $platform = $request->platform ?: 'android';
         $deviceName = $request->device_name
             ?: ($registeredDevice ? ($registeredDevice->name ?: trim("{$registeredDevice->brand} {$registeredDevice->model}")) : 'Mobile Personel');
-        $uniqueId = $registeredDevice?->id ?? ($request->unique_device_id ?: 'personnel-' . $personnel->id);
+        $uniqueId = $registeredDevice?->id ?? ($request->unique_device_id ?: 'personnel-'.$personnel->id);
 
         // 3b. Validasi Jendela Waktu Jadwal Shift (Time Window Validation)
         $isDirectCheckOut = false;
@@ -616,19 +621,21 @@ class PersonnelAbsensiController extends Controller
             $windowOutStart = $endTime->copy()->subMinutes($mulaiOut);
             $windowOutEnd = $endTime->copy()->addMinutes($selesaiOut);
 
-            if (!$absensi->exists || !$absensi->jam_masuk) {
+            if (! $absensi->exists || ! $absensi->jam_masuk) {
                 // Skenario: Belum Absen Masuk
                 if ($now->between($windowOutStart, $windowOutEnd)) {
                     // DIRECT CHECK-OUT: Diizinkan langsung absen pulang jika berada di jendela pulang
                     $isDirectCheckOut = true;
                 } elseif ($now->lessThan($windowInStart)) {
                     $diff = $windowInStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Masuk. Jadwal shift {$shift->name} masuk pukul {$startTime->format('H:i')} WIB (dibuka mulai {$windowInStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
                     ], 422);
                 } elseif ($now->greaterThan($windowInEnd) && $now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Batas waktu toleransi Absen Masuk untuk jadwal ini telah berakhir ({$windowInEnd->format('H:i')} WIB). Silakan kembali $diff lagi untuk Absen Pulang.",
@@ -643,6 +650,7 @@ class PersonnelAbsensiController extends Controller
                 // Skenario: Mencoba Absen Pulang (Sudah Masuk)
                 if ($now->lessThan($windowOutStart)) {
                     $diff = $windowOutStart->diffForHumans($now, syntax: true, parts: 2);
+
                     return response()->json([
                         'status' => 'error',
                         'message' => "Belum waktunya Absen Pulang. Jadwal shift {$shift->name} pulang pukul {$endTime->format('H:i')} WIB (dibuka mulai {$windowOutStart->format('H:i')} WIB). Silakan kembali $diff lagi.",
@@ -659,9 +667,9 @@ class PersonnelAbsensiController extends Controller
         }
 
         // 4. LOGIKA ABSEN MASUK VS PULANG (Simpan ke Sub-folder per tanggal: absensi/YYYY-MM-DD/)
-        $folderPath = 'absensi/' . $activeDate;
+        $folderPath = 'absensi/'.$activeDate;
 
-        if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && !$absensi->jam_pulang)) {
+        if ($isDirectCheckOut || ($absensi->exists && $absensi->jam_masuk && ! $absensi->jam_pulang)) {
             // --- ABSEN PULANG (Normal atau Direct Check-Out) ---
             $statusPulang = 'HADIR';
             if ($jadwal && $jadwal->shift && $jadwal->shift->end_time) {
@@ -675,7 +683,7 @@ class PersonnelAbsensiController extends Controller
                 }
             }
 
-            $fileName = $folderPath . '/out_' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
+            $fileName = $folderPath.'/out_'.$personnel->id.'_'.time().'_'.Str::random(8).'.jpg';
             Storage::disk('public')->put($fileName, $cleanJpeg);
 
             $absensi->jadwal_id = $jadwal?->id;
@@ -699,21 +707,21 @@ class PersonnelAbsensiController extends Controller
             $absensi->unique_device_id_pulang = $uniqueId;
             $absensi->save();
 
-            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat." . ($isDirectCheckOut ? " (Masuk: ALPA)" : "");
+            $pesan = "Absen PULANG ($statusPulang) berhasil dicatat.".($isDirectCheckOut ? ' (Masuk: ALPA)' : '');
             $actionType = 'pulang';
-        } elseif (!$absensi->exists || !$absensi->jam_masuk) {
+        } elseif (! $absensi->exists || ! $absensi->jam_masuk) {
             // --- ABSEN MASUK ---
             $statusMasuk = 'HADIR';
             if ($jadwal && $jadwal->shift && $jadwal->shift->start_time) {
                 $shiftStart = Carbon::parse($activeDate)->setTimeFrom($jadwal->shift->start_time);
-                $toleransi = (int) ($jadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 15));
+                $toleransi = (int) ($jadwal->shift->toleransi_menit ?? Setting::get('absensi_masuk_toleransi', 30));
                 $batasToleransi = $shiftStart->copy()->addMinutes($toleransi);
                 if ($now->greaterThan($batasToleransi)) {
                     $statusMasuk = 'TELAT';
                 }
             }
 
-            $fileName = $folderPath . '/in_' . $personnel->id . '_' . time() . '_' . Str::random(8) . '.jpg';
+            $fileName = $folderPath.'/in_'.$personnel->id.'_'.time().'_'.Str::random(8).'.jpg';
             Storage::disk('public')->put($fileName, $cleanJpeg);
 
             $absensi->jadwal_id = $jadwal?->id;
@@ -752,12 +760,12 @@ class PersonnelAbsensiController extends Controller
                     confidenceScore: (float) $request->input('confidence_score'),
                     poseType: $request->input('pose_type', 'FRONT'),
                     absensiId: $absensi->id,
-                    deviceInfo: $deviceName . ' (' . $platform . ')',
+                    deviceInfo: $deviceName.' ('.$platform.')',
                     eulerAngles: $request->input('euler_angles')
                 );
                 $adapted = $adaptationResult['adapted'] ?? false;
             } catch (\Throwable $e) {
-                Log::error("Error executing biometric adaptation in PersonnelAbsensiController: " . $e->getMessage());
+                Log::error('Error executing biometric adaptation in PersonnelAbsensiController: '.$e->getMessage());
             }
         }
 
@@ -783,7 +791,7 @@ class PersonnelAbsensiController extends Controller
                     'id' => (string) $shift->id,
                     'name' => $shift->name,
                 ] : null,
-                'foto_url' => asset('storage/' . $fileName),
+                'foto_url' => asset('storage/'.$fileName),
                 'adaptive_learning' => [
                     'adapted' => $adapted,
                     'result' => $adaptationResult,

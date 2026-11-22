@@ -13,6 +13,7 @@ use App\Models\Shift;
 use App\Services\JwtService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PersonnelAbsensiApiTest extends TestCase
@@ -20,10 +21,15 @@ class PersonnelAbsensiApiTest extends TestCase
     use RefreshDatabase;
 
     protected Opd $opd;
+
     protected Kantor $kantor;
+
     protected Personnel $personnel;
+
     protected Device $device;
+
     protected JwtService $jwtService;
+
     protected string $accessToken;
 
     protected function setUp(): void
@@ -86,6 +92,7 @@ class PersonnelAbsensiApiTest extends TestCase
         imagejpeg($img);
         $dummyImage = ob_get_clean();
         imagedestroy($img);
+
         return base64_encode($dummyImage);
     }
 
@@ -115,7 +122,7 @@ class PersonnelAbsensiApiTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-09-17 16:15:00'));
 
         // 1. Sebelum absen pulang: Direct check-out diizinkan
-        $resp1 = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+        $resp1 = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->getJson('/api/v1/personel/absensi/check-status');
 
         $resp1->assertStatus(200)
@@ -124,7 +131,7 @@ class PersonnelAbsensiApiTest extends TestCase
             ->assertJsonPath('action_type', 'pulang');
 
         // 2. Simpan presensi pulang (direct check-out)
-        $storeResp = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+        $storeResp = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->postJson('/api/v1/personel/absensi/store', [
                 'lat' => $this->kantor->latitude,
                 'lng' => $this->kantor->longitude,
@@ -135,7 +142,7 @@ class PersonnelAbsensiApiTest extends TestCase
             ->assertJsonPath('status', 'success');
 
         // 3. Cek status kembali: Harus SELESAI, can_attend false, bukan Siap Melakukan Presensi Pulang
-        $resp2 = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+        $resp2 = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->getJson('/api/v1/personel/absensi/check-status');
 
         $resp2->assertStatus(200)
@@ -145,7 +152,7 @@ class PersonnelAbsensiApiTest extends TestCase
             ->assertJsonPath('message', 'Anda telah menyelesaikan presensi pulang untuk jadwal hari ini.');
 
         // 4. Mencoba store lagi saat jam_pulang sudah ada harus ditolak dengan HTTP 422
-        $storeAgainResp = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+        $storeAgainResp = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->postJson('/api/v1/personel/absensi/store', [
                 'lat' => $this->kantor->latitude,
                 'lng' => $this->kantor->longitude,
@@ -188,7 +195,7 @@ class PersonnelAbsensiApiTest extends TestCase
 
         Carbon::setTestNow(Carbon::parse('2026-09-17 16:15:00'));
 
-        $resp = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+        $resp = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->getJson('/api/v1/personel/absensi/check-status');
 
         $resp->assertStatus(200)
@@ -214,7 +221,7 @@ class PersonnelAbsensiApiTest extends TestCase
 
         Carbon::setTestNow(Carbon::parse('2026-09-17 16:15:00'));
 
-        $resp = $this->withHeader('Authorization', 'Bearer ' . $this->accessToken)
+        $resp = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
             ->getJson('/api/v1/personel/absensi/check-status');
 
         $resp->assertStatus(200)
@@ -222,6 +229,84 @@ class PersonnelAbsensiApiTest extends TestCase
             ->assertJsonPath('can_attend', false)
             ->assertJsonPath('action_type', 'selesai')
             ->assertJsonPath('message', 'Anda telah menyelesaikan presensi pulang hari ini (Mode Fleksibel).');
+
+        Carbon::setTestNow();
+    }
+
+    public function test_check_in_uses_30_minutes_tolerance_for_morning_and_night_shifts(): void
+    {
+        Storage::fake('public');
+
+        $morningShift = Shift::create([
+            'name' => 'Pagi',
+            'type' => 'shift',
+            'start_time' => '08:00:00',
+            'end_time' => '16:00:00',
+        ]);
+
+        Jadwal::create([
+            'personnel_id' => $this->personnel->id,
+            'shift_id' => $morningShift->id,
+            'tanggal' => '2026-09-18',
+            'status' => 'SHIFT',
+        ]);
+
+        // 08:22 (<= 08:30) -> HADIR
+        Carbon::setTestNow(Carbon::parse('2026-09-18 08:22:00'));
+        $respMorning = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
+            ->postJson('/api/v1/personel/absensi/store', [
+                'lat' => 0.507068,
+                'lng' => 101.447779,
+                'foto' => $this->generateDummyImageBase64(),
+            ]);
+
+        $respMorning->assertStatus(200)
+            ->assertJsonPath('data.status_masuk', 'HADIR');
+
+        $nightShift = Shift::create([
+            'name' => 'Malam',
+            'type' => 'shift',
+            'start_time' => '20:00:00',
+            'end_time' => '08:00:00',
+        ]);
+
+        Jadwal::create([
+            'personnel_id' => $this->personnel->id,
+            'shift_id' => $nightShift->id,
+            'tanggal' => '2026-09-20',
+            'status' => 'SHIFT',
+        ]);
+
+        // 20:23 (<= 20:30) -> HADIR
+        Carbon::setTestNow(Carbon::parse('2026-09-20 20:23:00'));
+        $respNight = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
+            ->postJson('/api/v1/personel/absensi/store', [
+                'lat' => 0.507068,
+                'lng' => 101.447779,
+                'foto' => $this->generateDummyImageBase64(),
+            ]);
+
+        $respNight->assertStatus(200)
+            ->assertJsonPath('data.status_masuk', 'HADIR');
+
+        // 08:31 (> 08:30) -> TELAT (pakai tanggal terpisah setelah shift malam selesai)
+        Jadwal::create([
+            'personnel_id' => $this->personnel->id,
+            'shift_id' => $morningShift->id,
+            'tanggal' => '2026-09-22',
+            'status' => 'SHIFT',
+        ]);
+
+        Carbon::setTestNow(Carbon::parse('2026-09-22 08:31:00'));
+        $respLate = $this->withHeader('Authorization', 'Bearer '.$this->accessToken)
+            ->postJson('/api/v1/personel/absensi/store', [
+                'lat' => 0.507068,
+                'lng' => 101.447779,
+                'foto' => $this->generateDummyImageBase64(),
+            ]);
+
+        $respLate->assertStatus(200)
+            ->assertJsonPath('data.status_masuk', 'TELAT');
 
         Carbon::setTestNow();
     }

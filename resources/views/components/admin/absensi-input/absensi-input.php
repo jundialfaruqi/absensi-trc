@@ -173,7 +173,7 @@ new #[Title('Input Absen')] #[Layout('layouts::admin.app')] class extends Compon
     #[Computed]
     public function toleransiMenit(): int
     {
-        return (int) Setting::get('absensi_masuk_toleransi', 15);
+        return (int) Setting::get('absensi_masuk_toleransi', 30);
     }
 
     public function selectPersonnel(?int $personnelId): void
